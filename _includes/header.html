@@ -21,7 +21,7 @@
           <div class="menu__paneel" id="menu-regios">
             <div class="menu__regios">
               {%- for regio in regios %}
-              <div class="menu__regio">
+              <div class="menu__regio{% if regio.items.size > 6 %} menu__regio--breed{% endif %}">
                 <p class="menu__regionaam">{{ regio.name }} <span>{{ regio.items.first.land }}</span></p>
                 <ul>
                   {%- for p in regio.items %}

@@ -4,7 +4,7 @@
 {%- if page.collection == "producenten" -%}
   {%- capture seo_titel -%}{{ page.naam }}, {{ page.regio }} ({{ page.land }}) | importeur in Nederland | {{ site.title }}{%- endcapture -%}
   {%- capture seo_omschrijving -%}{% if page.samenvatting %}{{ page.samenvatting }} {% endif %}De wijnen van {{ page.naam }} uit {{ page.regio }} zijn in Nederland verkrijgbaar via importeur {{ site.title }}.{%- endcapture -%}
-  {%- assign seo_foto = page.foto -%}
+  {%- assign seo_foto = page.foto | default: site.logo -%}
 {%- else -%}
   {%- if page.titel_seo -%}
     {%- assign seo_titel = page.titel_seo -%}
@@ -57,7 +57,7 @@
   "@type": "Winery",
   "name": {{ page.naam | jsonify }},
   "description": {{ seo_omschrijving | strip_html | strip | jsonify }},
-  "image": {{ page.foto | absolute_url | jsonify }},
+  "image": {{ seo_foto | absolute_url | jsonify }},
   "url": {{ page.url | absolute_url | jsonify }},
   {%- if page.website %}
   "sameAs": [{{ page.website | jsonify }}{% if page.instagram %}, {{ page.instagram | jsonify }}{% endif %}],

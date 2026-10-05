@@ -10,15 +10,15 @@
 
 # Bovenaan de homepage, direct onder het logo
 hero:
-  foto: /assets/img/producenten/julien-henin.jpg
-  positie: center 55%
-  alt: Wijnmaker loopt tussen de rijen wijnstokken omhoog
+  foto: /assets/img/achtergrond/les-monts-1.jpg
+  positie: center 60%
+  alt: Plukkisten tussen de rijen wijnstokken tijdens de oogst
 
 # Blijft staan terwijl de tekst over ons eroverheen schuift
 verhaal:
-  foto: /assets/img/producenten/alexis-limar.jpg
-  positie: center 40%
-  alt: Twee wijnmakers aan het werk in de wijngaard
+  foto: /assets/img/achtergrond/les-monts-2.jpg
+  positie: center 70%
+  alt: Wijnmaker loopt door een jonge wijngaard onder een wolkenlucht
 
 # Achtergrond van het Hedonist-blok op de homepage
 hedonist:

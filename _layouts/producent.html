@@ -30,6 +30,20 @@ layout: default
       <p class="producent__samenvatting">{{ page.samenvatting }}</p>
       {%- endif %}
       {{ content }}
+
+      {%- if page.cuvees and page.cuvees.size > 0 %}
+      <section class="cuvees" aria-labelledby="cuvees-kop">
+        <h2 id="cuvees-kop">Cuvées</h2>
+        <ul class="cuvees__lijst">
+          {%- for c in page.cuvees %}
+          <li>
+            <span class="cuvees__naam">{{ c.naam }}</span>
+            {%- if c.druif %}<span class="cuvees__druif">{{ c.druif }}</span>{% endif %}
+          </li>
+          {%- endfor %}
+        </ul>
+      </section>
+      {%- endif %}
     </div>
 
     <aside class="producent__feiten" aria-label="Over {{ page.naam }}">

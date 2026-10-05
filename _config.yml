@@ -63,3 +63,5 @@ exclude:
   - vendor
   - .claude
   - prijslijst
+  - foto-originelen
+  - huisstijl

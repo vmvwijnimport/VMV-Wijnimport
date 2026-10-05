@@ -42,6 +42,11 @@ hectare: 4
 werkwijze: Biologisch, low intervention
 website: https://www.domainedupont.fr
 instagram: https://www.instagram.com/domainedupont
+cuvees:
+  - naam: Les Vieilles Vignes
+    druif: Pinot Noir
+  - naam: "Bourgogne “Clos du Bois”"
+    druif: Chardonnay
 ---
 
 Hier schrijf je het verhaal van de producent. Gewoon tekst, zo lang als je wilt.
@@ -69,6 +74,23 @@ Een lege regel begint een nieuwe alinea.
 | `foto_alt` | nee | Korte beschrijving van de foto, voor slechtzienden en Google |
 | `druiven`, `hectare`, `werkwijze` | nee | Verschijnen in het rijtje met feiten naast de tekst |
 | `website`, `instagram` | nee | Volledige link, beginnend met `https://` |
+| `cuvees` | nee | De lijst met wijnen van deze producent, zie hieronder |
+
+### Cuvées toevoegen of weghalen
+
+Elke cuvée bestaat uit twee regels: `- naam:` en daaronder `druif:`. Let op de spaties aan het begin: twee spaties voor `- naam`, vier voor `druif`.
+
+```
+cuvees:
+  - naam: Jolie Promenade
+    druif: Chardonnay
+  - naam: Les Pinailleuses
+    druif: Pinot Noir
+```
+
+Een nieuwe cuvée zet je er gewoon onder. Wil je er een weghalen, verwijder dan beide regels. Staan er aanhalingstekens of een dubbele punt in de naam? Zet de hele naam dan tussen gewone aanhalingstekens: `- naam: "Fixin “Côte Cour”"`.
+
+Een getal met een komma zet je tussen aanhalingstekens, anders maakt de site er een heel getal van: `hectare: "4,8"` (zonder aanhalingstekens wordt dat 48).
 
 Een veld dat je niet gebruikt, laat je leeg of haal je weg. Het verschijnt dan niet op de site.
 

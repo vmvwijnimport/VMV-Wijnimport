@@ -132,10 +132,12 @@ a:hover { color: var(--rood); }
 .menu__uitklapknop svg { width: .75rem; transition: transform .2s ease; }
 .menu__uitklap.open .menu__uitklapknop svg { transform: rotate(180deg); }
 
+.kop__binnen { position: relative; }
+.menu__uitklap { position: static; }
+.menu__uitklap > a, .menu__uitklapknop { position: relative; }
 .menu__paneel {
-  position: absolute; top: calc(100% + 1.4rem); left: 50%;
-  translate: -50% 0;
-  min-width: 22rem;
+  position: absolute; top: 100%; left: var(--rand); right: var(--rand);
+  max-height: calc(100svh - var(--kopgrootte) - 2rem); overflow-y: auto;
   padding: 1.75rem 2rem 1.5rem;
   background: var(--papier);
   border: 1px solid var(--lijn);
@@ -144,14 +146,16 @@ a:hover { color: var(--rood); }
   transition: opacity .18s ease, visibility .18s;
 }
 /* Een onzichtbare brug zodat het paneel open blijft als de muis omlaag gaat */
-.menu__paneel::before { content: ""; position: absolute; left: 0; right: 0; top: -1.6rem; height: 1.6rem; }
+.menu__paneel::before { content: ""; position: absolute; left: 0; right: 0; top: -2.5rem; height: 2.5rem; }
 
 @media (hover: hover) and (min-width: 56.01rem) {
   .menu__uitklap:hover .menu__paneel { visibility: visible; opacity: 1; }
 }
 .menu__uitklap.open .menu__paneel { visibility: visible; opacity: 1; }
 
-.menu__regios { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1.5rem 2.5rem; }
+.menu__regios { display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: 1.75rem 2.5rem; }
+.menu__regio--breed { grid-column: span 2; }
+.menu__regio--breed ul { columns: 2; column-gap: 2.5rem; }
 .menu__regionaam { margin: 0 0 .5rem; color: var(--rood); font-weight: 500; }
 .menu__regionaam span { margin-left: .4rem; color: var(--zacht); font-weight: 400; font-size: var(--t-klein); }
 .menu__regio ul { margin: 0; padding: 0; list-style: none; }
@@ -196,6 +200,8 @@ a:hover { color: var(--rood); }
     display: none; visibility: visible; opacity: 1;
   }
   .menu__paneel::before { display: none; }
+  .menu__paneel { max-height: none; overflow: visible; }
+  .menu__regio--breed { grid-column: auto; }
   .menu__uitklap.open .menu__paneel { display: block; }
 
   body.menu-open { overflow: hidden; }
@@ -240,7 +246,7 @@ a:hover { color: var(--rood); }
 .hero__foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .hero::after {
   content: ""; position: absolute; inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0) 55%);
+  background: linear-gradient(to top, rgba(0,0,0,.62), rgba(0,0,0,.15) 60%, rgba(0,0,0,0) 80%);
 }
 .hero__tekst {
   position: relative; z-index: 1;
@@ -575,3 +581,19 @@ a.kanaal:hover { border-color: var(--wa); color: var(--tekst); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* ---------- Cuvées op de producentpagina ---------- */
+
+.cuvees { margin-top: clamp(2.5rem, 6vw, 3.5rem); }
+.cuvees h2 { margin-top: 0; }
+.cuvees .cuvees__lijst { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--inkt); }
+.cuvees__lijst li {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .25rem 1.5rem;
+  padding: .85rem 0; border-bottom: 1px solid var(--lijn);
+}
+.cuvees__naam { color: var(--inkt); }
+.cuvees__druif { color: var(--zacht); font-size: 1rem; }
+
+/* Producent zonder foto: de drie stippen als plaatshouder */
+.producentregel__foto--leeg { display: grid; place-items: center; }
+.producentregel__foto--leeg .stippen i { width: .55rem; height: .55rem; }

@@ -1,21 +1,32 @@
 ---
-naam: Champagne Insu
+naam: Champagne INSU
 land: Frankrijk
 regio: Champagne
-plaats:
+plaats: Hautvillers
 foto: /assets/img/producenten/champagne-insu.jpg
 foto_positie: center 30%
-foto_alt: De makers van Champagne Insu in hun wijngaard
-samenvatting: Een jong champagnehuis dat de wijngaard voorop zet.
+foto_alt: De makers van Champagne INSU in hun wijngaard
+samenvatting: "Pierre-Gabriel Diarra maakt sinds 2021 champagne in Hautvillers: elke cuvée van één perceel, één druif en één jaar."
 druiven:
 hectare:
-werkwijze: Low intervention
+werkwijze: Biologisch, ongefilterd
 website:
 instagram:
+cuvees:
+  - naam: Les Hautes Maladries
+    druif: Pinot Noir
+  - naam: "Le Noyer de l’Orme du Nord"
+    druif: Pinot Noir
+  - naam: "Le Noyer de l’Orme du Midi"
+    druif: Pinot Noir
+  - naam: Le Pignon
+    druif: Pinot Noir
+  - naam: Les Coutures
+    druif: Chardonnay
 ---
 
-<!-- VOORBEELDTEKST: vervang deze beschrijving door je eigen tekst over Champagne Insu. -->
+Pierre-Gabriel Diarra groeide op in Hautvillers, waar zijn familie wijngaarden had. Hij koos eerst voor iets heel anders en werkte jarenlang in de techsector in Engeland en Frankrijk, maar uiteindelijk ging hij terug naar de wijngaard. Hij haalde zijn diploma wijnbouw en oenologie in Bordeaux en maakte in 2021 zijn eerste jaargang onder de naam Champagne INSU.
 
-Champagne Insu is een jong huis in de Champagne. De wijnen ontstaan in de wijngaard, met aandacht voor de bodem en het leven tussen de stokken.
+Zijn druiven perst hij bij Aurélien Lurquin, zijn vriend en mentor en een van de meest gezochte namen in de Champagne. Net als Lurquin maakt hij in de eerste plaats wijn, en pas daarna champagne. Pierre-Gabriel werkt zes percelen in Hautvillers, allemaal biologisch, en kijkt eigenlijk meer als een Bourgondische wijnmaker naar zijn wijngaard dan als een champagnemaker. Elke cuvée komt van één perceel, één druivensoort en één jaar. De wijnen vergisten spontaan, rijpen op vat en worden niet gefilterd of geklaard.
 
-In de kelder laten ze de wijn zoveel mogelijk zijn gang gaan. Het resultaat is champagne met karakter, die laat zien waar hij vandaan komt.
+Hij geeft zijn wijnen vijf jaar de tijd, met een aantal jaren op vat en een lange rijping op fles. De productie is klein en hij staat pas aan het begin, maar wat ons betreft hoort Pierre-Gabriel nu al bij de talenten van de nieuwe generatie in de Champagne.
