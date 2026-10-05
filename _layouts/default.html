@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="nl">
+<head>
+{% include head.html %}
+</head>
+<body class="{{ page.body_class }}">
+  <a class="naar-inhoud" href="#inhoud">Naar de inhoud</a>
+  {% include header.html %}
+  <main id="inhoud">
+    {{ content }}
+  </main>
+  {% include footer.html %}
+</body>
+</html>

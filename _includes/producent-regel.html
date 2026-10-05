@@ -1,0 +1,11 @@
+{%- assign p = include.p -%}
+<li class="producentregel">
+  <a href="{{ p.url | relative_url }}">
+    <span class="producentregel__foto">
+      {%- if p.foto %}<img src="{{ p.foto | relative_url }}" alt="" loading="lazy" style="object-position: {{ p.foto_positie | default: 'center' }}">{% endif -%}
+    </span>
+    <span class="producentregel__naam">{{ p.naam }}</span>
+    <span class="producentregel__plek">{{ p.plaats }}</span>
+    {%- if p.samenvatting %}<span class="producentregel__samenvatting">{{ p.samenvatting }}</span>{% endif %}
+  </a>
+</li>

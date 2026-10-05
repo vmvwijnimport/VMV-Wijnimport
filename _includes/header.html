@@ -1,0 +1,42 @@
+{%- assign producenten = site.producenten | sort: "naam" -%}
+{%- assign regios = producenten | group_by: "regio" | sort: "name" -%}
+<header class="kop">
+  <div class="kop__binnen">
+    <a class="kop__logo" href="{{ '/' | relative_url }}" aria-label="{{ site.title }}, naar de homepage">
+      <img src="{{ site.logo | relative_url }}" alt="{{ site.title }}" width="600" height="600">
+    </a>
+
+    <button class="kop__menuknop" type="button" aria-expanded="false" aria-controls="hoofdmenu">
+      <span class="kop__menuknop-tekst">Menu</span>
+    </button>
+
+    <nav class="menu" id="hoofdmenu" aria-label="Hoofdmenu">
+      <ul class="menu__lijst">
+        <li><a href="{{ '/over-ons/' | relative_url }}"{% if page.url == '/over-ons/' %} aria-current="page"{% endif %}>Over ons</a></li>
+        <li class="menu__uitklap">
+          <a href="{{ '/producenten/' | relative_url }}"{% if page.url contains '/producenten/' %} aria-current="page"{% endif %}>Producenten</a>
+          <button class="menu__uitklapknop" type="button" aria-expanded="false" aria-controls="menu-regios" aria-label="Toon producenten per regio">
+            <svg viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+          </button>
+          <div class="menu__paneel" id="menu-regios">
+            <div class="menu__regios">
+              {%- for regio in regios %}
+              <div class="menu__regio">
+                <p class="menu__regionaam">{{ regio.name }} <span>{{ regio.items.first.land }}</span></p>
+                <ul>
+                  {%- for p in regio.items %}
+                  <li><a href="{{ p.url | relative_url }}">{{ p.naam }}</a></li>
+                  {%- endfor %}
+                </ul>
+              </div>
+              {%- endfor %}
+            </div>
+            <a class="menu__alle" href="{{ '/producenten/' | relative_url }}">Alle producenten bekijken</a>
+          </div>
+        </li>
+        <li><a href="{{ '/hedonist/' | relative_url }}"{% if page.url == '/hedonist/' %} aria-current="page"{% endif %}>Hedonist</a></li>
+        <li><a href="{{ '/contact/' | relative_url }}"{% if page.url == '/contact/' %} aria-current="page"{% endif %}>Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>

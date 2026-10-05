@@ -1,0 +1,85 @@
+{%- comment -%}
+  Titel, beschrijving en gestructureerde gegevens voor Google.
+{%- endcomment -%}
+{%- if page.collection == "producenten" -%}
+  {%- capture seo_titel -%}{{ page.naam }}, {{ page.regio }} ({{ page.land }}) | importeur in Nederland | {{ site.title }}{%- endcapture -%}
+  {%- capture seo_omschrijving -%}{% if page.samenvatting %}{{ page.samenvatting }} {% endif %}De wijnen van {{ page.naam }} uit {{ page.regio }} zijn in Nederland verkrijgbaar via importeur {{ site.title }}.{%- endcapture -%}
+  {%- assign seo_foto = page.foto -%}
+{%- else -%}
+  {%- if page.titel_seo -%}
+    {%- assign seo_titel = page.titel_seo -%}
+  {%- elsif page.title -%}
+    {%- capture seo_titel -%}{{ page.title }} | {{ site.title }}{%- endcapture -%}
+  {%- else -%}
+    {%- capture seo_titel -%}{{ site.title }} | {{ site.tagline }}{%- endcapture -%}
+  {%- endif -%}
+  {%- assign seo_omschrijving = page.description | default: site.description -%}
+  {%- assign seo_foto = page.foto | default: site.data.fotos.hero.foto -%}
+{%- endif -%}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ seo_titel | strip }}</title>
+<meta name="description" content="{{ seo_omschrijving | strip_html | strip_newlines | strip | escape }}">
+<link rel="canonical" href="{{ page.url | absolute_url }}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="nl_NL">
+<meta property="og:site_name" content="{{ site.title }}">
+<meta property="og:title" content="{{ seo_titel | strip | escape }}">
+<meta property="og:description" content="{{ seo_omschrijving | strip_html | strip_newlines | strip | escape }}">
+<meta property="og:url" content="{{ page.url | absolute_url }}">
+<meta property="og:image" content="{{ seo_foto | absolute_url }}">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="{{ '/assets/img/favicon.svg' | relative_url }}" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ '/assets/css/stijl.css' | relative_url }}">
+<script src="{{ '/assets/js/site.js' | relative_url }}" defer></script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "{{ '/#organisatie' | absolute_url }}",
+  "name": {{ site.title | jsonify }},
+  "url": {{ '/' | absolute_url | jsonify }},
+  "logo": {{ site.logo | absolute_url | jsonify }},
+  "email": {{ site.email | jsonify }},
+  "description": {{ site.description | strip | jsonify }},
+  "foundingDate": "2024-11",
+  "areaServed": "NL"
+}
+</script>
+{%- if page.collection == "producenten" %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Winery",
+  "name": {{ page.naam | jsonify }},
+  "description": {{ seo_omschrijving | strip_html | strip | jsonify }},
+  "image": {{ page.foto | absolute_url | jsonify }},
+  "url": {{ page.url | absolute_url | jsonify }},
+  {%- if page.website %}
+  "sameAs": [{{ page.website | jsonify }}{% if page.instagram %}, {{ page.instagram | jsonify }}{% endif %}],
+  {%- endif %}
+  "address": {
+    "@type": "PostalAddress",
+    {%- if page.plaats %}
+    "addressLocality": {{ page.plaats | jsonify }},
+    {%- endif %}
+    "addressRegion": {{ page.regio | jsonify }},
+    "addressCountry": {{ page.land | jsonify }}
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Producenten", "item": {{ '/producenten/' | absolute_url | jsonify }} },
+    { "@type": "ListItem", "position": 2, "name": {{ page.naam | jsonify }}, "item": {{ page.url | absolute_url | jsonify }} }
+  ]
+}
+</script>
+{%- endif %}

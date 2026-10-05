@@ -1,0 +1,21 @@
+<footer class="voet">
+  <div class="voet__binnen">
+    <div class="voet__merk">
+      <span class="stippen" aria-hidden="true"><i></i><i></i><i></i></span>
+      <p>{{ site.title }}<br>Sinds {{ site.opgericht }}</p>
+    </div>
+    <div class="voet__kolom">
+      <p class="voet__kop">Contact</p>
+      <p><a href="mailto:{{ site.email }}">{{ site.email }}</a></p>
+      <p><a class="voet__wa" href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">{% include whatsapp-icoon.html %}WhatsApp-updates</a></p>
+    </div>
+    <div class="voet__kolom">
+      <p class="voet__kop">Website</p>
+      <p><a href="{{ '/over-ons/' | relative_url }}">Over ons</a></p>
+      <p><a href="{{ '/producenten/' | relative_url }}">Producenten</a></p>
+      <p><a href="{{ '/hedonist/' | relative_url }}">Hedonist</a></p>
+      <p><a href="{{ '/contact/' | relative_url }}">Contact</a></p>
+    </div>
+  </div>
+  <p class="voet__klein">Alleen voor 18+. Geniet, maar drink met mate. &copy; {{ site.time | date: "%Y" }} {{ site.title }}</p>
+</footer>

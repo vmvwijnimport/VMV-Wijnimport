@@ -1,0 +1,14 @@
+---
+layout: default
+---
+<article class="pagina">
+  <header class="pagina__kop">
+    <h1>{{ page.kop | default: page.title }}</h1>
+    {%- if page.intro %}
+    <p class="pagina__intro">{{ page.intro }}</p>
+    {%- endif %}
+  </header>
+  <div class="tekst">
+    {{ content }}
+  </div>
+</article>

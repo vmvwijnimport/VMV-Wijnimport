@@ -1,0 +1,82 @@
+---
+layout: default
+title: Contact
+permalink: /contact/
+description: Neem contact op met VMV Wijnimport via WhatsApp of e-mail. Via WhatsApp delen we nieuwe jaargangen van onze producenten en kun je direct bestellen.
+---
+{%- assign producenten = site.producenten | sort: "naam" -%}
+
+<section class="pagina pagina--breed contact">
+  <header class="pagina__kop">
+    <h1>Contact</h1>
+    <p class="pagina__intro">Wij werken met updates via WhatsApp. Komen er nieuwe jaargangen van onze producenten binnen, dan delen we dat daar en kun je direct bestellen.</p>
+  </header>
+
+  <div class="contact__raster">
+    <div class="contact__kanalen">
+      <a class="kanaal kanaal--wa" href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">
+        {% include whatsapp-icoon.html %}
+        <span class="kanaal__titel">WhatsApp</span>
+        <span class="kanaal__tekst">Ontvang onze updates over nieuwe jaargangen, of stuur ons direct een bericht.</span>
+        <span class="kanaal__actie">Open WhatsApp</span>
+      </a>
+
+      <div class="kanaal">
+        <svg class="kanaal__mail" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5h18v13H3z M3 6l9 7 9-7" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+        <span class="kanaal__titel">E-mail</span>
+        <span class="kanaal__tekst">Interesse in een bepaald domein? Mail ons, of gebruik het formulier.</span>
+        <a class="kanaal__actie" href="mailto:{{ site.email }}">{{ site.email }}</a>
+      </div>
+    </div>
+
+    <form class="formulier" id="contactformulier"
+          action="{{ site.formulier_endpoint | replace: '/ajax/', '/' }}" method="POST"
+          data-ajax="{{ site.formulier_endpoint }}">
+      <h2>Stuur ons een bericht</h2>
+
+      <input type="hidden" name="_subject" value="Nieuw bericht via vmvwijnimport.com">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_next" value="{{ '/bedankt/' | absolute_url }}">
+      <input type="text" name="_honey" class="formulier__honing" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+      <div class="veld">
+        <label for="naam">Naam</label>
+        <input id="naam" name="naam" type="text" autocomplete="name" required>
+      </div>
+      <div class="veld">
+        <label for="email">E-mailadres</label>
+        <input id="email" name="email" type="email" autocomplete="email" required>
+      </div>
+      <div class="veld">
+        <label for="telefoon">Telefoonnummer <span class="veld__optioneel">(niet verplicht)</span></label>
+        <input id="telefoon" name="telefoon" type="tel" autocomplete="tel">
+      </div>
+      <div class="veld">
+        <label for="onderwerp">Waar gaat je vraag over?</label>
+        <select id="onderwerp" name="onderwerp">
+          <option value="Wijnen van een producent">Wijnen van een producent</option>
+          <option value="Hedonist glazen">Hedonist glazen</option>
+          <option value="Aanmelden voor WhatsApp-updates">Aanmelden voor WhatsApp-updates</option>
+          <option value="Iets anders">Iets anders</option>
+        </select>
+      </div>
+      <div class="veld" data-toon-bij="Wijnen van een producent">
+        <label for="producent">Welke producent? <span class="veld__optioneel">(niet verplicht)</span></label>
+        <select id="producent" name="producent">
+          <option value="">Nog geen voorkeur</option>
+          {%- for p in producenten %}
+          <option value="{{ p.naam | escape }}">{{ p.naam }} ({{ p.regio }})</option>
+          {%- endfor %}
+        </select>
+      </div>
+      <div class="veld">
+        <label for="bericht">Bericht</label>
+        <textarea id="bericht" name="bericht" rows="6" required></textarea>
+      </div>
+
+      <button class="knop knop--rood" type="submit">Verstuur bericht</button>
+      <p class="formulier__status" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>

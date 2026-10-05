@@ -1,0 +1,36 @@
+---
+layout: default
+title: Producenten
+permalink: /producenten/
+description: Alle wijnmakers die VMV Wijnimport naar Nederland haalt, per regio. Jonge producenten met focus op de wijngaard en low intervention.
+---
+{%- assign producenten = site.producenten | sort: "naam" -%}
+{%- assign regios = producenten | group_by: "regio" | sort: "name" -%}
+
+<section class="pagina pagina--breed">
+  <header class="pagina__kop">
+    <h1>Producenten</h1>
+    <p class="pagina__intro">Jonge wijnmakers die in de wijngaard beginnen en in de kelder zo weinig mogelijk ingrijpen. Kies een regio of een domein.</p>
+  </header>
+
+  {%- if regios.size > 1 %}
+  <nav class="regiokeuze" aria-label="Regio's">
+    {%- for regio in regios %}
+    <a href="#{{ regio.name | slugify }}">{{ regio.name }}</a>
+    {%- endfor %}
+  </nav>
+  {%- endif %}
+
+  {%- for regio in regios %}
+  <section class="regio" id="{{ regio.name | slugify }}">
+    <h2 class="regio__naam">{{ regio.name }}<span>{{ regio.items.first.land }}</span></h2>
+    <ul class="producentlijst">
+      {%- for p in regio.items %}
+      {% include producent-regel.html p=p %}
+      {%- endfor %}
+    </ul>
+  </section>
+  {%- endfor %}
+</section>
+
+{% include contact-blok.html kop="Op zoek naar een specifiek domein?" tekst="Stuur ons een bericht via WhatsApp of mail. We laten weten wat er beschikbaar is en wanneer de volgende jaargang binnenkomt." %}

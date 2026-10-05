@@ -1,0 +1,66 @@
+---
+layout: default
+---
+{%- assign buren = site.producenten | where: "regio", page.regio | sort: "naam" -%}
+<article class="producent">
+  <nav class="kruimel" aria-label="Kruimelpad">
+    <a href="{{ '/producenten/' | relative_url }}">Producenten</a>
+    <span aria-hidden="true">/</span>
+    <a href="{{ '/producenten/' | relative_url }}#{{ page.regio | slugify }}">{{ page.regio }}</a>
+  </nav>
+
+  <header class="producent__kop">
+    <h1 class="producent__naam">{{ page.naam }}</h1>
+    <p class="producent__herkomst">
+      <span class="stip stip--rood" aria-hidden="true"></span>
+      {% if page.plaats %}{{ page.plaats }}, {% endif %}{{ page.regio }}, {{ page.land }}
+    </p>
+    <p class="producent__nl">In Nederland verkrijgbaar via {{ site.title }}</p>
+  </header>
+
+  {%- if page.foto %}
+  <figure class="producent__foto">
+    <img src="{{ page.foto | relative_url }}" alt="{{ page.foto_alt | default: page.naam }}" style="object-position: {{ page.foto_positie | default: 'center' }}">
+  </figure>
+  {%- endif %}
+
+  <div class="producent__inhoud">
+    <div class="tekst producent__tekst">
+      {%- if page.samenvatting %}
+      <p class="producent__samenvatting">{{ page.samenvatting }}</p>
+      {%- endif %}
+      {{ content }}
+    </div>
+
+    <aside class="producent__feiten" aria-label="Over {{ page.naam }}">
+      <dl>
+        <div><dt>Land</dt><dd>{{ page.land }}</dd></div>
+        <div><dt>Regio</dt><dd>{{ page.regio }}</dd></div>
+        {%- if page.plaats %}<div><dt>Plaats</dt><dd>{{ page.plaats }}</dd></div>{% endif %}
+        {%- if page.druiven %}<div><dt>Druiven</dt><dd>{{ page.druiven }}</dd></div>{% endif %}
+        {%- if page.hectare %}<div><dt>Wijngaard</dt><dd>{{ page.hectare }} hectare</dd></div>{% endif %}
+        {%- if page.werkwijze %}<div><dt>Werkwijze</dt><dd>{{ page.werkwijze }}</dd></div>{% endif %}
+      </dl>
+      {%- if page.website or page.instagram %}
+      <p class="producent__links">
+        {%- if page.website %}<a href="{{ page.website }}" target="_blank" rel="noopener">Website van {{ page.naam }}</a>{% endif %}
+        {%- if page.instagram %}<a href="{{ page.instagram }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
+      </p>
+      {%- endif %}
+    </aside>
+  </div>
+
+  {%- if buren.size > 1 %}
+  <section class="producent__buren">
+    <h2>Meer uit {{ page.regio }}</h2>
+    <ul>
+      {%- for p in buren %}{% unless p.url == page.url %}
+      <li><a href="{{ p.url | relative_url }}">{{ p.naam }}</a></li>
+      {%- endunless %}{% endfor %}
+    </ul>
+  </section>
+  {%- endif %}
+</article>
+
+{% capture kop %}Interesse in de wijnen van {{ page.naam }}?{% endcapture %}
+{% include contact-blok.html kop=kop producent=page.naam tekst="Stuur ons een bericht via WhatsApp of mail. Dan laten we weten wat er beschikbaar is en wanneer de nieuwe jaargang binnenkomt." %}

@@ -1,0 +1,27 @@
+# ------------------------------------------------------------
+#  Grote foto's op de homepage
+#  Zet een nieuwe foto in de map assets/img/achtergrond/ en
+#  vervang hieronder de bestandsnaam. Liggende foto's (breder dan hoog),
+#  minimaal 2000 pixels breed, werken het best.
+#
+#  positie = welk deel van de foto zichtbaar blijft als hij wordt bijgesneden,
+#  bijvoorbeeld "center", "center top" of "center 70%".
+# ------------------------------------------------------------
+
+# Bovenaan de homepage, direct onder het logo
+hero:
+  foto: /assets/img/producenten/julien-henin.jpg
+  positie: center 55%
+  alt: Wijnmaker loopt tussen de rijen wijnstokken omhoog
+
+# Blijft staan terwijl de tekst over ons eroverheen schuift
+verhaal:
+  foto: /assets/img/producenten/alexis-limar.jpg
+  positie: center 40%
+  alt: Twee wijnmakers aan het werk in de wijngaard
+
+# Achtergrond van het Hedonist-blok op de homepage
+hedonist:
+  foto: /assets/img/hedonist/hedonist-9.jpg
+  positie: right center
+  alt: Lichtlijn langs de bol van een Hedonist glas

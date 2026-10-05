@@ -1,0 +1,76 @@
+---
+layout: default
+body_class: home
+titel_seo: VMV Wijnimport | Wijnen van jonge wijnmakers, low intervention
+---
+{%- assign fotos = site.data.fotos -%}
+{%- assign producenten = site.producenten | sort: "naam" -%}
+{%- assign regios = producenten | group_by: "regio" | sort: "name" -%}
+
+<section class="hero">
+  <img class="hero__foto" src="{{ fotos.hero.foto | relative_url }}" alt="{{ fotos.hero.alt }}" style="object-position: {{ fotos.hero.positie }}">
+  <div class="hero__tekst">
+    <h1>Wijn die in de wijngaard begint</h1>
+    <p>We importeren wijnen van jonge wijnmakers die het werk buiten doen en in de kelder zo min mogelijk ingrijpen.</p>
+  </div>
+</section>
+
+<section class="pijlers" aria-label="Waar we op letten">
+  <div class="pijler">
+    <span class="stip stip--rood" aria-hidden="true"></span>
+    <h2>Jonge wijnmakers</h2>
+    <p>Een nieuwe generatie die het familiedomein overneemt of vanaf nul begint, en eigen keuzes durft te maken.</p>
+  </div>
+  <div class="pijler">
+    <span class="stip stip--wit" aria-hidden="true"></span>
+    <h2>De wijngaard eerst</h2>
+    <p>Gezonde bodems en zorgvuldig werk tussen de stokken. Daar wordt de wijn gemaakt, niet in het lab.</p>
+  </div>
+  <div class="pijler">
+    <span class="stip stip--rose" aria-hidden="true"></span>
+    <h2>Low intervention</h2>
+    <p>In de kelder zo weinig mogelijk toevoegen of corrigeren, zodat je proeft waar de wijn vandaan komt.</p>
+  </div>
+</section>
+
+<section class="scene">
+  <div class="scene__beeld">
+    <img src="{{ fotos.verhaal.foto | relative_url }}" alt="{{ fotos.verhaal.alt }}" style="object-position: {{ fotos.verhaal.positie }}" loading="lazy">
+  </div>
+  <div class="scene__panelen">
+    <div class="scene__paneel">
+      <h2>Begonnen in {{ site.opgericht }}</h2>
+      <p>VMV Wijnimport is jong, net als de wijnmakers met wie we werken. We bezoeken ze in hun wijngaard, proeven uit het vat en kiezen alleen wijnen waar we zelf voor staan.</p>
+      <a class="tekstlink" href="{{ '/over-ons/' | relative_url }}">Lees ons verhaal</a>
+    </div>
+  </div>
+</section>
+
+<section class="sectie regio-overzicht">
+  <div class="sectie__kop">
+    <h2>Onze producenten</h2>
+    <a class="tekstlink" href="{{ '/producenten/' | relative_url }}">Alle producenten</a>
+  </div>
+  {%- for regio in regios %}
+  <div class="regio">
+    <h3 class="regio__naam">{{ regio.name }}<span>{{ regio.items.first.land }}</span></h3>
+    <ul class="producentlijst">
+      {%- for p in regio.items %}
+      {% include producent-regel.html p=p %}
+      {%- endfor %}
+    </ul>
+  </div>
+  {%- endfor %}
+</section>
+
+<section class="hedonist-teaser">
+  <img class="hedonist-teaser__foto" src="{{ fotos.hedonist.foto | relative_url }}" alt="{{ fotos.hedonist.alt }}" style="object-position: {{ fotos.hedonist.positie }}" loading="lazy">
+  <div class="hedonist-teaser__tekst">
+    <p class="hedonist-teaser__merk">Hedonist</p>
+    <h2>Official distributor of Hedonist glasses</h2>
+    <p>Handgeblazen, loodvrij glas, gemaakt om de wijn te laten spreken. Wij leveren Hedonist in Nederland.</p>
+    <a class="knop knop--licht" href="{{ '/hedonist/' | relative_url }}">Bekijk de glazen</a>
+  </div>
+</section>
+
+{% include contact-blok.html %}

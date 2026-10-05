@@ -1,0 +1,65 @@
+# ------------------------------------------------------------
+#  VMV Wijnimport — algemene instellingen
+#  Na het aanpassen van dit bestand duurt het 1-2 minuten
+#  voordat GitHub Pages de site opnieuw heeft gebouwd.
+# ------------------------------------------------------------
+
+title: VMV Wijnimport
+tagline: Jonge wijnmakers die in de wijngaard beginnen
+description: >-
+  VMV Wijnimport importeert wijnen van jonge wijnmakers die werken vanuit de
+  wijngaard, met zo min mogelijk ingrijpen in de kelder. Officieel distributeur
+  van Hedonist glazen in Nederland.
+lang: nl_NL
+locale: nl_NL
+
+# Het adres van de website. Pas aan als het domein anders is.
+url: "https://www.vmvwijnimport.com"
+# Laat leeg bij een eigen domein. Gebruik je het standaard GitHub-adres
+# (gebruikersnaam.github.io/VMV-Wijnimport), zet hier dan "/VMV-Wijnimport".
+baseurl: ""
+
+logo: /assets/img/logo-vmv.jpg
+
+# Contactgegevens — worden overal op de site gebruikt
+email: info@vmvwijnimport.com
+whatsapp_url: https://wa.me/message/7A7JGLEONUS3E1
+opgericht: november 2024
+
+# Formulier: berichten gaan via FormSubmit naar het e-mailadres hierboven.
+# De eerste keer krijg je een bevestigingsmail van FormSubmit: klik op de link.
+formulier_endpoint: https://formsubmit.co/ajax/info@vmvwijnimport.com
+
+# ------------------------------------------------------------
+#  Producenten — elk bestand in de map _producenten is een producent
+# ------------------------------------------------------------
+collections:
+  producenten:
+    output: true
+    permalink: /producenten/:name/
+
+defaults:
+  - scope:
+      path: ""
+      type: producenten
+    values:
+      layout: producent
+  - scope:
+      path: ""
+    values:
+      layout: pagina
+      image: /assets/img/logo-vmv.jpg
+
+plugins:
+  - jekyll-sitemap
+
+markdown: kramdown
+
+exclude:
+  - HANDLEIDING.md
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - .claude
+  - prijslijst

@@ -1,0 +1,14 @@
+{%- comment -%}
+  Afsluitend blok met WhatsApp en contact. Gebruik:
+  {% include contact-blok.html kop="..." tekst="..." %}
+{%- endcomment -%}
+<section class="contactblok">
+  <div class="contactblok__binnen">
+    <h2 class="contactblok__kop">{{ include.kop | default: "Als eerste horen wanneer de nieuwe jaargangen binnenkomen" }}</h2>
+    <p class="contactblok__tekst">{{ include.tekst | default: "Via WhatsApp laten we weten wanneer er nieuwe jaargangen van onze producenten binnenkomen, en je kunt ze daar direct bestellen." }}</p>
+    <div class="knoppen">
+      <a class="knop knop--wa" href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">{% include whatsapp-icoon.html %}Stuur ons een WhatsApp</a>
+      <a class="knop knop--lijn" href="{{ '/contact/' | relative_url }}{% if include.producent %}?producent={{ include.producent | url_encode }}{% endif %}">Mail ons</a>
+    </div>
+  </div>
+</section>
