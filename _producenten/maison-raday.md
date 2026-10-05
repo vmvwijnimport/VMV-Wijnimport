@@ -15,8 +15,10 @@ instagram:
 cuvees:
   - naam: "Meunier d’Ailleurs"
     druif: Meunier
+    type: wit
   - naam: Ramosa Ripa
     druif: Chardonnay, Pinot Noir
+    type: wit
 ---
 
 Valentin Tribaut runt samen met zijn broer het familiedomein Champagne Tribaut Schloesser in Romery, in de Vallée de la Marne. Daarnaast begon hij in 2018 Maison Raday, een kleine négoce met druiven van wijnboeren die hij bewondert. De naam komt van het riviertje dat door Romery, Cormoyeux en Fleury-la-Rivière stroomt, de dorpen waar de familie Tribaut al generaties wijngaarden heeft. De naam van de wijnboer staat steeds op het etiket.

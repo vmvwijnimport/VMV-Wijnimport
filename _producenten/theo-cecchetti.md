@@ -15,6 +15,7 @@ instagram:
 cuvees:
   - naam: Les Mocque-Souris
     druif: Pinot Noir
+    type: wit
 ---
 
 Via ons werk met Pierric Brochet hadden we al over Théo Cecchetti en zijn champagne gehoord, maar we proefden hem voor het eerst tijdens Champagne Day in Reims, bij Le Wine Bar by Le Vintage. De explosieve neus viel ons meteen op. Het was zo'n wijn waar je nog lang aan blijft denken.

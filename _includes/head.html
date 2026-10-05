@@ -29,10 +29,16 @@
 <meta property="og:url" content="{{ page.url | absolute_url }}">
 <meta property="og:image" content="{{ seo_foto | absolute_url }}">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="{{ '/assets/img/favicon.svg' | relative_url }}" type="image/svg+xml">
+<link rel="icon" href="{{ '/brand/logo/svg/vmv-stippen.svg' | relative_url }}" type="image/svg+xml">
+<link rel="icon" href="{{ '/brand/logo/png/favicon-32.png' | relative_url }}" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="{{ '/brand/logo/png/apple-touch-icon-180.png' | relative_url }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap" rel="stylesheet">
+{%- if page.url == "/hedonist/" %}
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&display=swap" rel="stylesheet">
+{%- endif %}
+<link rel="stylesheet" href="{{ '/brand/tokens.css' | relative_url }}">
 <link rel="stylesheet" href="{{ '/assets/css/stijl.css' | relative_url }}">
 <script src="{{ '/assets/js/site.js' | relative_url }}" defer></script>
 

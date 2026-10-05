@@ -12,7 +12,6 @@ layout: default
   <header class="producent__kop">
     <h1 class="producent__naam">{{ page.naam }}</h1>
     <p class="producent__herkomst">
-      <span class="stip stip--rood" aria-hidden="true"></span>
       {% if page.plaats %}{{ page.plaats }}, {% endif %}{{ page.regio }}, {{ page.land }}
     </p>
     <p class="producent__nl">In Nederland verkrijgbaar via {{ site.title }}</p>
@@ -29,7 +28,9 @@ layout: default
       {%- if page.samenvatting %}
       <p class="producent__samenvatting">{{ page.samenvatting }}</p>
       {%- endif %}
-      {{ content }}
+      <div class="verhaal">
+        {{ content }}
+      </div>
 
       {%- if page.cuvees and page.cuvees.size > 0 %}
       <section class="cuvees" aria-labelledby="cuvees-kop">
@@ -37,6 +38,7 @@ layout: default
         <ul class="cuvees__lijst">
           {%- for c in page.cuvees %}
           <li>
+            <span class="stip stip--{{ c.type | default: 'wit' }}" aria-hidden="true"></span>
             <span class="cuvees__naam">{{ c.naam }}</span>
             {%- if c.druif %}<span class="cuvees__druif">{{ c.druif }}</span>{% endif %}
           </li>

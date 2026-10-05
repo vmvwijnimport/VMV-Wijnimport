@@ -15,14 +15,19 @@ instagram:
 cuvees:
   - naam: Les Hautes Maladries
     druif: Pinot Noir
+    type: wit
   - naam: "Le Noyer de l’Orme du Nord"
     druif: Pinot Noir
+    type: wit
   - naam: "Le Noyer de l’Orme du Midi"
     druif: Pinot Noir
+    type: wit
   - naam: Le Pignon
     druif: Pinot Noir
+    type: wit
   - naam: Les Coutures
     druif: Chardonnay
+    type: wit
 ---
 
 Pierre-Gabriel Diarra groeide op in Hautvillers, waar zijn familie wijngaarden had. Hij koos eerst voor iets heel anders en werkte jarenlang in de techsector in Engeland en Frankrijk, maar uiteindelijk ging hij terug naar de wijngaard. Hij haalde zijn diploma wijnbouw en oenologie in Bordeaux en maakte in 2021 zijn eerste jaargang onder de naam Champagne INSU.

@@ -15,8 +15,10 @@ instagram:
 cuvees:
   - naam: Jolie Promenade
     druif: Chardonnay
+    type: wit
   - naam: "Chardonnay “Le Champ Dame Jeanne”"
     druif: Chardonnay
+    type: wit
 ---
 
 Julien Hénin komt uit een wijnfamilie in Aÿ. Zijn ouders, Christine Delouvin en Jacky Hénin, voegden hun wijngaarden samen en richtten Champagne Hénin-Delouvin op. Julien en zijn broer Guillaume werken mee op het familiebedrijf. Daarnaast heeft Julien een eigen label, met iets meer dan anderhalve hectare wijngaard in Cerseuil, in de Vallée de la Marne. Die wijngaarden werkt hij sinds 2020 biologisch.

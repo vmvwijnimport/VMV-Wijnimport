@@ -15,18 +15,25 @@ instagram:
 cuvees:
   - naam: "Langhe Arneis “Stella Dorata”"
     druif: Arneis
+    type: wit
   - naam: "Barbera d’Alba “Baccara”"
     druif: Barbera
+    type: rood
   - naam: "Langhe Nebbiolo “Botero”"
     druif: Nebbiolo
+    type: rood
   - naam: "Langhe Freisa “Avolieri”"
     druif: Freisa
+    type: rood
   - naam: "Dolcetto “Grasmeri”"
     druif: Dolcetto
+    type: rood
   - naam: "Barbaresco “Damasco”"
     druif: Nebbiolo
+    type: rood
   - naam: "Barbaresco “Rizzi”"
     druif: Nebbiolo
+    type: rood
 ---
 
 Met Rosanna Sandri hebben we voor het eerst een producent van buiten Frankrijk in ons portfolio. De familie maakt wijn in Treiso, in Piemonte, vlak bij Barbaresco. Het begon in 1950, toen Rosanna's ouders Mario en Teresina hun eerste wijnstokken plantten in San Rocco Seno d'Elvio. Rosanna groeide op tussen de wijnstokken en werkte haar hele leven in de wijngaard. Tegenwoordig leiden haar zoons Roberto en Mauro Prandi het bedrijf. Ze studeerden allebei aan de wijnbouwschool in Alba.

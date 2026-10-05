@@ -15,6 +15,7 @@ instagram:
 cuvees:
   - naam: "Avize “Le Haut du Moulin”"
     druif: Chardonnay
+    type: wit
 ---
 
 Jonas Collino maakt champagne in Avize, een van de grand cru-dorpen van de Côte des Blancs. Het domein gaat terug tot de jaren zestig, toen de familie Petit er haar eerste wijngaarden had. Inmiddels staat Jonas aan het roer. Hij werkt met oude chardonnaystokken, op een natuurlijke manier, en sinds 2025 is het domein biologisch gecertificeerd. De eerste releases van Jonas waren gemaakt met gekochte druiven, om zijn project te financieren en vaten te kunnen kopen. Zijn eerste release met eigen druiven is net uit (vintage 2020). 

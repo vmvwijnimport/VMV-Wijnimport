@@ -15,12 +15,16 @@ instagram:
 cuvees:
   - naam: "Hautes-Côtes de Beaune “Mainbey”"
     druif: Chardonnay
+    type: wit
   - naam: "Hautes-Côtes de Nuits “Le Mont”"
     druif: Chardonnay
+    type: wit
   - naam: "Hautes-Côtes de Beaune “Le Mosnières”"
     druif: Chardonnay
+    type: wit
   - naam: "Santenay 1er Cru “Petit Clos Rousseau”"
     druif: Pinot Noir
+    type: rood
 ---
 
 Morgane en Alban Desazars maken sinds 2023 wijn in Auxey-Duresses, in de Côte d'Or. Morgane groeide op in de Champagne. Ze is de dochter van Laurent Champs van Champagne Vilmart en werkte daarna bij Olivier Leflaive. Alban komt uit de Loire en werkte als consultant voor andere wijnboeren. In Auxey-Duresses kochten ze een oud wijndomein met kelders, waarvan sommige direct in de kalksteen zijn uitgehakt. Ze maken per perceel kleine hoeveelheden wijn, voor een groot deel uit de hoger gelegen Hautes-Côtes.

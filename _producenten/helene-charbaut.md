@@ -15,14 +15,19 @@ instagram:
 cuvees:
   - naam: Les Pinailleuses
     druif: Pinot Noir
+    type: wit
   - naam: La Crayère
     druif: Chardonnay
+    type: wit
   - naam: La Meunière
     druif: Meunier
+    type: wit
   - naam: La Pirouette
     druif: Pinot Noir
+    type: wit
   - naam: La Charbauterie
     druif: Assemblage
+    type: wit
 ---
 
 Hélène Charbaut is de vierde generatie van de familie achter Champagne Guy Charbaut in Mareuil-sur-Aÿ, in de Vallée de la Marne. Na een aantal jaren ervaring in de Bourgogne kwam ze in 2020 terug naar het familiedomein. Daar begon ze onder haar eigen naam champagne te maken, met wat ze in de Bourgogne had geleerd.

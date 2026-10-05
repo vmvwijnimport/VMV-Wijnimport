@@ -15,16 +15,22 @@ instagram:
 cuvees:
   - naam: Buntsandstein
     druif: Chardonnay, Sylvaner
+    type: wit
   - naam: Chardonnay
     druif: Chardonnay
+    type: wit
   - naam: Sylvaner
     druif: Sylvaner
+    type: wit
   - naam: Spätburgunder
     druif: Spätburgunder
+    type: rood
   - naam: Blanc de Noir (sekt)
     druif: Spätburgunder
+    type: wit
   - naam: Blanc de Noir Prestige (sekt)
     druif: Spätburgunder
+    type: wit
 ---
 
 Felix Walter groeide op in Bürgstadt, in Franken, op het familiebedrijf Weingut Josef Walter. Zijn vader Christoph maakt daar al jaren door de Bourgogne geïnspireerde spätburgunder. Felix leerde het vak onder meer bij Künstler in de Rheingau en bij Julian Huber in Baden. Daar raakte hij in de ban van chardonnay en pinot noir uit de Bourgogne, en ontstond het idee om zelf wijnen te maken die anders zijn dan die van het familiebedrijf. De naam Krawalter is een bijnaam uit zijn opleiding, die hij kreeg omdat hij altijd kritische vragen stelde.

@@ -15,8 +15,10 @@ instagram:
 cuvees:
   - naam: Nos Terres Amoureuses
     druif: Meunier
+    type: wit
   - naam: Les Pieds Dans La Terre
     druif: Assemblage
+    type: wit
 ---
 
 Alexis en Jeanne Limar werken samen 3 hectare in de Champagne, met pinot noir, meunier en chardonnay. Hun wijngaarden liggen in La Neuville-aux-Larris, Cuchery en Belval-sous-Châtillon in de Vallée de la Marne, en in het grand cru-dorp Mailly-Champagne op de Montagne de Reims. Alexis volgde de opleiding wijnbouw en oenologie aan de Viti Campus in Avize en leerde het vak verder op het bedrijf van zijn grootvader. Daar maakte hij met de oogst van 2018 zijn eerste twee champagnes. Toen zijn grootvader in 2023 met pensioen ging, namen Alexis en Jeanne de wijngaarden volledig over.

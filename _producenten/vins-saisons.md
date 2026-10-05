@@ -15,12 +15,16 @@ instagram:
 cuvees:
   - naam: Jacquère VdF
     druif: Chardonnay
+    type: wit
   - naam: Bourgogne Aligoté
     druif: Aligoté
+    type: wit
   - naam: Bourgogne Hautes-Côtes de Beaune
     druif: Pinot Noir
+    type: rood
   - naam: Savigny-lès-Beaune
     druif: Pinot Noir
+    type: rood
 ---
 
 Vins Saisons is een kleine négoce in de Bourgogne, gevestigd in de oude kelder van Rougeot in Meloisey. Loïc Lamy en Éric Pignal begonnen het in 2019 samen. Ze kenden het vak van domeinen als Roulot, Roumier, Dujac en de Montille. In 2021 vertrok Éric om chef de cave te worden bij Simon Bize. Sindsdien staat Loïc er alleen voor.

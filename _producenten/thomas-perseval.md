@@ -15,16 +15,22 @@ instagram:
 cuvees:
   - naam: "Art’Terre"
     druif: Assemblage
+    type: wit
   - naam: Le Hazat
     druif: Pinot Noir
+    type: wit
   - naam: Le Hazat
     druif: Meunier
+    type: wit
   - naam: La Masure Rosé
     druif: Pinot Noir, Chardonnay
+    type: rose
   - naam: Le Village
     druif: Chardonnay
+    type: wit
   - naam: La Pucelle
     druif: Meunier
+    type: wit
 ---
 
 Thomas Perseval is de derde generatie van een wijnboerenfamilie in Chamery, een premier cru-dorp op de Montagne de Reims. Begin jaren 2000 kwam hij terug naar het familiedomein. Daarvoor had hij in de Bourgogne gewerkt bij biodynamische wijnmakers, en dat heeft zijn manier van werken sterk gevormd. In 2009 begon hij de wijngaarden om te schakelen naar biologisch, en sinds 2012 is hij gecertificeerd.

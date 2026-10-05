@@ -19,7 +19,7 @@ url: "https://www.vmvwijnimport.com"
 # (gebruikersnaam.github.io/VMV-Wijnimport), zet hier dan "/VMV-Wijnimport".
 baseurl: ""
 
-logo: /assets/img/logo-vmv.jpg
+logo: /brand/logo/png/vmv-logo-1024.png
 
 # Contactgegevens — worden overal op de site gebruikt
 email: info@vmvwijnimport.com
@@ -48,7 +48,7 @@ defaults:
       path: ""
     values:
       layout: pagina
-      image: /assets/img/logo-vmv.jpg
+      image: /brand/logo/png/vmv-logo-1024.png
 
 plugins:
   - jekyll-sitemap

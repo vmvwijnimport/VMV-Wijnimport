@@ -15,8 +15,10 @@ instagram:
 cuvees:
   - naam: "Hautes-Côtes de Beaune ‘Les Crucibées’"
     druif: Chardonnay
+    type: wit
   - naam: "Hautes-Côtes de Beaune ‘Les Crucibées’"
     druif: Pinot Noir
+    type: rood
 ---
 
 Nina Saulnier maakt samen met Lucas Mouchonnat wijn in Fussey, in de Hautes-Côtes de Beaune. Het is het laatste dorp van de appellatie, precies op de grens tussen de Côte de Nuits en de Côte de Beaune, op een paar minuten rijden van Pernand-Vergelesses. Nina plantte daar pinot noir en chardonnay op Les Crucibées, een perceel van 5,5 hectare dat meer dan honderd jaar weiland was. Het perceel is een monopole: het is helemaal van haar. Het ligt op 415 tot 470 meter hoogte. De ondergrond bestaat uit mergel, kalksteen en dolomiet, met een dunne laag klei erover. Ze werken biologisch en doen veel voor de biodiversiteit in en rond de wijngaard.

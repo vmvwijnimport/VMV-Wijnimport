@@ -15,20 +15,28 @@ instagram:
 cuvees:
   - naam: Aure
     druif: Assemblage
+    type: wit
   - naam: Chardonnay Grand Cru
     druif: Chardonnay
+    type: wit
   - naam: "Puisieulx Grand Cru ‘Les Petites Vignes’"
     druif: Pinot Noir
+    type: wit
   - naam: "Puisieulx Grand Cru ‘Les Petites Vignes’"
     druif: Chardonnay
+    type: wit
   - naam: "Rosé “La Vigne de Champvoisy”"
     druif: Meunier, Chardonnay
+    type: rose
   - naam: "Le Mesnil-sur-Oger Grand Cru “Malo”"
     druif: Chardonnay
+    type: wit
   - naam: Oger Grand Cru
     druif: Chardonnay
+    type: wit
   - naam: Union (Mesnil-sur-Oger × Puisieulx)
     druif: Pinot Noir, Chardonnay
+    type: wit
 ---
 
 Aurore Casanova was zeven jaar professioneel balletdanseres voordat ze terugkeerde naar Champagne, naar de wijngaarden die haar moeder in de jaren zestig had aangeplant. Tijdens haar opleiding wijnbouw en oenologie in Avize leerde ze Jean-Baptiste Robinet kennen, die zelf uit een wijnmakersfamilie komt. In 2013 nam Aurore de percelen van haar moeder over en begonnen ze samen hun domein in Mardeuil, vlak bij Épernay. Vandaag werken ze 4,8 hectare, met grand cru-percelen in Puisieulx, Le Mesnil-sur-Oger en Oger en daarnaast wijngaarden in Champvoisy. Ze werken biodynamisch en zijn biologisch gecertificeerd.

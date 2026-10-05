@@ -45,8 +45,10 @@ instagram: https://www.instagram.com/domainedupont
 cuvees:
   - naam: Les Vieilles Vignes
     druif: Pinot Noir
+    type: rood
   - naam: "Bourgogne “Clos du Bois”"
     druif: Chardonnay
+    type: wit
 ---
 
 Hier schrijf je het verhaal van de producent. Gewoon tekst, zo lang als je wilt.
@@ -78,14 +80,18 @@ Een lege regel begint een nieuwe alinea.
 
 ### Cuvées toevoegen of weghalen
 
-Elke cuvée bestaat uit twee regels: `- naam:` en daaronder `druif:`. Let op de spaties aan het begin: twee spaties voor `- naam`, vier voor `druif`.
+Elke cuvée bestaat uit drie regels: `- naam:`, `druif:` en `type:`. Let op de spaties aan het begin: twee spaties voor `- naam`, vier voor `druif` en `type`.
+
+Het type bepaalt de kleur van het stipje voor de wijn: `rood`, `wit` (ook voor champagne) of `rose`. Laat je het weg, dan krijgt de wijn een witte stip.
 
 ```
 cuvees:
   - naam: Jolie Promenade
     druif: Chardonnay
-  - naam: Les Pinailleuses
+    type: wit
+  - naam: Rosé de Macération
     druif: Pinot Noir
+    type: rose
 ```
 
 Een nieuwe cuvée zet je er gewoon onder. Wil je er een weghalen, verwijder dan beide regels. Staan er aanhalingstekens of een dubbele punt in de naam? Zet de hele naam dan tussen gewone aanhalingstekens: `- naam: "Fixin “Côte Cour”"`.

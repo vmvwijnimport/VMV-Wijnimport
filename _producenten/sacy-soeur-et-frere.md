@@ -15,16 +15,22 @@ instagram:
 cuvees:
   - naam: Ratafia Champenois
     druif: Pinot Noir
+    type: wit
   - naam: Les Courtisols du fût(ur)
     druif: Pinot Noir
+    type: wit
   - naam: Rosé de Macération
     druif: Pinot Noir
+    type: rose
   - naam: Les Chardonnays de Verzy
     druif: Chardonnay
+    type: wit
   - naam: Les Chardonnays perchés
     druif: Chardonnay
+    type: wit
   - naam: Coteaux Champenois Rouge
     druif: Pinot Noir
+    type: rood
 ---
 
 Yaël en Jonathan Sacy zijn zus en broer, en de dertiende generatie van een wijnboerenfamilie in Verzy, een grand cru-dorp op de Montagne de Reims. In 2018 namen ze het familiedomein over. Onder de naam Sacy Sœur & Frère laten ze hun eigen kijk op de terroirs van de familie zien. Vroeger maakte het domein vooral blends, nu maken ze champagnes van één dorp of zelfs één perceel.
