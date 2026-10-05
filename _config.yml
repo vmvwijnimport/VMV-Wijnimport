@@ -21,6 +21,11 @@ baseurl: ""
 
 logo: /brand/logo/png/vmv-logo-1024.png
 
+# Zichtbaar in Google en andere zoekmachines?
+# false = de site wordt niet opgenomen in zoekresultaten (voor de lancering).
+# Zet op true als de site officieel live mag.
+zoekmachines: false
+
 # Contactgegevens — worden overal op de site gebruikt
 email: info@vmvwijnimport.com
 whatsapp_url: https://wa.me/message/7A7JGLEONUS3E1

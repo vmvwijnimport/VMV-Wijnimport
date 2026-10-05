@@ -20,6 +20,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ seo_titel | strip }}</title>
 <meta name="description" content="{{ seo_omschrijving | strip_html | strip_newlines | strip | escape }}">
+{%- unless site.zoekmachines %}
+<meta name="robots" content="noindex, nofollow">
+{%- endunless %}
 <link rel="canonical" href="{{ page.url | absolute_url }}">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="nl_NL">

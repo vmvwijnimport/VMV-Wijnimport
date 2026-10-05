@@ -168,6 +168,10 @@ baseurl: "/VMV-Wijnimport"
 
 ## Gevonden worden in Google
 
+**Voor de lancering staat de site verborgen voor Google.** In `_config.yml` staat `zoekmachines: false`. Daardoor neemt Google de pagina's niet op in de zoekresultaten. Wie het adres kent, kan de site wel gewoon bekijken.
+
+Mag de site officieel live? Zet dan in `_config.yml` `zoekmachines: true` en klik op **Commit changes**. Meld de site daarna aan bij Google Search Console (zie hieronder).
+
 Elke producentpagina krijgt automatisch een titel als *"Domaine Dupont, Bourgogne (Frankrijk) | importeur in Nederland | VMV Wijnimport"*. Er komen ook gegevens bij die Google begrijpt. Zo kom je hoger in de zoekresultaten als iemand zoekt op "Domaine Dupont Nederland".
 
 Wat helpt:
