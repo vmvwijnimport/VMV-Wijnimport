@@ -307,6 +307,9 @@ a:hover { color: var(--rood); }
   aspect-ratio: 4 / 5; overflow: hidden; background: var(--champagne-licht);
 }
 .producentregel__foto img { width: 100%; height: 100%; object-fit: cover; }
+/* Foto in zijn geheel tonen, bijvoorbeeld een etiket (lijst_passend: true) */
+.producentregel__foto--passend { background: var(--wit); border: 1px solid var(--lijn); }
+.producentregel__foto--passend img { object-fit: contain; object-position: center !important; }
 .producentregel__naam { grid-area: naam; align-self: end; font-size: var(--fs-h3); font-weight: 400; line-height: 1.2; }
 .producentregel__plek { grid-area: plek; align-self: end; color: var(--tekst-zacht); font-size: var(--fs-klein); }
 .producentregel__samenvatting { grid-area: samenvatting; align-self: start; margin-top: var(--s-1); color: var(--tekst-zacht); font-size: var(--fs-ui); max-width: 60ch; }
