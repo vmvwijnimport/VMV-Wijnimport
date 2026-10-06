@@ -73,6 +73,7 @@ Een lege regel begint een nieuwe alinea.
 | `samenvatting` | aanbevolen | Korte tekst voor de lijst met producenten en voor Google |
 | `plaats` | nee | Dorp of stad |
 | `foto_positie` | nee | Welk deel van de foto zichtbaar blijft bij bijsnijden: `center`, `center top`, `center 30%` |
+| `lijst_foto` | nee | Een andere foto voor het producentenoverzicht dan op de producentpagina zelf |
 | `lijst_passend` | nee | Zet op `true` om de foto in het producentenoverzicht in zijn geheel te tonen in plaats van bijgesneden, bijvoorbeeld bij een etiket |
 | `foto_alt` | nee | Korte beschrijving van de foto, voor slechtzienden en Google |
 | `druiven`, `hectare`, `werkwijze` | nee | Verschijnen in het rijtje met feiten naast de tekst |

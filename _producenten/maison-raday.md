@@ -6,6 +6,7 @@ plaats: Romery
 foto: /assets/img/producenten/maison-raday-etiket.jpg
 foto_positie: center bottom
 foto_alt: Etiket van Maison Raday Ramosa Ripa
+lijst_foto: /assets/img/producenten/maison-raday-volledig.jpg
 lijst_passend: true
 samenvatting: Valentin Tribaut maakt onder de naam Maison Raday kleine hoeveelheden champagne van druiven van wijnboeren die hij bewondert.
 druiven:

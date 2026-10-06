@@ -2,7 +2,7 @@
 <li class="producentregel">
   <a href="{{ p.url | relative_url }}">
     {%- if p.foto %}
-    <span class="producentregel__foto{% if p.lijst_passend %} producentregel__foto--passend{% endif %}"><img src="{{ p.foto | relative_url }}" alt="" loading="lazy" style="object-position: {{ p.foto_positie | default: 'center' }}"></span>
+    <span class="producentregel__foto{% if p.lijst_passend %} producentregel__foto--passend{% endif %}"><img src="{{ p.lijst_foto | default: p.foto | relative_url }}" alt="" loading="lazy" style="object-position: {{ p.foto_positie | default: 'center' }}"></span>
     {%- else %}
     <span class="producentregel__foto producentregel__foto--leeg"><span class="stippen" aria-hidden="true"><i></i><i></i><i></i></span></span>
     {%- endif %}
