@@ -1,0 +1,25 @@
+{%- comment -%}
+  Leeftijdscheck bij het eerste bezoek. Het antwoord wordt 30 dagen onthouden
+  in een cookie (vmv18). Zonder JavaScript wordt de check niet getoond.
+{%- endcomment -%}
+<div class="leeftijd" id="leeftijdscheck" role="dialog" aria-modal="true" aria-labelledby="leeftijd-kop" aria-describedby="leeftijd-tekst">
+  <div class="leeftijd__binnen">
+    <img class="leeftijd__logo" src="{{ '/brand/logo/svg/vmv-logo.svg' | relative_url }}" alt="VMV Wijnimport" width="602" height="573">
+
+    <div class="leeftijd__vraag">
+      <h2 id="leeftijd-kop">Ben je 18 jaar of ouder?</h2>
+      <p id="leeftijd-tekst">Op deze website lees je over wijn en champagne. Daarom vragen we eerst je leeftijd.</p>
+      <div class="knoppen">
+        <button class="knop knop--primair" type="button" data-leeftijd="ja">Ja, ik ben 18 of ouder</button>
+        <button class="knop knop--secundair" type="button" data-leeftijd="nee">Nee</button>
+      </div>
+    </div>
+
+    <div class="leeftijd__nee" hidden>
+      <h2>Kom terug als je 18 bent</h2>
+      <p>Je moet 18 jaar of ouder zijn om deze website te bekijken.</p>
+    </div>
+
+    <p class="leeftijd__klein">Geniet, maar drink met mate.</p>
+  </div>
+</div>

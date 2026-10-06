@@ -18,7 +18,7 @@
 {%- endif -%}
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script>document.documentElement.classList.add("js")</script>
+<script>document.documentElement.classList.add("js");if(document.cookie.indexOf("vmv18=ja")<0)document.documentElement.classList.add("leeftijd-open")</script>
 <title>{{ seo_titel | strip }}</title>
 <meta name="description" content="{{ seo_omschrijving | strip_html | strip_newlines | strip | escape }}">
 {%- unless site.zoekmachines %}

@@ -581,6 +581,25 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .scene--donker .contactregel a { color: var(--wit); }
 .sectie > .contactregel { margin-top: var(--s-4); }
 
+/* ---------- Leeftijdscheck ---------- */
+
+.leeftijd { display: none; }
+.leeftijd-open .leeftijd {
+  display: grid; place-items: center;
+  position: fixed; inset: 0; z-index: 200;
+  padding: var(--s-3);
+  background: var(--wit);
+  overflow-y: auto;
+}
+.leeftijd-open body { overflow: hidden; }
+.leeftijd__binnen { width: 100%; max-width: 30rem; }
+.leeftijd__logo { width: 120px; height: auto; margin-bottom: var(--s-6); }
+.leeftijd h2 { margin-bottom: var(--s-2); }
+.leeftijd p { color: var(--tekst); }
+.leeftijd .knoppen { margin-top: var(--s-4); }
+.leeftijd__nee[hidden], .leeftijd__vraag[hidden] { display: none; }
+.leeftijd__klein { margin: var(--s-8) 0 0; padding-top: var(--s-2); border-top: 1px solid var(--lijn); font-size: var(--fs-klein); color: var(--tekst-zacht) !important; }
+
 /* ---------- Minder beweging ---------- */
 
 @media (prefers-reduced-motion: reduce) {

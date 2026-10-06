@@ -1,5 +1,28 @@
 // Menu (mobiel), uitklapmenu producenten en het contactformulier.
 document.addEventListener("DOMContentLoaded", function () {
+  // ---- Leeftijdscheck ----
+  var check = document.getElementById("leeftijdscheck");
+  if (check && document.documentElement.classList.contains("leeftijd-open")) {
+    var ja = check.querySelector("[data-leeftijd=ja]");
+    ja.focus({ focusVisible: false });
+    ja.addEventListener("click", function () {
+      document.cookie = "vmv18=ja; max-age=" + 60 * 60 * 24 * 30 + "; path=/; SameSite=Lax";
+      document.documentElement.classList.remove("leeftijd-open");
+    });
+    check.querySelector("[data-leeftijd=nee]").addEventListener("click", function () {
+      check.querySelector(".leeftijd__vraag").hidden = true;
+      check.querySelector(".leeftijd__nee").hidden = false;
+    });
+    // Houd de focus binnen de vraag
+    check.addEventListener("keydown", function (e) {
+      if (e.key !== "Tab") return;
+      var knoppen = check.querySelectorAll("button:not([hidden])");
+      var eerste = knoppen[0], laatste = knoppen[knoppen.length - 1];
+      if (e.shiftKey && document.activeElement === eerste) { laatste.focus(); e.preventDefault(); }
+      else if (!e.shiftKey && document.activeElement === laatste) { eerste.focus(); e.preventDefault(); }
+    });
+  }
+
   // ---- Mobiel menu ----
   var menuknop = document.querySelector(".kop__menuknop");
   var menu = document.getElementById("hoofdmenu");
