@@ -32,7 +32,19 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // ---- Homepage: producenten per regio uitklappen ----
+  document.querySelectorAll(".regio__meer").forEach(function (knop) {
+    knop.addEventListener("click", function () {
+      var regio = knop.closest(".regio");
+      var open = regio.classList.toggle("open");
+      knop.setAttribute("aria-expanded", open);
+      knop.textContent = open ? knop.dataset.minder : knop.dataset.meer;
+      if (!open) regio.scrollIntoView({ block: "nearest" });
+    });
+  });
+
   // ---- Contactformulier ----
+
   var form = document.getElementById("contactformulier");
   if (!form) return;
 

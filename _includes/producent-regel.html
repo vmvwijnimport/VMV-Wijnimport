@@ -1,5 +1,5 @@
 {%- assign p = include.p -%}
-<li class="producentregel">
+<li class="producentregel{% if include.extra %} producentregel--extra{% endif %}">
   <a href="{{ p.url | relative_url }}">
     {%- if p.foto %}
     <span class="producentregel__foto{% if p.lijst_passend %} producentregel__foto--passend{% endif %}"><img src="{{ p.lijst_foto | default: p.foto | relative_url }}" alt="" loading="lazy" style="object-position: {{ p.foto_positie | default: 'center' }}"></span>

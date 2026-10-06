@@ -315,6 +315,16 @@ a:hover { color: var(--rood); }
 .producentregel__samenvatting { grid-area: samenvatting; align-self: start; margin-top: var(--s-1); color: var(--tekst-zacht); font-size: var(--fs-ui); max-width: 60ch; }
 .producentregel a:hover .producentregel__naam { color: var(--rood); }
 
+/* Homepage: per regio eerst 3 producenten, de rest uitklapbaar (alleen met JavaScript) */
+.regio__meer { display: none; }
+.js .regio__meer {
+  display: inline-block; margin-top: var(--s-3);
+  padding: 10px var(--s-2); border: 1px solid var(--zwart); border-radius: 0; background: var(--wit);
+  font-family: var(--font-merk); font-size: var(--fs-knop); font-weight: 500; color: var(--zwart); cursor: pointer;
+}
+.js .regio__meer:hover { border-color: var(--rood); color: var(--rood); }
+.js .regio--inklapbaar:not(.open) .producentregel--extra { display: none; }
+
 /* Producent zonder foto: de drie stippen als plaatshouder */
 .producentregel__foto--leeg { display: grid; place-items: center; }
 .stippen { display: inline-flex; gap: 6px; }

@@ -52,13 +52,19 @@ titel_seo: VMV Wijnimport | Wijnen van de nieuwe generatie
     <a class="tekstlink" href="{{ '/producenten/' | relative_url }}">Alle producenten</a>
   </div>
   {%- for regio in regios %}
-  <div class="regio">
+  {%- assign meer = regio.items.size | minus: 3 %}
+  <div class="regio{% if meer > 0 %} regio--inklapbaar{% endif %}">
     <h3 class="regio__naam">{{ regio.name }}<span>{{ regio.items.first.land }}</span></h3>
-    <ul class="producentlijst">
+    <ul class="producentlijst" id="lijst-{{ regio.name | slugify }}">
       {%- for p in regio.items %}
-      {% include producent-regel.html p=p %}
+      {%- if forloop.index > 3 %}{% assign extra = true %}{% else %}{% assign extra = false %}{% endif %}
+      {% include producent-regel.html p=p extra=extra %}
       {%- endfor %}
     </ul>
+    {%- if meer > 0 %}
+    <button class="regio__meer" type="button" aria-expanded="false" aria-controls="lijst-{{ regio.name | slugify }}"
+            data-meer="Bekijk alle {{ regio.items.size }} producenten uit {{ regio.name }}" data-minder="Toon minder">Bekijk alle {{ regio.items.size }} producenten uit {{ regio.name }}</button>
+    {%- endif %}
   </div>
   {%- endfor %}
   {% include contact-regel.html tekst="Interesse in een van deze domeinen?" %}
