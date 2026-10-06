@@ -13,11 +13,13 @@ description: >-
 lang: nl_NL
 locale: nl_NL
 
-# Het adres van de website. Pas aan als het domein anders is.
-url: "https://www.vmvwijnimport.com"
+# Het adres van de website. Nu het tijdelijke GitHub-adres.
+# Koppel je www.vmvwijnimport.com, zet dan url op "https://www.vmvwijnimport.com"
+# en baseurl op "" (leeg).
+url: "https://vmvwijnimport.github.io"
 # Laat leeg bij een eigen domein. Gebruik je het standaard GitHub-adres
 # (gebruikersnaam.github.io/VMV-Wijnimport), zet hier dan "/VMV-Wijnimport".
-baseurl: ""
+baseurl: "/VMV-Wijnimport"
 
 logo: /brand/logo/png/vmv-logo-1024.png
 
