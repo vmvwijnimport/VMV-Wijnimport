@@ -44,6 +44,7 @@ layout: default
           </li>
           {%- endfor %}
         </ul>
+        {% include contact-regel.html tekst="Interesse in een van deze wijnen?" producent=page.naam %}
       </section>
       {%- endif %}
     </div>
@@ -57,6 +58,7 @@ layout: default
         {%- if page.hectare %}<div><dt>Wijngaard</dt><dd>{{ page.hectare }} hectare</dd></div>{% endif %}
         {%- if page.werkwijze %}<div><dt>Werkwijze</dt><dd>{{ page.werkwijze }}</dd></div>{% endif %}
       </dl>
+      <p class="producent__vraag"><a href="{{ '/contact/' | relative_url }}?producent={{ page.naam | url_encode }}">Vraag naar beschikbaarheid</a></p>
       {%- if page.website or page.instagram %}
       <p class="producent__links">
         {%- if page.website %}<a href="{{ page.website }}" target="_blank" rel="noopener">Website van {{ page.naam }}</a>{% endif %}

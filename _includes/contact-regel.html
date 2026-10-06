@@ -1,0 +1,7 @@
+{%- comment -%}
+  Subtiele verwijzing naar contact. Gebruik:
+  {% include contact-regel.html tekst="Interesse?" producent="Naam" %}
+  of onderwerp="hedonist" om het formulier vooraf in te vullen.
+{%- endcomment -%}
+{%- capture contact_link -%}{{ '/contact/' | relative_url }}{% if include.producent %}?producent={{ include.producent | url_encode }}{% elsif include.onderwerp %}?onderwerp={{ include.onderwerp }}{% endif %}{%- endcapture -%}
+<p class="contactregel">{{ include.tekst }} <a href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">Stuur ons een WhatsApp</a> of <a href="{{ contact_link }}">mail ons</a>.</p>

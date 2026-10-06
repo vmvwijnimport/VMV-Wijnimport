@@ -31,10 +31,10 @@
               </div>
               {%- endfor %}
             </div>
-            <a class="menu__alle" href="{{ '/producenten/' | relative_url }}">Alle producenten bekijken</a>
+            <p class="menu__voet"><a class="menu__alle" href="{{ '/producenten/' | relative_url }}">Alle producenten bekijken</a><a class="menu__alle" href="{{ '/contact/' | relative_url }}">Interesse? Neem contact op</a></p>
           </div>
         </li>
-        <li><a href="{{ '/hedonist/' | relative_url }}"{% if page.url == '/hedonist/' %} aria-current="page"{% endif %}>Hedonist</a></li>
+        <li><a href="{{ '/hedonist/' | relative_url }}"{% if page.url == '/hedonist/' %} aria-current="page"{% endif %}>Hedonist glas</a></li>
         <li><a href="{{ '/contact/' | relative_url }}"{% if page.url == '/contact/' %} aria-current="page"{% endif %}>Contact</a></li>
       </ul>
     </nav>

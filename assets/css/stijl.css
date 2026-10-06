@@ -121,7 +121,8 @@ a:hover { color: var(--rood); }
 .menu__regio ul { margin: 0; padding: 0; list-style: none; }
 .menu__regio li a { display: block; padding: 4px 0; text-decoration: none; color: var(--tekst); }
 .menu__regio li a:hover { color: var(--rood); }
-.menu__alle { display: inline-block; margin-top: var(--s-3); font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.menu__voet { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-4); margin: var(--s-3) 0 0; }
+.menu__alle { font-size: var(--fs-klein); color: var(--tekst-zacht); }
 
 .kop__menuknop { display: none; }
 
@@ -192,7 +193,7 @@ a:hover { color: var(--rood); }
 .knop--licht-lijn:hover { background: var(--rood); border-color: var(--rood); color: var(--wit); }
 .knop[disabled] { opacity: .6; cursor: progress; }
 
-.wa-icoon { width: 18px; height: 18px; flex: none; color: var(--wa-groen); }
+.wa-icoon { width: 18px; height: 18px; flex: none; color: var(--wa-groen); opacity: .7; }
 
 .tekstlink { color: inherit; text-decoration: underline; }
 .tekstlink:hover { color: var(--rood); }
@@ -420,12 +421,14 @@ a:hover { color: var(--rood); }
 .producent__feiten dl > div { display: grid; grid-template-columns: 6.5rem 1fr; gap: var(--s-2); padding: 12px 0; border-bottom: 1px solid var(--lijn); }
 .producent__feiten dt { color: var(--tekst-zacht); font-size: var(--fs-klein); padding-top: 2px; }
 .producent__feiten dd { margin: 0; }
+.producent__vraag { margin: var(--s-2) 0 0; font-size: var(--fs-klein); }
 .producent__links { display: flex; flex-direction: column; gap: var(--s-1); margin-top: var(--s-3); }
 
 .producent__buren { margin-top: var(--s-8); padding-top: var(--s-3); border-top: 1px solid var(--zwart); }
-.producent__buren h2 { font-size: var(--fs-h3); margin-bottom: var(--s-2); }
+.producent__buren h2 { font-size: var(--fs-ui); font-weight: 500; letter-spacing: 0; color: var(--zwart); margin-bottom: var(--s-2); }
 .producent__buren ul { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-4); margin: 0; padding: 0; list-style: none; font-size: var(--fs-h3); font-weight: 300; }
-.producent__buren a { text-decoration: none; }
+.producent__buren a { text-decoration: none; color: var(--tekst-zacht); }
+.producent__buren a:hover { color: var(--rood); }
 
 @media (max-width: 56rem) {
   .producent__inhoud { grid-template-columns: 1fr; gap: var(--s-6); }
@@ -449,7 +452,7 @@ a:hover { color: var(--rood); }
 body.donker { background: var(--zwart); }
 
 /* Bewuste afwijking van de styleguide, op verzoek: gecentreerd,
-   met het Hedonist-woordmerk en een glas dat in het zwart overloopt. */
+   met het Hedonist-woordmerk in hun eigen letter en een glas dat in het zwart overloopt. */
 .hd-hero { background: var(--zwart); color: var(--donker-tekst); text-align: center; }
 .hd-hero__foto {
   width: auto; max-width: 100%; height: calc(78svh - var(--kopgrootte)); min-height: 22rem;
@@ -460,12 +463,14 @@ body.donker { background: var(--zwart); }
   mask-composite: intersect;
 }
 .hd-hero__tekst { max-width: 46rem; margin: 0 auto; padding: var(--s-2) var(--rand) var(--sectie); }
+/* Woordmerk zoals op hedonist-glas.de: Newsreader 200, hoofdletters, zonder extra letterafstand */
 .hd-hero__merk {
-  margin-bottom: var(--s-2);
-  font-family: "Cormorant Garamond", "Times New Roman", serif;
-  font-size: 1.25rem; letter-spacing: .32em; text-transform: uppercase; color: var(--wit);
+  margin: 0 0 var(--s-3);
+  font-family: var(--font-tekst); font-weight: 200; font-optical-sizing: auto;
+  font-size: clamp(2.5rem, 5.5vw, 4rem); line-height: 1; letter-spacing: 0;
+  text-transform: uppercase; color: var(--wit);
 }
-.hd-hero h1 { color: var(--wit); }
+.hd-hero h1 { color: var(--wit); font-size: var(--fs-h2); }
 .hd-hero p:last-child { margin: var(--s-2) 0 0; }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -553,6 +558,15 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   .voet__binnen { grid-template-columns: 1fr 1fr; }
   .voet__merk { grid-column: 1 / -1; }
 }
+
+/* ---------- Subtiele verwijzing naar contact ---------- */
+
+.contactregel { margin: var(--s-3) 0 0; max-width: var(--kolom); font-family: var(--font-merk); font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.contactregel a { color: var(--zwart); }
+.contactregel a:hover { color: var(--rood); }
+.scene--donker .contactregel { color: var(--donker-zacht); }
+.scene--donker .contactregel a { color: var(--wit); }
+.sectie > .contactregel { margin-top: var(--s-4); }
 
 /* ---------- Minder beweging ---------- */
 
