@@ -1,0 +1,5 @@
+{%- comment -%}Bedrag als €32,75 of €185. Gebruik: {% include euro.html bedrag=32.75 %}{%- endcomment -%}
+{%- assign centen = include.bedrag | times: 100 | round -%}
+{%- assign euros = centen | divided_by: 100 -%}
+{%- assign rest = centen | modulo: 100 -%}
+€{{ euros }}{% if rest > 0 %},{% if rest < 10 %}0{% endif %}{{ rest }}{% endif -%}

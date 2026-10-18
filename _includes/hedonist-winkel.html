@@ -1,0 +1,97 @@
+{%- comment -%}
+  Pre-order Hedonist glazen. Prijzen en regels staan in _data/winkel.yml.
+  Bestellingen gaan via FormSubmit naar het e-mailadres in _config.yml;
+  betalen gebeurt daarna via een betaalverzoek.
+{%- endcomment -%}
+{%- assign w = site.data.winkel -%}
+{%- if w.open -%}
+<section class="winkel" id="bestellen" aria-labelledby="winkel-kop">
+  <div class="winkel__binnen">
+    <header class="winkel__kop">
+      <h2 id="winkel-kop">{{ w.kop }}</h2>
+      <p class="winkel__prijzen">
+        <span><strong>{% include euro.html bedrag=w.prijs_glas %}</strong> per glas <s>{% include euro.html bedrag=w.prijs_glas_normaal %}</s></span>
+        <span><strong>{% include euro.html bedrag=w.prijs_zes %}</strong> voor 6 glazen van hetzelfde model <s>{% include euro.html bedrag=w.prijs_zes_normaal %}</s></span>
+      </p>
+      <p class="winkel__levering">Verwachte levering: {{ w.levering }}. Je betaalt veilig met iDEAL.</p>
+    </header>
+
+    <div class="winkel__raster">
+      <ul class="winkel__producten">
+        {%- for m in w.modellen %}
+        <li class="product" data-model="{{ m.id }}">
+          <img class="product__foto" src="{{ m.foto | relative_url }}" alt="{{ m.naam | escape }}" loading="lazy">
+          <div class="product__info">
+            <h3>{{ m.naam }}</h3>
+            <p>{{ m.omschrijving }}</p>
+            <div class="aantal" role="group" aria-label="Aantal {{ m.naam | escape }}">
+              <button type="button" class="aantal__knop" data-stap="-1" aria-label="Eén minder">−</button>
+              <input class="aantal__veld" type="number" min="0" max="120" value="0" inputmode="numeric" aria-label="Aantal glazen {{ m.naam | escape }}">
+              <button type="button" class="aantal__knop" data-stap="1" aria-label="Eén meer">+</button>
+            </div>
+          </div>
+        </li>
+        {%- endfor %}
+      </ul>
+
+      <aside class="mandje" aria-labelledby="mandje-kop">
+        <h3 id="mandje-kop">Winkelmandje</h3>
+        <p class="mandje__leeg">Je winkelmandje is leeg. Kies hiernaast hoeveel glazen je wilt.</p>
+        <div class="mandje__inhoud" hidden>
+          <ul class="mandje__regels"></ul>
+          <div class="bezorging" role="radiogroup" aria-label="Bezorging">
+            <label><input type="radio" name="bezorging" value="verzenden" checked> Verzenden in Nederland</label>
+            <label><input type="radio" name="bezorging" value="amsterdam"> Bezorgen in Amsterdam</label>
+          </div>
+          <dl class="mandje__totalen">
+            <div><dt>Glazen</dt><dd class="mandje__subtotaal"></dd></div>
+            <div><dt>Verzending</dt><dd class="mandje__verzending"></dd></div>
+            <div class="mandje__totaal"><dt>Totaal</dt><dd class="mandje__som"></dd></div>
+          </dl>
+          <p class="mandje__tip" aria-live="polite"></p>
+          <button class="knop knop--licht mandje__verder" type="button">Verder naar bestellen</button>
+        </div>
+
+        <form class="bestel" id="bestelformulier" hidden data-ajax="{{ site.formulier_endpoint }}">
+          <h4 class="bestel__kop">Je gegevens</h4>
+          <input type="text" name="_honey" class="formulier__honing" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <div class="veld"><label for="b-naam">Naam</label><input id="b-naam" name="naam" autocomplete="name" required></div>
+          <div class="veld"><label for="b-email">E-mailadres</label><input id="b-email" name="email" type="email" autocomplete="email" required></div>
+          <div class="veld"><label for="b-tel">Telefoonnummer</label><input id="b-tel" name="telefoon" type="tel" autocomplete="tel" required></div>
+          <div class="veld"><label for="b-adres">Straat en huisnummer</label><input id="b-adres" name="adres" autocomplete="street-address" required></div>
+          <div class="veld veld--rij">
+            <div><label for="b-postcode">Postcode</label><input id="b-postcode" name="postcode" autocomplete="postal-code" required></div>
+            <div><label for="b-plaats">Plaats</label><input id="b-plaats" name="plaats" autocomplete="address-level2" required></div>
+          </div>
+          <div class="betaalwijze">
+            <p class="betaalwijze__kop">Betalen</p>
+            <div class="betaalwijze__optie"><span class="ideal" aria-hidden="true">iDEAL</span> Betalen met iDEAL via je eigen bank</div>
+          </div>
+          <div class="veld"><label for="b-opmerking">Opmerking <span class="veld__optioneel">(niet verplicht)</span></label><textarea id="b-opmerking" name="opmerking" rows="3"></textarea></div>
+          <button class="knop knop--licht bestel__betaal" type="submit">Betalen met iDEAL</button>
+          <button class="bestel__terug" type="button">Terug naar winkelmandje</button>
+          <p class="formulier__status" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="bestel__klaar" hidden>
+          <h3>Bedankt voor je pre-order</h3>
+          <p>We hebben je bestelling ontvangen.{% unless w.betalen.actief %} Je krijgt van ons per mail een iDEAL-betaallink.{% endunless %} De verwachte levering is in {{ w.levering }}.</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<script id="winkel-gegevens" type="application/json">
+{
+  "prijsGlas": {{ w.prijs_glas }},
+  "prijsZes": {{ w.prijs_zes }},
+  "verzendkosten": {{ w.verzendkosten }},
+  "gratisVanaf": {{ w.gratis_verzenden_vanaf }},
+  "gratisAmsterdamVanaf": {{ w.gratis_amsterdam_vanaf }},
+  "levering": {{ w.levering | jsonify }},
+  "idealActief": {{ w.betalen.actief | default: false }},
+  "modellen": { {% for m in w.modellen %}{{ m.id | jsonify }}: {{ m.naam | jsonify }}{% unless forloop.last %}, {% endunless %}{% endfor %} }
+}
+</script>
+{%- endif -%}

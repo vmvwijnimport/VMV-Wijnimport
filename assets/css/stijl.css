@@ -485,6 +485,7 @@ body.donker { background: var(--zwart); }
 }
 .hd-hero h1 { color: var(--wit); font-size: var(--fs-h2); }
 .hd-hero p:last-child { margin: var(--s-2) 0 0; }
+.hd-hero .hd-hero__actie { margin-top: var(--s-4); }
 
 @media (prefers-reduced-motion: no-preference) {
   .hd-hero__foto { animation: infaden 1.6s ease both; }
@@ -506,6 +507,65 @@ body.donker { background: var(--zwart); }
 .hd-slot h2 { color: var(--wit); margin-bottom: var(--s-3); }
 .hd-slot p { margin-bottom: var(--s-4); }
 .hd-slot .knoppen { justify-content: center; }
+
+/* ---------- Pre-order Hedonist ---------- */
+
+.winkel { background: var(--zwart); color: var(--donker-tekst); border-top: 1px solid var(--donker-lijn); }
+.winkel__binnen { max-width: calc(var(--container) + 2 * var(--rand)); margin: 0 auto; padding: var(--sectie) var(--rand); }
+.winkel h2, .winkel h3 { color: var(--wit); }
+.winkel__kop { max-width: var(--kolom); margin-bottom: var(--s-6); }
+.winkel__kop h2 { margin-bottom: var(--s-3); }
+.winkel__prijzen { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-4); margin-bottom: var(--s-2); font-size: var(--fs-h3); font-weight: 300; color: var(--wit); }
+.winkel__prijzen strong { font-weight: 400; }
+.winkel__prijzen s { margin-left: 6px; font-size: var(--fs-ui); color: var(--donker-zacht); }
+.winkel__levering { color: var(--donker-tekst); }
+
+.winkel__raster { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 24rem); gap: var(--s-6); align-items: start; }
+@media (max-width: 56rem) { .winkel__raster { grid-template-columns: 1fr; } }
+
+.winkel__producten { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); margin: 0; padding: 0; list-style: none; }
+@media (max-width: 36rem) { .winkel__producten { grid-template-columns: 1fr; } }
+.product { display: flex; flex-direction: column; }
+.product__info { display: flex; flex-direction: column; flex: 1; }
+.product__info p { flex: 1; }
+.product .aantal { align-self: flex-start; }
+.product__foto { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; margin-bottom: var(--s-3); }
+.product h3 { font-size: var(--fs-h3); font-weight: 300; margin-bottom: var(--s-1); }
+.product p { font-size: var(--fs-klein); color: var(--donker-tekst); }
+
+.aantal { display: inline-flex; border: 1px solid var(--donker-zacht); }
+.aantal__knop { width: 44px; height: 44px; border: 0; background: transparent; color: var(--wit); font: inherit; font-size: 1.25rem; cursor: pointer; }
+.aantal__knop:hover { background: var(--wit); color: var(--zwart); }
+.aantal__veld { width: 56px; height: 44px; border: 0; border-left: 1px solid var(--donker-zacht); border-right: 1px solid var(--donker-zacht); background: transparent; color: var(--wit); font: inherit; text-align: center; -moz-appearance: textfield; }
+.aantal__veld::-webkit-outer-spin-button, .aantal__veld::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.mandje { position: sticky; top: calc(var(--kopgrootte) + var(--s-3)); padding: var(--s-4); background: var(--wit); color: var(--tekst); }
+.mandje h3 { color: var(--zwart); font-size: var(--fs-h3); font-weight: 300; margin-bottom: var(--s-2); }
+.mandje__leeg { color: var(--tekst-zacht); font-size: var(--fs-klein); margin: 0; }
+.mandje__regels { margin: 0 0 var(--s-3); padding: 0; list-style: none; }
+.mandje__regels li { display: flex; justify-content: space-between; gap: var(--s-2); padding: 6px 0; border-bottom: 1px solid var(--lijn); }
+.mandje__regels small { display: block; font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.betaalwijze { margin: var(--s-3) 0; }
+.betaalwijze__kop { margin: 0 0 var(--s-1); font-weight: 500; color: var(--zwart); }
+.betaalwijze__optie { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--zwart); font-size: var(--fs-klein); }
+/* Voorlopig label; vervang door het officiële iDEAL-logo van de betaalprovider */
+.ideal { display: inline-grid; place-items: center; min-width: 52px; height: 30px; padding: 0 6px; background: #CC0066; color: var(--wit); font-weight: 500; font-size: 0.8125rem; letter-spacing: 0.02em; }
+.bezorging { display: grid; gap: 6px; margin-bottom: var(--s-3); font-size: var(--fs-klein); }
+.bezorging input { accent-color: var(--zwart); margin-right: 6px; }
+.mandje__totalen { margin: 0; border-top: 1px solid var(--zwart); }
+.mandje__totalen > div { display: flex; justify-content: space-between; gap: var(--s-2); padding: 8px 0; border-bottom: 1px solid var(--lijn); font-size: var(--fs-klein); }
+.mandje__totalen dd { margin: 0; text-align: right; }
+.mandje__totaal { font-size: var(--fs-ui) !important; font-weight: 500; color: var(--zwart); }
+.mandje__tip { margin: var(--s-2) 0; font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.mandje .knop--licht { width: 100%; justify-content: center; background: var(--zwart); border-color: var(--zwart); color: var(--wit); }
+.mandje .knop--licht:hover { background: var(--rood); border-color: var(--rood); }
+.bestel__kop { margin: 0 0 var(--s-2); font-size: var(--fs-ui); font-weight: 500; color: var(--zwart); }
+.bestel .veld { margin-bottom: var(--s-2); }
+.bestel .veld input, .bestel .veld textarea { padding: 10px 12px; }
+.veld--rij { display: grid; grid-template-columns: 8rem 1fr; gap: var(--s-2); }
+.veld--rij > div { display: grid; gap: var(--s-1); }
+.bestel__terug { display: block; margin-top: var(--s-2); padding: 0; border: 0; background: none; font: inherit; font-size: var(--fs-klein); color: var(--tekst-zacht); text-decoration: underline; cursor: pointer; }
+.bestel__klaar p { margin: 0; }
 
 /* ---------- Contact ---------- */
 

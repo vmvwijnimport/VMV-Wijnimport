@@ -1,0 +1,35 @@
+# ------------------------------------------------------------
+#  Pre-order Hedonist glazen
+#  Prijzen in euro's, met een punt als decimaalteken (32.75).
+#  Zet open op false om de pre-order van de site te halen.
+# ------------------------------------------------------------
+
+open: true
+kop: Hedonist pre-order nu open
+levering: november
+
+# Prijs per glas, en de prijs voor elke 6 glazen van hetzelfde model (niet mixen)
+prijs_glas: 32.75
+prijs_glas_normaal: 34.50
+prijs_zes: 185.00
+prijs_zes_normaal: 195.00
+
+# Verzending
+verzendkosten: 12.50            # inclusief verzekering
+gratis_verzenden_vanaf: 12      # glazen, overal in Nederland
+gratis_amsterdam_vanaf: 6       # glazen, bezorgd door ons in Amsterdam
+
+# Betalen met iDEAL. Zolang actief op false staat, komt de bestelling per mail
+# binnen en sturen jullie zelf een iDEAL-betaallink.
+betalen:
+  actief: false
+
+modellen:
+  - id: breed
+    naam: HEDONIST Glas
+    omschrijving: Het brede glas, voor wijnen die ruimte en lucht nodig hebben, zoals bourgogne, nebbiolo en champagne met meer volume.
+    foto: /assets/img/hedonist/hedonist-1.jpg
+  - id: white
+    naam: HEDONIST Glas "White"
+    omschrijving: Het smallere glas, voor frisse champagnes en frissere witte wijnen, zoals riesling.
+    foto: /assets/img/hedonist/hedonist-8.jpg

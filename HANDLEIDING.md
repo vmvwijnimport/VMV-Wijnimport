@@ -131,6 +131,24 @@ Gebruik hiervoor liggende foto's van minimaal 2000 pixels breed.
 
 ---
 
+## Pre-order Hedonist glazen
+
+Op de Hedonist-pagina staat een winkelmandje. Klanten kiezen hoeveel glazen ze willen, zien de prijs en de verzendkosten en plaatsen een pre-order. Jullie krijgen de bestelling per mail op info@vmvwijnimport.com en de klant krijgt automatisch een bevestiging.
+
+De klant ziet de betaalstap met iDEAL. **Zolang online betalen nog niet is ingesteld** (`betalen: actief: false`), wordt er nog niet echt betaald: jullie sturen zelf een iDEAL-betaallink (bijvoorbeeld via Tikkie). Direct online betalen vraagt een account bij een betaalprovider zoals Mollie, plus een kleine koppeling; vraag Claude om hulp als je zover bent.
+
+De prijs voor 6 glazen geldt alleen voor 6 glazen van hetzelfde model.
+
+Alle prijzen en regels staan in `_data/winkel.yml`:
+
+- `prijs_glas`, `prijs_zes` en de "normaal"-prijzen (met een punt: `32.75`)
+- `verzendkosten`, `gratis_verzenden_vanaf` en `gratis_amsterdam_vanaf`
+- `levering`: de verwachte leveringsmaand
+- `modellen`: naam, korte omschrijving en foto van elk glas
+- `open: false` haalt de pre-order van de site (de rest van de pagina blijft staan)
+
+Bezorgen in Amsterdam kan alleen bij een Amsterdamse postcode (1011 tot en met 1109); het formulier controleert dat.
+
 ## Teksten aanpassen
 
 | Wat | Bestand |

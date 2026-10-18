@@ -15,6 +15,9 @@ foto: /assets/img/hedonist/hedonist-5.jpg
     <p class="hd-hero__merk">Hedonist</p>
     <h1>Official distributor of Hedonist glasses</h1>
     <p>VMV Wijnimport is de officiële distributeur van Hedonist in Nederland.</p>
+    {%- if site.data.winkel.open %}
+    <p class="hd-hero__actie"><a class="knop knop--licht" href="#bestellen">Naar de pre-order</a></p>
+    {%- endif %}
   </div>
 </section>
 
@@ -64,10 +67,12 @@ foto: /assets/img/hedonist/hedonist-5.jpg
   <figure><img src="{{ img }}hedonist-3.jpg" alt="Detail van een Hedonist glas" loading="lazy"></figure>
 </section>
 
+{% include hedonist-winkel.html %}
+
 <section class="hd-slot">
   <div class="hd-slot__binnen">
-    <h2>Hedonist bestellen of meer weten?</h2>
-    <p>Neem contact met ons op voor prijzen, de beschikbare modellen of om te bestellen. Voor horeca maken we graag een voorstel op maat.</p>
+    <h2>Vragen of bestellen voor de horeca?</h2>
+    <p>Twijfel je welk glas bij jouw wijnen past, of wil je grotere aantallen bestellen? Neem contact met ons op. Voor horeca maken we graag een voorstel op maat.</p>
     <div class="knoppen">
       <a class="knop knop--licht" href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">{% include whatsapp-icoon.html %}Stuur ons een WhatsApp</a>
       <a class="knop knop--licht-lijn" href="{{ '/contact/' | relative_url }}?onderwerp=hedonist">Mail ons</a>
