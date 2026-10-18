@@ -13,7 +13,7 @@
         <span><strong>{% include euro.html bedrag=w.prijs_glas %}</strong> per glas <s>{% include euro.html bedrag=w.prijs_glas_normaal %}</s></span>
         <span><strong>{% include euro.html bedrag=w.prijs_zes %}</strong> voor 6 glazen van hetzelfde model <s>{% include euro.html bedrag=w.prijs_zes_normaal %}</s></span>
       </p>
-      <p class="winkel__levering">Verwachte levering: {{ w.levering }}. Je betaalt veilig met iDEAL.</p>
+      <p class="winkel__levering">Verwachte levering: {{ w.levering }}. Je betaalt veilig met iDEAL of via een bankoverschrijving.</p>
     </header>
 
     <div class="winkel__raster">
@@ -65,10 +65,12 @@
           </div>
           <div class="betaalwijze">
             <p class="betaalwijze__kop">Betalen</p>
-            <div class="betaalwijze__optie"><span class="ideal" aria-hidden="true">iDEAL</span> Betalen met iDEAL via je eigen bank</div>
+            <div class="betaalwijze__optie"><span class="ideal" aria-hidden="true">iDEAL</span> iDEAL of bankoverschrijving, via Mollie</div>
           </div>
           <div class="veld"><label for="b-opmerking">Opmerking <span class="veld__optioneel">(niet verplicht)</span></label><textarea id="b-opmerking" name="opmerking" rows="3"></textarea></div>
-          <button class="knop knop--licht bestel__betaal" type="submit">Betalen met iDEAL</button>
+          <label class="akkoord"><input type="checkbox" name="akkoord" required> Ik ga akkoord met de <a href="{{ '/algemene-voorwaarden/' | relative_url }}" target="_blank" rel="noopener">algemene voorwaarden</a></label>
+          <button class="knop knop--licht bestel__betaal" type="submit">Bestellen en betalen</button>
+          <p class="bestel__klein">Prijzen zijn inclusief btw. Je hebt 14 dagen bedenktijd na ontvangst.</p>
           <button class="bestel__terug" type="button">Terug naar winkelmandje</button>
           <p class="formulier__status" role="status" aria-live="polite"></p>
         </form>
@@ -91,6 +93,7 @@
   "gratisAmsterdamVanaf": {{ w.gratis_amsterdam_vanaf }},
   "levering": {{ w.levering | jsonify }},
   "idealActief": {{ w.betalen.actief | default: false }},
+  "koppeling": {{ w.betalen.koppeling | default: "" | jsonify }},
   "modellen": { {% for m in w.modellen %}{{ m.id | jsonify }}: {{ m.naam | jsonify }}{% unless forloop.last %}, {% endunless %}{% endfor %} }
 }
 </script>

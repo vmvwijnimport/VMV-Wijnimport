@@ -28,6 +28,20 @@ logo: /brand/logo/png/vmv-logo-1024.png
 # Zet op true als de site officieel live mag.
 zoekmachines: false
 
+# Bedrijfsgegevens — staan in de footer en in de algemene voorwaarden.
+# Gevonden in openbare registers; controleer ze in je KvK-uittreksel.
+bedrijf:
+  naam: VMV Wijnimport B.V.
+  kvk: "99082918"
+  btw: NL868786901B01
+  # Het adres staat alleen in de algemene voorwaarden (wettelijk verplicht bij
+  # verkoop op afstand), niet in de footer of de privacyverklaring.
+  adres: Theophile de Bockstraat 97-H
+  postcode: 1058 VC
+  plaats: Amsterdam
+  telefoon: 06 15 74 23 32
+  telefoon_link: "+31615742332"
+
 # Contactgegevens — worden overal op de site gebruikt
 email: info@vmvwijnimport.com
 whatsapp_url: https://wa.me/message/7A7JGLEONUS3E1
@@ -72,3 +86,4 @@ exclude:
   - prijslijst
   - foto-originelen
   - huisstijl
+  - betalen

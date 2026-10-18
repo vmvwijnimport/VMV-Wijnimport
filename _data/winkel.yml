@@ -19,10 +19,12 @@ verzendkosten: 12.50            # inclusief verzekering
 gratis_verzenden_vanaf: 12      # glazen, overal in Nederland
 gratis_amsterdam_vanaf: 6       # glazen, bezorgd door ons in Amsterdam
 
-# Betalen met iDEAL. Zolang actief op false staat, komt de bestelling per mail
-# binnen en sturen jullie zelf een iDEAL-betaallink.
+# Betalen via Mollie (iDEAL en bankoverschrijving). Zie betalen/INSTELLEN.md.
+# Zolang actief op false staat, komt de bestelling alleen per mail binnen en
+# sturen jullie zelf een betaallink.
 betalen:
   actief: false
+  koppeling: ""        # adres van de Cloudflare Worker, bijv. https://vmv-betalen.jouwnaam.workers.dev
 
 modellen:
   - id: breed

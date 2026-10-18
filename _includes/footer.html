@@ -16,5 +16,9 @@
       <p><a href="{{ '/contact/' | relative_url }}">Contact</a></p>
     </div>
   </div>
-  <p class="voet__klein">NIX18: wij verkopen geen alcohol aan jongeren onder de 18 jaar. &copy; {{ site.time | date: "%Y" }} {{ site.title }}</p>
+  <div class="voet__klein">
+    <p>NIX18: wij verkopen geen alcohol aan jongeren onder de 18 jaar.</p>
+    <p>&copy; {{ site.time | date: "%Y" }} {{ site.bedrijf.naam }}, {{ site.bedrijf.plaats }}<br>KvK {{ site.bedrijf.kvk }}{% if site.bedrijf.btw != "" %}, btw {{ site.bedrijf.btw }}{% endif %}</p>
+    <p class="voet__juridisch"><a href="{{ '/algemene-voorwaarden/' | relative_url }}">Algemene voorwaarden</a> <a href="{{ '/algemene-voorwaarden/' | relative_url }}#herroepingsrecht">Herroepingsrecht</a> <a href="{{ '/privacy/' | relative_url }}">Privacy</a></p>
+  </div>
 </footer>

@@ -1,0 +1,16 @@
+---
+layout: null
+permalink: /winkel.json
+sitemap: false
+---
+{%- assign w = site.data.winkel -%}
+{
+  "open": {{ w.open }},
+  "prijsGlas": {{ w.prijs_glas }},
+  "prijsZes": {{ w.prijs_zes }},
+  "verzendkosten": {{ w.verzendkosten }},
+  "gratisVanaf": {{ w.gratis_verzenden_vanaf }},
+  "gratisAmsterdamVanaf": {{ w.gratis_amsterdam_vanaf }},
+  "levering": {{ w.levering | jsonify }},
+  "modellen": { {% for m in w.modellen %}{{ m.id | jsonify }}: {{ m.naam | jsonify }}{% unless forloop.last %}, {% endunless %}{% endfor %} }
+}

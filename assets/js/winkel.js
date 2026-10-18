@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .join("");
 
     winkel.querySelector(".mandje__subtotaal").textContent = euro(b.glazen);
-    form.querySelector(".bestel__betaal").textContent = "Betalen met iDEAL · " + euro(b.totaal);
+    form.querySelector(".bestel__betaal").textContent = "Bestellen en betalen · " + euro(b.totaal);
     winkel.querySelector(".mandje__verzending").textContent = b.verzending === 0 ? "Gratis" : euro(b.verzending) + " (incl. verzekering)";
     winkel.querySelector(".mandje__som").textContent = euro(b.totaal);
     winkel.querySelector(".mandje__tip").textContent = b.n > 0 ? tip(b) : "";
@@ -142,6 +142,48 @@ document.addEventListener("DOMContentLoaded", function () {
     knop.disabled = true;
     status.className = "formulier__status";
     status.textContent = "Je bestelling wordt verstuurd...";
+
+    var mail = function (extra) {
+      return fetch(form.dataset.ajax, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(Object.assign({}, data, extra))
+      });
+    };
+
+    if (W.idealActief && W.koppeling) {
+      fetch(W.koppeling.replace(/\/$/, "") + "/betaling", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          aantallen: mandje,
+          bezorging: bezorging(),
+          klant: { naam: data.naam, email: data.email, telefoon: data.telefoon, adres: data.adres, postcode: data.postcode, plaats: data.plaats, opmerking: data.opmerking }
+        })
+      })
+        .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.fout || "Betalen lukt nu niet"); return j; }); })
+        .then(function (betaling) {
+          try { sessionStorage.setItem("vmv-betaling", JSON.stringify({ id: betaling.id, bestelnummer: betaling.bestelnummer })); } catch (e) {}
+          status.textContent = "Je gaat nu naar de betaalpagina...";
+          // De bestelling ook per mail sturen; niet wachten als dat traag is
+          var verder = function () { location.href = betaling.betaallink; };
+          var klaarOm = setTimeout(verder, 3000);
+          mail({
+            _subject: "Pre-order Hedonist " + betaling.bestelnummer + ": " + b.n + " glazen, " + data.naam,
+            _autoresponse: "",
+            bestelnummer: betaling.bestelnummer,
+            mollie_betaling: betaling.id,
+            betalen: "Via Mollie; controleer de status in het Mollie-dashboard",
+            totaal: euro(betaling.totaal)
+          }).catch(function () {}).finally(function () { clearTimeout(klaarOm); verder(); });
+        })
+        .catch(function (fout) {
+          knop.disabled = false;
+          status.classList.add("fout");
+          status.textContent = fout.message + ". Probeer het opnieuw of mail ons op info@vmvwijnimport.com.";
+        });
+      return;
+    }
 
     fetch(form.dataset.ajax, {
       method: "POST",
