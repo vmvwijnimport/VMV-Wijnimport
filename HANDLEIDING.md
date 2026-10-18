@@ -147,7 +147,7 @@ Alle prijzen en regels staan in `_data/winkel.yml`:
 - `modellen`: naam, korte omschrijving en foto van elk glas
 - `open: false` haalt de pre-order van de site (de rest van de pagina blijft staan)
 
-Bezorgen in Amsterdam kan alleen bij een Amsterdamse postcode (1011 tot en met 1109); het formulier controleert dat.
+Bezorgen in Amsterdam kan alleen bij een Amsterdamse postcode (1011 tot en met 1109); het formulier controleert dat. Klanten kunnen ook kiezen voor **ophalen bij Oocker** (Frederiksplein, Amsterdam): dat is altijd gratis en de klant hoeft dan geen adres in te vullen. De ophaallocatie staat onder `ophalen:` in `_data/winkel.yml`.
 
 ## Teksten aanpassen
 

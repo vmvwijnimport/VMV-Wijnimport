@@ -75,7 +75,7 @@ export function bereken(winkel, aantallen, bezorging) {
   }
   if (n === 0) throw new Fout("Je winkelmandje is leeg");
   const amsterdam = bezorging === "amsterdam";
-  const gratis = n >= winkel.gratisVanaf || (amsterdam && n >= winkel.gratisAmsterdamVanaf);
+  const gratis = bezorging === "ophalen" || n >= winkel.gratisVanaf || (amsterdam && n >= winkel.gratisAmsterdamVanaf);
   const verzending = gratis ? 0 : winkel.verzendkosten;
   const totaal = Math.round((glazen + verzending) * 100) / 100;
   return { n, regels, glazen, verzending, totaal };
@@ -93,11 +93,12 @@ async function maakBetaling(invoer, env, site) {
   if (!winkel.open) throw new Fout("De pre-order is gesloten");
 
   const k = invoer.klant || {};
-  for (const veld of ["naam", "email", "telefoon", "adres", "postcode", "plaats"]) {
+  const bezorging = ["amsterdam", "ophalen"].includes(invoer.bezorging) ? invoer.bezorging : "verzenden";
+  const verplicht = bezorging === "ophalen" ? ["naam", "email", "telefoon"] : ["naam", "email", "telefoon", "adres", "postcode", "plaats"];
+  for (const veld of verplicht) {
     if (!String(k[veld] || "").trim()) throw new Fout("Vul alle verplichte velden in");
   }
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(k.email)) throw new Fout("Vul een geldig e-mailadres in");
-  const bezorging = invoer.bezorging === "amsterdam" ? "amsterdam" : "verzenden";
   if (bezorging === "amsterdam" && !isAmsterdam(k.postcode)) {
     throw new Fout("Bezorgen in Amsterdam kan alleen bij een Amsterdamse postcode");
   }
@@ -117,10 +118,10 @@ async function maakBetaling(invoer, env, site) {
     metadata: {
       bestelnummer,
       bestelling: b.regels.join(", "),
-      bezorging: bezorging === "amsterdam" ? "Bezorgen in Amsterdam" : "Verzenden",
+      bezorging: { amsterdam: "Bezorgen in Amsterdam", ophalen: "Ophalen bij Oocker" }[bezorging] || "Verzenden",
       verzending: b.verzending.toFixed(2),
       naam: kort(k.naam), email: kort(k.email), telefoon: kort(k.telefoon, 40),
-      adres: `${kort(k.adres)}, ${kort(k.postcode, 12)} ${kort(k.plaats, 80)}`,
+      adres: bezorging === "ophalen" ? "Ophalen" : `${kort(k.adres)}, ${kort(k.postcode, 12)} ${kort(k.plaats, 80)}`,
       opmerking: kort(k.opmerking, 500),
     },
   });

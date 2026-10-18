@@ -30,12 +30,13 @@ document.addEventListener("DOMContentLoaded", function () {
   var berekening = function () {
     var n = totaalGlazen();
     var glazen = Object.keys(mandje).reduce(function (som, id) { return som + prijsModel(mandje[id] || 0); }, 0);
-    var gratis = n >= W.gratisVanaf || (bezorging() === "amsterdam" && n >= W.gratisAmsterdamVanaf);
+    var gratis = bezorging() === "ophalen" || n >= W.gratisVanaf || (bezorging() === "amsterdam" && n >= W.gratisAmsterdamVanaf);
     var verzending = n === 0 || gratis ? 0 : W.verzendkosten;
     return { n: n, glazen: glazen, verzending: verzending, totaal: glazen + verzending };
   };
 
   var tip = function (b) {
+    if (bezorging() === "ophalen") return "Je haalt je bestelling gratis op bij " + W.ophalenBij + " in Amsterdam.";
     var amsterdam = bezorging() === "amsterdam";
     if (b.n >= W.gratisVanaf || (amsterdam && b.n >= W.gratisAmsterdamVanaf)) return "Je bestelling wordt gratis " + (amsterdam ? "bezorgd." : "verzonden.");
     if (amsterdam) {
@@ -90,7 +91,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     p.querySelector(".aantal__veld").addEventListener("change", function (e) { zet(id, e.target.value); });
   });
-  winkel.querySelectorAll("input[name=bezorging]").forEach(function (r) { r.addEventListener("change", toon); });
+  // Bij ophalen is geen adres nodig
+  var adresVelden = function () {
+    var ophalen = bezorging() === "ophalen";
+    form.querySelector(".bestel__ophalen").hidden = !ophalen;
+    form.querySelectorAll("[data-adres]").forEach(function (v) {
+      v.hidden = ophalen;
+      v.querySelectorAll("input").forEach(function (i) { i.required = !ophalen; });
+    });
+  };
+  winkel.querySelectorAll("input[name=bezorging]").forEach(function (r) {
+    r.addEventListener("change", function () { adresVelden(); toon(); });
+  });
 
   winkel.querySelector(".mandje__verder").addEventListener("click", function () {
     inhoud.hidden = true;
@@ -133,7 +145,8 @@ document.addEventListener("DOMContentLoaded", function () {
     data._autoresponse = "Bedankt voor je pre-order van Hedonist glazen bij VMV Wijnimport. We hebben je bestelling ontvangen en sturen je een iDEAL-betaallink. Verwachte levering: " + W.levering + ".";
     data.betalen = W.idealActief ? "iDEAL (online)" : "iDEAL-betaallink sturen";
     data.bestelling = regels.join(", ");
-    data.bezorging = bezorging() === "amsterdam" ? "Bezorgen in Amsterdam" : "Verzenden";
+    data.bezorging = { amsterdam: "Bezorgen in Amsterdam", ophalen: "Ophalen bij " + W.ophalenBij }[bezorging()] || "Verzenden";
+    if (bezorging() === "ophalen") { delete data.adres; delete data.postcode; delete data.plaats; }
     data.glazen = euro(b.glazen);
     data.verzending = b.verzending === 0 ? "Gratis" : euro(b.verzending);
     data.totaal = euro(b.totaal);
@@ -214,5 +227,6 @@ document.addEventListener("DOMContentLoaded", function () {
       .finally(function () { knop.disabled = false; });
   });
 
+  adresVelden();
   toon();
 });

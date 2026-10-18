@@ -42,6 +42,7 @@
           <div class="bezorging" role="radiogroup" aria-label="Bezorging">
             <label><input type="radio" name="bezorging" value="verzenden" checked> Verzenden in Nederland</label>
             <label><input type="radio" name="bezorging" value="amsterdam"> Bezorgen in Amsterdam</label>
+            <label><input type="radio" name="bezorging" value="ophalen"> Ophalen bij {{ w.ophalen.naam }}, Amsterdam (gratis)</label>
           </div>
           <dl class="mandje__totalen">
             <div><dt>Glazen</dt><dd class="mandje__subtotaal"></dd></div>
@@ -58,8 +59,9 @@
           <div class="veld"><label for="b-naam">Naam</label><input id="b-naam" name="naam" autocomplete="name" required></div>
           <div class="veld"><label for="b-email">E-mailadres</label><input id="b-email" name="email" type="email" autocomplete="email" required></div>
           <div class="veld"><label for="b-tel">Telefoonnummer</label><input id="b-tel" name="telefoon" type="tel" autocomplete="tel" required></div>
-          <div class="veld"><label for="b-adres">Straat en huisnummer</label><input id="b-adres" name="adres" autocomplete="street-address" required></div>
-          <div class="veld veld--rij">
+          <p class="bestel__ophalen" hidden>Je haalt je bestelling op bij restaurant {{ w.ophalen.naam }}, {{ w.ophalen.adres }}. We laten je weten wanneer je bestelling klaarligt.</p>
+          <div class="veld" data-adres><label for="b-adres">Straat en huisnummer</label><input id="b-adres" name="adres" autocomplete="street-address" required></div>
+          <div class="veld veld--rij" data-adres>
             <div><label for="b-postcode">Postcode</label><input id="b-postcode" name="postcode" autocomplete="postal-code" required></div>
             <div><label for="b-plaats">Plaats</label><input id="b-plaats" name="plaats" autocomplete="address-level2" required></div>
           </div>
@@ -93,6 +95,7 @@
   "gratisAmsterdamVanaf": {{ w.gratis_amsterdam_vanaf }},
   "levering": {{ w.levering | jsonify }},
   "idealActief": {{ w.betalen.actief | default: false }},
+  "ophalenBij": {{ w.ophalen.naam | jsonify }},
   "koppeling": {{ w.betalen.koppeling | default: "" | jsonify }},
   "modellen": { {% for m in w.modellen %}{{ m.id | jsonify }}: {{ m.naam | jsonify }}{% unless forloop.last %}, {% endunless %}{% endfor %} }
 }

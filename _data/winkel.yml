@@ -19,6 +19,11 @@ verzendkosten: 12.50            # inclusief verzekering
 gratis_verzenden_vanaf: 12      # glazen, overal in Nederland
 gratis_amsterdam_vanaf: 6       # glazen, bezorgd door ons in Amsterdam
 
+# Ophalen (altijd gratis)
+ophalen:
+  naam: Oocker
+  adres: Frederiksplein 29h, 1017 XL Amsterdam
+
 # Betalen via Mollie (iDEAL en bankoverschrijving). Zie betalen/INSTELLEN.md.
 # Zolang actief op false staat, komt de bestelling alleen per mail binnen en
 # sturen jullie zelf een betaallink.

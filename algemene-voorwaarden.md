@@ -98,7 +98,8 @@ KvK-nummer: {{ b.kvk }}<br>
 2. De verzendkosten worden vóór het sluiten van de overeenkomst afzonderlijk vermeld in het winkelmandje. Op dit moment gelden de volgende tarieven:
    - verzending binnen Nederland: {% include euro.html bedrag=w.verzendkosten %} per bestelling, inclusief verzekering;
    - bij een bestelling van {{ w.gratis_verzenden_vanaf }} glazen of meer: gratis;
-   - bezorging door de ondernemer in Amsterdam: gratis bij een bestelling van {{ w.gratis_amsterdam_vanaf }} glazen of meer.
+   - bezorging door de ondernemer in Amsterdam: gratis bij een bestelling van {{ w.gratis_amsterdam_vanaf }} glazen of meer;
+   - ophalen bij {{ w.ophalen.naam }}, {{ w.ophalen.adres }}: altijd gratis.
 3. Gedurende de geldigheidsduur van het aanbod worden de prijzen niet verhoogd, behoudens prijswijzigingen als gevolg van wijzigingen in btw-tarieven.
 4. Actieprijzen gelden alleen gedurende de vermelde periode of zolang de voorraad strekt.
 
@@ -114,7 +115,8 @@ KvK-nummer: {{ b.kvk }}<br>
 1. De ondernemer neemt de grootst mogelijke zorgvuldigheid in acht bij het in ontvangst nemen en bij de uitvoering van bestellingen.
 2. De ondernemer levert uitsluitend binnen Nederland. Als plaats van levering geldt het adres dat de klant bij de bestelling heeft opgegeven.
 3. Bezorging door de ondernemer zelf is alleen mogelijk binnen de gemeente Amsterdam. De ondernemer stemt het moment van bezorging vooraf met de klant af.
-4. Is bezorging na twee pogingen niet mogelijk door afwezigheid van de klant, dan neemt de ondernemer contact op om een andere afspraak te maken. Eventuele extra verzendkosten komen in dat geval voor rekening van de klant.
+4. De klant kan ervoor kiezen de bestelling op te halen bij restaurant {{ w.ophalen.naam }}, {{ w.ophalen.adres }}. De ondernemer laat de klant weten wanneer de bestelling klaarligt. Haalt de klant de bestelling niet binnen 30 dagen daarna op, dan neemt de ondernemer contact op om de bestelling alsnog te verzenden; de verzendkosten komen dan voor rekening van de klant.
+5. Is bezorging na twee pogingen niet mogelijk door afwezigheid van de klant, dan neemt de ondernemer contact op om een andere afspraak te maken. Eventuele extra verzendkosten komen in dat geval voor rekening van de klant.
 
 ## Artikel 10. Risico en transportschade {#artikel-10}
 
