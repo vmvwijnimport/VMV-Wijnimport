@@ -3,7 +3,11 @@
 --
 --  Eenmalig plakken in Supabase: SQL Editor → New query → Run.
 --  Dit bestand bevat GEEN prijzen en GEEN geheimen; die staan alleen
---  in de database. Opnieuw uitvoeren is veilig (het script ruimt eerst op).
+--  in de database.
+--
+--  LET OP: alleen uitvoeren op een LEGE database. Het script begint met
+--  opruimen (drop table) en wist dan alle klanten, wijnen en bestellingen.
+--  Latere wijzigingen gaan via aparte, kleine scripts.
 --
 --  Beveiliging (Row Level Security):
 --  - Bezoekers zonder inlog kunnen niets lezen.

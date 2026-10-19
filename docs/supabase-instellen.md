@@ -23,7 +23,8 @@ Supabase is de dienst waar het inloggen en de database van het horecaportaal dra
 1. Klik links op **SQL Editor** (het icoontje met `>_`).
 2. Klik op **New query**.
 3. Open het bestand `supabase/schema.sql` uit deze projectmap, kopieer **alles** en plak het in het venster.
-4. Klik rechtsonder op **Run**.
+4. Klik rechtsonder op **Run**. Supabase waarschuwt dan voor "destructive operations"; bij een nieuw, leeg project klik je gewoon op **Run query**.
+   **Voer dit script nooit opnieuw uit** als er al klanten, wijnen of bestellingen in staan: het wist dan alles.
 5. Onderaan moet **Success. No rows returned** staan. Zie je een rode foutmelding, kopieer die dan en stuur hem naar Claude.
 
 Daarna staan er onder **Table Editor** vijf tabellen: `klanten`, `producten`, `instellingen`, `bestellingen` en `bestelregels`.
