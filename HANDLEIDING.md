@@ -198,3 +198,75 @@ Wat helpt:
 - **Schrijf een goede `samenvatting`** voor elke producent, en een eigen tekst van een paar alinea's. Unieke tekst scoort beter dan tekst van de website van de producent.
 - **Meld de site aan bij Google Search Console** (search.google.com/search-console). Voeg daar je domein toe en dien de sitemap in: `https://www.vmvwijnimport.com/sitemap.xml`. Die sitemap maakt de website automatisch.
 - **Vraag je producenten om naar jullie te linken**, bijvoorbeeld vanaf hun pagina met importeurs. Dat is het sterkste signaal voor Google.
+
+---
+
+## Het horecaportaal
+
+Op **/horeca/** kunnen horecazaken een account aanvragen. Na jouw goedkeuring zien ze de horecaprijzen en kunnen ze bestellen op factuur. Alles wat je beheert (klanten, wijnen, prijzen, bestellingen) staat in **Supabase**: ga naar supabase.com, log in en open het project **vmv-horeca**. Links zie je **Table Editor**, met daarin de tabellen.
+
+De horecaprijzen staan **alleen** in Supabase, nooit op GitHub of in de broncode van de site. Bezoekers zonder (goedgekeurd) account zien ze nergens.
+
+### Een aanvraag goedkeuren of afwijzen
+
+Bij een nieuwe aanvraag krijg je een mail op info@ met de gegevens van de zaak.
+
+1. Ga naar **Table Editor → klanten**. De aanvraag staat erin met status `in_afwachting`.
+2. Controleer de gegevens, bijvoorbeeld het KvK-nummer op kvk.nl.
+3. Dubbelklik op de **status** en kies:
+   - `goedgekeurd`: de klant kan direct inloggen en ziet de prijzen;
+   - `afgewezen`: de klant ziet een nette melding dat zijn aanvraag niet is goedgekeurd.
+4. In **notitie** kun je iets voor jezelf opschrijven. De klant ziet dat niet.
+
+Een goedgekeurde klant tijdelijk blokkeren? Zet de status terug op `in_afwachting` of `afgewezen`. Hij ziet dan direct geen prijzen meer.
+
+### Prijzen, voorraad en wijnen beheren
+
+Ga naar **Table Editor → producten**. Elke regel is één wijn (of glas). Dubbelklik op een vakje om het aan te passen; het portaal laat het meteen zien.
+
+| Kolom | Wat het doet |
+|---|---|
+| `prijs_ex` | prijs per fles, excl. btw (met een punt, bijvoorbeeld `12.34`) |
+| `beschikbaarheid` | `op_voorraad`, `binnenkort` of `uitverkocht` (uitverkocht is zichtbaar maar niet te bestellen) |
+| `allocatie` | aan: de klant vraagt een aantal aan en jullie bevestigen hoeveel er kan |
+| `max_per_bestelling` | maximum aantal flessen per bestelling (leeg = geen maximum) |
+| `actief` | uit: de wijn is helemaal niet zichtbaar |
+| `volgorde` | de volgorde in het overzicht (lager = hoger op de pagina) |
+| `jaargang`, `druif`, `formaat` | wat er bij de wijn staat, bijvoorbeeld `B22` of `Magnum 150 cl` |
+
+**Nieuwe wijn:** klik op **Insert → Insert row** en vul minimaal `producent`, `naam` en `prijs_ex` in. Voor een wijn van een producent op de site vul je ook `producent_slug` in (de naam van het bestand in `_producenten`, bijvoorbeeld `sacy-soeur-et-frere`), zodat de link naar de producentpagina werkt.
+
+**Nieuwe prijslijst?** Zet de nieuwe PDF in de map `prijslijst/` en vraag Claude om er een importbestand van te maken. Dat bestand komt nooit op GitHub.
+
+### Algemene instellingen
+
+**Table Editor → instellingen** (één regel):
+- `schenk_vanaf` en `schenk_korting_pct`: schenkwijnkorting (nu 5% vanaf 24 flessen van dezelfde wijn, niet voor allocatiewijnen);
+- `glas_staffel_vanaf` en `glas_staffel_prijs_ex`: lagere Hedonist-glasprijs vanaf een aantal glazen (modellen gemengd);
+- `minimale_bestelling_ex`: minimale bestelling excl. btw (leeg = geen minimum);
+- `betaaltermijn_dagen`: betaaltermijn van de factuur (nu 14).
+
+### Bestellingen afhandelen
+
+Bij een bestelling krijg je een mail op info@ met alle regels, het afleveradres en of het **spoed** heeft. De klant krijgt automatisch een bevestiging, met daarin dat de bestelling pas definitief is na jullie bevestiging.
+
+1. Ga naar **Table Editor → bestellingen**. Nieuwe bestellingen staan op `ontvangen`; de klant ziet "Wacht op bevestiging".
+2. Kijk of alles leverbaar is. Bij **allocatiewijnen** vul je in **Table Editor → bestelregels** bij `toegewezen` het aantal in dat je kunt leveren. De klant ziet dat in zijn overzicht.
+3. Zet de status op `bevestigd`, later op `geleverd`. Kan een bestelling niet doorgaan, dan zet je hem op `geannuleerd` (neem wel even contact op met de klant).
+4. **Maak de factuur in e-Boekhouden**, zoals altijd. De site maakt geen facturen, zodat je nummering klopt.
+
+De bedragen in een bestelling berekent de database zelf. Wat een klant in zijn browser doet, kan de prijs niet veranderen.
+
+### Een klant verwijderen
+
+Ga naar **Authentication → Users**, zoek het e-mailadres en kies **Delete user**. Heeft de klant al bestellingen, dan lukt dat niet (bestellingen moeten 7 jaar bewaard blijven). Zet de klant dan op `afgewezen`.
+
+### Wachtwoord vergeten
+
+Klanten klikken bij het inloggen op **Wachtwoord vergeten?** en krijgen een mail met een link. Dat werkt pas als de mailinstellingen (Resend) klaar zijn, zie `docs/resend-instellen.md`.
+
+### Beveiliging controleren
+
+Na een wijziging in de database kun je Claude vragen de beveiligingstest (`supabase/beveiligingstest.sh`) opnieuw te draaien. Die probeert als bezoeker, als niet-goedgekeurde klant en als andere klant bij gegevens te komen die niet van hen zijn; alle pogingen moeten mislukken.
+
+**Deel nooit** de secret key of service_role-sleutel van Supabase, het databasewachtwoord of de sleutel van Resend. Niet met Claude, niet in een mail en niet op GitHub.

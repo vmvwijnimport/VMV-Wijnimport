@@ -17,6 +17,8 @@ Bijgewerkt: 19 oktober 2026
 - **Fase 4 getest (19 okt), testorder als A via plaats_bestelling:** 24 flessen van één wijn krijgen 5% korting, een allocatiewijn geen korting, 6+6 glazen samen de staffelprijs; het totaal klopt tot op de cent met de handberekening ✔. Uitverkocht, negatief aantal en verborgen producten worden geweigerd ✔; een meegestuurde prijs van 0,01 wordt genegeerd ✔. B kan de bestellingen en gegevens van A niet lezen, wijzigen, wissen of zelf invoegen ✔. De afronding in de browser is gelijkgetrokken met de database (in centen; 3 prijzen weken eerst 1 cent af).
 - **Fase 5 (deels):** het beveiligingstestscript `supabase/beveiligingstest.sh` geeft 29 goed en 0 fout, inclusief controles die moeten lukken. Aanvulscript 003 (nettere omschrijving bij glazen) staat klaar. Voorbehoud "pas definitief na bevestiging" toegevoegd aan het mandje, de bevestiging, de mail en de geschiedenis (wens van de eigenaar). De privacyverklaring is aangevuld met het horecaportaal en goedgekeurd door de eigenaar (afgewezen aanvragen worden binnen 6 maanden verwijderd).
 - **Gevonden en hersteld:** er stonden horecabedragen in CLAUDE.md, voortgang.md en schema.sql (door Claude). Die zijn uit de bestanden gehaald; met toestemming van de eigenaar is ook de geschiedenis van de branch opgeschoond (filter-branch en force-push, 19 okt): 0 van de 13 commits op GitHub bevatten nog bedragen. Een lokale reservekopie staat in de branch `reserve-horeca-portaal-voor-opschonen` (niet gepusht; wissen na fase 6).
+- **003 uitgevoerd** door de eigenaar; getest: een glas heet nu "HEDONIST Glas \"White\"" en een magnum krijgt "(Magnum 150 cl)" (testorder H-261019-F7F3).
+- **Fase 6 (deels):** de handleiding in HANDLEIDING.md bij "Het horecaportaal": goedkeuren, prijzen, voorraad en wijnen, instellingen, bestellingen afhandelen, klant verwijderen, wachtwoord vergeten en de beveiligingstest.
 - Het databasescript: `schema.sql` is uitgevoerd met "Success" (19 okt).
 - **Fase 1 (deels):** het databasescript `supabase/schema.sql` staat klaar, met tabellen, beveiliging (RLS) en de bestelfunctie die de prijs zelf berekent. De stappen voor de eigenaar staan in `docs/supabase-instellen.md`.
 
@@ -57,19 +59,18 @@ Bijgewerkt: 19 oktober 2026
 
 ## ⏰ Herinnering vóór de livegang
 
-- **Testaccounts verwijderen** (info+test-a/b/c) in Supabase → Authentication → Users, en de **testbestellingen** van A (H-261019-597D, -36D2, -841A) in de Table Editor → bestellingen.
+- **Testaccounts verwijderen** (info+test-a/b/c) in Supabase → Authentication → Users, en de **testbestellingen** van A (H-261019-597D, -36D2, -841A, -F7F3) in de Table Editor → bestellingen.
 - **Resend instellen** (`docs/resend-instellen.md`): op 19 okt overgeslagen, omdat de DNS bij GoDaddy niet bereikbaar was (verkeerd of geen account ingelogd). Zonder Resend krijgen klanten geen inlogmails (bevestigen, wachtwoord vergeten).
 - Daarna in Supabase **Confirm email** weer **aan** zetten (voor het testen tijdelijk uit).
 
 ## Open vragen
 
-- De eigenaar voert `supabase/003-omschrijving-bestelregels.sql` uit.
 - De bestelling via de knop in de browser (met mail) is nog niet echt verstuurd, om geen mail naar info@ te sturen. Testen samen met de eigenaar zodra FormSubmit is geactiveerd.
 - "Maximum per klant" is nu een **maximum per bestelling** (`max_per_bestelling`). Moet het een maximum per jaar per klant worden?
 
 ## Eerstvolgende stap
 
-De eigenaar voert 003 uit. Daarna fase 6: handleiding (goedkeuren, prijzen en voorraad, bestellingen bevestigen), de opruimpunten uit de herinnering, en samen een echte bestelling testen. Pas daarna, met uitdrukkelijk akkoord, mergen naar main.
+De livegang voorbereiden met de eigenaar: Resend, Confirm email aan, FormSubmit activeren, samen een echte bestelling met mail testen, de testaccounts en testbestellingen verwijderen, de reservebranch wissen. Daarna mergen naar main, alleen met uitdrukkelijk akkoord.
 
 ## Zo kun je terug
 
