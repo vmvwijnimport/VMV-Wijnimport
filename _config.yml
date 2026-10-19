@@ -85,3 +85,5 @@ exclude:
   - foto-originelen
   - huisstijl
   - betalen
+  - CLAUDE.md
+  - docs

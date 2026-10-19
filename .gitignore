@@ -11,3 +11,11 @@ Gemfile.lock
 prijslijst/
 foto-originelen/
 huisstijl/
+
+# Lokale geheimen: nooit committen
+.env
+.env.*
+*.secret
+*.local.json
+geheimen/
+supabase/.temp/
