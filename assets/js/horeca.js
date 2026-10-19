@@ -93,13 +93,13 @@
     return db.auth.getSession().then(function (r) {
       var sessie = r.data && r.data.session;
       if (!sessie) { toon("uit"); return; }
-      return db.from("klanten").select("bedrijfsnaam, contactpersoon, status").eq("id", sessie.user.id).maybeSingle()
+      return db.from("klanten").select("bedrijfsnaam, contactpersoon, email, telefoon, straat, postcode, plaats, status").eq("id", sessie.user.id).maybeSingle()
         .then(function (k) {
           if (k.error) throw k.error;
           if (!k.data) { fout("Dit account hoort niet bij het horecaportaal. Neem contact met ons op."); return; }
           vulIn(k.data);
           toon(k.data.status);
-          if (k.data.status === "goedgekeurd") document.dispatchEvent(new CustomEvent("horeca:goedgekeurd"));
+          if (k.data.status === "goedgekeurd") document.dispatchEvent(new CustomEvent("horeca:goedgekeurd", { detail: { klant: k.data, id: sessie.user.id } }));
         });
     }).catch(function () { fout("Het horecaportaal is nu niet bereikbaar. Probeer het later opnieuw."); });
   };

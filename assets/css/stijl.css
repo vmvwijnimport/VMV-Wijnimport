@@ -773,3 +773,48 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   .wijnregel__labels { grid-column: 2; justify-content: flex-start; }
   .wijnregel__prijs { grid-column: 3; grid-row: 1; }
 }
+
+/* Bestellen in het portaal */
+.portaal__raster { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 22rem); gap: var(--s-6); align-items: start; }
+.portaal__mandje { border: 1px solid var(--lijn); }
+.portaal__mandjekop { font-size: var(--fs-h3); margin-bottom: var(--s-2); }
+.bestel__adres { margin: 0 0 var(--s-1); font-size: var(--fs-klein); }
+#bestelformulier-horeca .knop { width: 100%; justify-content: center; margin-top: var(--s-2); }
+.wijnregel { grid-template-columns: var(--stip) minmax(0, 1fr) auto 6rem auto; }
+.wijnregel__bestel { display: flex; align-items: center; gap: var(--s-1); min-width: 11.5rem; justify-content: flex-end; }
+.wijnregel__doos { font-size: var(--fs-klein); white-space: nowrap; }
+.wijnregel--gekozen { background: var(--champagne-licht); }
+.aantal--licht { border-color: var(--lijn); background: var(--wit); }
+.aantal--licht .aantal__knop { width: 36px; height: 36px; color: var(--zwart); }
+.aantal--licht .aantal__knop:hover { background: var(--zwart); color: var(--wit); }
+.aantal--licht .aantal__veld { width: 48px; height: 36px; color: var(--zwart); border-color: var(--lijn); }
+.portaal__balk-mobiel { display: none; }
+.portaal__bestellingen { margin-top: var(--s-8); padding-top: var(--s-4); border-top: 1px solid var(--zwart); }
+.portaal__bestellingen h2 { margin-bottom: var(--s-3); }
+.bestelling { border-bottom: 1px solid var(--lijn); }
+.bestelling__kop {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: var(--s-2); align-items: center;
+  padding: 12px 0; cursor: pointer; list-style: none;
+}
+.bestelling__kop::-webkit-details-marker { display: none; }
+.bestelling__nummer { font-weight: 500; color: var(--zwart); }
+.bestelling__totaal { font-variant-numeric: tabular-nums; }
+.bestelling[open] .bestelling__kop { color: var(--rood); }
+.bestelling .mandje__regels { margin: 0 0 var(--s-2); }
+
+@media (max-width: 64rem) {
+  .portaal__raster { grid-template-columns: 1fr; }
+  .portaal__mandje { position: static; }
+  .portaal__balk-mobiel:not([hidden]) {
+    display: block; position: sticky; bottom: 0; margin: 0 calc(-1 * var(--rand)); padding: 12px var(--rand);
+    background: var(--zwart); z-index: 20;
+  }
+  .portaal__balk-mobiel a { color: var(--wit); text-decoration: underline; }
+}
+@media (max-width: 48rem) {
+  .wijnregel { grid-template-columns: var(--stip) minmax(0, 1fr) auto; }
+  .wijnregel__labels { grid-column: 2; justify-content: flex-start; }
+  .wijnregel__prijs { grid-column: 3; grid-row: 1; }
+  .wijnregel__bestel { grid-column: 2 / -1; justify-content: flex-start; min-width: 0; }
+  .bestelling__kop { grid-template-columns: 1fr auto; }
+}

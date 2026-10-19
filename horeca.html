@@ -164,7 +164,45 @@ description: Besloten portaal voor horecaklanten van VMV Wijnimport.
       <p>Ingelogd als <strong data-veld="bedrijfsnaam"></strong></p>
       <button class="knop knop--secundair" type="button" data-actie="uitloggen">Uitloggen</button>
     </div>
-    <div id="assortiment"></div>
+    <div class="portaal__raster">
+      <div id="assortiment"></div>
+      <aside class="mandje portaal__mandje" id="bestelmandje" aria-labelledby="bestel-kop">
+        <h2 class="portaal__mandjekop" id="bestel-kop">Je bestelling</h2>
+        <p class="mandje__leeg">Je bestelling is nog leeg. Kies aantallen bij de wijnen.</p>
+        <div class="mandje__inhoud" hidden>
+          <ul class="mandje__regels"></ul>
+          <dl class="mandje__totalen">
+            <div><dt>Totaal excl. btw</dt><dd data-totaal="ex"></dd></div>
+            <div><dt>Btw 21%</dt><dd data-totaal="btw"></dd></div>
+            <div class="mandje__totaal"><dt>Totaal incl. btw</dt><dd data-totaal="incl"></dd></div>
+          </dl>
+          <p class="mandje__tip" data-mandje="tip"></p>
+          <form id="bestelformulier-horeca" novalidate>
+            <p class="bestel__kop">Bezorgen</p>
+            <p class="bestel__adres" data-mandje="adres"></p>
+            <p class="bestel__klein">We bezorgen in principe één keer per week. Bij kleine bestellingen ver buiten Amsterdam nemen we contact met je op over de levering.</p>
+            <label class="akkoord"><input type="checkbox" name="spoed"> Deze bestelling heeft spoed</label>
+            <div class="veld">
+              <label for="bh-opmerking">Opmerking <span class="veld__optioneel">(niet verplicht)</span></label>
+              <textarea id="bh-opmerking" name="opmerking" rows="3"></textarea>
+            </div>
+            <button class="knop knop--primair bestel__betaal" type="submit">Bestelling plaatsen</button>
+            <p class="bestel__klein">Je betaalt op factuur, binnen <span data-mandje="termijn">14</span> dagen. Prijzen zijn excl. btw.</p>
+            <p class="formulier__status" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+        <div class="bestel__klaar" hidden tabindex="-1">
+          <h3>Bedankt voor je bestelling</h3>
+          <p data-mandje="klaar"></p>
+        </div>
+      </aside>
+    </div>
+    <p class="portaal__balk-mobiel" hidden><a href="#bestelmandje" data-mandje="mobiel"></a></p>
+
+    <section class="portaal__bestellingen" id="mijn-bestellingen" aria-labelledby="bestellingen-kop">
+      <h2 id="bestellingen-kop">Je bestellingen</h2>
+      <div data-bestellingen></div>
+    </section>
   </div>
 
   <p class="formulier__status horeca__fout" data-toestand="fout" hidden></p>
@@ -172,4 +210,5 @@ description: Besloten portaal voor horecaklanten van VMV Wijnimport.
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="{{ '/assets/js/horeca-portaal.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+<script src="{{ '/assets/js/horeca-bestellen.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
 <script src="{{ '/assets/js/horeca.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

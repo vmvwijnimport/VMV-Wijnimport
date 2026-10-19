@@ -7,7 +7,7 @@
 
   var basis = (document.getElementById("horeca").dataset.basis || "").replace(/\/$/, "");
   var euro = function (n) {
-    return "€" + Number(n).toFixed(2).replace(".", ",");
+    return "€" + Number(n).toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
   var el = function (tag, klasse, tekst) {
     var e = document.createElement(tag);

@@ -13,6 +13,8 @@ Bijgewerkt: 19 oktober 2026
 - **Test niet-goedgekeurde klant (C), 19 okt:** ziet alleen zijn eigen rij in klanten; producten, instellingen en bestellingen zijn leeg; bestellen geeft "Je account is nog niet goedgekeurd"; zelf de status wijzigen geeft "permission denied". ✔
 - **Fase 3 (code):** het portaal toont na goedkeuring het assortiment per producent (assets/js/horeca-portaal.js), met jaargang, druif, formaat, allocatie- en voorraadlabels en prijzen excl. btw. Aanvulscript `supabase/002-producten-druif-jaargang.sql` (jaargang als tekst voor B20, plus druif). Het importbestand met prijzen staat in `prijslijst/horeca-import.sql` (wordt niet gecommit): 76 wijnen en 2 glazen. Doorgestreept = uitverkocht, * = allocatie. Coustheur-Bonnard en Messager-Germain zijn geïmporteerd als niet actief.
 - **Fase 3 getest (19 okt):** de eigenaar heeft A en B goedgekeurd en 002 en de import uitgevoerd. Klant A ziet 70 producten met prijzen en instellingen; de verborgen producenten (Coustheur-Bonnard, Messager-Germain) ziet hij niet; klant C (in afwachting) krijgt een lege lijst; anoniem geeft permission denied. Screenshots op desktop en mobiel zijn in orde. ✔
+- **Fase 4:** bestelmandje (assets/js/horeca-bestellen.js): per fles of + doos, spoed, opmerking, afleveradres van de klant, totaal excl./incl. btw, plaats_bestelling, mail naar info@ via FormSubmit met autoresponse naar de klant, bestelgeschiedenis. Op mobiel een vaste balk onderaan.
+- **Fase 4 getest (19 okt), testorder als A via plaats_bestelling:** 24 flessen van één wijn krijgen 5% korting, een allocatiewijn geen korting, 6+6 glazen samen de staffelprijs; het totaal klopt tot op de cent met de handberekening ✔. Uitverkocht, negatief aantal en verborgen producten worden geweigerd ✔; een meegestuurde prijs van 0,01 wordt genegeerd ✔. B kan de bestellingen en gegevens van A niet lezen, wijzigen, wissen of zelf invoegen ✔. De afronding in de browser is gelijkgetrokken met de database (in centen; 3 prijzen weken eerst 1 cent af).
 - Het databasescript: `schema.sql` is uitgevoerd met "Success" (19 okt).
 - **Fase 1 (deels):** het databasescript `supabase/schema.sql` staat klaar, met tabellen, beveiliging (RLS) en de bestelfunctie die de prijs zelf berekent. De stappen voor de eigenaar staan in `docs/supabase-instellen.md`.
 
@@ -53,17 +55,19 @@ Bijgewerkt: 19 oktober 2026
 
 ## ⏰ Herinnering vóór de livegang
 
-- **Testaccounts verwijderen** (info+test-a/b/c) in Supabase → Authentication → Users.
+- **Testaccounts verwijderen** (info+test-a/b/c) in Supabase → Authentication → Users, en de **testbestellingen** van A (H-261019-597D, -36D2, -841A) in de Table Editor → bestellingen.
 - **Resend instellen** (`docs/resend-instellen.md`): op 19 okt overgeslagen, omdat de DNS bij GoDaddy niet bereikbaar was (verkeerd of geen account ingelogd). Zonder Resend krijgen klanten geen inlogmails (bevestigen, wachtwoord vergeten).
 - Daarna in Supabase **Confirm email** weer **aan** zetten (voor het testen tijdelijk uit).
 
 ## Open vragen
 
+- Kleinigheid: bij glazen zet de database "Hedonist – HEDONIST Glas" in de omschrijving (dubbel). Oplossen met een klein aanvulscript in fase 5.
+- De bestelling via de knop in de browser (met mail) is nog niet echt verstuurd, om geen mail naar info@ te sturen. Testen samen met de eigenaar zodra FormSubmit is geactiveerd.
 - "Maximum per klant" is nu een **maximum per bestelling** (`max_per_bestelling`). Moet het een maximum per jaar per klant worden?
 
 ## Eerstvolgende stap
 
-Fase 4: bestelmandje, bestellen (via plaats_bestelling), mails en eerdere bestellingen.
+Fase 5: de volledige beveiligingstest als overzicht voor de eigenaar, de broncode en de repository controleren op prijzen, noindex, de privacyverklaring bijwerken en het kleine aanvulscript.
 
 ## Zo kun je terug
 
