@@ -47,13 +47,18 @@ Bijgewerkt: 19 oktober 2026
 - **Hedonist voor horeca:** de modellen mogen gemengd worden voor de 12 glazen.
 - **E-mail:** info@ draait waarschijnlijk op Microsoft 365 via GoDaddy. Het domein staat waarschijnlijk ook bij GoDaddy.
 
+## ⏰ Herinnering vóór de livegang
+
+- **Resend instellen** (`docs/resend-instellen.md`): op 19 okt overgeslagen, omdat de DNS bij GoDaddy niet bereikbaar was (verkeerd of geen account ingelogd). Zonder Resend krijgen klanten geen inlogmails (bevestigen, wachtwoord vergeten).
+- Daarna in Supabase **Confirm email** weer **aan** zetten (voor het testen tijdelijk uit).
+
 ## Open vragen
 
 - "Maximum per klant" is nu een **maximum per bestelling** (`max_per_bestelling`). Moet het een maximum per jaar per klant worden?
 
 ## Eerstvolgende stap
 
-De eigenaar zet de inloginstellingen (stap 5) en stelt Resend in (`docs/resend-instellen.md`). Ondertussen: fase 2 bouwen (de horecapagina, aanvragen en inloggen). Daarna: Resend instellen en fase 2 (de horecapagina, aanvragen en inloggen).
+Fase 2 bouwen: de horecapagina, aanvragen, inloggen en uitloggen. Resend is uitgesteld (zie de herinnering). Daarna: Resend instellen en fase 2 (de horecapagina, aanvragen en inloggen).
 
 ## Zo kun je terug
 
