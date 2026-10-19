@@ -15,8 +15,8 @@ Bijgewerkt: 19 oktober 2026
 - **Fase 3 getest (19 okt):** de eigenaar heeft A en B goedgekeurd en 002 en de import uitgevoerd. Klant A ziet 70 producten met prijzen en instellingen; de verborgen producenten (Coustheur-Bonnard, Messager-Germain) ziet hij niet; klant C (in afwachting) krijgt een lege lijst; anoniem geeft permission denied. Screenshots op desktop en mobiel zijn in orde. ✔
 - **Fase 4:** bestelmandje (assets/js/horeca-bestellen.js): per fles of + doos, spoed, opmerking, afleveradres van de klant, totaal excl./incl. btw, plaats_bestelling, mail naar info@ via FormSubmit met autoresponse naar de klant, bestelgeschiedenis. Op mobiel een vaste balk onderaan.
 - **Fase 4 getest (19 okt), testorder als A via plaats_bestelling:** 24 flessen van één wijn krijgen 5% korting, een allocatiewijn geen korting, 6+6 glazen samen de staffelprijs; het totaal klopt tot op de cent met de handberekening ✔. Uitverkocht, negatief aantal en verborgen producten worden geweigerd ✔; een meegestuurde prijs van 0,01 wordt genegeerd ✔. B kan de bestellingen en gegevens van A niet lezen, wijzigen, wissen of zelf invoegen ✔. De afronding in de browser is gelijkgetrokken met de database (in centen; 3 prijzen weken eerst 1 cent af).
-- **Fase 5 (deels):** het beveiligingstestscript `supabase/beveiligingstest.sh` geeft 29 goed en 0 fout, inclusief controles die moeten lukken. Aanvulscript 003 (nettere omschrijving bij glazen) staat klaar. Voorbehoud "pas definitief na bevestiging" toegevoegd aan het mandje, de bevestiging, de mail en de geschiedenis (wens van de eigenaar). De privacyverklaring is aangevuld met het horecaportaal en ligt ter goedkeuring bij de eigenaar.
-- **Gevonden en hersteld:** er stonden horecabedragen in CLAUDE.md, voortgang.md en schema.sql (door Claude). Die zijn uit de bestanden gehaald; de geschiedenis van de branch moet nog worden opgeschoond (toestemming nodig, force-push).
+- **Fase 5 (deels):** het beveiligingstestscript `supabase/beveiligingstest.sh` geeft 29 goed en 0 fout, inclusief controles die moeten lukken. Aanvulscript 003 (nettere omschrijving bij glazen) staat klaar. Voorbehoud "pas definitief na bevestiging" toegevoegd aan het mandje, de bevestiging, de mail en de geschiedenis (wens van de eigenaar). De privacyverklaring is aangevuld met het horecaportaal en goedgekeurd door de eigenaar (afgewezen aanvragen worden binnen 6 maanden verwijderd).
+- **Gevonden en hersteld:** er stonden horecabedragen in CLAUDE.md, voortgang.md en schema.sql (door Claude). Die zijn uit de bestanden gehaald; met toestemming van de eigenaar is ook de geschiedenis van de branch opgeschoond (filter-branch en force-push, 19 okt): 0 van de 13 commits op GitHub bevatten nog bedragen. Een lokale reservekopie staat in de branch `reserve-horeca-portaal-voor-opschonen` (niet gepusht; wissen na fase 6).
 - Het databasescript: `schema.sql` is uitgevoerd met "Success" (19 okt).
 - **Fase 1 (deels):** het databasescript `supabase/schema.sql` staat klaar, met tabellen, beveiliging (RLS) en de bestelfunctie die de prijs zelf berekent. De stappen voor de eigenaar staan in `docs/supabase-instellen.md`.
 
@@ -64,14 +64,12 @@ Bijgewerkt: 19 oktober 2026
 ## Open vragen
 
 - De eigenaar voert `supabase/003-omschrijving-bestelregels.sql` uit.
-- Akkoord op de privacytekst.
-- Toestemming om de geschiedenis van de branch op te schonen (force-push).
 - De bestelling via de knop in de browser (met mail) is nog niet echt verstuurd, om geen mail naar info@ te sturen. Testen samen met de eigenaar zodra FormSubmit is geactiveerd.
 - "Maximum per klant" is nu een **maximum per bestelling** (`max_per_bestelling`). Moet het een maximum per jaar per klant worden?
 
 ## Eerstvolgende stap
 
-Fase 5: de volledige beveiligingstest als overzicht voor de eigenaar, de broncode en de repository controleren op prijzen, noindex, de privacyverklaring bijwerken en het kleine aanvulscript.
+De eigenaar voert 003 uit. Daarna fase 6: handleiding (goedkeuren, prijzen en voorraad, bestellingen bevestigen), de opruimpunten uit de herinnering, en samen een echte bestelling testen. Pas daarna, met uitdrukkelijk akkoord, mergen naar main.
 
 ## Zo kun je terug
 
