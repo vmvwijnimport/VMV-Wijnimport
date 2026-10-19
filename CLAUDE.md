@@ -185,4 +185,6 @@ Horecaklanten vragen een inlog aan; de eigenaar keurt die handmatig goed. Alleen
 | okt 2026 | Horecaportaal met Supabase (EU) en Row Level Security, op de branch `horeca-portaal` | opdracht van de eigenaar |
 | 19 okt 2026 | Horeca: assortiment uit de HORECA-prijslijst (excl. btw), alles per fles, doos = 6 × flesprijs, schenkwijnen 5% korting vanaf 24 flessen, factuur 14 dagen, eigen bezorging 1× per week, spoed aan te geven, niet ophalen, 1 inlog per zaak, mails naar info@ | antwoorden van de eigenaar, zie `docs/voortgang.md` |
 | 19 okt 2026 | Schenkwijnkorting 5% vanaf 24 flessen van dezelfde wijn, niet voor allocatiewijnen; allocatie = aanvraag die VMV bevestigt; geen bezorgkosten; Hedonist-modellen mogen gemengd worden | vervolgantwoorden van de eigenaar |
+| 19 okt 2026 | Coustheur-Bonnard en Messager-Germain staan in de database maar zijn verborgen (actief = false) | ze staan niet meer op de site |
+| 19 okt 2026 | Prijslijst-import: doorgestreept = uitverkocht, * = allocatie; jaargang als tekst (B20 = base 2020) | de opzet van de HORECA-prijslijst |
 | 19 okt 2026 | Hedonist voor horeca: een lagere glasprijs vanaf 12 glazen (modellen gemengd), daaronder een hogere; tonen excl. btw. De bedragen staan alleen in de database | keuze van de eigenaar |
