@@ -35,13 +35,18 @@ Bijgewerkt: 19 oktober 2026
 1. Plan in fases laten goedkeuren.
 2. Fase 1 tot en met 6 bouwen (zie het plan in het gesprek van 19 okt), met na elke fase een lokale demo, een update van dit logboek en een commit.
 
+## Beantwoorde vervolgvragen (19 okt 2026)
+
+- **Schenkwijn:** elke wijn krijgt 5% korting vanaf 24 flessen van **dezelfde** wijn, behalve allocatiewijnen.
+- **Allocatie:** de klant vraagt een aantal aan en VMV bevestigt het toegewezen aantal. Aanvragen kan altijd; er wordt jaarlijks gealloceerd en er blijft wat over voor nieuwe klanten.
+- **Bezorgkosten:** geen.
+- **Hedonist voor horeca:** de modellen mogen gemengd worden voor de 12 glazen.
+- **E-mail:** info@ draait waarschijnlijk op Microsoft 365 via GoDaddy. Het domein staat waarschijnlijk ook bij GoDaddy.
+
 ## Open vragen
 
-- **Schenkwijnen:** geldt de 5% korting vanaf 24 flessen van **dezelfde** wijn? En welke wijnen zijn schenkwijnen?
-- **Allocatie:** werkt het als een **aanvraag**, waarbij de klant aangeeft hoeveel hij wil en VMV het toegewezen aantal bevestigt?
-- **Bezorgkosten:** worden er geen bezorgkosten berekend?
-- **Hedonist voor horeca:** mogen de twee modellen gemengd worden voor de 12 glazen?
-- **E-mail:** waar draait de mailbox info@vmvwijnimport.com (Google Workspace, Microsoft 365 of een hostingprovider)? Dat is nodig om inlogmails te versturen.
+- Akkoord op het plan in fases.
+- Keuze van de maildienst voor de inlogmails (voorstel: Resend, zie het gesprek van 19 okt).
 
 ## Eerstvolgende stap
 
