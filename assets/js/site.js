@@ -79,7 +79,10 @@ document.addEventListener("DOMContentLoaded", function () {
   // Vooraf invullen via de link, bijvoorbeeld /contact/?onderwerp=hedonist
   var params = new URLSearchParams(location.search);
   if (params.get("onderwerp") === "hedonist") onderwerp.value = "Hedonist glazen";
-  if (params.get("producent")) form.querySelector("#producent").value = params.get("producent");
+  if (params.get("producent")) {
+    onderwerp.value = "Wijnen van een producent";
+    form.querySelector("#producent").value = params.get("producent");
+  }
 
   var toonProducent = function () {
     producentVeld.hidden = onderwerp.value !== producentVeld.dataset.toonBij;
@@ -87,13 +90,50 @@ document.addEventListener("DOMContentLoaded", function () {
   onderwerp.addEventListener("change", toonProducent);
   toonProducent();
 
+  // Eigen validatie in het Nederlands: bij verlaten van een veld en bij versturen
+  var EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
+  var regels = {
+    naam: function (v) { return v ? "" : "Vul je naam in"; },
+    email: function (v) { return !v ? "Vul je e-mailadres in" : EMAIL.test(v) ? "" : "Dit e-mailadres klopt niet. Bijvoorbeeld: naam@voorbeeld.nl"; },
+    onderwerp: function (v) { return v ? "" : "Kies waar je vraag over gaat"; },
+    bericht: function (v) { return v ? "" : "Schrijf een kort bericht"; }
+  };
+  var controleer = function (veld) {
+    var melding = regels[veld.name](veld.value.trim());
+    var fout = document.getElementById(veld.id + "-fout");
+    fout.textContent = melding;
+    fout.hidden = !melding;
+    if (melding) veld.setAttribute("aria-invalid", "true"); else veld.removeAttribute("aria-invalid");
+    return !melding;
+  };
+  Object.keys(regels).forEach(function (naam) {
+    var veld = form.elements[naam];
+    veld.addEventListener("blur", function () { controleer(veld); });
+    // Een getoonde fout verdwijnt zodra hij is opgelost
+    veld.addEventListener(veld.tagName === "SELECT" ? "change" : "input", function () {
+      if (veld.getAttribute("aria-invalid") === "true") controleer(veld);
+    });
+  });
+
+  var bedankt = document.getElementById("contact-bedankt");
+
   form.addEventListener("submit", function (e) {
     e.preventDefault();
-    if (!form.reportValidity()) return;
+    var eersteFout = null;
+    Object.keys(regels).forEach(function (naam) {
+      var veld = form.elements[naam];
+      if (!controleer(veld) && !eersteFout) eersteFout = veld;
+    });
+    if (eersteFout) {
+      eersteFout.scrollIntoView({ block: "center" });
+      eersteFout.focus({ preventScroll: true });
+      return;
+    }
 
     status.className = "formulier__status";
-    status.textContent = "Bericht wordt verstuurd...";
+    status.textContent = "";
     knop.disabled = true;
+    knop.textContent = "Versturen…";
 
     var data = Object.fromEntries(new FormData(form).entries());
     data._replyto = data.email;
@@ -110,9 +150,9 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then(function () {
         form.reset();
-        toonProducent();
-        status.classList.add("goed");
-        status.textContent = "Bedankt, je bericht is verstuurd. We nemen snel contact met je op.";
+        form.hidden = true;
+        bedankt.hidden = false;
+        bedankt.focus();
       })
       .catch(function () {
         status.classList.add("fout");
@@ -120,6 +160,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .finally(function () {
         knop.disabled = false;
+        knop.textContent = "Verstuur bericht";
       });
   });
 });

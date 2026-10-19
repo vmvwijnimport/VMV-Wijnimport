@@ -18,20 +18,52 @@
           <button class="menu__uitklapknop" type="button" aria-expanded="false" aria-controls="menu-regios" aria-label="Toon producenten per regio">
             <svg viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
           </button>
+          {%- comment -%}
+            Vier kolommen: de grootste regio verdeeld over kolom 1 en 2,
+            de volgende regio in kolom 3, de rest onder elkaar in kolom 4.
+          {%- endcomment -%}
+          {%- assign grootste = regios.first -%}
+          {%- for r in regios -%}{%- if r.items.size > grootste.items.size -%}{%- assign grootste = r -%}{%- endif -%}{%- endfor -%}
+          {%- assign overige = "" | split: "" -%}
+          {%- for r in regios -%}{%- unless r.name == grootste.name -%}{%- assign overige = overige | push: r -%}{%- endunless -%}{%- endfor -%}
           <div class="menu__paneel" id="menu-regios">
             <div class="menu__regios">
-              {%- for regio in regios %}
-              <div class="menu__regio{% if regio.items.size > 6 %} menu__regio--breed{% endif %}">
-                <p class="menu__regionaam">{{ regio.name }} <span>{{ regio.items.first.land }}</span></p>
+              <div class="menu__regio menu__regio--breed">
+                <p class="menu__regionaam">{{ grootste.name }} <span>{{ grootste.items.first.land }}</span></p>
                 <ul>
-                  {%- for p in regio.items %}
+                  {%- for p in grootste.items %}
                   <li><a href="{{ p.url | relative_url }}">{{ p.naam }}</a></li>
                   {%- endfor %}
                 </ul>
               </div>
+              {%- for regio in overige limit: 1 %}
+              <div class="menu__kolom">
+                <div class="menu__regio">
+                  <p class="menu__regionaam">{{ regio.name }} <span>{{ regio.items.first.land }}</span></p>
+                  <ul>
+                    {%- for p in regio.items %}
+                    <li><a href="{{ p.url | relative_url }}">{{ p.naam }}</a></li>
+                    {%- endfor %}
+                  </ul>
+                </div>
+              </div>
               {%- endfor %}
+              {%- if overige.size > 1 %}
+              <div class="menu__kolom">
+                {%- for regio in overige offset: 1 %}
+                <div class="menu__regio">
+                  <p class="menu__regionaam">{{ regio.name }} <span>{{ regio.items.first.land }}</span></p>
+                  <ul>
+                    {%- for p in regio.items %}
+                    <li><a href="{{ p.url | relative_url }}">{{ p.naam }}</a></li>
+                    {%- endfor %}
+                  </ul>
+                </div>
+                {%- endfor %}
+              </div>
+              {%- endif %}
             </div>
-            <p class="menu__voet"><a class="menu__alle" href="{{ '/producenten/' | relative_url }}">Alle producenten bekijken</a><a class="menu__alle" href="{{ '/contact/' | relative_url }}">Interesse? Neem contact op</a></p>
+            <p class="menu__voet"><a class="knop knop--secundair" href="{{ '/producenten/' | relative_url }}">Alle producenten bekijken</a></p>
           </div>
         </li>
         <li><a href="{{ '/hedonist/' | relative_url }}"{% if page.url == '/hedonist/' %} aria-current="page"{% endif %}>Hedonist glas</a></li>

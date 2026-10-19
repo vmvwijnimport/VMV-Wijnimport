@@ -17,7 +17,7 @@ description: Neem contact op met VMV Wijnimport via WhatsApp of e-mail. Via What
       <a class="kanaal kanaal--wa" href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">
         {% include whatsapp-icoon.html %}
         <span class="kanaal__titel">WhatsApp</span>
-        <span class="kanaal__tekst">Ontvang onze updates over nieuwe jaargangen, of stuur ons direct een bericht. Bellen kan ook: {{ site.bedrijf.telefoon }}.</span>
+        <span class="kanaal__tekst">Ontvang onze updates over nieuwe jaargangen, of stuur ons direct een bericht. Bellen kan ook: <span class="geen-afbreking">{{ site.bedrijf.telefoon }}</span>.</span>
         <span class="kanaal__actie">Open WhatsApp</span>
       </a>
 
@@ -29,7 +29,7 @@ description: Neem contact op met VMV Wijnimport via WhatsApp of e-mail. Via What
       </div>
     </div>
 
-    <form class="formulier" id="contactformulier"
+    <form class="formulier" id="contactformulier" novalidate
           action="{{ site.formulier_endpoint | replace: '/ajax/', '/' }}" method="POST"
           data-ajax="{{ site.formulier_endpoint }}">
       <h2>Stuur ons een bericht</h2>
@@ -42,11 +42,13 @@ description: Neem contact op met VMV Wijnimport via WhatsApp of e-mail. Via What
 
       <div class="veld">
         <label for="naam">Naam</label>
-        <input id="naam" name="naam" type="text" autocomplete="name" required>
+        <input id="naam" name="naam" type="text" autocomplete="name" required aria-describedby="naam-fout">
+        <p class="veld__fout" id="naam-fout" hidden></p>
       </div>
       <div class="veld">
         <label for="email">E-mailadres</label>
-        <input id="email" name="email" type="email" autocomplete="email" required>
+        <input id="email" name="email" type="email" autocomplete="email" required aria-describedby="email-fout">
+        <p class="veld__fout" id="email-fout" hidden></p>
       </div>
       <div class="veld">
         <label for="telefoon">Telefoonnummer <span class="veld__optioneel">(niet verplicht)</span></label>
@@ -54,12 +56,14 @@ description: Neem contact op met VMV Wijnimport via WhatsApp of e-mail. Via What
       </div>
       <div class="veld">
         <label for="onderwerp">Waar gaat je vraag over?</label>
-        <select id="onderwerp" name="onderwerp">
+        <select id="onderwerp" name="onderwerp" required aria-describedby="onderwerp-fout">
+          <option value="">Maak een keuze</option>
           <option value="Wijnen van een producent">Wijnen van een producent</option>
           <option value="Hedonist glazen">Hedonist glazen</option>
           <option value="Aanmelden voor WhatsApp-updates">Aanmelden voor WhatsApp-updates</option>
           <option value="Iets anders">Iets anders</option>
         </select>
+        <p class="veld__fout" id="onderwerp-fout" hidden></p>
       </div>
       <div class="veld" data-toon-bij="Wijnen van een producent">
         <label for="producent">Welke producent? <span class="veld__optioneel">(niet verplicht)</span></label>
@@ -72,11 +76,16 @@ description: Neem contact op met VMV Wijnimport via WhatsApp of e-mail. Via What
       </div>
       <div class="veld">
         <label for="bericht">Bericht</label>
-        <textarea id="bericht" name="bericht" rows="6" required></textarea>
+        <textarea id="bericht" name="bericht" rows="6" required aria-describedby="bericht-fout"></textarea>
+        <p class="veld__fout" id="bericht-fout" hidden></p>
       </div>
 
-      <button class="knop knop--rood" type="submit">Verstuur bericht</button>
+      <button class="knop knop--primair" type="submit">Verstuur bericht</button>
       <p class="formulier__status" role="status" aria-live="polite"></p>
     </form>
+    <div class="formulier formulier--klaar" id="contact-bedankt" hidden tabindex="-1">
+      <h2>Bedankt, we nemen snel contact met je op.</h2>
+      <p>Je bericht is verstuurd naar {{ site.email }}. Liever direct contact? <a href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">Stuur ons een WhatsApp</a>.</p>
+    </div>
   </div>
 </section>

@@ -11,7 +11,8 @@ titel_seo: VMV Wijnimport | Wijnen van de nieuwe generatie
   <img class="hero__foto" src="{{ fotos.hero.foto | relative_url }}" alt="{{ fotos.hero.alt }}" style="object-position: {{ fotos.hero.positie }}">
   <div class="hero__tekst">
     <h1>Wijn die in de wijngaard begint</h1>
-    <p>We importeren champagne en wijn van een nieuwe generatie wijnmakers. Ze werken zonder pesticiden of herbiciden en doen in de kelder zo min mogelijk.</p>
+    <p>We importeren champagne en wijn van een nieuwe generatie wijnmakers. Ze werken zonder pesticiden of herbiciden en voegen in de kelder zo weinig mogelijk toe.</p>
+    <p class="hero__actie"><a class="knop knop--op-foto" href="{{ '/producenten/' | relative_url }}">Bekijk onze producenten</a></p>
   </div>
 </section>
 
@@ -41,7 +42,7 @@ titel_seo: VMV Wijnimport | Wijnen van de nieuwe generatie
     <div class="scene__paneel">
       <h2>Begonnen in {{ site.opgericht }}</h2>
       <p>VMV Wijnimport is jong, net als de wijnmakers met wie we werken. We bezoeken ze in hun wijngaard, proeven uit het vat en kiezen alleen wijnen waar we zelf voor staan.</p>
-      <a class="tekstlink" href="{{ '/over-ons/' | relative_url }}">Lees ons verhaal</a>
+      <a class="knop knop--secundair" href="{{ '/over-ons/' | relative_url }}">Lees ons verhaal</a>
     </div>
   </div>
 </section>
@@ -62,7 +63,7 @@ titel_seo: VMV Wijnimport | Wijnen van de nieuwe generatie
       {%- endfor %}
     </ul>
     {%- if meer > 0 %}
-    <button class="regio__meer" type="button" aria-expanded="false" aria-controls="lijst-{{ regio.name | slugify }}"
+    <button class="knop knop--secundair regio__meer" type="button" aria-expanded="false" aria-controls="lijst-{{ regio.name | slugify }}"
             data-meer="Bekijk alle {{ regio.items.size }} producenten uit {{ regio.name }}" data-minder="Toon minder">Bekijk alle {{ regio.items.size }} producenten uit {{ regio.name }}</button>
     {%- endif %}
   </div>
@@ -73,7 +74,7 @@ titel_seo: VMV Wijnimport | Wijnen van de nieuwe generatie
 <section class="hedonist-teaser">
   <img class="hedonist-teaser__foto" src="{{ fotos.hedonist.foto | relative_url }}" alt="{{ fotos.hedonist.alt }}" style="object-position: {{ fotos.hedonist.positie }}" loading="lazy">
   <div class="hedonist-teaser__tekst">
-    <h2>Official distributor of Hedonist glasses</h2>
+    <h2>Officieel distributeur van Hedonist</h2>
     <p>Handgeblazen, loodvrij glas, gemaakt om de wijn te laten spreken. Wij leveren Hedonist in Nederland.</p>
     <a class="knop knop--licht" href="{{ '/hedonist/' | relative_url }}">Bekijk de glazen</a>
   </div>
