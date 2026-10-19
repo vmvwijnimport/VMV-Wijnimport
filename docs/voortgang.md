@@ -7,6 +7,8 @@ Bijgewerkt: 19 oktober 2026
 - **Stap 0, herstelpunt:** de ontwerpronde staat live op `main` (ea67870). Daarna kwamen de tag `voor-horeca-portaal` en de branch `horeca-portaal`.
 - **Stap 1, vastleggen:** `CLAUDE.md` is goedgekeurd door de eigenaar. Dit logboek is aangemaakt.
 - **Vragen:** de eigenaar heeft de vragen over het assortiment en de voorwaarden beantwoord (zie hieronder).
+- **Plan en Resend:** goedgekeurd op 19 okt.
+- **Fase 1 (deels):** het databasescript `supabase/schema.sql` staat klaar, met tabellen, beveiliging (RLS) en de bestelfunctie die de prijs zelf berekent. De stappen voor de eigenaar staan in `docs/supabase-instellen.md`.
 
 ## Antwoorden van de eigenaar (19 okt 2026)
 
@@ -45,12 +47,12 @@ Bijgewerkt: 19 oktober 2026
 
 ## Open vragen
 
-- Akkoord op het plan in fases.
-- Keuze van de maildienst voor de inlogmails (voorstel: Resend, zie het gesprek van 19 okt).
+- "Maximum per klant" is nu een **maximum per bestelling** (`max_per_bestelling`). Moet het een maximum per jaar per klant worden?
+- Het databasescript is nog niet uitgevoerd; controleren zodra Supabase er is.
 
 ## Eerstvolgende stap
 
-Goedkeuring van het plan en antwoorden op de open vragen.
+De eigenaar maakt het Supabase-project aan (`docs/supabase-instellen.md`), voert het script uit en stuurt de Project URL en de publishable key. Daarna: Resend instellen en fase 2 (de horecapagina, aanvragen en inloggen).
 
 ## Zo kun je terug
 

@@ -87,3 +87,4 @@ exclude:
   - betalen
   - CLAUDE.md
   - docs
+  - supabase
