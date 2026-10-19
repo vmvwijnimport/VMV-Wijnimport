@@ -721,3 +721,27 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 }
 
 .geen-afbreking { white-space: nowrap; }
+
+/* ---------- Horecaportaal ---------- */
+
+.horeca [hidden] { display: none !important; }
+.horeca .formulier + .formulier { margin-top: var(--s-3); }
+.horeca__laden { color: var(--tekst-zacht); }
+.horeca__klein { margin: var(--s-2) 0 0; font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.horeca__tussenkop { margin: var(--s-4) 0 var(--s-2); font-weight: 500; color: var(--zwart); }
+.horeca__melding { max-width: var(--kolom); }
+.horeca__melding h2 { margin-bottom: var(--s-2); }
+.horeca__melding .knop { margin-top: var(--s-2); }
+.horeca__balk {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-2);
+  padding-bottom: var(--s-3); margin-bottom: var(--s-6); border-bottom: 1px solid var(--lijn);
+}
+.horeca__balk p { margin: 0; }
+.horeca__fout { color: var(--rood); }
+/* Knop die eruitziet als een tekstlink */
+.tekstknop {
+  padding: 0; border: 0; background: none; cursor: pointer;
+  font: inherit; color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px;
+}
+.tekstknop:hover { color: var(--rood); }
+.veld--helft { grid-template-columns: 1fr 1fr; }

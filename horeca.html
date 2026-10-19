@@ -1,0 +1,176 @@
+---
+layout: default
+title: Horeca
+permalink: /horeca/
+noindex: true
+sitemap: false
+description: Besloten portaal voor horecaklanten van VMV Wijnimport.
+---
+{%- comment -%}
+  Besloten horecaportaal. Deze pagina bevat GEEN prijzen: het assortiment
+  wordt na inloggen opgehaald uit Supabase, en de database geeft het alleen
+  aan goedgekeurde klanten (Row Level Security).
+  Logica: assets/js/horeca.js. Database: supabase/schema.sql.
+{%- endcomment -%}
+<section class="pagina pagina--breed horeca" id="horeca"
+         data-url="{{ site.horeca.supabase_url }}" data-sleutel="{{ site.horeca.supabase_key }}"
+         data-mail="{{ site.formulier_endpoint }}">
+  <header class="pagina__kop">
+    <h1>Horeca</h1>
+    <p class="pagina__intro">Voor horeca hebben we een besloten portaal met onze horecaprijzen. Vraag een account aan; na goedkeuring kun je inloggen, het assortiment bekijken en bestellen op factuur.</p>
+  </header>
+
+  <p class="horeca__laden" data-toestand="laden">Even geduld…</p>
+
+  {%- comment -%} ---------- Niet ingelogd ---------- {%- endcomment -%}
+  <div class="contact__raster" data-toestand="uit" hidden>
+    <div>
+      <form class="formulier" id="inlogformulier" novalidate>
+        <h2>Inloggen</h2>
+        <div class="veld">
+          <label for="in-email">E-mailadres</label>
+          <input id="in-email" name="email" type="email" autocomplete="email" required aria-describedby="in-email-fout">
+          <p class="veld__fout" id="in-email-fout" hidden></p>
+        </div>
+        <div class="veld">
+          <label for="in-wachtwoord">Wachtwoord</label>
+          <input id="in-wachtwoord" name="wachtwoord" type="password" autocomplete="current-password" required aria-describedby="in-wachtwoord-fout">
+          <p class="veld__fout" id="in-wachtwoord-fout" hidden></p>
+        </div>
+        <button class="knop knop--primair" type="submit">Inloggen</button>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+        <p class="horeca__klein"><button class="tekstknop" type="button" data-actie="vergeten">Wachtwoord vergeten?</button></p>
+      </form>
+
+      <form class="formulier" id="vergetenformulier" novalidate hidden>
+        <h2>Wachtwoord vergeten</h2>
+        <p>Vul je e-mailadres in. Je krijgt een link om een nieuw wachtwoord te kiezen.</p>
+        <div class="veld">
+          <label for="ve-email">E-mailadres</label>
+          <input id="ve-email" name="email" type="email" autocomplete="email" required aria-describedby="ve-email-fout">
+          <p class="veld__fout" id="ve-email-fout" hidden></p>
+        </div>
+        <button class="knop knop--primair" type="submit">Stuur de link</button>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+        <p class="horeca__klein"><button class="tekstknop" type="button" data-actie="terug-inloggen">Terug naar inloggen</button></p>
+      </form>
+    </div>
+
+    <form class="formulier" id="aanvraagformulier" novalidate>
+      <h2>Account aanvragen</h2>
+      <p>Na je aanvraag kijken we je gegevens na. Zodra je account is goedgekeurd, kun je inloggen.</p>
+      <div class="veld">
+        <label for="aa-bedrijfsnaam">Bedrijfsnaam</label>
+        <input id="aa-bedrijfsnaam" name="bedrijfsnaam" autocomplete="organization" required aria-describedby="aa-bedrijfsnaam-fout">
+        <p class="veld__fout" id="aa-bedrijfsnaam-fout" hidden></p>
+      </div>
+      <div class="veld">
+        <label for="aa-type_zaak">Type zaak</label>
+        <select id="aa-type_zaak" name="type_zaak" required aria-describedby="aa-type_zaak-fout">
+          <option value="">Maak een keuze</option>
+          <option value="restaurant">Restaurant</option>
+          <option value="bar">Bar</option>
+          <option value="wijnbar">Wijnbar</option>
+          <option value="slijterij">Slijterij</option>
+          <option value="overig">Overig</option>
+        </select>
+        <p class="veld__fout" id="aa-type_zaak-fout" hidden></p>
+      </div>
+      <div class="veld">
+        <label for="aa-contactpersoon">Contactpersoon</label>
+        <input id="aa-contactpersoon" name="contactpersoon" autocomplete="name" required aria-describedby="aa-contactpersoon-fout">
+        <p class="veld__fout" id="aa-contactpersoon-fout" hidden></p>
+      </div>
+      <div class="veld">
+        <label for="aa-email">E-mailadres</label>
+        <input id="aa-email" name="email" type="email" autocomplete="email" required aria-describedby="aa-email-fout">
+        <p class="veld__fout" id="aa-email-fout" hidden></p>
+      </div>
+      <div class="veld">
+        <label for="aa-telefoon">Telefoonnummer</label>
+        <input id="aa-telefoon" name="telefoon" type="tel" autocomplete="tel" required aria-describedby="aa-telefoon-fout">
+        <p class="veld__fout" id="aa-telefoon-fout" hidden></p>
+      </div>
+      <div class="veld veld--rij veld--helft">
+        <div>
+          <label for="aa-kvk">KvK-nummer</label>
+          <input id="aa-kvk" name="kvk" inputmode="numeric" required aria-describedby="aa-kvk-fout">
+          <p class="veld__fout" id="aa-kvk-fout" hidden></p>
+        </div>
+        <div>
+          <label for="aa-btw">Btw-nummer</label>
+          <input id="aa-btw" name="btw" required aria-describedby="aa-btw-fout">
+          <p class="veld__fout" id="aa-btw-fout" hidden></p>
+        </div>
+      </div>
+      <p class="horeca__tussenkop">Afleveradres</p>
+      <div class="veld">
+        <label for="aa-straat">Straat en huisnummer</label>
+        <input id="aa-straat" name="straat" autocomplete="street-address" required aria-describedby="aa-straat-fout">
+        <p class="veld__fout" id="aa-straat-fout" hidden></p>
+      </div>
+      <div class="veld veld--rij">
+        <div>
+          <label for="aa-postcode">Postcode</label>
+          <input id="aa-postcode" name="postcode" autocomplete="postal-code" required aria-describedby="aa-postcode-fout">
+          <p class="veld__fout" id="aa-postcode-fout" hidden></p>
+        </div>
+        <div>
+          <label for="aa-plaats">Plaats</label>
+          <input id="aa-plaats" name="plaats" autocomplete="address-level2" required aria-describedby="aa-plaats-fout">
+          <p class="veld__fout" id="aa-plaats-fout" hidden></p>
+        </div>
+      </div>
+      <div class="veld">
+        <label for="aa-wachtwoord">Kies een wachtwoord <span class="veld__optioneel">(minimaal 8 tekens)</span></label>
+        <input id="aa-wachtwoord" name="wachtwoord" type="password" autocomplete="new-password" required aria-describedby="aa-wachtwoord-fout">
+        <p class="veld__fout" id="aa-wachtwoord-fout" hidden></p>
+      </div>
+      <button class="knop knop--primair" type="submit">Account aanvragen</button>
+      <p class="formulier__status" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+
+  {%- comment -%} ---------- Ingelogd, nog niet goedgekeurd ---------- {%- endcomment -%}
+  <div class="formulier horeca__melding" data-toestand="in_afwachting" hidden>
+    <h2>Je aanvraag is in behandeling</h2>
+    <p>Bedankt voor je aanvraag, <span data-veld="contactpersoon"></span>. We kijken de gegevens van <span data-veld="bedrijfsnaam"></span> na en laten je weten wanneer je account is goedgekeurd. Daarna zie je hier onze horecaprijzen.</p>
+    <p>Vragen? <a href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">Stuur ons een WhatsApp</a> of mail naar <a href="mailto:{{ site.email }}">{{ site.email }}</a>.</p>
+    <button class="knop knop--secundair" type="button" data-actie="uitloggen">Uitloggen</button>
+  </div>
+
+  <div class="formulier horeca__melding" data-toestand="afgewezen" hidden>
+    <h2>Je aanvraag is niet goedgekeurd</h2>
+    <p>We hebben je aanvraag bekeken, maar kunnen je op dit moment geen toegang geven. Neem gerust contact met ons op via <a href="mailto:{{ site.email }}">{{ site.email }}</a>.</p>
+    <button class="knop knop--secundair" type="button" data-actie="uitloggen">Uitloggen</button>
+  </div>
+
+  <div class="formulier horeca__melding" data-toestand="nieuw-wachtwoord" hidden>
+    <form id="nieuwwachtwoordformulier" novalidate>
+      <h2>Kies een nieuw wachtwoord</h2>
+      <div class="veld">
+        <label for="nw-wachtwoord">Nieuw wachtwoord <span class="veld__optioneel">(minimaal 8 tekens)</span></label>
+        <input id="nw-wachtwoord" name="wachtwoord" type="password" autocomplete="new-password" required aria-describedby="nw-wachtwoord-fout">
+        <p class="veld__fout" id="nw-wachtwoord-fout" hidden></p>
+      </div>
+      <button class="knop knop--primair" type="submit">Wachtwoord opslaan</button>
+      <p class="formulier__status" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+
+  {%- comment -%} ---------- Goedgekeurd: het portaal (fase 3 en 4) ---------- {%- endcomment -%}
+  <div class="horeca__portaal" data-toestand="goedgekeurd" hidden>
+    <div class="horeca__balk">
+      <p>Ingelogd als <strong data-veld="bedrijfsnaam"></strong></p>
+      <button class="knop knop--secundair" type="button" data-actie="uitloggen">Uitloggen</button>
+    </div>
+    <div id="assortiment">
+      <p class="horeca__klein">Het assortiment wordt in de volgende fase toegevoegd.</p>
+    </div>
+  </div>
+
+  <p class="formulier__status horeca__fout" data-toestand="fout" hidden></p>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+<script src="{{ '/assets/js/horeca.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
