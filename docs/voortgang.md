@@ -9,6 +9,8 @@ Bijgewerkt: 19 oktober 2026
 - **Vragen:** de eigenaar heeft de vragen over het assortiment en de voorwaarden beantwoord (zie hieronder).
 - **Plan en Resend:** goedgekeurd op 19 okt.
 - **Supabase-project** `iemduldvpylppckpttja` (Frankfurt), met de URL en de publishable key in `_config.yml` onder `horeca:`. Test als bezoeker zonder inlog: alle tabellen en functies geven "permission denied" (19 okt).
+- **Fase 2:** de horecapagina /horeca/ met aanvragen, inloggen, uitloggen en wachtwoord herstellen (commit f3b35f4). Testaccounts info+test-a/b/c@vmvwijnimport.com (wachtwoord TestWachtwoord-123, alleen voor testen; verwijderen vóór de livegang).
+- **Test niet-goedgekeurde klant (C), 19 okt:** ziet alleen zijn eigen rij in klanten; producten, instellingen en bestellingen zijn leeg; bestellen geeft "Je account is nog niet goedgekeurd"; zelf de status wijzigen geeft "permission denied". ✔
 - Het databasescript: `schema.sql` is uitgevoerd met "Success" (19 okt).
 - **Fase 1 (deels):** het databasescript `supabase/schema.sql` staat klaar, met tabellen, beveiliging (RLS) en de bestelfunctie die de prijs zelf berekent. De stappen voor de eigenaar staan in `docs/supabase-instellen.md`.
 
@@ -49,6 +51,7 @@ Bijgewerkt: 19 oktober 2026
 
 ## ⏰ Herinnering vóór de livegang
 
+- **Testaccounts verwijderen** (info+test-a/b/c) in Supabase → Authentication → Users.
 - **Resend instellen** (`docs/resend-instellen.md`): op 19 okt overgeslagen, omdat de DNS bij GoDaddy niet bereikbaar was (verkeerd of geen account ingelogd). Zonder Resend krijgen klanten geen inlogmails (bevestigen, wachtwoord vergeten).
 - Daarna in Supabase **Confirm email** weer **aan** zetten (voor het testen tijdelijk uit).
 
