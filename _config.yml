@@ -45,6 +45,13 @@ email: info@vmvwijnimport.com
 whatsapp_url: https://wa.me/message/7A7JGLEONUS3E1
 opgericht: november 2024
 
+# Horecaportaal (Supabase). Deze twee waarden zijn openbaar en mogen in de site;
+# de beveiliging zit in de database (Row Level Security). Zet hier NOOIT de
+# secret- of service_role-sleutel.
+horeca:
+  supabase_url: https://iemduldvpylppckpttja.supabase.co
+  supabase_key: sb_publishable_w0sVLgS2_qy-HdTgVyvfqw_xpahvjXV
+
 # Formulier: berichten gaan via FormSubmit naar het e-mailadres hierboven.
 # De eerste keer krijg je een bevestigingsmail van FormSubmit: klik op de link.
 formulier_endpoint: https://formsubmit.co/ajax/info@vmvwijnimport.com

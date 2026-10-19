@@ -8,7 +8,8 @@ Bijgewerkt: 19 oktober 2026
 - **Stap 1, vastleggen:** `CLAUDE.md` is goedgekeurd door de eigenaar. Dit logboek is aangemaakt.
 - **Vragen:** de eigenaar heeft de vragen over het assortiment en de voorwaarden beantwoord (zie hieronder).
 - **Plan en Resend:** goedgekeurd op 19 okt.
-- **Supabase-project** aangemaakt door de eigenaar; `schema.sql` is uitgevoerd met "Success" (19 okt).
+- **Supabase-project** `iemduldvpylppckpttja` (Frankfurt), met de URL en de publishable key in `_config.yml` onder `horeca:`. Test als bezoeker zonder inlog: alle tabellen en functies geven "permission denied" (19 okt).
+- Het databasescript: `schema.sql` is uitgevoerd met "Success" (19 okt).
 - **Fase 1 (deels):** het databasescript `supabase/schema.sql` staat klaar, met tabellen, beveiliging (RLS) en de bestelfunctie die de prijs zelf berekent. De stappen voor de eigenaar staan in `docs/supabase-instellen.md`.
 
 ## Antwoorden van de eigenaar (19 okt 2026)
@@ -52,7 +53,7 @@ Bijgewerkt: 19 oktober 2026
 
 ## Eerstvolgende stap
 
-De eigenaar stuurt de Project URL en de publishable key en zet de inloginstellingen (stap 4 en 5 van `docs/supabase-instellen.md`). Daarna: Resend instellen en fase 2 (de horecapagina, aanvragen en inloggen).
+De eigenaar zet de inloginstellingen (stap 5) en stelt Resend in (`docs/resend-instellen.md`). Ondertussen: fase 2 bouwen (de horecapagina, aanvragen en inloggen). Daarna: Resend instellen en fase 2 (de horecapagina, aanvragen en inloggen).
 
 ## Zo kun je terug
 
