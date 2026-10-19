@@ -243,14 +243,15 @@ begin
 
     insert into public.bestelregels (bestelling_id, product_id, omschrijving, aantal, prijs_ex, korting_pct, regel_ex, allocatie)
     values (bestel_id, p.id,
-            p.producent || ' – ' || p.naam || coalesce(' ' || p.jaargang, '') ||
-              case when p.formaat <> '75 cl' then ' (' || p.formaat || ')' else '' end,
+            case when p.soort = 'glas' then p.naam else p.producent || ' – ' || p.naam end || coalesce(' ' || p.jaargang, '') ||
+              case when p.formaat not in ('75 cl', 'per glas') then ' (' || p.formaat || ')' else '' end,
             aantal, stukprijs, korting, round(stukprijs * aantal, 2), p.allocatie);
 
     totaal := totaal + round(stukprijs * aantal, 2);
     heeft_aanvraag := heeft_aanvraag or p.allocatie;
     uitvoer := uitvoer || jsonb_build_object(
-      'omschrijving', p.producent || ' – ' || p.naam || coalesce(' ' || p.jaargang, ''),
+      'omschrijving', case when p.soort = 'glas' then p.naam else p.producent || ' – ' || p.naam end || coalesce(' ' || p.jaargang, '') ||
+        case when p.formaat not in ('75 cl', 'per glas') then ' (' || p.formaat || ')' else '' end,
       'aantal', aantal, 'prijs_ex', stukprijs, 'korting_pct', korting,
       'regel_ex', round(stukprijs * aantal, 2), 'allocatie', p.allocatie);
   end loop;

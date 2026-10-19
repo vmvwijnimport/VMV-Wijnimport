@@ -163,12 +163,13 @@ Horecaklanten vragen een inlog aan; de eigenaar keurt die handmatig goed. Alleen
 1. **Werk op de branch `horeca-portaal`.** Merge **nooit** naar `main` zonder uitdrukkelijke toestemming van de eigenaar. De live site draait vanaf `main`.
 2. Het herstelpunt is de tag `voor-horeca-portaal`.
 3. **Nooit geheimen in de repo**, zoals de service-role-sleutel, de Mollie-sleutel of wachtwoorden. Lokale geheimen gaan in bestanden die in `.gitignore` staan.
-4. **Volg de huisstijl strikt:** tokens, bestaande classes, layouts en includes. Geen nieuwe frameworks of buildstappen.
-5. Kleine commits per afgerond onderdeel, met een Nederlands commitbericht, en werk `docs/voortgang.md` bij.
-6. Maak geen aannames over prijzen of voorwaarden; vraag het de eigenaar.
-7. Laat het resultaat na elke fase lokaal zien (http://localhost:4000), met screenshots op 1440px en 390px.
-8. Het thuisadres staat alleen in de algemene voorwaarden.
-9. Communiceer in eenvoudig Nederlands; de eigenaar is geen programmeur.
+4. **Nooit horecaprijzen of -bedragen in de repository**: niet in code, documentatie, commitberichten of testverslagen. Ze staan alleen in Supabase en in `prijslijst/` (genegeerd door Git). Schrijf in verslagen "klopt" in plaats van het bedrag. Controleer vóór elke commit met een zoekopdracht op bedragen uit `prijslijst/horeca-import.sql`.
+5. **Volg de huisstijl strikt:** tokens, bestaande classes, layouts en includes. Geen nieuwe frameworks of buildstappen.
+6. Kleine commits per afgerond onderdeel, met een Nederlands commitbericht, en werk `docs/voortgang.md` bij.
+7. Maak geen aannames over prijzen of voorwaarden; vraag het de eigenaar.
+8. Laat het resultaat na elke fase lokaal zien (http://localhost:4000), met screenshots op 1440px en 390px.
+9. Het thuisadres staat alleen in de algemene voorwaarden.
+10. Communiceer in eenvoudig Nederlands; de eigenaar is geen programmeur.
 
 ## 7. Genomen beslissingen
 
@@ -185,6 +186,8 @@ Horecaklanten vragen een inlog aan; de eigenaar keurt die handmatig goed. Alleen
 | okt 2026 | Horecaportaal met Supabase (EU) en Row Level Security, op de branch `horeca-portaal` | opdracht van de eigenaar |
 | 19 okt 2026 | Horeca: assortiment uit de HORECA-prijslijst (excl. btw), alles per fles, doos = 6 × flesprijs, schenkwijnen 5% korting vanaf 24 flessen, factuur 14 dagen, eigen bezorging 1× per week, spoed aan te geven, niet ophalen, 1 inlog per zaak, mails naar info@ | antwoorden van de eigenaar, zie `docs/voortgang.md` |
 | 19 okt 2026 | Schenkwijnkorting 5% vanaf 24 flessen van dezelfde wijn, niet voor allocatiewijnen; allocatie = aanvraag die VMV bevestigt; geen bezorgkosten; Hedonist-modellen mogen gemengd worden | vervolgantwoorden van de eigenaar |
+| 19 okt 2026 | Horecabestellingen zijn pas definitief na bevestiging door VMV (status ontvangen → bevestigd in het dashboard); voorbehoud zichtbaar in het mandje, de bevestiging, de mail en de geschiedenis | wens van de eigenaar: bij te weinig voorraad moet VMV kunnen bijsturen |
+| 19 okt 2026 | Horecabedragen ook niet in documentatie of commits; geschiedenis van de branch opgeschoond | ze stonden per ongeluk in CLAUDE.md, voortgang.md en schema.sql |
 | 19 okt 2026 | Coustheur-Bonnard en Messager-Germain staan in de database maar zijn verborgen (actief = false) | ze staan niet meer op de site |
 | 19 okt 2026 | Prijslijst-import: doorgestreept = uitverkocht, * = allocatie; jaargang als tekst (B20 = base 2020) | de opzet van de HORECA-prijslijst |
 | 19 okt 2026 | Hedonist voor horeca: een lagere glasprijs vanaf 12 glazen (modellen gemengd), daaronder een hogere; tonen excl. btw. De bedragen staan alleen in de database | keuze van de eigenaar |

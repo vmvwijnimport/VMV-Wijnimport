@@ -818,3 +818,4 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   .wijnregel__bestel { grid-column: 2 / -1; justify-content: flex-start; min-width: 0; }
   .bestelling__kop { grid-template-columns: 1fr auto; }
 }
+.bestel__voorbehoud { margin: var(--s-2) 0 0; padding: 12px 14px; background: var(--champagne-licht); font-size: var(--fs-klein); color: var(--tekst); }

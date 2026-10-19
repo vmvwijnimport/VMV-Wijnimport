@@ -172,7 +172,7 @@
           body: JSON.stringify({
             _subject: "Horecabestelling " + best.bestelnummer + " – " + klant.bedrijfsnaam + (spoed ? " – SPOED" : ""),
             _template: "box", _captcha: "false", _replyto: klant.email,
-            _autoresponse: "Bedankt voor je bestelling " + best.bestelnummer + " bij VMV Wijnimport. We hebben hem ontvangen en nemen contact met je op over de levering. Je ontvangt een factuur met een betaaltermijn van " + inst.betaaltermijn_dagen + " dagen.",
+            _autoresponse: "Bedankt voor je bestelling " + best.bestelnummer + " bij VMV Wijnimport. We hebben hem ontvangen. Je bestelling is pas definitief als wij hem hebben bevestigd; is er van een wijn te weinig voorraad, dan nemen we contact met je op. Na levering ontvang je een factuur met een betaaltermijn van " + inst.betaaltermijn_dagen + " dagen.",
             email: klant.email,
             bestelnummer: best.bestelnummer,
             klant: klant.bedrijfsnaam + " (" + klant.contactpersoon + ", " + klant.telefoon + ")",
@@ -194,7 +194,7 @@
         klaar.querySelector("[data-mandje=klaar]").textContent =
           "We hebben je bestelling " + best.bestelnummer + " ontvangen (" + euro(best.totaal_ex) + " excl. btw). " +
           (best.bevat_aanvraag ? "Voor de wijnen op allocatie bevestigen we het aantal dat we kunnen leveren. " : "") +
-          "We nemen contact met je op over de levering. Je ontvangt een factuur met een betaaltermijn van " + inst.betaaltermijn_dagen + " dagen.";
+          "Je bestelling is pas definitief als wij hem hebben bevestigd; is er van een wijn te weinig voorraad, dan nemen we contact met je op. Je ontvangt een factuur met een betaaltermijn van " + inst.betaaltermijn_dagen + " dagen.";
         klaar.focus();
         laadBestellingen();
       })
@@ -207,7 +207,7 @@
   });
 
   // ---------- Eerdere bestellingen ----------
-  var STATUS = { ontvangen: "Ontvangen", bevestigd: "Bevestigd", geleverd: "Geleverd", geannuleerd: "Geannuleerd" };
+  var STATUS = { ontvangen: "Wacht op bevestiging", bevestigd: "Bevestigd", geleverd: "Geleverd", geannuleerd: "Geannuleerd" };
   var bestelDoel = pagina.querySelector("[data-bestellingen]");
   var laadBestellingen = function () {
     window.vmvHoreca.db.from("bestellingen")
