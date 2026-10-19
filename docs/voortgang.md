@@ -11,6 +11,7 @@ Bijgewerkt: 19 oktober 2026
 - **Supabase-project** `iemduldvpylppckpttja` (Frankfurt), met de URL en de publishable key in `_config.yml` onder `horeca:`. Test als bezoeker zonder inlog: alle tabellen en functies geven "permission denied" (19 okt).
 - **Fase 2:** de horecapagina /horeca/ met aanvragen, inloggen, uitloggen en wachtwoord herstellen (commit f3b35f4). Testaccounts info+test-a/b/c@vmvwijnimport.com (wachtwoord TestWachtwoord-123, alleen voor testen; verwijderen vóór de livegang).
 - **Test niet-goedgekeurde klant (C), 19 okt:** ziet alleen zijn eigen rij in klanten; producten, instellingen en bestellingen zijn leeg; bestellen geeft "Je account is nog niet goedgekeurd"; zelf de status wijzigen geeft "permission denied". ✔
+- **Fase 3 (code):** het portaal toont na goedkeuring het assortiment per producent (assets/js/horeca-portaal.js), met jaargang, druif, formaat, allocatie- en voorraadlabels en prijzen excl. btw. Aanvulscript `supabase/002-producten-druif-jaargang.sql` (jaargang als tekst voor B20, plus druif). Het importbestand met prijzen staat in `prijslijst/horeca-import.sql` (wordt niet gecommit): 76 wijnen en 2 glazen. Doorgestreept = uitverkocht, * = allocatie. Coustheur-Bonnard en Messager-Germain zijn geïmporteerd als niet actief.
 - Het databasescript: `schema.sql` is uitgevoerd met "Success" (19 okt).
 - **Fase 1 (deels):** het databasescript `supabase/schema.sql` staat klaar, met tabellen, beveiliging (RLS) en de bestelfunctie die de prijs zelf berekent. De stappen voor de eigenaar staan in `docs/supabase-instellen.md`.
 
@@ -57,11 +58,12 @@ Bijgewerkt: 19 oktober 2026
 
 ## Open vragen
 
+- Moeten Coustheur-Bonnard en Messager-Germain zichtbaar zijn in het portaal? (Ze staan niet meer op de site, maar wel op de horecaprijslijst.)
 - "Maximum per klant" is nu een **maximum per bestelling** (`max_per_bestelling`). Moet het een maximum per jaar per klant worden?
 
 ## Eerstvolgende stap
 
-Fase 2 bouwen: de horecapagina, aanvragen, inloggen en uitloggen. Resend is uitgesteld (zie de herinnering). Daarna: Resend instellen en fase 2 (de horecapagina, aanvragen en inloggen).
+De eigenaar voert in de SQL Editor uit: (1) A en B goedkeuren, (2) `supabase/002-producten-druif-jaargang.sql`, (3) `prijslijst/horeca-import.sql`. Daarna testen als klant A en fase 4 (bestellen) bouwen.
 
 ## Zo kun je terug
 

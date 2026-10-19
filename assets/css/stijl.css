@@ -745,3 +745,31 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 }
 .tekstknop:hover { color: var(--rood); }
 .veld--helft { grid-template-columns: 1fr 1fr; }
+
+/* Assortiment in het portaal */
+.assortiment__uitleg { max-width: var(--kolom); margin-bottom: var(--s-6); color: var(--tekst-zacht); font-size: var(--fs-klein); }
+.assortiment__uitleg p { margin: 0 0 var(--s-1); }
+.assortiment__groep { margin-bottom: var(--s-8); }
+.assortiment__link { display: inline-block; margin-top: var(--s-1); font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.assortiment__noot { margin: var(--s-1) 0 0; font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.assortiment__lijst { margin: var(--s-2) 0 0; padding: 0; list-style: none; }
+.wijnregel {
+  display: grid; grid-template-columns: var(--stip) minmax(0, 1fr) auto 7rem; align-items: center; gap: var(--s-2);
+  padding: 12px 0; border-bottom: 1px solid var(--lijn);
+}
+.wijnregel__tekst { display: grid; }
+.wijnregel__naam { color: var(--zwart); }
+.wijnregel__details { font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.wijnregel__labels { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.wijnregel__prijs { text-align: right; font-variant-numeric: tabular-nums; color: var(--zwart); }
+.wijnregel--uit .wijnregel__naam, .wijnregel--uit .wijnregel__prijs { color: var(--tekst-zacht); }
+.wijnregel--uit .wijnregel__prijs { text-decoration: line-through; }
+.label { display: inline-block; padding: 2px 8px; border: 1px solid var(--lijn); font-size: var(--fs-klein); color: var(--tekst); white-space: nowrap; }
+.label--uitverkocht { color: var(--tekst-zacht); }
+.label--binnenkort { border-color: var(--champagne-rand); background: var(--champagne-licht); }
+.stip--leeg { background: transparent; }
+@media (max-width: 36rem) {
+  .wijnregel { grid-template-columns: var(--stip) minmax(0, 1fr) auto; }
+  .wijnregel__labels { grid-column: 2; justify-content: flex-start; }
+  .wijnregel__prijs { grid-column: 3; grid-row: 1; }
+}

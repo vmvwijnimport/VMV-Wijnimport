@@ -14,7 +14,7 @@ description: Besloten portaal voor horecaklanten van VMV Wijnimport.
 {%- endcomment -%}
 <section class="pagina pagina--breed horeca" id="horeca"
          data-url="{{ site.horeca.supabase_url }}" data-sleutel="{{ site.horeca.supabase_key }}"
-         data-mail="{{ site.formulier_endpoint }}">
+         data-mail="{{ site.formulier_endpoint }}" data-basis="{{ '/' | relative_url }}">
   <header class="pagina__kop">
     <h1>Horeca</h1>
     <p class="pagina__intro">Voor horeca hebben we een besloten portaal met onze horecaprijzen. Vraag een account aan; na goedkeuring kun je inloggen, het assortiment bekijken en bestellen op factuur.</p>
@@ -164,13 +164,12 @@ description: Besloten portaal voor horecaklanten van VMV Wijnimport.
       <p>Ingelogd als <strong data-veld="bedrijfsnaam"></strong></p>
       <button class="knop knop--secundair" type="button" data-actie="uitloggen">Uitloggen</button>
     </div>
-    <div id="assortiment">
-      <p class="horeca__klein">Het assortiment wordt in de volgende fase toegevoegd.</p>
-    </div>
+    <div id="assortiment"></div>
   </div>
 
   <p class="formulier__status horeca__fout" data-toestand="fout" hidden></p>
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+<script src="{{ '/assets/js/horeca-portaal.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
 <script src="{{ '/assets/js/horeca.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
