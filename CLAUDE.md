@@ -190,4 +190,5 @@ Horecaklanten vragen een inlog aan; de eigenaar keurt die handmatig goed. Alleen
 | 19 okt 2026 | Horecabedragen ook niet in documentatie of commits; geschiedenis van de branch opgeschoond | ze stonden per ongeluk in CLAUDE.md, voortgang.md en schema.sql |
 | 19 okt 2026 | Coustheur-Bonnard en Messager-Germain staan in de database maar zijn verborgen (actief = false) | ze staan niet meer op de site |
 | 19 okt 2026 | Prijslijst-import: doorgestreept = uitverkocht, * = allocatie; jaargang als tekst (B20 = base 2020) | de opzet van de HORECA-prijslijst |
+| 20 okt 2026 | Op allocatie alleen: Domaine Jules Brochet, Champagne Petit-Collino, Hélène Charbaut (behalve La Charbauterie) en Thomas Perseval (behalve Art'Terre); script `supabase/004-allocatie.sql` | keuze van de eigenaar; vervangt de sterretjes uit de prijslijst |
 | 19 okt 2026 | Hedonist voor horeca: een lagere glasprijs vanaf 12 glazen (modellen gemengd), daaronder een hogere; tonen excl. btw. De bedragen staan alleen in de database | keuze van de eigenaar |
