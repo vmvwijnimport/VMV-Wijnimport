@@ -37,7 +37,7 @@
 
     groepen.forEach(function (g) {
       var sectie = el("section", "assortiment__groep");
-      sectie.dataset.regio = g.soort === "glas" ? "Hedonist-glazen" : (g.regio || "");
+      sectie.dataset.regio = g.soort === "glas" ? "Glaswerk" : (g.regio || "");
       var kop = el("h2", "regio__naam");
       kop.appendChild(document.createTextNode(g.naam));
       if (g.regio) kop.appendChild(el("span", null, g.regio));
@@ -88,7 +88,7 @@
   var voegFilterToe = function (groepen) {
     var regios = [];
     groepen.forEach(function (g) {
-      var r = g.soort === "glas" ? "Hedonist-glazen" : g.regio;
+      var r = g.soort === "glas" ? "Glaswerk" : g.regio;
       if (r && regios.indexOf(r) < 0) regios.push(r);
     });
 
