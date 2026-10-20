@@ -51,8 +51,8 @@ opgericht: november 2024
 horeca:
   supabase_url: https://iemduldvpylppckpttja.supabase.co
   supabase_key: sb_publishable_w0sVLgS2_qy-HdTgVyvfqw_xpahvjXV
-  # "formsubmit" zolang Resend nog niet naar klanten mailt (DNS); daarna "resend"
-  klantmail: formsubmit
+  # "resend": de database verstuurt de bestelmails zelf (supabase/005). "formsubmit" alleen als Resend niet naar klanten mailt
+  klantmail: resend
 
 # Formulier: berichten gaan via FormSubmit naar het e-mailadres hierboven.
 # De eerste keer krijg je een bevestigingsmail van FormSubmit: klik op de link.
