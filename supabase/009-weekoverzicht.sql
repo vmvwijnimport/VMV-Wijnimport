@@ -1,13 +1,14 @@
 -- ------------------------------------------------------------------
---  009: elke maandagochtend een mail naar VMV met de bestellingen die
+--  009: elke zondagavond een mail naar VMV met de bestellingen die
 --  nog geleverd moeten worden (wens van de eigenaar, 20 okt 2026).
 --  De database roept de functie "bestelmail" aan; die stelt de mail samen.
 --  Zijn er geen bestellingen om te leveren of te bevestigen, dan komt er geen mail.
 --  Veilig: voegt één kolom en een geplande taak toe.
 --
---  Tijd: maandag 06:00 UTC, dat is 08:00 in de zomer en 07:00 in de winter.
+--  Tijd: zondag 18:00 UTC, dat is 20:00 in de zomer en 19:00 in de winter.
+--  Opnieuw uitvoeren mag: de taak met dezelfde naam wordt dan bijgewerkt.
 --  Een andere dag of tijd? Voer de regel met cron.schedule opnieuw uit met
---  bijvoorbeeld '0 6 * * 5' voor vrijdag (minuut, uur, dag, maand, weekdag).
+--  bijvoorbeeld '0 6 * * 1' voor maandagochtend (minuut, uur, dag, maand, weekdag).
 --  Stoppen: select cron.unschedule('weekoverzicht');
 -- ------------------------------------------------------------------
 
@@ -20,7 +21,7 @@ create extension if not exists pg_cron with schema pg_catalog;
 
 select cron.schedule(
   'weekoverzicht',
-  '0 6 * * 1',
+  '0 18 * * 0',
   $$ select net.http_post(
        url  := 'https://iemduldvpylppckpttja.supabase.co/functions/v1/bestelmail',
        body := '{"weekoverzicht": true}'::jsonb

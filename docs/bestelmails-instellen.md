@@ -68,7 +68,7 @@ Doe deze stappen in deze volgorde.
    3. Doe hetzelfde later voor Tim.
 4. **Alleen zolang het portaal nog niet live staat:** de knoppen in de mail openen de backoffice op de live site, en die staat er pas na de livegang. Om nu al te testen voeg je bij de secrets `BEHEER_URL` toe met de waarde `http://localhost:4000/horeca/beheer/` (werkt alleen op je MacBook, met de voorbeeldsite aan). **Verwijder die secret na de livegang.** De knop in de welkomstmail werkt ook pas na de livegang.
 
-## Update 20 okt: weekoverzicht op maandag
+## Update 20 okt: weekoverzicht op zondagavond
 
 1. **Functie bijwerken:** **Edge Functions → bestelmail → Code**. Vervang alle code door de nieuwe inhoud van `supabase/functions/bestelmail/index.ts` en klik op **Deploy**. Verify JWT blijft uit.
 2. **SQL Editor → New query** → plak `supabase/009-weekoverzicht.sql` → **Run**. Je krijgt één regel terug met een nummer: dat is de geplande taak.

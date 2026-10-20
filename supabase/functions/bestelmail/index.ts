@@ -5,7 +5,7 @@
 // 2. Welkomstmail. De database roept deze functie aan (supabase/008) met het id van een klant
 //    zodra zijn account is goedgekeurd.
 //    De functie leest alles zelf uit de database en verstuurt elke mail maar één keer.
-// 3. Weekoverzicht. Elke maandag roept de database deze functie aan (supabase/009) voor een mail
+// 3. Weekoverzicht. Elke zondagavond roept de database deze functie aan (supabase/009) voor een mail
 //    aan VMV met de bevestigde bestellingen die nog geleverd moeten worden. Hooguit één per 20 uur.
 // 4. GET ?beeld=kop geeft de kopband van de mails (zwart met het witte logo).
 // Bestellingen afhandelen gebeurt in de backoffice op /horeca/beheer/ (inloggen als beheerder);
@@ -234,7 +234,7 @@ export const mailWelkom = (k, doorsturen, ctx) => {
   };
 };
 
-// Naar VMV, elke maandag: wat er nog geleverd moet worden, op postcode, met een laadlijst
+// Naar VMV, elke zondagavond: wat er nog geleverd moet worden, op postcode, met een laadlijst
 const postcode = (b) => (b.klanten ? b.klanten.postcode : "").replace(/\s/g, "").toUpperCase();
 export const mailWeekoverzicht = (teLeveren, nieuw, ctx) => {
   const lijst = [...teLeveren].sort((x, y) => postcode(x) < postcode(y) ? -1 : postcode(x) > postcode(y) ? 1 : x.id - y.id);
@@ -359,7 +359,7 @@ const welkomVoor = async (db, id) => {
   return antwoord({ verstuurd: ["welkom"] });
 };
 
-// ---------- Weekoverzicht (aanroep door de database, elke maandag) ----------
+// ---------- Weekoverzicht (aanroep door de database, elke zondagavond) ----------
 const weekoverzicht = async (db) => {
   // Tijdstempel zetten; lukt dat niet, dan is er de afgelopen 20 uur al een verstuurd
   const grens = new Date(Date.now() - 20 * 3600e3).toISOString();
