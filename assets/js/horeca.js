@@ -96,7 +96,13 @@
       return db.from("klanten").select("bedrijfsnaam, contactpersoon, email, telefoon, straat, postcode, plaats, status").eq("id", sessie.user.id).maybeSingle()
         .then(function (k) {
           if (k.error) throw k.error;
-          if (!k.data) { fout("Dit account hoort niet bij het horecaportaal. Neem contact met ons op."); return; }
+          if (!k.data) {
+            // Een VMV-beheerder hoort in de backoffice
+            return db.from("beheerders").select("id").eq("id", sessie.user.id).maybeSingle().then(function (be) {
+              if (be.data) { location.href = (pagina.dataset.basis || "/").replace(/\/$/, "") + "/horeca/beheer/"; return; }
+              fout("Dit account hoort niet bij het horecaportaal. Neem contact met ons op.");
+            });
+          }
           vulIn(k.data);
           toon(k.data.status);
           if (k.data.status === "goedgekeurd") document.dispatchEvent(new CustomEvent("horeca:goedgekeurd", { detail: { klant: k.data, id: sessie.user.id } }));
@@ -197,7 +203,7 @@
             _template: "table", _captcha: "false", _replyto: email,
             _autoresponse: "Bedankt voor je aanvraag voor het horecaportaal van VMV Wijnimport. We kijken je gegevens na en laten je weten wanneer je account is goedgekeurd.",
             email: email,
-            goedkeuren: "Supabase → Table Editor → klanten → status op 'goedgekeurd' zetten"
+            goedkeuren: "In de backoffice: " + location.origin + (pagina.dataset.basis || "/").replace(/\/$/, "") + "/horeca/beheer/#klanten"
           }, g))
         }).catch(function () {});
         aanvraag.reset();

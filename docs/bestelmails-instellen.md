@@ -54,8 +54,16 @@ Als Resend het domein vmvwijnimport.com kent (zie `docs/resend-instellen.md`):
 1. Voeg bij de secrets toe: `AFZENDER` = `VMV Wijnimport <bestellingen@vmvwijnimport.com>` en `KLANTMAIL` = `aan`.
 2. Vraag Claude om in de site `klantmail` op `resend` te zetten. Dan stopt de tekstmail via FormSubmit en krijgt de klant ook het overzicht in huisstijl.
 
-## Update 20 okt: knoppen in de mail, afkeuren en nieuwe opmaak
+## Update 20 okt: backoffice, knoppen in de mail, afkeuren en welkomstmail
+
+Doe deze stappen in deze volgorde.
 
 1. **Functie bijwerken:** **Edge Functions → bestelmail → Code**. Vervang alle code door de nieuwe inhoud van `supabase/functions/bestelmail/index.ts` en klik op **Deploy**. Controleer daarna dat **Verify JWT** nog steeds uit staat.
-2. **Databasescripts 006 en 007:** **SQL Editor → New query** → plak `supabase/006-afkeuren.sql` → **Run**. Daarna hetzelfde met `supabase/007-korting-bij-bevestigen.sql`. Je krijgt geen waarschuwing: er staat geen "drop" in.
-3. **Alleen zolang het portaal nog niet live staat:** de knoppen in de mail openen de beheerpagina op de live site, en die staat er pas na de livegang. Om nu al te testen voeg je bij de secrets `BEHEER_URL` toe met de waarde `http://localhost:4000/horeca/beheer/` (werkt alleen op je MacBook, met de voorbeeldsite aan). **Verwijder die secret na de livegang.**
+2. **Drie databasescripts**, één voor één: **SQL Editor → New query** → plak `supabase/006-afkeuren.sql` → **Run**. Daarna hetzelfde met `supabase/007-korting-bij-bevestigen.sql` en `supabase/008-backoffice.sql`. Je krijgt geen waarschuwing: er staat geen "drop" in. Voer 008 maar één keer uit; een tweede keer geeft de melding dat de regels al bestaan (dat kan geen kwaad).
+3. **Je eigen beheerdersaccount:**
+   1. **Authentication → Users → Add user → Create new user**. Vul je e-mailadres en een wachtwoord in en zet **Auto Confirm User** aan. Gebruik niet het adres van een testklant.
+   2. **SQL Editor → New query**, met jouw adres en naam:
+      `insert into public.beheerders (id, naam) select id, 'Stijn' from auth.users where email = 'jouw@adres.nl';`
+      Klik op **Run**. Je krijgt "Success. 1 row" (staat er 0 rows, dan klopt het adres niet).
+   3. Doe hetzelfde later voor Tim.
+4. **Alleen zolang het portaal nog niet live staat:** de knoppen in de mail openen de backoffice op de live site, en die staat er pas na de livegang. Om nu al te testen voeg je bij de secrets `BEHEER_URL` toe met de waarde `http://localhost:4000/horeca/beheer/` (werkt alleen op je MacBook, met de voorbeeldsite aan). **Verwijder die secret na de livegang.** De knop in de welkomstmail werkt ook pas na de livegang.

@@ -867,7 +867,7 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   .portaal__mandje .mandje__regels, .portaal__mandje .mandje__midden { flex: 0 1 auto; min-height: 7rem; overflow-y: auto; overscroll-behavior: contain; }
 }
 
-/* Beheerpagina: een bestelling afhandelen via de knoppen in de mail */
+/* Backoffice (/horeca/beheer/): bestellingen en klanten, alleen voor VMV */
 .beheer [hidden] { display: none !important; }
 .beheer__fout { color: var(--rood); }
 .beheer__raster { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 20rem); gap: var(--s-6); align-items: start; }
@@ -913,4 +913,61 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   .beheer__regel { grid-template-columns: minmax(0, 1fr) auto; }
   .beheer__leveren { grid-column: 1; grid-row: 2; }
   .beheer__bedrag { grid-column: 2; grid-row: 1; }
+}
+
+/* Backoffice: tabbladen, lijsten en klantgegevens */
+.beheer__inlog { max-width: 30rem; }
+.beheer__tabs { display: flex; flex-wrap: wrap; gap: var(--s-4); margin-bottom: var(--s-4); border-bottom: 1px solid var(--lijn); }
+.beheer__tabs a {
+  padding: 0 0 12px; margin-bottom: -1px; border-bottom: 2px solid transparent;
+  font-size: var(--fs-ui); font-weight: 500; text-decoration: none; color: var(--tekst-zacht);
+}
+.beheer__tabs a:hover { color: var(--rood); }
+.beheer__tabs a[aria-current="page"] { color: var(--zwart); border-bottom-color: var(--zwart); }
+.beheer__tabs span { font-weight: 400; }
+.beheer__filter { margin-bottom: var(--s-3); }
+.beheer__lijst { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--zwart); }
+.beheer__rij {
+  display: grid; grid-template-columns: 11rem minmax(0, 1fr) auto 7rem; gap: var(--s-2); align-items: center;
+  padding: 12px var(--s-1); border-bottom: 1px solid var(--lijn); text-decoration: none; color: var(--tekst);
+}
+.beheer__rij--klant { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto; }
+.beheer__rij:hover { background: var(--champagne-licht); }
+.beheer__rij:hover strong { color: var(--rood); }
+.beheer__rij:focus-visible { outline: 2px solid var(--rood); outline-offset: -2px; }
+.beheer__cel { display: grid; min-width: 0; }
+.beheer__cel strong { font-weight: 500; color: var(--zwart); }
+.beheer__cel small { font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.beheer__labels { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.label--ontvangen, .label--in_afwachting { border-color: var(--champagne-rand); background: var(--champagne-licht); color: var(--zwart); }
+.label--spoed { border-color: var(--rood); color: var(--rood); }
+.label--geannuleerd, .label--afgewezen { color: var(--tekst-zacht); }
+.beheer__leeg { margin: var(--s-3) 0 0; color: var(--tekst-zacht); }
+.beheer__terug { margin: 0 0 var(--s-3); font-size: var(--fs-klein); }
+.beheer__terug a { color: var(--tekst-zacht); }
+.beheer__terug a:hover { color: var(--rood); }
+.beheer__nummer:focus { outline: none; }
+.beheer__naarklant { margin-top: var(--s-2); }
+.beheer__gegevens--breed { max-width: var(--kolom); margin-bottom: var(--s-2); }
+.beheer__gegevens--breed div { display: grid; grid-template-columns: 12rem minmax(0, 1fr); gap: var(--s-2); }
+.beheer__controle { margin-bottom: var(--s-4); }
+.beheer__knoppen { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+#geleverdformulier { margin-top: var(--s-2); }
+#geleverdformulier .knop { margin-top: var(--s-2); }
+#notitieformulier .veld { margin-bottom: var(--s-2); }
+.beheer__tussenkop { margin: var(--s-4) 0 var(--s-1); font-size: var(--fs-ui); font-weight: 500; color: var(--zwart); }
+.beheer__mini { margin: 0; padding: 0; list-style: none; font-size: var(--fs-klein); }
+.beheer__mini li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px var(--s-1); padding: 6px 0; border-bottom: 1px solid var(--lijn); }
+.beheer__mini span { color: var(--tekst-zacht); }
+@media (max-width: 48rem) {
+  .beheer__rij, .beheer__rij--klant { grid-template-columns: minmax(0, 1fr) auto; }
+  .beheer__rij .beheer__cel:nth-child(2) { grid-column: 1; grid-row: 2; }
+  .beheer__rij .beheer__labels { grid-column: 1 / -1; grid-row: 3; justify-content: flex-start; }
+  .beheer__rij .beheer__bedrag { grid-column: 2; grid-row: 1; }
+  .beheer__rij--klant .beheer__labels { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+  .beheer__gegevens--breed div { grid-template-columns: 1fr; gap: 0; }
+}
+@media (max-width: 36rem) {
+  .beheer__tabs { gap: var(--s-3); }
+  .beheer__tabs a { font-size: var(--fs-knop); }
 }

@@ -203,22 +203,34 @@ Wat helpt:
 
 ## Het horecaportaal
 
-Op **/horeca/** kunnen horecazaken een account aanvragen. Na jouw goedkeuring zien ze de horecaprijzen en kunnen ze bestellen op factuur. Alles wat je beheert (klanten, wijnen, prijzen, bestellingen) staat in **Supabase**: ga naar supabase.com, log in en open het project **vmv-horeca**. Links zie je **Table Editor**, met daarin de tabellen.
+Op **/horeca/** kunnen horecazaken een account aanvragen. Na jouw goedkeuring zien ze de horecaprijzen en kunnen ze bestellen op factuur.
+
+Het dagelijkse werk doe je in de **backoffice**: **/horeca/beheer/** op de site. Log in met je eigen beheerdersaccount. Daar staan alle bestellingen en alle klanten. Wijnen, prijzen en instellingen beheer je nog in **Supabase**: ga naar supabase.com, log in en open het project **vmv-horeca**. Links zie je **Table Editor**, met daarin de tabellen.
 
 De horecaprijzen staan **alleen** in Supabase, nooit op GitHub of in de broncode van de site. Bezoekers zonder (goedgekeurd) account zien ze nergens.
+
+### De backoffice
+
+Bovenaan staan twee tabbladen: **Bestellingen** en **Klanten**. Erachter zie je hoeveel nieuwe bestellingen en aanvragen er zijn. Met de knoppen eronder kies je wat je ziet, bijvoorbeeld alleen nieuwe bestellingen of alles. Klik op een regel om hem te openen.
+
+**Een beheerder toevoegen** (bijvoorbeeld voor Tim):
+1. Supabase → **Authentication → Users → Add user → Create new user**. Vul het e-mailadres en een wachtwoord in en zet **Auto Confirm User** aan.
+2. **SQL Editor → New query**, met het juiste adres en de naam:
+   `insert into public.beheerders (id, naam) select id, 'Tim' from auth.users where email = 'tim@voorbeeld.nl';`
+   Klik op **Run**.
+
+Gebruik voor een beheerder een ander e-mailadres dan voor een horecaklant. Een beheerder die op /horeca/ inlogt, komt vanzelf in de backoffice.
 
 ### Een aanvraag goedkeuren of afwijzen
 
 Bij een nieuwe aanvraag krijg je een mail op info@ met de gegevens van de zaak.
 
-1. Ga naar **Table Editor → klanten**. De aanvraag staat erin met status `in_afwachting`.
-2. Controleer de gegevens, bijvoorbeeld het KvK-nummer op kvk.nl.
-3. Dubbelklik op de **status** en kies:
-   - `goedgekeurd`: de klant kan direct inloggen en ziet de prijzen;
-   - `afgewezen`: de klant ziet een nette melding dat zijn aanvraag niet is goedgekeurd.
-4. In **notitie** kun je iets voor jezelf opschrijven. De klant ziet dat niet.
+1. Open de backoffice → **Klanten**. Nieuwe aanvragen staan onder **Aanvragen**.
+2. Open de aanvraag en controleer de gegevens. Met de links **KvK-nummer opzoeken** en **btw-nummer controleren** zie je of de zaak bestaat. Bel bij twijfel het nummer van de zaak, niet het nummer uit de aanvraag.
+3. Klik op **Goedkeuren**. De klant krijgt automatisch een welkomstmail en kan direct bestellen. Of klik op **Afwijzen** (twee keer, ter controle). De klant krijgt dan geen mail, maar ziet bij het inloggen dat de aanvraag niet is goedgekeurd.
+4. Bij **Notitie** kun je iets voor jezelf opschrijven. De klant ziet dat niet.
 
-Een goedgekeurde klant tijdelijk blokkeren? Zet de status terug op `in_afwachting` of `afgewezen`. Hij ziet dan direct geen prijzen meer.
+Een goedgekeurde klant blokkeren? Open de klant en klik op **Toegang intrekken**. Hij ziet dan direct geen prijzen meer. Met **Alsnog goedkeuren** zet je het terug.
 
 ### Prijzen, voorraad en wijnen beheren
 
@@ -250,9 +262,7 @@ Ga naar **Table Editor → producten**. Elke regel is één wijn (of glas). Dubb
 
 Bij een nieuwe bestelling krijg je een mail op info@ in de huisstijl, met alle regels, de klantgegevens, het afleveradres en of het **spoed** heeft. De klant krijgt een **overzicht van zijn bestelaanvraag**, met daarin duidelijk dat het nog geen bevestiging is.
 
-**Een bestelling afhandelen via de mail**
-
-In de mail "Nieuwe bestelling" staan drie knoppen. Elke knop opent de pagina **Bestelling afhandelen** op de site, met de bestelling en de klantgegevens. Er gebeurt pas iets als je op die pagina op de knop onderaan klikt.
+Open de bestelling via een van de drie knoppen in de mail, of via de backoffice → **Bestellingen**. Ben je nog niet ingelogd, dan log je eerst in. Er gebeurt pas iets als je onderaan de pagina op de knop klikt.
 
 - **Bevestigen:** je levert alles zoals besteld. Zet eventueel een bericht voor de klant erbij, zoals de leverdag, en klik op **Bestelling bevestigen**.
 - **Bevestigen met wijziging:** vul per wijn in hoeveel je levert (`0` = niet leverbaar). Dat is ook de plek voor **allocatiewijnen**. De totalen rekenen direct mee. Klik op **Bevestigen met deze aantallen**.
@@ -261,18 +271,16 @@ In de mail "Nieuwe bestelling" staan drie knoppen. Elke knop opent de pagina **B
 De klant krijgt daarna automatisch een mail: een bevestiging met de aantallen die je levert en je bericht, of een mail dat de bestelling niet doorgaat. In het portaal ziet de klant de nieuwe status. Een bestelling die al is afgehandeld, kun je niet nog een keer bevestigen of afkeuren.
 
 Daarna:
-1. Na het leveren zet je in Supabase (**Table Editor → bestellingen**) de status op `geleverd`.
-2. **Maak de factuur in e-Boekhouden**, zoals altijd. De site maakt geen facturen, zodat je nummering klopt.
-
-Bewaar de mails met de knoppen goed en stuur ze niet door: met de link kan iemand de bestelling afhandelen.
-
-**Liever via Supabase?** Dat kan ook. Vul in **bestelregels** bij `toegewezen` het aantal in dat je levert en in **bestellingen** eventueel `bericht_klant`, en zet daarna de status op `bevestigd` of `geannuleerd`. De mail aan de klant gaat dan ook automatisch.
+1. **Maak de factuur in e-Boekhouden**, zoals altijd. De site maakt geen facturen, zodat je nummering klopt.
+2. Is de bestelling bezorgd, open hem dan in de backoffice (onder **Bevestigd**) en klik op **Op geleverd zetten**. De klant krijgt daarvan geen mail; in zijn overzicht staat dan "geleverd".
 
 De bedragen berekent de database zelf. Wat een klant in zijn browser doet, kan de prijs niet veranderen. Lever je minder, dan geldt een korting alleen nog als het geleverde aantal er recht op geeft: de schenkkorting vanaf 24 flessen van dezelfde wijn, de staffelprijs voor Hedonist vanaf 12 glazen. Op de pagina zie je dat meteen ("geen schenkkorting meer"), en de bevestiging aan de klant heeft de juiste bedragen.
 
+**Via Supabase kan het ook nog.** Vul in **bestelregels** bij `toegewezen` het aantal in dat je levert en in **bestellingen** eventueel `bericht_klant`, en zet daarna de status op `bevestigd`, `geannuleerd` of `geleverd`. De mails gaan dan ook automatisch.
+
 ### Een klant verwijderen
 
-Ga naar **Authentication → Users**, zoek het e-mailadres en kies **Delete user**. Heeft de klant al bestellingen, dan lukt dat niet (bestellingen moeten 7 jaar bewaard blijven). Zet de klant dan op `afgewezen`.
+Ga naar **Authentication → Users**, zoek het e-mailadres en kies **Delete user**. Heeft de klant al bestellingen, dan lukt dat niet (bestellingen moeten 7 jaar bewaard blijven). Trek dan in de backoffice zijn toegang in.
 
 ### Wachtwoord vergeten
 
@@ -280,6 +288,6 @@ Klanten klikken bij het inloggen op **Wachtwoord vergeten?** en krijgen een mail
 
 ### Beveiliging controleren
 
-Na een wijziging in de database kun je Claude vragen de beveiligingstest (`supabase/beveiligingstest.sh`) opnieuw te draaien. Die probeert als bezoeker, als niet-goedgekeurde klant en als andere klant bij gegevens te komen die niet van hen zijn; alle pogingen moeten mislukken.
+Na een wijziging in de database kun je Claude vragen de beveiligingstest (`supabase/beveiligingstest.sh`) opnieuw te draaien. Die probeert als bezoeker, als niet-goedgekeurde klant en als andere klant bij gegevens te komen die niet van hen zijn, en de backoffice te gebruiken zonder beheerder te zijn. Alle pogingen moeten mislukken.
 
 **Deel nooit** de secret key of service_role-sleutel van Supabase, het databasewachtwoord of de sleutel van Resend. Niet met Claude, niet in een mail en niet op GitHub.

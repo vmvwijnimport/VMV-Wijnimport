@@ -142,7 +142,7 @@ Voorbeeldzinnen van de site:
 Horecaklanten vragen een inlog aan; de eigenaar keurt die handmatig goed. Alleen goedgekeurde klanten zien de horecaprijzen en kunnen wijn bestellen.
 
 - **Aanvragen** op de pagina "Horeca", met de velden bedrijfsnaam, contactpersoon, e-mail, telefoon, KvK, btw, afleveradres en type zaak (restaurant, bar, wijnbar, slijterij, overig). Daarna staat de aanvraag op **in afwachting**: de klant krijgt een bevestiging en info@ een mail.
-- **Goedkeuren** gaat in eerste instantie via het Supabase-dashboard. Een eigen beheerpagina kan later.
+- **Goedkeuren** en bestellingen afhandelen gaan via de backoffice op /horeca/beheer/ (inloggen als beheerder, tabel `beheerders`, script `supabase/008-backoffice.sql`). Wijnen, prijzen en instellingen staan nog in het Supabase-dashboard.
 - **Besloten deel:**
   - wijnen met horecaprijzen (excl. btw), per producent;
   - aantallen per fles of per doos;
@@ -192,4 +192,5 @@ Horecaklanten vragen een inlog aan; de eigenaar keurt die handmatig goed. Alleen
 | 19 okt 2026 | Prijslijst-import: doorgestreept = uitverkocht, * = allocatie; jaargang als tekst (B20 = base 2020) | de opzet van de HORECA-prijslijst |
 | 20 okt 2026 | Op allocatie alleen: Domaine Jules Brochet, Champagne Petit-Collino, Hélène Charbaut (behalve La Charbauterie) en Thomas Perseval (behalve Art'Terre); script `supabase/004-allocatie.sql` | keuze van de eigenaar; vervangt de sterretjes uit de prijslijst |
 | 20 okt 2026 | Bestellingen afhandelen via knoppen in de mail aan VMV (Bevestigen, Bevestigen met wijziging, Afkeuren) op /horeca/beheer/; de klant krijgt automatisch een mail. Levert VMV minder, dan vervalt de korting als het aantal er geen recht meer op geeft (schenkkorting < 24 flessen, staffel < 12 glazen) | wens van de eigenaar; Supabase was te omslachtig |
+| 20 okt 2026 | Backoffice op /horeca/beheer/ met inlog voor beheerders: alle bestellingen (bevestigen, met wijziging, afkeuren, geleverd) en klanten (goedkeuren, afwijzen, toegang intrekken, notitie). De mailknoppen openen de backoffice; de links zonder inlog (met sleutel) zijn vervallen. Welkomstmail bij goedkeuring | wens van de eigenaar; Supabase was te omslachtig |
 | 19 okt 2026 | Hedonist voor horeca: een lagere glasprijs vanaf 12 glazen (modellen gemengd), daaronder een hogere; tonen excl. btw. De bedragen staan alleen in de database | keuze van de eigenaar |

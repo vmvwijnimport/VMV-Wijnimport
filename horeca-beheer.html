@@ -1,62 +1,159 @@
 ---
 layout: default
-title: Bestelling afhandelen
+title: Backoffice
 permalink: /horeca/beheer/
 noindex: true
 sitemap: false
-description: Een horecabestelling bevestigen of afkeuren.
+description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
 ---
 {%- comment -%}
-  Alleen voor VMV, via de knoppen in de mail "Nieuwe bestelling". De link bevat
-  het id van de bestelling en een sleutel; zonder die sleutel geeft de functie
-  niets terug. Er staan geen prijzen in deze pagina: die komen pas na het laden.
-  Logica: assets/js/horeca-beheer.js. Functie: supabase/functions/bestelmail.
+  Alleen voor VMV: inloggen met een beheerdersaccount (tabel beheerders, zie
+  supabase/008-backoffice.sql). Andere accounts zien niets; de database geeft
+  alleen beheerders toegang. Er staan geen prijzen in deze pagina: die komen
+  pas na het inloggen uit de database. Logica: assets/js/horeca-beheer.js.
+  De knoppen in de mail "Nieuwe bestelling" openen deze pagina met ?id=…&actie=….
 {%- endcomment -%}
 <section class="pagina pagina--breed beheer" id="beheer"
-         data-functie="{{ site.horeca.supabase_url }}/functions/v1/bestelmail">
+         data-url="{{ site.horeca.supabase_url }}" data-sleutel="{{ site.horeca.supabase_key }}" data-basis="{{ '/' | relative_url }}">
   <header class="pagina__kop">
-    <h1>Bestelling afhandelen</h1>
+    <h1>Backoffice</h1>
   </header>
 
   <p class="horeca__laden" data-toestand="laden">Even geduld…</p>
   <p class="beheer__fout" data-toestand="fout" hidden></p>
 
-  <div class="beheer__raster" data-toestand="bestelling" hidden>
-    <div>
-      <h2 class="beheer__nummer" data-veld="nummer"></h2>
-      <p class="beheer__status" data-veld="status" hidden></p>
-      <div class="regiokeuze beheer__keuze" role="group" aria-label="Wat wil je doen?">
-        <button type="button" data-modus="bevestigen" aria-pressed="false">Bevestigen</button>
-        <button type="button" data-modus="wijzigen" aria-pressed="false">Bevestigen met wijziging</button>
-        <button type="button" data-modus="afkeuren" aria-pressed="false">Afkeuren</button>
-      </div>
-      <p class="beheer__uitleg" data-veld="uitleg"></p>
-      <ul class="beheer__regels"></ul>
-      <dl class="mandje__totalen beheer__totalen">
-        <div><dt>Totaal excl. btw</dt><dd data-totaal="ex"></dd></div>
-        <div><dt>Btw 21%</dt><dd data-totaal="btw"></dd></div>
-        <div class="mandje__totaal"><dt>Totaal incl. btw</dt><dd data-totaal="incl"></dd></div>
-      </dl>
-      <form class="beheer__formulier" id="beheerformulier" novalidate>
-        <div class="veld">
-          <label for="beheer-bericht" data-veld="berichtlabel">Bericht aan de klant <span class="veld__optioneel">(niet verplicht)</span></label>
-          <textarea id="beheer-bericht" name="bericht" rows="3" aria-describedby="beheer-bericht-uitleg"></textarea>
-          <p class="beheer__klein" id="beheer-bericht-uitleg" data-veld="berichtuitleg"></p>
-        </div>
-        <button class="knop knop--primair" type="submit" data-veld="knop">Bestelling bevestigen</button>
-        <p class="formulier__status" role="status" aria-live="polite"></p>
-      </form>
+  {%- comment -%} ---------- Niet ingelogd ---------- {%- endcomment -%}
+  <form class="formulier beheer__inlog" id="beheer-inlog" data-toestand="uit" novalidate hidden>
+    <h2>Inloggen</h2>
+    <p>Alleen voor VMV. Log in met je beheerdersaccount.</p>
+    <div class="veld">
+      <label for="bi-email">E-mailadres</label>
+      <input id="bi-email" name="email" type="email" autocomplete="email" required aria-describedby="bi-email-fout">
+      <p class="veld__fout" id="bi-email-fout" hidden></p>
     </div>
-    <aside class="beheer__klant" aria-labelledby="beheer-klant-kop">
-      <h2 class="beheer__klantkop" id="beheer-klant-kop">Klant</h2>
-      <dl class="beheer__gegevens" data-veld="klant"></dl>
-    </aside>
+    <div class="veld">
+      <label for="bi-wachtwoord">Wachtwoord</label>
+      <input id="bi-wachtwoord" name="wachtwoord" type="password" autocomplete="current-password" required aria-describedby="bi-wachtwoord-fout">
+      <p class="veld__fout" id="bi-wachtwoord-fout" hidden></p>
+    </div>
+    <button class="knop knop--primair" type="submit">Inloggen</button>
+    <p class="formulier__status" role="status" aria-live="polite"></p>
+    <p class="horeca__klein">Wachtwoord vergeten? Gebruik "Wachtwoord vergeten" op de <a href="{{ '/horeca/' | relative_url }}">horecapagina</a>.</p>
+  </form>
+
+  <div class="formulier horeca__melding" data-toestand="geen-toegang" hidden>
+    <h2>Geen toegang</h2>
+    <p>Dit account heeft geen toegang tot de backoffice.</p>
+    <button class="knop knop--secundair" type="button" data-actie="uitloggen">Uitloggen</button>
   </div>
 
-  <div class="beheer__klaar" data-toestand="klaar" hidden tabindex="-1">
-    <h2 data-veld="klaarkop"></h2>
-    <p data-veld="klaartekst"></p>
+  {%- comment -%} ---------- Ingelogd als beheerder ---------- {%- endcomment -%}
+  <div data-toestand="backoffice" hidden>
+    <div class="horeca__balk">
+      <p>Ingelogd als <strong data-veld="naam"></strong></p>
+      <button class="knop knop--secundair" type="button" data-actie="uitloggen">Uitloggen</button>
+    </div>
+
+    <nav class="beheer__tabs" aria-label="Backoffice">
+      <a href="#bestellingen" data-tab="bestellingen">Bestellingen <span data-teller="bestellingen"></span></a>
+      <a href="#klanten" data-tab="klanten">Klanten <span data-teller="klanten"></span></a>
+    </nav>
+
+    {%- comment -%} Lijst met bestellingen {%- endcomment -%}
+    <div data-scherm="bestellingen" hidden>
+      <div class="regiokeuze beheer__filter" role="group" aria-label="Toon bestellingen">
+        <button type="button" data-filter="ontvangen" aria-pressed="true">Nieuw</button>
+        <button type="button" data-filter="bevestigd" aria-pressed="false">Bevestigd</button>
+        <button type="button" data-filter="geleverd" aria-pressed="false">Geleverd</button>
+        <button type="button" data-filter="geannuleerd" aria-pressed="false">Afgekeurd</button>
+        <button type="button" data-filter="" aria-pressed="false">Alle</button>
+      </div>
+      <ul class="beheer__lijst" data-lijst="bestellingen"></ul>
+      <p class="beheer__leeg" data-leeg="bestellingen" hidden></p>
+    </div>
+
+    {%- comment -%} Lijst met klanten {%- endcomment -%}
+    <div data-scherm="klanten" hidden>
+      <div class="regiokeuze beheer__filter" role="group" aria-label="Toon klanten">
+        <button type="button" data-filter="in_afwachting" aria-pressed="true">Aanvragen</button>
+        <button type="button" data-filter="goedgekeurd" aria-pressed="false">Goedgekeurd</button>
+        <button type="button" data-filter="afgewezen" aria-pressed="false">Afgewezen</button>
+        <button type="button" data-filter="" aria-pressed="false">Alle</button>
+      </div>
+      <ul class="beheer__lijst" data-lijst="klanten"></ul>
+      <p class="beheer__leeg" data-leeg="klanten" hidden></p>
+    </div>
+
+    {%- comment -%} Eén bestelling {%- endcomment -%}
+    <div data-scherm="bestelling" hidden>
+      <p class="beheer__terug"><a href="#bestellingen">Alle bestellingen</a></p>
+      <div class="beheer__raster">
+        <div>
+          <h2 class="beheer__nummer" data-veld="nummer" tabindex="-1"></h2>
+          <p class="beheer__status" data-veld="status" role="status" hidden></p>
+          <div class="regiokeuze beheer__keuze" role="group" aria-label="Wat wil je doen?">
+            <button type="button" data-modus="bevestigen" aria-pressed="false">Bevestigen</button>
+            <button type="button" data-modus="wijzigen" aria-pressed="false">Bevestigen met wijziging</button>
+            <button type="button" data-modus="afkeuren" aria-pressed="false">Afkeuren</button>
+          </div>
+          <p class="beheer__uitleg" data-veld="uitleg"></p>
+          <ul class="beheer__regels"></ul>
+          <dl class="mandje__totalen beheer__totalen">
+            <div><dt>Totaal excl. btw</dt><dd data-totaal="ex"></dd></div>
+            <div><dt>Btw 21%</dt><dd data-totaal="btw"></dd></div>
+            <div class="mandje__totaal"><dt>Totaal incl. btw</dt><dd data-totaal="incl"></dd></div>
+          </dl>
+          <form class="beheer__formulier" id="beheerformulier" novalidate>
+            <div class="veld">
+              <label for="beheer-bericht" data-veld="berichtlabel">Bericht aan de klant <span class="veld__optioneel">(niet verplicht)</span></label>
+              <textarea id="beheer-bericht" name="bericht" rows="3" aria-describedby="beheer-bericht-uitleg"></textarea>
+              <p class="beheer__klein" id="beheer-bericht-uitleg" data-veld="berichtuitleg"></p>
+            </div>
+            <button class="knop knop--primair" type="submit" data-veld="knop">Bestelling bevestigen</button>
+            <p class="formulier__status" role="status" aria-live="polite"></p>
+          </form>
+          <form class="beheer__formulier" id="geleverdformulier" novalidate hidden>
+            <p class="beheer__klein">Is de bestelling bezorgd? Zet hem dan op geleverd. De klant krijgt hiervan geen mail.</p>
+            <button class="knop knop--primair" type="submit">Op geleverd zetten</button>
+            <p class="formulier__status" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+        <aside class="beheer__klant" aria-labelledby="beheer-klant-kop">
+          <h2 class="beheer__klantkop" id="beheer-klant-kop">Klant</h2>
+          <dl class="beheer__gegevens" data-veld="klant"></dl>
+          <p class="beheer__klein beheer__naarklant"><a data-veld="klantlink" href="#klanten">Alle gegevens van deze klant</a></p>
+        </aside>
+      </div>
+    </div>
+
+    {%- comment -%} Eén klant {%- endcomment -%}
+    <div data-scherm="klant" hidden>
+      <p class="beheer__terug"><a href="#klanten">Alle klanten</a></p>
+      <div class="beheer__raster">
+        <div>
+          <h2 class="beheer__nummer" data-veld="klantnaam" tabindex="-1"></h2>
+          <p class="beheer__status" data-veld="klantstatus" role="status"></p>
+          <dl class="beheer__gegevens beheer__gegevens--breed" data-veld="klantgegevens"></dl>
+          <p class="beheer__klein beheer__controle" data-veld="controle"></p>
+          <div class="beheer__knoppen" data-veld="klantknoppen"></div>
+          <p class="formulier__status" data-veld="klantmelding" role="status" aria-live="polite"></p>
+        </div>
+        <aside class="beheer__klant">
+          <form id="notitieformulier" novalidate>
+            <div class="veld">
+              <label for="beheer-notitie">Notitie <span class="veld__optioneel">(alleen voor VMV)</span></label>
+              <textarea id="beheer-notitie" name="notitie" rows="4"></textarea>
+            </div>
+            <button class="knop knop--secundair" type="submit">Notitie opslaan</button>
+            <p class="formulier__status" role="status" aria-live="polite"></p>
+          </form>
+          <h3 class="beheer__tussenkop">Bestellingen</h3>
+          <ul class="beheer__mini" data-veld="klantbestellingen"></ul>
+        </aside>
+      </div>
+    </div>
   </div>
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="{{ '/assets/js/horeca-beheer.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

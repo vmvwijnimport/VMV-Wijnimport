@@ -32,6 +32,8 @@ TA=$(tok a); TB=$(tok b); TC=$(tok c)
 [ -z "$TA" ] || [ -z "$TB" ] || [ -z "$TC" ] && { echo "Inloggen met de testaccounts lukt niet"; exit 1; }
 AID=$(get "klanten?select=id" "$TA" | sed -n 's/.*"id":"\([^"]*\)".*/\1/p')
 ABEST=$(get "bestellingen?select=bestelnummer&limit=1" "$TA" | sed -n 's/.*"bestelnummer":"\([^"]*\)".*/\1/p')
+ABID=$(get "bestellingen?select=id&limit=1" "$TA" | sed -n 's/.*"id":\([0-9]*\).*/\1/p')
+CID=$(get "klanten?select=id" "$TC" | sed -n 's/.*"id":"\([^"]*\)".*/\1/p')
 
 echo "== 0. Controle: wat wél mag, werkt (anders bewijzen de tests hieronder niets)"
 check "A (goedgekeurd) ziet prijzen" "$(get 'producten?select=prijs_ex' "$TA")" '"prijs_ex":[0-9]'
@@ -69,6 +71,18 @@ check "A leest verborgen producten" "$(get 'producten?select=producent&actief=eq
 check "A bestelt een verborgen product" "$(rpc plaats_bestelling '{"regels":[{"product_id":28,"aantal":1}]}' "$TA")" 'niet meer beschikbaar'
 check "A bestelt een uitverkochte wijn" "$(rpc plaats_bestelling '{"regels":[{"product_id":4,"aantal":1}]}' "$TA")" 'uitverkocht'
 check "A ziet alleen eigen klantgegevens" "$(get 'klanten?select=email' "$TA")" '^\[\{"email":"info\+test-a@[^]]*\}\]$'
+
+echo "== 5. Backoffice (008): alleen voor beheerders"
+GEEN='Geen toegang|42501|permission denied'
+check "bezoeker keurt klant goed" "$(rpc beheer_klant "{\"klant\":\"$CID\",\"status\":\"goedgekeurd\"}")" "$GEEN"
+check "C keurt zichzelf goed via de backoffice" "$(rpc beheer_klant "{\"klant\":\"$CID\",\"status\":\"goedgekeurd\"}" "$TC")" "$GEEN"
+check "A bevestigt eigen bestelling" "$(rpc beheer_bevestig "{\"bestelling\":$ABID}" "$TA")" "$GEEN"
+check "A keurt eigen bestelling af" "$(rpc beheer_afkeur "{\"bestelling\":$ABID}" "$TA")" "$GEEN"
+check "A zet eigen bestelling op geleverd" "$(rpc beheer_geleverd "{\"bestelling\":$ABID}" "$TA")" "$GEEN"
+check "A wordt zelf beheerder" "$(wijzig POST 'beheerders' "$TA" "{\"id\":\"$AID\",\"naam\":\"nep\"}")" "$GEWEIGERD"
+check "A leest beheerders" "$(get 'beheerders?select=*' "$TA")" '^\[\]$'
+check "B leest klantgegevens van C (alleen beheerders mogen dat)" "$(get "klanten?select=*&id=eq.$CID" "$TB")" '^\[\]$'
+check "C is nog steeds niet goedgekeurd" "$(get 'klanten?select=status' "$TC")" 'in_afwachting'
 
 echo
 echo "Uitkomst: $goed goed, $fout fout"

@@ -1,13 +1,13 @@
-// Bestelmails en bestelbeheer voor het horecaportaal (Supabase Edge Function "bestelmail").
+// Bestelmails voor het horecaportaal (Supabase Edge Function "bestelmail").
 //
-// 1. Mails. De database roept deze functie aan (supabase/005 en 006) met alleen het id van een
+// 1. Bestelmails. De database roept deze functie aan (supabase/005 en 006) met alleen het id van een
 //    bestelling: bij een nieuwe bestelling, en wanneer de status "bevestigd" of "geannuleerd" wordt.
+// 2. Welkomstmail. De database roept deze functie aan (supabase/008) met het id van een klant
+//    zodra zijn account is goedgekeurd.
 //    De functie leest alles zelf uit de database en verstuurt elke mail maar één keer.
-// 2. Beheer. De knoppen in de mail aan VMV openen de pagina /horeca/beheer/ op de site. Die pagina
-//    stuurt het id, een sleutel en de actie (bekijk, bevestig, afkeur) hierheen. De sleutel is een
-//    handtekening van het id met de geheime sleutel van Supabase: alleen wie de mail heeft, heeft hem.
-//    Acties gebeuren alleen na een klik op de pagina, nooit door alleen een link te openen.
 // 3. GET ?beeld=kop geeft de kopband van de mails (zwart met het witte logo).
+// Bestellingen afhandelen gebeurt in de backoffice op /horeca/beheer/ (inloggen als beheerder);
+// de knoppen in de mail aan VMV openen die pagina.
 //
 // Instellingen in Supabase → Edge Functions → Secrets (niets hiervan staat in de repository):
 //   RESEND_API_KEY  de sleutel uit Resend (verplicht)
@@ -15,7 +15,7 @@
 //   AFZENDER        standaard "VMV Wijnimport <onboarding@resend.dev>";
 //                   met eigen domein: "VMV Wijnimport <bestellingen@vmvwijnimport.com>"
 //   KLANTMAIL       "aan": mails gaan naar de klant zelf. Anders gaan ze naar VMV om door te sturen.
-//   BEHEER_URL      alleen om te testen; standaard de beheerpagina op de site
+//   BEHEER_URL      alleen om te testen; standaard de backoffice op de site
 
 const SITE = "https://vmvwijnimport.github.io/VMV-Wijnimport";
 const KLEUR = {
@@ -23,7 +23,6 @@ const KLEUR = {
   rood: "#731515", champagneLicht: "#F8F7E6", lijn: "#E6E4DC"
 };
 const LETTER = "'Jost', 'Helvetica Neue', Helvetica, Arial, sans-serif";
-const STATUS = { ontvangen: "nog niet afgehandeld", bevestigd: "bevestigd", geleverd: "geleverd", geannuleerd: "afgekeurd" };
 
 // ---------- Hulpjes ----------
 export const euro = (n) =>
@@ -32,6 +31,8 @@ const centen = (n) => Math.round(Number(n) * 100);
 const html = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const datum = (d) => new Date(d).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Amsterdam" });
 const adres = (k) => `${k.straat}, ${k.postcode} ${k.plaats}`;
+const kopband = () => `${Deno.env.get("SUPABASE_URL")}/functions/v1/bestelmail?beeld=kop`;
+const beheerUrl = () => Deno.env.get("BEHEER_URL") || `${SITE}/horeca/beheer/`;
 
 // Bedragen van een bestelling. Bij een bevestiging telt het aantal dat VMV levert
 // (toegewezen; leeg = het bestelde aantal); de prijs per stuk blijft die van de bestelling.
@@ -217,6 +218,20 @@ export const mailAfgekeurd = (b, k, doorsturen, ctx) => {
   };
 };
 
+// Naar de klant, zodra VMV het account heeft goedgekeurd
+export const mailWelkom = (k, doorsturen, ctx) => {
+  const inhoud =
+    alinea(`Beste ${html(k.contactpersoon)},`) +
+    alinea(`Je account voor het horecaportaal van VMV Wijnimport is goedgekeurd. Log in met je e-mailadres en wachtwoord. Je ziet dan onze horecaprijzen en kunt direct bestellen voor ${html(k.bedrijfsnaam)}.`) +
+    `<div style="margin:8px 0 24px;">${knop("Naar het horecaportaal", `${SITE}/horeca/`, true)}</div>` +
+    alinea("Je bestelt op factuur. Elke bestelling bevestigen we eerst; je krijgt daarvan een mail.") +
+    alinea(contactRegel);
+  return {
+    onderwerp: "Je account voor het horecaportaal is goedgekeurd",
+    html: omhulsel({ voorvertoning: "Je kunt nu inloggen en bestellen.", kop: "Welkom bij VMV Wijnimport", inhoud, doorsturen }, ctx)
+  };
+};
+
 // ---------- Versturen ----------
 const verstuur = async (aan, antwoordAan, mail) => {
   const r = await fetch("https://api.resend.com/emails", {
@@ -245,20 +260,12 @@ const metClaim = async (db, id, kolom, verstuurFn) => {
   }
 };
 
-// Handtekening van een bestelling, voor de links in de mail aan VMV
-const sleutelVan = async (id) => {
-  const geheim = new TextEncoder().encode(Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"));
-  const k = await crypto.subtle.importKey("raw", geheim, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const h = await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(`vmv-bestelling-${id}`));
-  return Array.from(new Uint8Array(h)).slice(0, 16).map((x) => x.toString(16).padStart(2, "0")).join("");
-};
-
-const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, GET, OPTIONS", "Access-Control-Allow-Headers": "content-type" };
+const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, OPTIONS", "Access-Control-Allow-Headers": "content-type" };
 const antwoord = (data, status = 200) => Response.json(data, { status, headers: CORS });
 
 const laadBestelling = async (db, id) => {
   const { data, error } = await db.from("bestellingen")
-    .select("*, klanten(*), bestelregels(*, producten(soort, prijs_ex))").eq("id", id)
+    .select("*, klanten(*), bestelregels(*)").eq("id", id)
     .order("id", { referencedTable: "bestelregels" }).maybeSingle();
   if (error) throw error;
   return data;
@@ -275,11 +282,9 @@ const mailsVoor = async (db, id) => {
   const naarKlant = Deno.env.get("KLANTMAIL") === "aan";
   const klantAdres = naarKlant ? k.email : vmv;
   const doorsturen = naarKlant ? null : k.email;
-  const sleutel = await sleutelVan(id);
-  const beheerUrl = Deno.env.get("BEHEER_URL") || `${SITE}/horeca/beheer/`;
   const ctx = {
-    kopband: `${Deno.env.get("SUPABASE_URL")}/functions/v1/bestelmail?beeld=kop`,
-    beheer: (actie) => `${beheerUrl}?id=${id}&sleutel=${sleutel}&actie=${actie}`
+    kopband: kopband(),
+    beheer: (actie) => `${beheerUrl()}?id=${id}&actie=${actie}`
   };
   const verstuurd = [];
 
@@ -295,71 +300,25 @@ const mailsVoor = async (db, id) => {
   return antwoord({ verstuurd });
 };
 
-// ---------- Beheer (aanroep door de pagina /horeca/beheer/) ----------
-const beheer = async (db, vraag) => {
-  const id = vraag.id;
-  if (typeof vraag.sleutel !== "string" || vraag.sleutel !== await sleutelVan(id)) return antwoord({ fout: "Deze link klopt niet of is verlopen." }, 403);
-  const b = await laadBestelling(db, id);
-  if (!b) return antwoord({ fout: "Deze bestelling bestaat niet meer." }, 404);
-  const bericht = typeof vraag.bericht === "string" && vraag.bericht.trim() ? vraag.bericht.trim().slice(0, 2000) : null;
-  const alAfgehandeld = () => antwoord({ fout: `Deze bestelling is al ${STATUS[b.status] || b.status}.` }, 409);
-
-  if (vraag.actie === "bekijk") {
-    const k = b.klanten;
-    const { data: inst } = await db.from("instellingen").select("schenk_vanaf, glas_staffel_vanaf, glas_staffel_prijs_ex").maybeSingle();
-    // Prijs zonder korting, voor als de korting vervalt bij een kleiner aantal
-    // (dezelfde regels als supabase/007-korting-bij-bevestigen.sql)
-    const normaal = (r) => {
-      const p = r.producten;
-      if (p && p.soort === "glas") return Number(p.prijs_ex);
-      if (!(r.korting_pct > 0)) return Number(r.prijs_ex);
-      if (p && centen(Number(p.prijs_ex) * (1 - r.korting_pct / 100)) === centen(r.prijs_ex)) return Number(p.prijs_ex);
-      return centen(r.prijs_ex / (1 - r.korting_pct / 100)) / 100;
-    };
-    return antwoord({
-      schenk_vanaf: inst.schenk_vanaf, glas_staffel_vanaf: inst.glas_staffel_vanaf,
-      bestelnummer: b.bestelnummer, status: b.status, besteld_op: b.besteld_op, spoed: b.spoed,
-      opmerking: b.opmerking, bericht_klant: b.bericht_klant,
-      klant: { bedrijfsnaam: k.bedrijfsnaam, contactpersoon: k.contactpersoon, telefoon: k.telefoon, email: k.email, adres: adres(k) },
-      regels: b.bestelregels.map((r) => ({
-        id: r.id, omschrijving: r.omschrijving, aantal: r.aantal, prijs_ex: r.prijs_ex, korting_pct: r.korting_pct,
-        regel_ex: r.regel_ex, allocatie: r.allocatie, toegewezen: r.toegewezen,
-        glas: !!(r.producten && r.producten.soort === "glas"),
-        staffel: !!(r.producten && r.producten.soort === "glas" && centen(r.prijs_ex) === centen(inst.glas_staffel_prijs_ex)),
-        prijs_normaal: normaal(r)
-      }))
-    });
+// ---------- Welkomstmail (aanroep door de database bij goedkeuring) ----------
+const welkomVoor = async (db, id) => {
+  const { data: k, error } = await db.from("klanten").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  if (!k) return antwoord({ fout: "onbekende klant" }, 404);
+  if (k.status !== "goedgekeurd") return antwoord({ verstuurd: [] });
+  // Tijdstempel zetten; lukt dat niet (al gezet), dan is de mail al eens verstuurd
+  const { data: gezet } = await db.from("klanten").update({ mail_welkom_op: new Date().toISOString() })
+    .eq("id", id).is("mail_welkom_op", null).select("id");
+  if (!(gezet && gezet.length)) return antwoord({ verstuurd: [] });
+  const vmv = Deno.env.get("VMV_MAIL") || "info@vmvwijnimport.com";
+  const naarKlant = Deno.env.get("KLANTMAIL") === "aan";
+  try {
+    await verstuur(naarKlant ? k.email : vmv, vmv, mailWelkom(k, naarKlant ? null : k.email, { kopband: kopband() }));
+  } catch (e) {
+    await db.from("klanten").update({ mail_welkom_op: null }).eq("id", id);
+    throw e;
   }
-
-  if (vraag.actie === "bevestig") {
-    if (b.status !== "ontvangen") return alAfgehandeld();
-    const gekozen = {};
-    (Array.isArray(vraag.regels) ? vraag.regels : []).forEach((x) => { gekozen[x.id] = x.leveren; });
-    const leveren = b.bestelregels.map((r) => {
-      const n = gekozen[r.id] === undefined ? r.aantal : Number(gekozen[r.id]);
-      return { id: r.id, n: Number.isInteger(n) && n >= 0 && n <= r.aantal ? n : null };
-    });
-    if (leveren.some((x) => x.n === null)) return antwoord({ fout: "Vul bij elke wijn een aantal in tussen 0 en het bestelde aantal." }, 400);
-    if (leveren.every((x) => x.n === 0)) return antwoord({ fout: "Je levert niets. Kies Afkeuren als de bestelling niet doorgaat." }, 400);
-    for (const x of leveren) {
-      const { error } = await db.from("bestelregels").update({ toegewezen: x.n }).eq("id", x.id).eq("bestelling_id", id);
-      if (error) throw error;
-    }
-    // De database ziet de nieuwe status en laat deze functie de bevestiging versturen
-    const { data, error } = await db.from("bestellingen").update({ bericht_klant: bericht, status: "bevestigd" })
-      .eq("id", id).eq("status", "ontvangen").select("id");
-    if (error) throw error;
-    return data.length ? antwoord({ ok: true, status: "bevestigd" }) : alAfgehandeld();
-  }
-
-  if (vraag.actie === "afkeur") {
-    if (b.status !== "ontvangen") return alAfgehandeld();
-    const { data, error } = await db.from("bestellingen").update({ bericht_klant: bericht, status: "geannuleerd" })
-      .eq("id", id).eq("status", "ontvangen").select("id");
-    if (error) throw error;
-    return data.length ? antwoord({ ok: true, status: "geannuleerd" }) : alAfgehandeld();
-  }
-  return antwoord({ fout: "onbekende actie" }, 400);
+  return antwoord({ verstuurd: ["welkom"] });
 };
 
 if (typeof Deno !== "undefined") Deno.serve(async (req) => {
@@ -374,10 +333,11 @@ if (typeof Deno !== "undefined") Deno.serve(async (req) => {
   }
   try {
     const vraag = await req.json();
-    if (!Number.isInteger(vraag.id)) return antwoord({ fout: "geen geldig id" }, 400);
+    const klant = typeof vraag.klant === "string" && /^[0-9a-f-]{36}$/i.test(vraag.klant);
+    if (!klant && !Number.isInteger(vraag.id)) return antwoord({ fout: "geen geldig id" }, 400);
     const { createClient } = await import("jsr:@supabase/supabase-js@2");
     const db = createClient(Deno.env.get("SUPABASE_URL"), Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"));
-    return vraag.actie ? await beheer(db, vraag) : await mailsVoor(db, vraag.id);
+    return klant ? await welkomVoor(db, vraag.klant) : await mailsVoor(db, vraag.id);
   } catch (e) {
     console.error(e);
     return antwoord({ fout: "Er ging iets mis. Probeer het opnieuw." }, 500);
