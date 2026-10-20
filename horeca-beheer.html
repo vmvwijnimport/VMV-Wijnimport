@@ -1,0 +1,62 @@
+---
+layout: default
+title: Bestelling afhandelen
+permalink: /horeca/beheer/
+noindex: true
+sitemap: false
+description: Een horecabestelling bevestigen of afkeuren.
+---
+{%- comment -%}
+  Alleen voor VMV, via de knoppen in de mail "Nieuwe bestelling". De link bevat
+  het id van de bestelling en een sleutel; zonder die sleutel geeft de functie
+  niets terug. Er staan geen prijzen in deze pagina: die komen pas na het laden.
+  Logica: assets/js/horeca-beheer.js. Functie: supabase/functions/bestelmail.
+{%- endcomment -%}
+<section class="pagina pagina--breed beheer" id="beheer"
+         data-functie="{{ site.horeca.supabase_url }}/functions/v1/bestelmail">
+  <header class="pagina__kop">
+    <h1>Bestelling afhandelen</h1>
+  </header>
+
+  <p class="horeca__laden" data-toestand="laden">Even geduld…</p>
+  <p class="beheer__fout" data-toestand="fout" hidden></p>
+
+  <div class="beheer__raster" data-toestand="bestelling" hidden>
+    <div>
+      <h2 class="beheer__nummer" data-veld="nummer"></h2>
+      <p class="beheer__status" data-veld="status" hidden></p>
+      <div class="regiokeuze beheer__keuze" role="group" aria-label="Wat wil je doen?">
+        <button type="button" data-modus="bevestigen" aria-pressed="false">Bevestigen</button>
+        <button type="button" data-modus="wijzigen" aria-pressed="false">Bevestigen met wijziging</button>
+        <button type="button" data-modus="afkeuren" aria-pressed="false">Afkeuren</button>
+      </div>
+      <p class="beheer__uitleg" data-veld="uitleg"></p>
+      <ul class="beheer__regels"></ul>
+      <dl class="mandje__totalen beheer__totalen">
+        <div><dt>Totaal excl. btw</dt><dd data-totaal="ex"></dd></div>
+        <div><dt>Btw 21%</dt><dd data-totaal="btw"></dd></div>
+        <div class="mandje__totaal"><dt>Totaal incl. btw</dt><dd data-totaal="incl"></dd></div>
+      </dl>
+      <form class="beheer__formulier" id="beheerformulier" novalidate>
+        <div class="veld">
+          <label for="beheer-bericht" data-veld="berichtlabel">Bericht aan de klant <span class="veld__optioneel">(niet verplicht)</span></label>
+          <textarea id="beheer-bericht" name="bericht" rows="3" aria-describedby="beheer-bericht-uitleg"></textarea>
+          <p class="beheer__klein" id="beheer-bericht-uitleg" data-veld="berichtuitleg"></p>
+        </div>
+        <button class="knop knop--primair" type="submit" data-veld="knop">Bestelling bevestigen</button>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+    <aside class="beheer__klant" aria-labelledby="beheer-klant-kop">
+      <h2 class="beheer__klantkop" id="beheer-klant-kop">Klant</h2>
+      <dl class="beheer__gegevens" data-veld="klant"></dl>
+    </aside>
+  </div>
+
+  <div class="beheer__klaar" data-toestand="klaar" hidden tabindex="-1">
+    <h2 data-veld="klaarkop"></h2>
+    <p data-veld="klaartekst"></p>
+  </div>
+</section>
+
+<script src="{{ '/assets/js/horeca-beheer.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

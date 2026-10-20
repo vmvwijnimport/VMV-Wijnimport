@@ -250,20 +250,25 @@ Ga naar **Table Editor → producten**. Elke regel is één wijn (of glas). Dubb
 
 Bij een nieuwe bestelling krijg je een mail op info@ in de huisstijl, met alle regels, de klantgegevens, het afleveradres en of het **spoed** heeft. De klant krijgt een **overzicht van zijn bestelaanvraag**, met daarin duidelijk dat het nog geen bevestiging is.
 
-**Een bestelling bevestigen**
+**Een bestelling afhandelen via de mail**
 
-1. Ga naar **Table Editor → bestellingen**. Nieuwe bestellingen staan op `ontvangen`; de klant ziet "Wacht op bevestiging".
-2. Kijk of alles leverbaar is. Kun je van een wijn minder leveren, of is het een **allocatiewijn**? Ga dan naar **Table Editor → bestelregels** en vul bij `toegewezen` het aantal in dat je levert (`0` = niet leverbaar). Laat je `toegewezen` leeg, dan lever je het bestelde aantal.
-3. Wil je de klant iets laten weten, zoals de leverdag? Zet dat bij de bestelling in `bericht_klant`.
-4. Zet de status op `bevestigd`. De klant krijgt dan **automatisch een bevestigingsmail** met de aantallen die je levert, de nieuwe totalen en je bericht. In het portaal ziet de klant "Bevestigd".
-5. Na het leveren zet je de status op `geleverd`. Kan een bestelling niet doorgaan, dan zet je hem op `geannuleerd` en neem je contact op met de klant (daar gaat geen automatische mail bij).
-6. **Maak de factuur in e-Boekhouden**, zoals altijd. De site maakt geen facturen, zodat je nummering klopt.
+In de mail "Nieuwe bestelling" staan drie knoppen. Elke knop opent de pagina **Bestelling afhandelen** op de site, met de bestelling en de klantgegevens. Er gebeurt pas iets als je op die pagina op de knop onderaan klikt.
 
-Let op: vul `toegewezen` en `bericht_klant` **vóór** je de status op `bevestigd` zet. De bevestiging gaat maar één keer weg.
+- **Bevestigen:** je levert alles zoals besteld. Zet eventueel een bericht voor de klant erbij, zoals de leverdag, en klik op **Bestelling bevestigen**.
+- **Bevestigen met wijziging:** vul per wijn in hoeveel je levert (`0` = niet leverbaar). Dat is ook de plek voor **allocatiewijnen**. De totalen rekenen direct mee. Klik op **Bevestigen met deze aantallen**.
+- **Afkeuren:** de bestelling gaat niet door. Vul eventueel de reden in en klik op **Bestelling afkeuren**.
 
-Zolang Resend nog niet naar klanten mag mailen (de DNS-records), komt de bevestiging bij info@ binnen met bovenaan "Nog niet naar de klant verstuurd". Stuur hem dan zelf door naar het adres dat erbij staat. Het overzicht na het bestellen krijgt de klant in die periode als gewone tekstmail via FormSubmit.
+De klant krijgt daarna automatisch een mail: een bevestiging met de aantallen die je levert en je bericht, of een mail dat de bestelling niet doorgaat. In het portaal ziet de klant de nieuwe status. Een bestelling die al is afgehandeld, kun je niet nog een keer bevestigen of afkeuren.
 
-De bedragen in een bestelling berekent de database zelf. Wat een klant in zijn browser doet, kan de prijs niet veranderen. Lever je minder, dan blijft de prijs per stuk zoals besteld.
+Daarna:
+1. Na het leveren zet je in Supabase (**Table Editor → bestellingen**) de status op `geleverd`.
+2. **Maak de factuur in e-Boekhouden**, zoals altijd. De site maakt geen facturen, zodat je nummering klopt.
+
+Bewaar de mails met de knoppen goed en stuur ze niet door: met de link kan iemand de bestelling afhandelen.
+
+**Liever via Supabase?** Dat kan ook. Vul in **bestelregels** bij `toegewezen` het aantal in dat je levert en in **bestellingen** eventueel `bericht_klant`, en zet daarna de status op `bevestigd` of `geannuleerd`. De mail aan de klant gaat dan ook automatisch.
+
+De bedragen berekent de database zelf. Wat een klant in zijn browser doet, kan de prijs niet veranderen. Lever je minder, dan blijft de prijs per stuk zoals besteld.
 
 ### Een klant verwijderen
 
