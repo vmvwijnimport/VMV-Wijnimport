@@ -212,13 +212,15 @@
           return x.aantal + " × " + x.omschrijving + " à " + euro(x.prijs_ex) + (x.korting_pct > 0 ? " (" + x.korting_pct + "% korting)" : "") +
             " = " + euro(x.regel_ex) + (x.allocatie ? " [ALLOCATIE-AANVRAAG]" : "");
         }).join("\n");
-        fetch(pagina.dataset.mail, {
+        // Zolang Resend nog niet naar klanten mailt, gaat de mail naar VMV en het overzicht
+        // voor de klant via FormSubmit; daarna verstuurt de database alles zelf (zie supabase/005)
+        if (pagina.dataset.klantmail !== "resend") fetch(pagina.dataset.mail, {
           method: "POST",
           headers: { "Content-Type": "application/json", Accept: "application/json" },
           body: JSON.stringify({
             _subject: "Horecabestelling " + best.bestelnummer + " – " + klant.bedrijfsnaam + (spoed ? " – SPOED" : ""),
             _template: "box", _captcha: "false", _replyto: klant.email,
-            _autoresponse: "Bedankt voor je bestelling " + best.bestelnummer + " bij VMV Wijnimport. We hebben hem ontvangen. Je bestelling is pas definitief als wij hem hebben bevestigd; is er van een wijn te weinig voorraad, dan nemen we contact met je op. Na levering ontvang je een factuur met een betaaltermijn van " + inst.betaaltermijn_dagen + " dagen.",
+            _autoresponse: "Bedankt voor je bestelaanvraag " + best.bestelnummer + " bij VMV Wijnimport. Dit is nog geen bevestiging: we controleren eerst de voorraad en sturen je een bevestiging zodra je bestelling definitief is. Je overzicht staat in het horecaportaal onder 'Je bestellingen'. Na levering ontvang je een factuur met een betaaltermijn van " + inst.betaaltermijn_dagen + " dagen.",
             email: klant.email,
             bestelnummer: best.bestelnummer,
             klant: klant.bedrijfsnaam + " (" + klant.contactpersoon + ", " + klant.telefoon + ")",
@@ -257,32 +259,42 @@
   var bestelDoel = pagina.querySelector("[data-bestellingen]");
   var laadBestellingen = function () {
     window.vmvHoreca.db.from("bestellingen")
-      .select("bestelnummer, besteld_op, status, spoed, totaal_ex, bevat_aanvraag, bestelregels(omschrijving, aantal, prijs_ex, korting_pct, regel_ex, allocatie, toegewezen)")
+      .select("bestelnummer, besteld_op, status, spoed, totaal_ex, bevat_aanvraag, bericht_klant, bestelregels(omschrijving, aantal, prijs_ex, korting_pct, regel_ex, allocatie, toegewezen)")
       .order("besteld_op", { ascending: false })
       .then(function (r) {
         bestelDoel.textContent = "";
         if (r.error) throw r.error;
         if (!r.data.length) { bestelDoel.appendChild(el("p", "horeca__klein", "Je hebt nog geen bestellingen geplaatst.")); return; }
         r.data.forEach(function (b) {
+          // Na bevestiging telt het aantal dat VMV levert (toegewezen; leeg = besteld), zoals in de bevestigingsmail
+          var bevestigd = b.status === "bevestigd" || b.status === "geleverd";
+          var totaal = 0;
+          b.bestelregels.forEach(function (x) {
+            x.getoond = bevestigd && x.toegewezen != null ? x.toegewezen : x.aantal;
+            x.bedrag = bevestigd ? Math.round(x.prijs_ex * 100) * x.getoond / 100 : Number(x.regel_ex);
+            totaal += Math.round(x.bedrag * 100);
+          });
           var d = el("details", "bestelling");
           var s = el("summary", "bestelling__kop");
           s.appendChild(el("span", "bestelling__nummer", b.bestelnummer));
           s.appendChild(el("span", null, new Date(b.besteld_op).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" })));
           s.appendChild(el("span", "label", STATUS[b.status] || b.status));
-          s.appendChild(el("span", "bestelling__totaal", euro(b.totaal_ex) + " excl. btw"));
+          s.appendChild(el("span", "bestelling__totaal", euro(totaal / 100) + " excl. btw"));
           d.appendChild(s);
           var ul = el("ul", "mandje__regels");
           b.bestelregels.forEach(function (x) {
             var li = el("li");
-            var links = el("span", null, x.aantal + " × " + x.omschrijving);
+            var links = el("span", null, x.getoond + " × " + x.omschrijving);
             var extra = [];
             if (x.korting_pct > 0) extra.push(String(x.korting_pct).replace(".", ",") + "% schenkkorting");
-            if (x.allocatie) extra.push(x.toegewezen != null ? "toegewezen: " + x.toegewezen : "allocatie-aanvraag");
+            if (x.getoond !== x.aantal) extra.push(x.getoond === 0 ? "niet leverbaar (besteld: " + x.aantal + ")" : "besteld: " + x.aantal + ", we leveren: " + x.getoond);
+            else if (x.allocatie && !bevestigd) extra.push("allocatie-aanvraag");
             if (extra.length) links.appendChild(el("small", null, extra.join(" · ")));
             li.appendChild(links);
-            li.appendChild(el("span", null, euro(x.regel_ex)));
+            li.appendChild(el("span", null, euro(x.bedrag)));
             ul.appendChild(li);
           });
+          if (b.bericht_klant) d.appendChild(el("p", "bestel__voorbehoud", "Bericht van ons: " + b.bericht_klant));
           d.appendChild(ul);
           if (b.spoed) d.appendChild(el("p", "horeca__klein", "Met spoed besteld."));
           bestelDoel.appendChild(d);

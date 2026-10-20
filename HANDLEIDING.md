@@ -248,14 +248,22 @@ Ga naar **Table Editor → producten**. Elke regel is één wijn (of glas). Dubb
 
 ### Bestellingen afhandelen
 
-Bij een bestelling krijg je een mail op info@ met alle regels, het afleveradres en of het **spoed** heeft. De klant krijgt automatisch een bevestiging, met daarin dat de bestelling pas definitief is na jullie bevestiging.
+Bij een nieuwe bestelling krijg je een mail op info@ in de huisstijl, met alle regels, de klantgegevens, het afleveradres en of het **spoed** heeft. De klant krijgt een **overzicht van zijn bestelaanvraag**, met daarin duidelijk dat het nog geen bevestiging is.
+
+**Een bestelling bevestigen**
 
 1. Ga naar **Table Editor → bestellingen**. Nieuwe bestellingen staan op `ontvangen`; de klant ziet "Wacht op bevestiging".
-2. Kijk of alles leverbaar is. Bij **allocatiewijnen** vul je in **Table Editor → bestelregels** bij `toegewezen` het aantal in dat je kunt leveren. De klant ziet dat in zijn overzicht.
-3. Zet de status op `bevestigd`, later op `geleverd`. Kan een bestelling niet doorgaan, dan zet je hem op `geannuleerd` (neem wel even contact op met de klant).
-4. **Maak de factuur in e-Boekhouden**, zoals altijd. De site maakt geen facturen, zodat je nummering klopt.
+2. Kijk of alles leverbaar is. Kun je van een wijn minder leveren, of is het een **allocatiewijn**? Ga dan naar **Table Editor → bestelregels** en vul bij `toegewezen` het aantal in dat je levert (`0` = niet leverbaar). Laat je `toegewezen` leeg, dan lever je het bestelde aantal.
+3. Wil je de klant iets laten weten, zoals de leverdag? Zet dat bij de bestelling in `bericht_klant`.
+4. Zet de status op `bevestigd`. De klant krijgt dan **automatisch een bevestigingsmail** met de aantallen die je levert, de nieuwe totalen en je bericht. In het portaal ziet de klant "Bevestigd".
+5. Na het leveren zet je de status op `geleverd`. Kan een bestelling niet doorgaan, dan zet je hem op `geannuleerd` en neem je contact op met de klant (daar gaat geen automatische mail bij).
+6. **Maak de factuur in e-Boekhouden**, zoals altijd. De site maakt geen facturen, zodat je nummering klopt.
 
-De bedragen in een bestelling berekent de database zelf. Wat een klant in zijn browser doet, kan de prijs niet veranderen.
+Let op: vul `toegewezen` en `bericht_klant` **vóór** je de status op `bevestigd` zet. De bevestiging gaat maar één keer weg.
+
+Zolang Resend nog niet naar klanten mag mailen (de DNS-records), komt de bevestiging bij info@ binnen met bovenaan "Nog niet naar de klant verstuurd". Stuur hem dan zelf door naar het adres dat erbij staat. Het overzicht na het bestellen krijgt de klant in die periode als gewone tekstmail via FormSubmit.
+
+De bedragen in een bestelling berekent de database zelf. Wat een klant in zijn browser doet, kan de prijs niet veranderen. Lever je minder, dan blijft de prijs per stuk zoals besteld.
 
 ### Een klant verwijderen
 
