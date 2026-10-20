@@ -15,6 +15,10 @@
     if (tekst != null) e.textContent = tekst;
     return e;
   };
+  // Naam van de filterknop per groep, en de volgorde van de knoppen
+  var FILTERNAAM = { Franken: "Duitsland", "Piëmont": "Italië" };
+  var VOLGORDE = ["Champagne", "Bourgogne", "Duitsland", "Italië", "Glaswerk"];
+  var filterNaam = function (g) { return g.soort === "glas" ? "Glaswerk" : FILTERNAAM[g.regio] || g.regio || ""; };
   var STATUS = { op_voorraad: "", binnenkort: "Binnenkort", uitverkocht: "Uitverkocht" };
 
   var toonAssortiment = function (producten, inst) {
@@ -37,7 +41,7 @@
 
     groepen.forEach(function (g) {
       var sectie = el("section", "assortiment__groep");
-      sectie.dataset.regio = g.soort === "glas" ? "Glaswerk" : (g.regio || "");
+      sectie.dataset.regio = filterNaam(g);
       var kop = el("h2", "regio__naam");
       kop.appendChild(document.createTextNode(g.naam));
       if (g.regio) kop.appendChild(el("span", null, g.regio));
@@ -88,9 +92,11 @@
   var voegFilterToe = function (groepen) {
     var regios = [];
     groepen.forEach(function (g) {
-      var r = g.soort === "glas" ? "Glaswerk" : g.regio;
+      var r = filterNaam(g);
       if (r && regios.indexOf(r) < 0) regios.push(r);
     });
+    var plek = function (r) { var i = VOLGORDE.indexOf(r); return i < 0 ? VOLGORDE.length : i; };
+    regios.sort(function (a, b) { return plek(a) - plek(b); });
 
     var balk = el("div", "assortiment__filter");
     var label = el("label", "visueel-verborgen", "Zoek een wijn");

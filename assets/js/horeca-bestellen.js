@@ -105,6 +105,28 @@
   var form = document.getElementById("bestelformulier-horeca");
   var klaar = mandjeEl.querySelector(".bestel__klaar");
   var balk = pagina.querySelector(".portaal__balk-mobiel");
+  var kiezen = mandjeEl.querySelector("[data-stap=kiezen]");
+
+  // Twee stappen: eerst aantallen kiezen, dan bezorging en opmerking
+  var naarStap = function (stap) {
+    kiezen.hidden = stap !== "kiezen";
+    form.hidden = stap !== "bestellen";
+    if (stap === "bestellen") form.querySelector("[data-actie=terug]").focus();
+    else mandjeEl.querySelector("[data-actie=verder]").focus();
+    if (mandjeEl.getBoundingClientRect().top < 0) mandjeEl.scrollIntoView();
+    toonScrolhint();
+  };
+  mandjeEl.querySelector("[data-actie=verder]").addEventListener("click", function () { naarStap("bestellen"); });
+  form.querySelector("[data-actie=terug]").addEventListener("click", function () { naarStap("kiezen"); });
+
+  // Past een stap niet in het mandje, dan zeggen we dat je erin kunt scrollen
+  var toonScrolhint = function () {
+    [[kiezen, ".mandje__regels"], [form, ".mandje__midden"]].forEach(function (x) {
+      var vak = x[0].querySelector(x[1]);
+      x[0].querySelector(".mandje__scrolhint").hidden = x[0].hidden || vak.scrollHeight <= vak.clientHeight + 1;
+    });
+  };
+  window.addEventListener("resize", toonScrolhint);
 
   var toon = function () {
     document.querySelectorAll("#assortiment .wijnregel").forEach(function (li) {
@@ -115,6 +137,7 @@
     var b = berekening();
     leeg.hidden = b.regels.length > 0;
     inhoud.hidden = b.regels.length === 0;
+    if (!b.regels.length) { kiezen.hidden = false; form.hidden = true; }
     if (b.regels.length) klaar.hidden = true;
 
     var lijst = mandjeEl.querySelector(".mandje__regels");
@@ -156,6 +179,9 @@
     mandjeEl.querySelector("[data-mandje=tip]").textContent = tips.join(" ");
 
     var stuks = b.flessen + b.glazen;
+    mandjeEl.querySelector("[data-mandje=samenvatting]").textContent =
+      stuks + (stuks === 1 ? " stuk" : " stuks") + ", " + euro(b.totaal) + " excl. btw";
+    toonScrolhint();
     balk.hidden = b.regels.length === 0;
     balk.querySelector("a").textContent = "Je bestelling: " + stuks + (stuks === 1 ? " stuk" : " stuks") + " · " + euro(b.totaal) + " excl. btw";
   };
