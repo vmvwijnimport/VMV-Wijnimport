@@ -258,7 +258,7 @@ const antwoord = (data, status = 200) => Response.json(data, { status, headers: 
 
 const laadBestelling = async (db, id) => {
   const { data, error } = await db.from("bestellingen")
-    .select("*, klanten(*), bestelregels(*)").eq("id", id)
+    .select("*, klanten(*), bestelregels(*, producten(soort, prijs_ex))").eq("id", id)
     .order("id", { referencedTable: "bestelregels" }).maybeSingle();
   if (error) throw error;
   return data;
@@ -306,11 +306,28 @@ const beheer = async (db, vraag) => {
 
   if (vraag.actie === "bekijk") {
     const k = b.klanten;
+    const { data: inst } = await db.from("instellingen").select("schenk_vanaf, glas_staffel_vanaf, glas_staffel_prijs_ex").maybeSingle();
+    // Prijs zonder korting, voor als de korting vervalt bij een kleiner aantal
+    // (dezelfde regels als supabase/007-korting-bij-bevestigen.sql)
+    const normaal = (r) => {
+      const p = r.producten;
+      if (p && p.soort === "glas") return Number(p.prijs_ex);
+      if (!(r.korting_pct > 0)) return Number(r.prijs_ex);
+      if (p && centen(Number(p.prijs_ex) * (1 - r.korting_pct / 100)) === centen(r.prijs_ex)) return Number(p.prijs_ex);
+      return centen(r.prijs_ex / (1 - r.korting_pct / 100)) / 100;
+    };
     return antwoord({
+      schenk_vanaf: inst.schenk_vanaf, glas_staffel_vanaf: inst.glas_staffel_vanaf,
       bestelnummer: b.bestelnummer, status: b.status, besteld_op: b.besteld_op, spoed: b.spoed,
       opmerking: b.opmerking, bericht_klant: b.bericht_klant,
       klant: { bedrijfsnaam: k.bedrijfsnaam, contactpersoon: k.contactpersoon, telefoon: k.telefoon, email: k.email, adres: adres(k) },
-      regels: b.bestelregels.map((r) => ({ id: r.id, omschrijving: r.omschrijving, aantal: r.aantal, prijs_ex: r.prijs_ex, korting_pct: r.korting_pct, regel_ex: r.regel_ex, allocatie: r.allocatie, toegewezen: r.toegewezen }))
+      regels: b.bestelregels.map((r) => ({
+        id: r.id, omschrijving: r.omschrijving, aantal: r.aantal, prijs_ex: r.prijs_ex, korting_pct: r.korting_pct,
+        regel_ex: r.regel_ex, allocatie: r.allocatie, toegewezen: r.toegewezen,
+        glas: !!(r.producten && r.producten.soort === "glas"),
+        staffel: !!(r.producten && r.producten.soort === "glas" && centen(r.prijs_ex) === centen(inst.glas_staffel_prijs_ex)),
+        prijs_normaal: normaal(r)
+      }))
     });
   }
 

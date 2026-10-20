@@ -268,7 +268,7 @@ Bewaar de mails met de knoppen goed en stuur ze niet door: met de link kan ieman
 
 **Liever via Supabase?** Dat kan ook. Vul in **bestelregels** bij `toegewezen` het aantal in dat je levert en in **bestellingen** eventueel `bericht_klant`, en zet daarna de status op `bevestigd` of `geannuleerd`. De mail aan de klant gaat dan ook automatisch.
 
-De bedragen berekent de database zelf. Wat een klant in zijn browser doet, kan de prijs niet veranderen. Lever je minder, dan blijft de prijs per stuk zoals besteld.
+De bedragen berekent de database zelf. Wat een klant in zijn browser doet, kan de prijs niet veranderen. Lever je minder, dan geldt een korting alleen nog als het geleverde aantal er recht op geeft: de schenkkorting vanaf 24 flessen van dezelfde wijn, de staffelprijs voor Hedonist vanaf 12 glazen. Op de pagina zie je dat meteen ("geen schenkkorting meer"), en de bevestiging aan de klant heeft de juiste bedragen.
 
 ### Een klant verwijderen
 

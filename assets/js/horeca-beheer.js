@@ -65,8 +65,22 @@
     var n = invoer ? parseInt(invoer.value, 10) : r.aantal;
     return isNaN(n) ? 0 : Math.max(0, Math.min(r.aantal, n));
   };
+  // Prijs per stuk bij het aantal dat je levert. De korting vervalt als dat aantal er geen recht meer
+  // op geeft: schenkkorting vanaf schenk_vanaf flessen, staffelprijs vanaf glas_staffel_vanaf glazen.
+  // De database rekent bij het bevestigen precies zo (supabase/007-korting-bij-bevestigen.sql).
+  var glazen = function () {
+    return bestelling.regels.reduce(function (som, r) { return som + (r.glas ? leveren(r) : 0); }, 0);
+  };
+  var vervalt = function (r, n) {
+    if (bestelling.status !== "ontvangen" || n === r.aantal) return "";
+    if (r.staffel && glazen() < bestelling.glas_staffel_vanaf) return "geen staffelprijs meer (minder dan " + bestelling.glas_staffel_vanaf + " glazen)";
+    if (r.korting_pct > 0 && n < bestelling.schenk_vanaf) return "geen schenkkorting meer (minder dan " + bestelling.schenk_vanaf + " flessen)";
+    return "";
+  };
   var bedrag = function (r, n) {
-    return n === r.aantal ? Number(r.regel_ex) : Math.round(r.prijs_ex * 100) * n / 100;
+    if (n === r.aantal) return Number(r.regel_ex);
+    var stuk = vervalt(r, n) ? r.prijs_normaal : r.prijs_ex;
+    return Math.round(stuk * 100) * n / 100;
   };
 
   var totalen = function () {
@@ -76,6 +90,8 @@
       centen += Math.round(b * 100);
       var cel = lijst.querySelector("[data-bedrag='" + r.id + "']");
       if (cel) cel.textContent = euro(b);
+      var noot = lijst.querySelector("[data-vervalt='" + r.id + "']");
+      if (noot) noot.textContent = vervalt(r, n);
     });
     var btw = Math.round(centen * 0.21);
     pagina.querySelector("[data-totaal=ex]").textContent = euro(centen / 100);
@@ -97,6 +113,9 @@
       if (modus === "wijzigen" && !afgehandeld) extra.push("besteld: " + r.aantal);
       if (afgehandeld && getoond !== r.aantal) extra.push("besteld: " + r.aantal);
       if (extra.length) tekst.appendChild(el("small", null, extra.join(", ")));
+      var noot = el("small", "beheer__vervalt");
+      noot.dataset.vervalt = r.id;
+      tekst.appendChild(noot);
       li.appendChild(tekst);
 
       var vak = el("span", "beheer__leveren");

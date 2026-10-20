@@ -883,6 +883,8 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .beheer__regel--weg .beheer__tekst, .beheer__regel--weg .beheer__bedrag { color: var(--tekst-zacht); text-decoration: line-through; }
 .beheer__tekst { color: var(--zwart); }
 .beheer__tekst small { display: block; font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.beheer__tekst .beheer__vervalt { color: var(--rood); }
+.beheer__vervalt:empty { display: none; }
 .beheer__leveren { display: flex; align-items: center; gap: var(--s-1); font-size: var(--fs-klein); color: var(--tekst-zacht); }
 .beheer__van { min-width: 3.5em; }
 .beheer__invoer {
