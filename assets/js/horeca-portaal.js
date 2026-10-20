@@ -37,6 +37,7 @@
 
     groepen.forEach(function (g) {
       var sectie = el("section", "assortiment__groep");
+      sectie.dataset.regio = g.soort === "glas" ? "Hedonist-glazen" : (g.regio || "");
       var kop = el("h2", "regio__naam");
       kop.appendChild(document.createTextNode(g.naam));
       if (g.regio) kop.appendChild(el("span", null, g.regio));
@@ -55,6 +56,7 @@
       g.items.forEach(function (p) {
         var li = el("li", "wijnregel" + (p.beschikbaarheid === "uitverkocht" ? " wijnregel--uit" : ""));
         li.dataset.product = p.id;
+        li.dataset.zoek = [p.producent, p.naam, p.jaargang, p.druif, p.formaat, p.regio].join(" ").toLowerCase();
         if (p.kleur) li.appendChild(el("span", "stip stip--" + p.kleur));
         else li.appendChild(el("span", "stip stip--leeg"));
 
@@ -76,7 +78,72 @@
       sectie.appendChild(lijst);
       doel.appendChild(sectie);
     });
+    voegFilterToe(groepen);
     document.dispatchEvent(new CustomEvent("horeca:assortiment", { detail: { producten: producten, instellingen: inst } }));
+  };
+
+  // ---------- Zoeken en filteren op regio ----------
+  // Zonder accenten vergelijken, zodat "helene" ook "Hélène" vindt
+  var plat = function (s) { return s.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); };
+  var voegFilterToe = function (groepen) {
+    var regios = [];
+    groepen.forEach(function (g) {
+      var r = g.soort === "glas" ? "Hedonist-glazen" : g.regio;
+      if (r && regios.indexOf(r) < 0) regios.push(r);
+    });
+
+    var balk = el("div", "assortiment__filter");
+    var label = el("label", "visueel-verborgen", "Zoek een wijn");
+    label.htmlFor = "assortiment-zoek";
+    var zoek = el("input", "assortiment__zoek");
+    zoek.type = "search"; zoek.id = "assortiment-zoek";
+    zoek.placeholder = "Zoek op wijn, producent of druif";
+    balk.appendChild(label);
+    balk.appendChild(zoek);
+
+    var knoppen = el("div", "regiokeuze assortiment__regios");
+    knoppen.setAttribute("role", "group");
+    knoppen.setAttribute("aria-label", "Filter op regio");
+    var gekozen = "";
+    ["Alle"].concat(regios).forEach(function (r) {
+      var k = el("button", null, r);
+      k.type = "button";
+      k.dataset.regio = r === "Alle" ? "" : r;
+      k.setAttribute("aria-pressed", r === "Alle" ? "true" : "false");
+      k.addEventListener("click", function () {
+        gekozen = k.dataset.regio;
+        knoppen.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-pressed", b === k ? "true" : "false"); });
+        pas();
+      });
+      knoppen.appendChild(k);
+    });
+    balk.appendChild(knoppen);
+
+    var geen = el("p", "horeca__klein assortiment__geen", "Geen wijnen gevonden. Probeer een andere zoekterm of regio.");
+    geen.hidden = true;
+
+    var pas = function () {
+      var woorden = plat(zoek.value.trim().toLowerCase()).split(/\s+/).filter(Boolean);
+      var iets = false;
+      doel.querySelectorAll(".assortiment__groep").forEach(function (sectie) {
+        var regioPast = !gekozen || sectie.dataset.regio === gekozen;
+        var zichtbaar = 0;
+        sectie.querySelectorAll(".wijnregel").forEach(function (li) {
+          var tekst = plat(li.dataset.zoek);
+          var past = regioPast && woorden.every(function (w) { return tekst.indexOf(w) >= 0; });
+          li.hidden = !past;
+          if (past) zichtbaar++;
+        });
+        sectie.hidden = zichtbaar === 0;
+        if (zichtbaar) iets = true;
+      });
+      geen.hidden = iets;
+    };
+    zoek.addEventListener("input", pas);
+
+    var uitleg = doel.querySelector(".assortiment__uitleg");
+    uitleg.insertAdjacentElement("afterend", balk);
+    balk.insertAdjacentElement("afterend", geen);
   };
 
   document.addEventListener("horeca:goedgekeurd", function () {

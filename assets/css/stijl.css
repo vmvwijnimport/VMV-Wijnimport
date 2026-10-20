@@ -819,3 +819,27 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   .bestelling__kop { grid-template-columns: 1fr auto; }
 }
 .bestel__voorbehoud { margin: var(--s-2) 0 0; padding: 12px 14px; background: var(--champagne-licht); font-size: var(--fs-klein); color: var(--tekst); }
+
+/* Zoeken en filteren in het portaal */
+.visueel-verborgen { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.assortiment__filter { display: grid; gap: var(--s-2); margin-bottom: var(--s-6); }
+.assortiment__zoek {
+  width: 100%; max-width: 28rem; height: 48px; padding: 0 14px;
+  border: 1px solid var(--lijn); border-radius: 0; background: var(--wit); font: inherit; color: var(--zwart);
+}
+.assortiment__zoek:focus { outline: 2px solid var(--rood); outline-offset: 0; border-color: var(--rood); }
+.assortiment__regios { margin-bottom: 0; }
+.regiokeuze button {
+  padding: 10px var(--s-2); border: 1px solid var(--rood); background: transparent; cursor: pointer;
+  font: inherit; font-size: var(--fs-knop); font-weight: 500; color: var(--rood);
+}
+.regiokeuze button:hover, .regiokeuze button[aria-pressed="true"] { background: var(--rood); color: var(--wit); }
+.assortiment__geen { margin: 0 0 var(--s-6); }
+
+/* Aantallen aanpassen in het mandje */
+.mandje__regels li.mandje__regel { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px var(--s-2); padding: 12px 0; }
+.mandje__bedrag { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mandje__acties { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.mandje__acties .tekstknop { font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.mandje__acties .tekstknop:hover { color: var(--rood); }
+.portaal__mandjekop:focus { outline: none; }

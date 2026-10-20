@@ -63,24 +63,31 @@
     toon();
   };
 
+  // − aantal + ; gebruikt bij de wijnen en in het mandje
+  var aantalKnoppen = function (id, p, plek) {
+    var groep = el("span", "aantal aantal--licht");
+    groep.setAttribute("role", "group");
+    groep.setAttribute("aria-label", "Aantal " + omschrijving(p));
+    var min = el("button", "aantal__knop", "−"); min.type = "button"; min.setAttribute("aria-label", "Eén minder");
+    var veld = el("input", "aantal__veld"); veld.type = "number"; veld.min = "0"; veld.inputMode = "numeric";
+    veld.setAttribute("aria-label", "Aantal " + (p.soort === "glas" ? "glazen" : "flessen") + " " + omschrijving(p));
+    var plus = el("button", "aantal__knop", "+"); plus.type = "button"; plus.setAttribute("aria-label", "Eén meer");
+    [min, veld, plus].forEach(function (x, i) { x.dataset.focus = plek + "-" + id + "-" + i; });
+    veld.value = mandje[id] || 0;
+    min.addEventListener("click", function () { zet(id, (mandje[id] || 0) - 1); });
+    plus.addEventListener("click", function () { zet(id, (mandje[id] || 0) + 1); });
+    veld.addEventListener("change", function () { zet(id, veld.value); });
+    groep.appendChild(min); groep.appendChild(veld); groep.appendChild(plus);
+    return groep;
+  };
+
   var voegKnoppenToe = function () {
     document.querySelectorAll("#assortiment .wijnregel").forEach(function (li) {
       var id = li.dataset.product, p = perId[id];
       if (!p || li.querySelector(".aantal")) return;
       var vak = el("span", "wijnregel__bestel");
       if (p.beschikbaarheid === "uitverkocht") { li.appendChild(vak); return; }
-      var groep = el("span", "aantal aantal--licht");
-      groep.setAttribute("role", "group");
-      groep.setAttribute("aria-label", "Aantal " + omschrijving(p));
-      var min = el("button", "aantal__knop", "−"); min.type = "button"; min.setAttribute("aria-label", "Eén minder");
-      var veld = el("input", "aantal__veld"); veld.type = "number"; veld.min = "0"; veld.inputMode = "numeric";
-      veld.setAttribute("aria-label", "Aantal " + (p.soort === "glas" ? "glazen" : "flessen") + " " + omschrijving(p));
-      var plus = el("button", "aantal__knop", "+"); plus.type = "button"; plus.setAttribute("aria-label", "Eén meer");
-      min.addEventListener("click", function () { zet(id, (mandje[id] || 0) - 1); });
-      plus.addEventListener("click", function () { zet(id, (mandje[id] || 0) + 1); });
-      veld.addEventListener("change", function () { zet(id, veld.value); });
-      groep.appendChild(min); groep.appendChild(veld); groep.appendChild(plus);
-      vak.appendChild(groep);
+      vak.appendChild(aantalKnoppen(id, p, "wijnregel"));
       if (p.soort !== "glas") {
         var doos = el("button", "tekstknop wijnregel__doos", "+ doos");
         doos.type = "button";
@@ -111,9 +118,11 @@
     if (b.regels.length) klaar.hidden = true;
 
     var lijst = mandjeEl.querySelector(".mandje__regels");
+    // Focus bewaren: het mandje wordt bij elke wijziging opnieuw opgebouwd
+    var focus = document.activeElement && lijst.contains(document.activeElement) ? document.activeElement.dataset.focus || "weg" : null;
     lijst.textContent = "";
     b.regels.forEach(function (r) {
-      var li = el("li");
+      var li = el("li", "mandje__regel");
       var links = el("span", null, r.aantal + " × " + omschrijving(r.p));
       var extra = [];
       if (r.korting) extra.push(String(r.korting).replace(".", ",") + "% schenkkorting");
@@ -121,9 +130,20 @@
       if (r.p.allocatie) extra.push("aanvraag, wij bevestigen het aantal");
       if (extra.length) links.appendChild(el("small", null, extra.join(" · ")));
       li.appendChild(links);
-      li.appendChild(el("span", null, euro(r.regel)));
+      li.appendChild(el("span", "mandje__bedrag", euro(r.regel)));
+      var acties = el("span", "mandje__acties");
+      acties.appendChild(aantalKnoppen(r.p.id, r.p, "mandje"));
+      var weg = el("button", "tekstknop", "Verwijderen");
+      weg.type = "button";
+      weg.setAttribute("aria-label", "Verwijder " + omschrijving(r.p) + " uit je bestelling");
+      weg.addEventListener("click", function () { zet(r.p.id, 0); });
+      acties.appendChild(weg);
+      li.appendChild(acties);
       lijst.appendChild(li);
     });
+    var terug = focus && lijst.querySelector('[data-focus="' + focus + '"]');
+    if (terug) terug.focus();
+    else if (focus) document.getElementById("bestel-kop").focus();
     mandjeEl.querySelector("[data-totaal=ex]").textContent = euro(b.totaal);
     mandjeEl.querySelector("[data-totaal=btw]").textContent = euro(b.totaal * 0.21);
     mandjeEl.querySelector("[data-totaal=incl]").textContent = euro(b.totaal * 1.21);
