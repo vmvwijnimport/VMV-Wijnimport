@@ -843,3 +843,23 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .mandje__acties .tekstknop { font-size: var(--fs-klein); color: var(--tekst-zacht); }
 .mandje__acties .tekstknop:hover { color: var(--rood); }
 .portaal__mandjekop:focus { outline: none; }
+
+/* Mandje in het portaal: altijd helemaal te zien. Is het hoger dan het scherm,
+   dan scrolt het mandje zelf, zodat de knop bereikbaar blijft zonder de hele pagina af te gaan */
+.portaal__mandje .veld textarea { min-height: 4.5rem; }
+@media (min-width: 64.0625rem) {
+  .portaal__mandje {
+    max-height: calc(100vh - var(--kopgrootte) - 2 * var(--s-3));
+    overflow-y: auto; overscroll-behavior: contain; padding: var(--s-3);
+  }
+  /* De knop blijft onderin het mandje staan tot je erbij bent */
+  /* De knop blijft onderin het mandje staan tot je erbij bent. De tussenliggende
+     blokken tellen niet mee als kader, zodat de knop aan het mandje zelf blijft hangen */
+  .portaal__mandje .mandje__inhoud, #bestelformulier-horeca { display: contents; }
+  .portaal__mandje .bestel__betaal { position: sticky; bottom: 0; z-index: 1; }
+  .portaal__mandje .bestel__betaal::before, .portaal__mandje .bestel__betaal::after {
+    content: ""; position: absolute; left: -1px; right: -1px; background: var(--wit);
+  }
+  .portaal__mandje .bestel__betaal::before { bottom: calc(100% + 1px); height: var(--s-1); }
+  .portaal__mandje .bestel__betaal::after { top: calc(100% + 1px); height: var(--s-3); }
+}

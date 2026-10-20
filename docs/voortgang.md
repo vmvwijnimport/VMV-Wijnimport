@@ -20,6 +20,7 @@ Bijgewerkt: 19 oktober 2026
 - **003 uitgevoerd** door de eigenaar; getest: een glas heet nu "HEDONIST Glas \"White\"" en een magnum krijgt "(Magnum 150 cl)" (testorder H-261019-F7F3).
 - **Fase 6 (deels):** de handleiding in HANDLEIDING.md bij "Het horecaportaal": goedkeuren, prijzen, voorraad en wijnen, instellingen, bestellingen afhandelen, klant verwijderen, wachtwoord vergeten en de beveiligingstest.
 - **Extra (20 okt), wens van de eigenaar:** zoeken (op wijn, producent, druif, jaargang; accenten maken niet uit) en knoppen per regio boven het assortiment (de glazen onder de knop "Glaswerk"); in het mandje rechts kun je per regel het aantal aanpassen (− / +) of de regel verwijderen. Getest als A: alle 70, "pinot" 24, Franken 6, onzin geeft "Geen wijnen gevonden"; aanpassen en verwijderen in het mandje werken; desktop en mobiel in orde. ✔
+- **Mandje altijd in beeld (20 okt), wens van de eigenaar:** op de computer past het mandje rechts altijd op het scherm; is het langer, dan scrolt het mandje zelf en blijft de knop "Bestelling plaatsen" onderin staan. De regel over betalen op factuur staat nu boven de knop. Getest op een laptopscherm (1440 × 900), bovenaan en helemaal omlaag gescrold. ✔
 - Het databasescript: `schema.sql` is uitgevoerd met "Success" (19 okt).
 - **Fase 1 (deels):** het databasescript `supabase/schema.sql` staat klaar, met tabellen, beveiliging (RLS) en de bestelfunctie die de prijs zelf berekent. De stappen voor de eigenaar staan in `docs/supabase-instellen.md`.
 
