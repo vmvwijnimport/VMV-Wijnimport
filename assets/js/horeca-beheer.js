@@ -141,10 +141,15 @@
     c1.appendChild(el("small", null, datum(b.besteld_op, true)));
     var c2 = el("span", "beheer__cel");
     c2.appendChild(el("span", null, b.klanten ? b.klanten.bedrijfsnaam : "Onbekende klant"));
-    var stuks = b.bestelregels.reduce(function (s, r) { return s + r.aantal; }, 0);
-    c2.appendChild(el("small", null, b.bestelregels.length + (b.bestelregels.length === 1 ? " wijn" : " wijnen") + ", " + stuks + " stuks"));
+    var stuks = b.bestelregels.reduce(function (s, r) { return s + getoond(b, r); }, 0);
+    var wijnen = b.bestelregels.length + (b.bestelregels.length === 1 ? " wijn" : " wijnen") + ", " + stuks + " stuks";
+    // Bij bevestigde bestellingen het afleveradres, om de leveringen te plannen
+    if (b.status === "bevestigd" && b.klanten) {
+      c2.appendChild(el("small", "beheer__adres", b.klanten.straat + ", " + b.klanten.postcode + " " + b.klanten.plaats));
+    }
+    c2.appendChild(el("small", null, wijnen));
     var c3 = el("span", "beheer__cel beheer__labels");
-    if (b.spoed && b.status === "ontvangen") c3.appendChild(el("span", "label label--spoed", "Spoed"));
+    if (b.spoed && (b.status === "ontvangen" || b.status === "bevestigd")) c3.appendChild(el("span", "label label--spoed", "Spoed"));
     if (b.bevat_aanvraag && b.status === "ontvangen") c3.appendChild(el("span", "label", "Allocatie"));
     c3.appendChild(el("span", "label label--" + b.status, STATUS_BESTELLING[b.status] || b.status));
     a.appendChild(c1); a.appendChild(c2); a.appendChild(c3);
@@ -180,6 +185,14 @@
     var lijst = scherm.querySelector("[data-lijst]");
     lijst.textContent = "";
     var gekozen = alle.filter(function (x) { return !filter[soort] || x.status === filter[soort]; });
+    // Te leveren bestellingen op postcode, zodat bestellingen in dezelfde buurt bij elkaar staan
+    var opPostcode = soort === "bestellingen" && filter.bestellingen === "bevestigd";
+    if (opPostcode) {
+      var pc = function (b) { return b.klanten ? b.klanten.postcode.replace(/\s/g, "").toUpperCase() : "~"; };
+      gekozen = gekozen.slice().sort(function (x, y) { return pc(x) < pc(y) ? -1 : pc(x) > pc(y) ? 1 : x.id - y.id; });
+    }
+    var uitleg = scherm.querySelector("[data-uitleg]");
+    if (uitleg) uitleg.hidden = !opPostcode || !gekozen.length;
     gekozen.forEach(function (x) {
       var li = el("li");
       li.appendChild(soort === "bestellingen" ? rijBestelling(x) : rijKlant(x));

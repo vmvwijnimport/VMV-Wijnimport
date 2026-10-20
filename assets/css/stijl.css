@@ -945,6 +945,8 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .label--spoed { border-color: var(--rood); color: var(--rood); }
 .label--geannuleerd, .label--afgewezen { color: var(--tekst-zacht); }
 .beheer__leeg { margin: var(--s-3) 0 0; color: var(--tekst-zacht); }
+.beheer__lijstuitleg { margin-bottom: var(--s-2); }
+.beheer__cel .beheer__adres { color: var(--tekst); }
 .beheer__terug { margin: 0 0 var(--s-3); font-size: var(--fs-klein); }
 .beheer__terug a { color: var(--tekst-zacht); }
 .beheer__terug a:hover { color: var(--rood); }
