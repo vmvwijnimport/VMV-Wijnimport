@@ -5,7 +5,9 @@
 // 2. Welkomstmail. De database roept deze functie aan (supabase/008) met het id van een klant
 //    zodra zijn account is goedgekeurd.
 //    De functie leest alles zelf uit de database en verstuurt elke mail maar één keer.
-// 3. GET ?beeld=kop geeft de kopband van de mails (zwart met het witte logo).
+// 3. Weekoverzicht. Elke maandag roept de database deze functie aan (supabase/009) voor een mail
+//    aan VMV met de bevestigde bestellingen die nog geleverd moeten worden. Hooguit één per 20 uur.
+// 4. GET ?beeld=kop geeft de kopband van de mails (zwart met het witte logo).
 // Bestellingen afhandelen gebeurt in de backoffice op /horeca/beheer/ (inloggen als beheerder);
 // de knoppen in de mail aan VMV openen die pagina.
 //
@@ -232,6 +234,42 @@ export const mailWelkom = (k, doorsturen, ctx) => {
   };
 };
 
+// Naar VMV, elke maandag: wat er nog geleverd moet worden, op postcode, met een laadlijst
+const postcode = (b) => (b.klanten ? b.klanten.postcode : "").replace(/\s/g, "").toUpperCase();
+export const mailWeekoverzicht = (teLeveren, nieuw, ctx) => {
+  const lijst = [...teLeveren].sort((x, y) => postcode(x) < postcode(y) ? -1 : postcode(x) > postcode(y) ? 1 : x.id - y.id);
+  const aantal = (r) => r.toegewezen != null ? r.toegewezen : r.aantal;
+  const laden = new Map();
+  const blokken = lijst.map((b) => {
+    const k = b.klanten;
+    const regels = b.bestelregels.filter((r) => aantal(r) > 0);
+    regels.forEach((r) => laden.set(r.omschrijving, (laden.get(r.omschrijving) || 0) + aantal(r)));
+    const kaart = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adres(k))}`;
+    return kopje(`${html(k.bedrijfsnaam)}${b.spoed ? ` <span style="color:${KLEUR.rood};">· spoed</span>` : ""}`) +
+      gegevens([
+        ["Adres", `<a href="${kaart}" style="color:${KLEUR.zwart};">${html(adres(k))}</a>`],
+        ["Contact", `${html(k.contactpersoon)}, <a href="tel:${html(k.telefoon.replace(/\s/g, ""))}" style="color:${KLEUR.zwart};">${html(k.telefoon)}</a>`],
+        ["Bestelling", `<a href="${html(ctx.beheer(b.id))}" style="color:${KLEUR.zwart};">${html(b.bestelnummer)}</a>, ${datum(b.besteld_op)}`],
+        ["Leveren", regels.map((r) => `${aantal(r)} × ${html(r.omschrijving)}`).join("<br>")],
+        ["Bericht aan klant", b.bericht_klant ? html(b.bericht_klant) : ""]
+      ]);
+  }).join("");
+  const laadlijst = [...laden.entries()].sort((x, y) => x[0].localeCompare(y[0], "nl"))
+    .map(([oms, n]) => `${n} × ${html(oms)}`).join("<br>");
+  const inhoud =
+    alinea(lijst.length
+      ? `Er ${lijst.length === 1 ? "staat 1 bevestigde bestelling" : `staan ${lijst.length} bevestigde bestellingen`} klaar om te leveren, gesorteerd op postcode. Zet ze na het bezorgen op geleverd in de backoffice.`
+      : "Er staan geen bevestigde bestellingen klaar om te leveren.") +
+    (nieuw ? vlak(`<strong style="font-weight:500;">${nieuw === 1 ? "Er wacht nog 1 nieuwe bestelling" : `Er wachten nog ${nieuw} nieuwe bestellingen`} op bevestiging.</strong>`) : "") +
+    `<div style="margin:8px 0 8px;">${knop("Open de backoffice", ctx.backoffice, true)}</div>` +
+    blokken +
+    (laadlijst ? kopje("Laadlijst (alles bij elkaar)") + alinea(laadlijst, "font-size:15px;color:" + KLEUR.zwart + ";") : "");
+  return {
+    onderwerp: lijst.length ? `Te leveren: ${lijst.length} ${lijst.length === 1 ? "bestelling" : "bestellingen"}` : `${nieuw} ${nieuw === 1 ? "bestelling wacht" : "bestellingen wachten"} op bevestiging`,
+    html: omhulsel({ voorvertoning: lijst.map((b) => b.klanten.bedrijfsnaam).join(", ") || "Nieuwe bestellingen wachten op bevestiging", kop: "Weekoverzicht leveringen", inhoud }, ctx)
+  };
+};
+
 // ---------- Versturen ----------
 const verstuur = async (aan, antwoordAan, mail) => {
   const r = await fetch("https://api.resend.com/emails", {
@@ -321,6 +359,33 @@ const welkomVoor = async (db, id) => {
   return antwoord({ verstuurd: ["welkom"] });
 };
 
+// ---------- Weekoverzicht (aanroep door de database, elke maandag) ----------
+const weekoverzicht = async (db) => {
+  // Tijdstempel zetten; lukt dat niet, dan is er de afgelopen 20 uur al een verstuurd
+  const grens = new Date(Date.now() - 20 * 3600e3).toISOString();
+  const { data: gezet, error: fout } = await db.from("instellingen").update({ weekoverzicht_op: new Date().toISOString() })
+    .eq("id", 1).or(`weekoverzicht_op.is.null,weekoverzicht_op.lt.${grens}`).select("id");
+  if (fout) throw fout;
+  if (!(gezet && gezet.length)) return antwoord({ verstuurd: [] });
+  const { data: teLeveren, error } = await db.from("bestellingen")
+    .select("*, klanten(*), bestelregels(*)").eq("status", "bevestigd").order("id", { referencedTable: "bestelregels" });
+  if (error) throw error;
+  const { count: nieuw } = await db.from("bestellingen").select("id", { count: "exact", head: true }).eq("status", "ontvangen");
+  if (!teLeveren.length && !nieuw) return antwoord({ verstuurd: [] });
+  const vmv = Deno.env.get("VMV_MAIL") || "info@vmvwijnimport.com";
+  try {
+    await verstuur(vmv, vmv, mailWeekoverzicht(teLeveren, nieuw || 0, {
+      kopband: kopband(),
+      backoffice: `${beheerUrl()}#bestellingen`,
+      beheer: (id) => `${beheerUrl()}#bestelling-${id}`
+    }));
+  } catch (e) {
+    await db.from("instellingen").update({ weekoverzicht_op: null }).eq("id", 1);
+    throw e;
+  }
+  return antwoord({ verstuurd: ["weekoverzicht"] });
+};
+
 if (typeof Deno !== "undefined") Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method === "GET") {
@@ -334,9 +399,11 @@ if (typeof Deno !== "undefined") Deno.serve(async (req) => {
   try {
     const vraag = await req.json();
     const klant = typeof vraag.klant === "string" && /^[0-9a-f-]{36}$/i.test(vraag.klant);
-    if (!klant && !Number.isInteger(vraag.id)) return antwoord({ fout: "geen geldig id" }, 400);
+    const week = vraag.weekoverzicht === true;
+    if (!klant && !week && !Number.isInteger(vraag.id)) return antwoord({ fout: "geen geldig id" }, 400);
     const { createClient } = await import("jsr:@supabase/supabase-js@2");
     const db = createClient(Deno.env.get("SUPABASE_URL"), Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"));
+    if (week) return await weekoverzicht(db);
     return klant ? await welkomVoor(db, vraag.klant) : await mailsVoor(db, vraag.id);
   } catch (e) {
     console.error(e);

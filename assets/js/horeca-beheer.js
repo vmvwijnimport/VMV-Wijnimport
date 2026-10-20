@@ -28,6 +28,14 @@
     if (tekst != null) e.textContent = tekst;
     return e;
   };
+  // Afleveradres als link naar Google Maps (opent op de telefoon de kaarten-app)
+  var kaart = function (k) {
+    var adres = k.straat + ", " + k.postcode + " " + k.plaats;
+    var a = el("a", null, adres);
+    a.href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(adres);
+    a.target = "_blank"; a.rel = "noopener";
+    return a;
+  };
   var veld = function (naam) { return pagina.querySelector("[data-veld=" + naam + "]"); };
   var melding = function (plek, tekst, soort) {
     plek.className = "formulier__status" + (soort ? " " + soort : "");
@@ -359,7 +367,7 @@
     dl.textContent = "";
     [
       ["Zaak", k.bedrijfsnaam], ["Contact", k.contactpersoon], ["Telefoon", k.telefoon], ["E-mail", k.email],
-      ["Afleveradres", k.straat ? k.straat + ", " + k.postcode + " " + k.plaats : ""],
+      ["Afleveradres", k.straat ? kaart(k) : ""],
       ["Besteld op", datum(b.besteld_op)],
       ["Spoed", b.spoed ? "Ja" : ""], ["Opmerking", b.opmerking || ""],
       [b.status === "geannuleerd" ? "Reden aan de klant" : "Bericht aan de klant", afgehandeld(b) ? b.bericht_klant || "" : ""]
@@ -367,7 +375,9 @@
       if (!p[1]) return;
       var rij = el("div");
       rij.appendChild(el("dt", null, p[0]));
-      rij.appendChild(el("dd", null, p[1]));
+      var dd = el("dd");
+      if (typeof p[1] === "string") dd.textContent = p[1]; else dd.appendChild(p[1]);
+      rij.appendChild(dd);
       dl.appendChild(rij);
     });
     veld("klantlink").href = "#klant-" + b.klant_id;
@@ -502,14 +512,16 @@
       ["Contactpersoon", k.contactpersoon], ["E-mail", k.email], ["Telefoon", k.telefoon],
       ["Type zaak", TYPE_ZAAK[k.type_zaak] || k.type_zaak],
       ["KvK-nummer", k.kvk], ["Btw-nummer", k.btw],
-      ["Afleveradres", k.straat + ", " + k.postcode + " " + k.plaats],
+      ["Afleveradres", kaart(k)],
       ["Aangevraagd op", datum(k.aangemaakt_op)],
       ["Welkomstmail verstuurd", k.mail_welkom_op ? datum(k.mail_welkom_op) : ""]
     ].forEach(function (p) {
       if (!p[1]) return;
       var rij = el("div");
       rij.appendChild(el("dt", null, p[0]));
-      rij.appendChild(el("dd", null, p[1]));
+      var dd = el("dd");
+      if (typeof p[1] === "string") dd.textContent = p[1]; else dd.appendChild(p[1]);
+      rij.appendChild(dd);
       dl.appendChild(rij);
     });
 
