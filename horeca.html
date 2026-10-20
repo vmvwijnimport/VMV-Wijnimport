@@ -164,6 +164,11 @@ description: Besloten portaal voor horecaklanten van VMV Wijnimport.
       <p>Ingelogd als <strong data-veld="bedrijfsnaam"></strong></p>
       <button class="knop knop--secundair" type="button" data-actie="uitloggen">Uitloggen</button>
     </div>
+    <nav class="tabbladen" aria-label="Horecaportaal">
+      <a href="#bestellen-horeca" data-tab="bestellen">Bestellen</a>
+      <a href="#je-bestellingen" data-tab="je-bestellingen">Je bestellingen <span data-teller="bestellingen"></span></a>
+    </nav>
+    <div data-paneel="bestellen">
     <div class="portaal__raster">
       <div id="assortiment"></div>
       <aside class="mandje portaal__mandje" id="bestelmandje" aria-labelledby="bestel-kop">
@@ -204,13 +209,15 @@ description: Besloten portaal voor horecaklanten van VMV Wijnimport.
         <div class="bestel__klaar" hidden tabindex="-1">
           <h3>Bedankt voor je bestelling</h3>
           <p data-mandje="klaar"></p>
+          <p><a href="#je-bestellingen">Bekijk je bestellingen</a></p>
         </div>
       </aside>
     </div>
     <p class="portaal__balk-mobiel" hidden><a href="#bestelmandje" data-mandje="mobiel"></a></p>
+    </div>
 
-    <section class="portaal__bestellingen" id="mijn-bestellingen" aria-labelledby="bestellingen-kop">
-      <h2 id="bestellingen-kop">Je bestellingen</h2>
+    <section class="portaal__bestellingen" id="mijn-bestellingen" data-paneel="je-bestellingen" aria-labelledby="bestellingen-kop" hidden>
+      <h2 class="visueel-verborgen" id="bestellingen-kop">Je bestellingen</h2>
       <div data-bestellingen></div>
     </section>
   </div>

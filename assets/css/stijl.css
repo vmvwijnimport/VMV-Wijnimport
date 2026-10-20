@@ -789,7 +789,7 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .aantal--licht .aantal__knop:hover { background: var(--zwart); color: var(--wit); }
 .aantal--licht .aantal__veld { width: 48px; height: 36px; color: var(--zwart); border-color: var(--lijn); }
 .portaal__balk-mobiel { display: none; }
-.portaal__bestellingen { margin-top: var(--s-8); padding-top: var(--s-4); border-top: 1px solid var(--zwart); }
+.portaal__bestellingen { max-width: 56rem; }
 .portaal__bestellingen h2 { margin-bottom: var(--s-3); }
 .bestelling { border-bottom: 1px solid var(--lijn); }
 .bestelling__kop {
@@ -797,6 +797,7 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   padding: 12px 0; cursor: pointer; list-style: none;
 }
 .bestelling__kop::-webkit-details-marker { display: none; }
+.bestelling__kop .label { justify-self: start; }
 .bestelling__nummer { font-weight: 500; color: var(--zwart); }
 .bestelling__totaal { font-variant-numeric: tabular-nums; }
 .bestelling[open] .bestelling__kop { color: var(--rood); }
@@ -917,14 +918,15 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 
 /* Backoffice: tabbladen, lijsten en klantgegevens */
 .beheer__inlog { max-width: 30rem; }
-.beheer__tabs { display: flex; flex-wrap: wrap; gap: var(--s-4); margin-bottom: var(--s-4); border-bottom: 1px solid var(--lijn); }
-.beheer__tabs a {
+/* Tabbladen (backoffice en horecaportaal) */
+.tabbladen { display: flex; flex-wrap: wrap; gap: var(--s-4); margin-bottom: var(--s-4); border-bottom: 1px solid var(--lijn); }
+.tabbladen a {
   padding: 0 0 12px; margin-bottom: -1px; border-bottom: 2px solid transparent;
   font-size: var(--fs-ui); font-weight: 500; text-decoration: none; color: var(--tekst-zacht);
 }
-.beheer__tabs a:hover { color: var(--rood); }
-.beheer__tabs a[aria-current="page"] { color: var(--zwart); border-bottom-color: var(--zwart); }
-.beheer__tabs span { font-weight: 400; }
+.tabbladen a:hover { color: var(--rood); }
+.tabbladen a[aria-current="page"] { color: var(--zwart); border-bottom-color: var(--zwart); }
+.tabbladen span { font-weight: 400; }
 .beheer__filter { margin-bottom: var(--s-3); }
 .beheer__lijst { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--zwart); }
 .beheer__rij {
@@ -968,6 +970,6 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   .beheer__gegevens--breed div { grid-template-columns: 1fr; gap: 0; }
 }
 @media (max-width: 36rem) {
-  .beheer__tabs { gap: var(--s-3); }
-  .beheer__tabs a { font-size: var(--fs-knop); }
+  .tabbladen { gap: var(--s-3); }
+  .tabbladen a { font-size: var(--fs-knop); }
 }

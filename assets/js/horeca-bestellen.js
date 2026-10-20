@@ -254,6 +254,23 @@
       .finally(function () { knop.disabled = false; knop.textContent = "Bestelling plaatsen"; });
   });
 
+  // ---------- Tabbladen: Bestellen en Je bestellingen (via het adres #je-bestellingen) ----------
+  var panelen = pagina.querySelectorAll("[data-paneel]");
+  var tabblad = function () {
+    var naam = location.hash === "#je-bestellingen" ? "je-bestellingen" : "bestellen";
+    panelen.forEach(function (p) { p.hidden = p.dataset.paneel !== naam; });
+    pagina.querySelectorAll("[data-tab]").forEach(function (a) {
+      if (a.dataset.tab === naam) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    });
+  };
+  window.addEventListener("hashchange", function () {
+    if (location.hash === "#je-bestellingen" || location.hash === "#bestellen-horeca") {
+      tabblad();
+      pagina.querySelector(".tabbladen").scrollIntoView();
+    }
+  });
+  tabblad();
+
   // ---------- Eerdere bestellingen ----------
   var STATUS = { ontvangen: "Wacht op bevestiging", bevestigd: "Bevestigd", geleverd: "Geleverd", geannuleerd: "Geannuleerd" };
   var bestelDoel = pagina.querySelector("[data-bestellingen]");
@@ -264,6 +281,8 @@
       .then(function (r) {
         bestelDoel.textContent = "";
         if (r.error) throw r.error;
+        var open = r.data.filter(function (b) { return b.status === "ontvangen"; }).length;
+        pagina.querySelector("[data-teller=bestellingen]").textContent = open ? "(" + open + " wacht op bevestiging)" : r.data.length ? "(" + r.data.length + ")" : "";
         if (!r.data.length) { bestelDoel.appendChild(el("p", "horeca__klein", "Je hebt nog geen bestellingen geplaatst.")); return; }
         r.data.forEach(function (b) {
           // Na bevestiging telt het aantal dat VMV levert (toegewezen; leeg = besteld), zoals in de bevestigingsmail

@@ -573,7 +573,7 @@
       if (!sessie) { toon("uit"); return; }
       return db.from("beheerders").select("naam").eq("id", sessie.user.id).maybeSingle().then(function (be) {
         if (be.error) throw be.error;
-        if (!be.data) { toon("geen-toegang"); return; }
+        if (!be.data) { veld("account").textContent = sessie.user.email || "onbekend"; toon("geen-toegang"); return; }
         veld("naam").textContent = be.data.naam;
         return laadAlles().then(function () { tellers(); toon("backoffice"); route(); });
       });
