@@ -28,8 +28,8 @@ ophalen:
 # Zolang actief op false staat, komt de bestelling alleen per mail binnen en
 # sturen jullie zelf een betaallink.
 betalen:
-  actief: false
-  koppeling: ""        # adres van de Cloudflare Worker, bijv. https://vmv-betalen.jouwnaam.workers.dev
+  actief: true
+  koppeling: "https://vmv-betalen.winter-dawn-d1b9.workers.dev"        # adres van de Cloudflare Worker, bijv. https://vmv-betalen.jouwnaam.workers.dev
 
 modellen:
   - id: breed
