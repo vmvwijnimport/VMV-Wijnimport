@@ -11,13 +11,11 @@ description: >-
 lang: nl_NL
 locale: nl_NL
 
-# Het adres van de website. Nu het tijdelijke GitHub-adres.
-# Koppel je www.vmvwijnimport.com, zet dan url op "https://www.vmvwijnimport.com"
-# en baseurl op "" (leeg).
-url: "https://vmvwijnimport.github.io"
-# Laat leeg bij een eigen domein. Gebruik je het standaard GitHub-adres
-# (gebruikersnaam.github.io/VMV-Wijnimport), zet hier dan "/VMV-Wijnimport".
-baseurl: "/VMV-Wijnimport"
+# Het adres van de website: het eigen domein (bestand CNAME). Het oude adres
+# vmvwijnimport.github.io/VMV-Wijnimport stuurt GitHub vanzelf hierheen door.
+url: "https://vmvwijnimport.com"
+# Leeg bij een eigen domein. Zonder eigen domein zou hier "/VMV-Wijnimport" staan.
+baseurl: ""
 
 logo: /brand/logo/png/vmv-logo-1024.png
 
@@ -25,6 +23,11 @@ logo: /brand/logo/png/vmv-logo-1024.png
 # false = de site wordt niet opgenomen in zoekresultaten (voor de lancering).
 # Zet op true als de site officieel live mag.
 zoekmachines: false
+
+# Wachtpagina: zolang dit op true staat, toont de homepage alleen "Binnenkort online".
+# De andere pagina's (horeca, Hedonist, backoffice) blijven bereikbaar via hun eigen adres.
+# Zet op false om de volledige site te tonen.
+wachtpagina: true
 
 # Bedrijfsgegevens — staan in de footer en in de algemene voorwaarden.
 # Gevonden in openbare registers; controleer ze in je KvK-uittreksel.

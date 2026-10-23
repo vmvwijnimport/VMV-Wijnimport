@@ -45,7 +45,7 @@ Deze twee zijn **openbaar**: ze komen in de website te staan, en dat is veilig, 
 1. Ga naar **Authentication** → **Sign In / Providers** (of **Providers**) → **Email**.
 2. Zorg dat **Enable Email provider** en **Confirm email** aan staan.
 3. Ga naar **Authentication** → **URL Configuration** en vul in:
-   - **Site URL:** `https://vmvwijnimport.github.io/VMV-Wijnimport/horeca/`
-   - Bij **Redirect URLs** voeg je toe: `https://vmvwijnimport.github.io/VMV-Wijnimport/**` en `http://localhost:4000/**`
+   - **Site URL:** `https://vmvwijnimport.com/horeca/`
+   - Bij **Redirect URLs** voeg je toe: `https://vmvwijnimport.com/**` en `http://localhost:4000/**`
 
 De mailinstellingen (Resend) doen we in fase 2.

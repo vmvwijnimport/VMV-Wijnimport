@@ -19,7 +19,7 @@
 //   KLANTMAIL       "aan": mails gaan naar de klant zelf. Anders gaan ze naar VMV om door te sturen.
 //   BEHEER_URL      alleen om te testen; standaard de backoffice op de site
 
-const SITE = "https://vmvwijnimport.github.io/VMV-Wijnimport";
+const SITE = "https://vmvwijnimport.com";
 const KLEUR = {
   zwart: "#000000", tekst: "#3A3A3A", zacht: "#6B6B6B", wit: "#FFFFFF", donkerTekst: "#CFCFCF",
   rood: "#731515", champagneLicht: "#F8F7E6", lijn: "#E6E4DC"

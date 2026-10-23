@@ -25,7 +25,7 @@ Let op: Mollie controleert de website voordat je live mag. Daarvoor moeten de al
 3. Klik op **Edit code**. Verwijder de voorbeeldcode, plak de volledige inhoud van `betalen/worker.js` en klik op **Deploy**.
 4. Ga naar **Settings → Variables and Secrets** en voeg toe:
    - `MOLLIE_API_KEY` als type **Secret**, met je testsleutel (`test_...`)
-   - `SITE_URL` als type **Text**: `https://vmvwijnimport.github.io/VMV-Wijnimport` (of later `https://www.vmvwijnimport.com`), zonder `/` aan het eind
+   - `SITE_URL` als type **Text**: `https://vmvwijnimport.com`, zonder `/` aan het eind
    - `RESEND_API_KEY` als type **Secret**: een sleutel uit Resend (**API Keys → Create API Key**, naam `cloudflare`, **Sending access**). Daarmee verstuurt de Worker na betaling een mail in de huisstijl naar de klant en naar info@.
 5. Kopieer het adres van de Worker, bijvoorbeeld `https://vmv-betalen.jouwnaam.workers.dev`.
 

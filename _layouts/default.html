@@ -3,6 +3,11 @@
 <head>
 {% include head.html %}
 </head>
+{%- if site.wachtpagina and page.url == "/" %}
+<body class="wacht">
+  {% include wachtpagina.html %}
+</body>
+{%- else %}
 <body class="{{ page.body_class }}">
   <a class="naar-inhoud" href="#inhoud">Naar de inhoud</a>
   {% include header.html %}
@@ -12,4 +17,5 @@
   {% include footer.html %}
   {% include leeftijdscheck.html %}
 </body>
+{%- endif %}
 </html>

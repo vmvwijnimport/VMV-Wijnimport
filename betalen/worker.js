@@ -4,7 +4,7 @@
 //
 //  Instellingen in Cloudflare (Settings → Variables and Secrets):
 //    MOLLIE_API_KEY  (geheim)  test_... of live_...
-//    SITE_URL                  bijv. https://vmvwijnimport.github.io/VMV-Wijnimport
+//    SITE_URL                  https://vmvwijnimport.com (zonder / aan het eind)
 //    RESEND_API_KEY  (geheim)  sleutel uit Resend, voor de mails na betaling
 //    AFZENDER                  standaard "VMV Wijnimport <bestellingen@vmvwijnimport.com>"
 //    VMV_MAIL                  standaard info@vmvwijnimport.com

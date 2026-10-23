@@ -18,7 +18,11 @@
 {%- endif -%}
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+{%- if site.wachtpagina and page.url == "/" %}
+<script>document.documentElement.classList.add("js")</script>
+{%- else %}
 <script>document.documentElement.classList.add("js");if(document.cookie.indexOf("vmv18=ja")<0)document.documentElement.classList.add("leeftijd-open")</script>
+{%- endif %}
 <title>{{ seo_titel | strip }}</title>
 <meta name="description" content="{{ seo_omschrijving | strip_html | strip_newlines | strip | escape }}">
 {%- if page.noindex or site.zoekmachines != true %}
