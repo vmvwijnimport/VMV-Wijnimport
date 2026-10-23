@@ -9,7 +9,7 @@ Bijgewerkt: 19 oktober 2026
 - **Vragen:** de eigenaar heeft de vragen over het assortiment en de voorwaarden beantwoord (zie hieronder).
 - **Plan en Resend:** goedgekeurd op 19 okt.
 - **Supabase-project** `iemduldvpylppckpttja` (Frankfurt), met de URL en de publishable key in `_config.yml` onder `horeca:`. Test als bezoeker zonder inlog: alle tabellen en functies geven "permission denied" (19 okt).
-- **Fase 2:** de horecapagina /horeca/ met aanvragen, inloggen, uitloggen en wachtwoord herstellen (commit f3b35f4). Testaccounts info+test-a/b/c@vmvwijnimport.com (wachtwoord TestWachtwoord-123, alleen voor testen; verwijderen vóór de livegang).
+- **Fase 2:** de horecapagina /horeca/ met aanvragen, inloggen, uitloggen en wachtwoord herstellen (commit f3b35f4). Testaccounts info+test-a/b/c@vmvwijnimport.com (op 23 okt verwijderd, met hun bestellingen).
 - **Test niet-goedgekeurde klant (C), 19 okt:** ziet alleen zijn eigen rij in klanten; producten, instellingen en bestellingen zijn leeg; bestellen geeft "Je account is nog niet goedgekeurd"; zelf de status wijzigen geeft "permission denied". ✔
 - **Fase 3 (code):** het portaal toont na goedkeuring het assortiment per producent (assets/js/horeca-portaal.js), met jaargang, druif, formaat, allocatie- en voorraadlabels en prijzen excl. btw. Aanvulscript `supabase/002-producten-druif-jaargang.sql` (jaargang als tekst voor B20, plus druif). Het importbestand met prijzen staat in `prijslijst/horeca-import.sql` (wordt niet gecommit): 76 wijnen en 2 glazen. Doorgestreept = uitverkocht, * = allocatie. Coustheur-Bonnard en Messager-Germain zijn geïmporteerd als niet actief.
 - **Fase 3 getest (19 okt):** de eigenaar heeft A en B goedgekeurd en 002 en de import uitgevoerd. Klant A ziet 70 producten met prijzen en instellingen; de verborgen producenten (Coustheur-Bonnard, Messager-Germain) ziet hij niet; klant C (in afwachting) krijgt een lege lijst; anoniem geeft permission denied. Screenshots op desktop en mobiel zijn in orde. ✔
@@ -30,6 +30,7 @@ Bijgewerkt: 19 oktober 2026
 - **Leveren plannen (20 okt), wens van de eigenaar:** in de backoffice staat bij Bevestigd het afleveradres bij elke bestelling, gesorteerd op postcode, met spoed erbij. Getest met verzonnen gegevens (1011, 1021, 1082, 1091 in de goede volgorde), desktop en mobiel. ✔
 - **Weekoverzicht en kaartlink (20 okt), wens van de eigenaar:** elke zondag 18:00 UTC (20:00 zomertijd, 19:00 wintertijd; keuze eigenaar) een mail aan info@ met de bevestigde bestellingen op postcode (adres met kaartlink, contact, wat er geleverd wordt, bericht) en een laadlijst; ook hoeveel nieuwe bestellingen op bevestiging wachten. Via pg_cron (`supabase/009-weekoverzicht.sql`) en de functie `bestelmail`; hooguit één per 20 uur, geen mail als er niets is. In de backoffice opent het afleveradres Google Maps. Mail getest met verzonnen gegevens (volgorde, niet-leverbare regel weggelaten, laadlijst opgeteld). ✔ **Nog te doen door de eigenaar: functie opnieuw plakken, 009 uitvoeren, test-aanroep.**
 - **Inlogmails in de huisstijl (23 okt):** "Bevestig je e-mailadres" en "Nieuw wachtwoord kiezen" in dezelfde opmaak als de bestelmails (`supabase/mails/`, uitleg in `docs/inlogmails-instellen.md`), door de eigenaar in Supabase geplakt. **Confirm email staat aan.** Getest met testaccount E (info+test-e@): bevestigingsmail kwam aan en het bevestigen werkte; wachtwoordmail kwam aan en de link werkte via localhost. Supabase accepteert het netwerkadres van de MacBook niet als terugkeeradres; links uit inlogmails dus op de MacBook zelf testen. Ook getest op 22 okt: weekoverzicht (mail kwam aan), afkeuren (eigenaar), beveiligingstest 38 goed, 0 fout. ✔
+- **Live (23 okt):** op verzoek van de eigenaar ("Doe nu maar live") is `horeca-portaal` naar `main` gezet. Vooraf: testaccounts verwijderd (de repo is openbaar en het testwachtwoord stond in dit logboek), controle op prijzen 0 treffers. Nog door de eigenaar: secret BEHEER_URL en de redirect URL met 192.168.178.99 weghalen.
 - **Proefbestelling van begin tot eind (23 okt):** klant E goedgekeurd in de backoffice (welkomstmail kwam aan), besteld als klant E, mails "Nieuwe bestelling" en "Overzicht van je bestelaanvraag" kwamen aan, bevestigd (bevestigingsmail kwam aan), op geleverd gezet. Alles werkte. ✔
 - **Proefbestelling via de voorbeeldsite (20 okt):** de mail naar info@ via FormSubmit kwam aan; de automatische mail naar de testklant (info+test-a@) niet. Te controleren of het "+"-adres werkt.
 - Het databasescript: `schema.sql` is uitgevoerd met "Success" (19 okt).
@@ -72,7 +73,7 @@ Bijgewerkt: 19 oktober 2026
 
 ## ⏰ Herinnering vóór de livegang
 
-- **Testaccounts verwijderen** (info+test-a/b/c/e) in Supabase → Authentication → Users, en de **testbestellingen** van A (H-261019-597D, -36D2, -841A, -F7F3) in de Table Editor → bestellingen.
+- Testaccounts en testbestellingen: verwijderd (23 okt).
 - Resend, Confirm email en de inlogmails: klaar (20 en 23 okt).
 - Redirect URL `http://192.168.178.99:4000/**` weghalen (werkt toch niet, zie hieronder), en het secret BEHEER_URL.
 
