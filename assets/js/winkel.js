@@ -156,14 +156,6 @@ document.addEventListener("DOMContentLoaded", function () {
     status.className = "formulier__status";
     status.textContent = "Je bestelling wordt verstuurd...";
 
-    var mail = function (extra) {
-      return fetch(form.dataset.ajax, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(Object.assign({}, data, extra))
-      });
-    };
-
     if (W.idealActief && W.koppeling) {
       fetch(W.koppeling.replace(/\/$/, "") + "/betaling", {
         method: "POST",
@@ -178,17 +170,8 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(function (betaling) {
           try { sessionStorage.setItem("vmv-betaling", JSON.stringify({ id: betaling.id, bestelnummer: betaling.bestelnummer })); } catch (e) {}
           status.textContent = "Je gaat nu naar de betaalpagina...";
-          // De bestelling ook per mail sturen; niet wachten als dat traag is
-          var verder = function () { location.href = betaling.betaallink; };
-          var klaarOm = setTimeout(verder, 3000);
-          mail({
-            _subject: "Pre-order Hedonist " + betaling.bestelnummer + ": " + b.n + " glazen, " + data.naam,
-            _autoresponse: "",
-            bestelnummer: betaling.bestelnummer,
-            mollie_betaling: betaling.id,
-            betalen: "Via Mollie; controleer de status in het Mollie-dashboard",
-            totaal: euro(betaling.totaal)
-          }).catch(function () {}).finally(function () { clearTimeout(klaarOm); verder(); });
+          // De mails naar de klant en naar VMV gaan pas als de betaling binnen is (betalen/worker.js)
+          location.href = betaling.betaallink;
         })
         .catch(function (fout) {
           knop.disabled = false;

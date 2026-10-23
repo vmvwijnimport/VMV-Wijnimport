@@ -25,7 +25,8 @@ Let op: Mollie controleert de website voordat je live mag. Daarvoor moeten de al
 3. Klik op **Edit code**. Verwijder de voorbeeldcode, plak de volledige inhoud van `betalen/worker.js` en klik op **Deploy**.
 4. Ga naar **Settings → Variables and Secrets** en voeg toe:
    - `MOLLIE_API_KEY` als type **Secret**, met je testsleutel (`test_...`)
-   - `SITE_URL` als type **Text**: `https://vmvwijnimport.github.io/VMV-Wijnimport` (of later `https://www.vmvwijnimport.com`)
+   - `SITE_URL` als type **Text**: `https://vmvwijnimport.github.io/VMV-Wijnimport` (of later `https://www.vmvwijnimport.com`), zonder `/` aan het eind
+   - `RESEND_API_KEY` als type **Secret**: een sleutel uit Resend (**API Keys → Create API Key**, naam `cloudflare`, **Sending access**). Daarmee verstuurt de Worker na betaling een mail in de huisstijl naar de klant en naar info@.
 5. Kopieer het adres van de Worker, bijvoorbeeld `https://vmv-betalen.jouwnaam.workers.dev`.
 
 ## Stap 3: De website koppelen
@@ -45,7 +46,7 @@ Of stuur het adres naar Claude, dan regelt die dat.
 Met de testsleutel zie je bij Mollie een testpagina, waar je zelf kiest of de betaling lukt of mislukt. Er wordt dan geen echt geld overgemaakt. Controleer:
 
 - dat je op de bedankpagina terechtkomt;
-- dat de bestelling per mail binnenkomt;
+- dat de mail "Betaald: Hedonist …" op info@ binnenkomt, en de mail "Bedankt voor je bestelling …" bij de klant;
 - dat de betaling in het Mollie-dashboard staat (onder **Testmodus**).
 
 ## Stap 5: Live
@@ -56,6 +57,7 @@ Zodra Mollie je account heeft goedgekeurd, vervang je bij Cloudflare `MOLLIE_API
 
 ## Na elke bestelling
 
+- Er gaat pas een mail uit als de betaling binnen is. Een afgebroken betaling geeft dus geen mail; die zie je alleen in het Mollie-dashboard.
 - In de mail en in het Mollie-dashboard staan het bestelnummer (`VMV-...`), de klantgegevens en de bestelling.
 - **Maak de factuur in e-Boekhouden.** Zo blijft je nummering kloppen. De website en Mollie maken geen facturen.
 - Bij een bankoverschrijving staat de betaling in Mollie op **open** tot het geld binnen is.
