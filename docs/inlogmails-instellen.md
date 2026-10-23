@@ -25,6 +25,6 @@ De mails staan in `supabase/mails/`. Er staan geen geheimen of prijzen in.
 
 Nieuwe aanvragen moeten dan eerst hun e-mailadres bevestigen. Bestaande accounts merken er niets van.
 
-## 4. Alleen om te testen via de voorbeeldsite
+## 4. Testen via de voorbeeldsite
 
-**Authentication** → **URL Configuration** → **Redirect URLs** → voeg `http://192.168.178.99:4000/**` toe. Zonder dit stuurt de link in de mail je naar de live site. Haal het na de livegang weer weg.
+Test de links uit deze mails op de MacBook zelf, via `http://localhost:4000/horeca/`. Supabase accepteert het netwerkadres van de MacBook (`192.168.178.99`) niet als terugkeeradres, ook niet als het bij **Redirect URLs** staat; de link gaat dan naar de live site. Na de livegang gaat de link vanzelf naar de live site, en dat is goed.
