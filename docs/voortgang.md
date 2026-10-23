@@ -79,7 +79,8 @@ Bijgewerkt: 19 oktober 2026
 ## Open vragen
 
 - De bestelling via de knop in de browser (met mail) is nog niet echt verstuurd, om geen mail naar info@ te sturen. Testen samen met de eigenaar zodra FormSubmit is geactiveerd.
-- "Maximum per klant" is nu een **maximum per bestelling** (`max_per_bestelling`). Moet het een maximum per jaar per klant worden?
+- ~~Maximum per klant~~: blijft een **maximum per bestelling** (keuze eigenaar, 23 okt: elke bestelling wordt toch goedgekeurd).
+- Domein: later naar vmvwijnimport.com, eerst nog foto's bijwerken (keuze eigenaar, 23 okt).
 
 ## Eerstvolgende stap
 
