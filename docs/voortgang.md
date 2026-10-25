@@ -33,6 +33,7 @@ Bijgewerkt: 19 oktober 2026
 - **Hedonist: betalen met Mollie live (23 okt):** Worker `vmv-betalen` op Cloudflare (MOLLIE_API_KEY, SITE_URL, RESEND_API_KEY), `betalen.actief: true`. Na betaling stuurt de Worker via de Mollie-webhook twee mails in de huisstijl: "Bedankt voor je bestelling" naar de klant (met herroepingsrecht en voorwaarden) en "Betaald: Hedonist …" naar info@. Het formuliermailtje van FormSubmit bij afrekenen is vervallen. FormSubmit op de live site geactiveerd. Getest met de testsleutel: bedankpagina, beide mails in orde. ✔ **Nog door de eigenaar: in Cloudflare de livesleutel (`live_…`) invullen.**
 - **Live (23 okt):** op verzoek van de eigenaar ("Doe nu maar live") is `horeca-portaal` naar `main` gezet. Vooraf: testaccounts verwijderd (de repo is openbaar en het testwachtwoord stond in dit logboek), controle op prijzen 0 treffers. Nog door de eigenaar: secret BEHEER_URL en de redirect URL met 192.168.178.99 weghalen.
 - **Proefbestelling van begin tot eind (23 okt):** klant E goedgekeurd in de backoffice (welkomstmail kwam aan), besteld als klant E, mails "Nieuwe bestelling" en "Overzicht van je bestelaanvraag" kwamen aan, bevestigd (bevestigingsmail kwam aan), op geleverd gezet. Alles werkte. ✔
+- **Eigen domein en wachtpagina (25 okt), keuze eigenaar:** de site draait op https://vmvwijnimport.com (bestand `CNAME`, `baseurl` leeg). De homepage toont tot november alleen "Binnenkort online" (`wachtpagina: true` in `_config.yml`); horeca, Hedonist en de backoffice blijven bereikbaar via hun eigen adres. GoDaddy: Website Builder-record weg, A-records naar GitHub, www → vmvwijnimport.github.io; NS en mail (Microsoft 365) ongewijzigd. Op verzoek van de eigenaar ("Zet het live") naar `main` gezet. Daarna door de eigenaar: SITE_URL in Cloudflare, Site URL en Redirect URL in Supabase, functie `bestelmail` en de twee inlogmails opnieuw geplakt. Gecontroleerd: wachtpagina en https werken, het oude github-adres stuurt door, /horeca/, /horeca/beheer/, /hedonist/ en winkel.json geven 200, de betaal-Worker antwoordt met het nieuwe adres. ✔ **Nog door de eigenaar:** Enforce HTTPS in GitHub Pages, FormSubmit opnieuw activeren, websiteprofiel in Mollie bijwerken, livesleutel in Cloudflare.
 - **Proefbestelling via de voorbeeldsite (20 okt):** de mail naar info@ via FormSubmit kwam aan; de automatische mail naar de testklant (info+test-a@) niet. Te controleren of het "+"-adres werkt.
 - Het databasescript: `schema.sql` is uitgevoerd met "Success" (19 okt).
 - **Fase 1 (deels):** het databasescript `supabase/schema.sql` staat klaar, met tabellen, beveiliging (RLS) en de bestelfunctie die de prijs zelf berekent. De stappen voor de eigenaar staan in `docs/supabase-instellen.md`.
@@ -82,7 +83,7 @@ Bijgewerkt: 19 oktober 2026
 
 - De bestelling via de knop in de browser (met mail) is nog niet echt verstuurd, om geen mail naar info@ te sturen. Testen samen met de eigenaar zodra FormSubmit is geactiveerd.
 - ~~Maximum per klant~~: blijft een **maximum per bestelling** (keuze eigenaar, 23 okt: elke bestelling wordt toch goedgekeurd).
-- Domein: later naar vmvwijnimport.com, eerst nog foto's bijwerken (keuze eigenaar, 23 okt).
+- ~~Domein~~: sinds 25 okt op vmvwijnimport.com met een wachtpagina; in november `wachtpagina: false` (en `zoekmachines: true` bij de lancering).
 
 ## Eerstvolgende stap
 
