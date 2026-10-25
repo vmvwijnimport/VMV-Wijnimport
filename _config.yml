@@ -24,10 +24,18 @@ logo: /brand/logo/png/vmv-logo-1024.png
 # Zet op true als de site officieel live mag.
 zoekmachines: false
 
-# Wachtpagina: zolang dit op true staat, toont de homepage alleen "Binnenkort online".
-# De andere pagina's (horeca, Hedonist, backoffice) blijven bereikbaar via hun eigen adres.
-# Zet op false om de volledige site te tonen.
+# Wachtpagina: zolang dit op true staat, tonen alle pagina's alleen "Binnenkort online",
+# behalve de pagina's in de lijst hieronder. Zet op false om de volledige site te tonen.
 wachtpagina: true
+# Deze pagina's blijven werken zolang de wachtpagina aan staat: het horecaportaal,
+# de backoffice, de pagina's waar de mails naar linken, en de pagina waar je na
+# het betalen terugkomt.
+wachtpagina_open:
+  - /horeca/
+  - /horeca/beheer/
+  - /algemene-voorwaarden/
+  - /privacy/
+  - /bestelling/
 
 # Bedrijfsgegevens — staan in de footer en in de algemene voorwaarden.
 # Gevonden in openbare registers; controleer ze in je KvK-uittreksel.

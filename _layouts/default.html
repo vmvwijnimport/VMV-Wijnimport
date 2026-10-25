@@ -1,9 +1,16 @@
 <!doctype html>
 <html lang="nl">
+{%- comment -%}
+  Wachtpagina: zolang die aan staat, tonen alle pagina's alleen "Binnenkort online",
+  behalve de pagina's in wachtpagina_open (_config.yml). De inhoud van de andere
+  pagina's komt dan ook niet in de broncode.
+{%- endcomment -%}
+{%- assign wacht = false -%}
+{%- if site.wachtpagina -%}{%- unless site.wachtpagina_open contains page.url -%}{%- assign wacht = true -%}{%- endunless -%}{%- endif %}
 <head>
 {% include head.html %}
 </head>
-{%- if site.wachtpagina and page.url == "/" %}
+{%- if wacht %}
 <body class="wacht">
   {% include wachtpagina.html %}
 </body>

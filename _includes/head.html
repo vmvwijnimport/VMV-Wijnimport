@@ -1,7 +1,11 @@
 {%- comment -%}
   Titel, beschrijving en gestructureerde gegevens voor Google.
 {%- endcomment -%}
-{%- if page.collection == "producenten" -%}
+{%- if wacht -%}
+  {%- capture seo_titel -%}{{ site.title }} | {{ site.tagline }}{%- endcapture -%}
+  {%- assign seo_omschrijving = site.description -%}
+  {%- assign seo_foto = site.data.fotos.hero.foto -%}
+{%- elsif page.collection == "producenten" -%}
   {%- capture seo_titel -%}{{ page.naam }}, {{ page.regio }} ({{ page.land }}) | importeur in Nederland | {{ site.title }}{%- endcapture -%}
   {%- capture seo_omschrijving -%}{% if page.samenvatting %}{{ page.samenvatting }} {% endif %}De wijnen van {{ page.naam }} uit {{ page.regio }} zijn in Nederland verkrijgbaar via importeur {{ site.title }}.{%- endcapture -%}
   {%- assign seo_foto = page.foto | default: site.logo -%}
@@ -18,7 +22,7 @@
 {%- endif -%}
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-{%- if site.wachtpagina and page.url == "/" %}
+{%- if wacht %}
 <script>document.documentElement.classList.add("js")</script>
 {%- else %}
 <script>document.documentElement.classList.add("js");if(document.cookie.indexOf("vmv18=ja")<0)document.documentElement.classList.add("leeftijd-open")</script>
@@ -43,13 +47,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap" rel="stylesheet">
-{%- if page.url == "/hedonist/" %}
+{%- if page.url == "/hedonist/" and wacht != true %}
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,200&display=swap" rel="stylesheet">
 {%- endif %}
 <link rel="stylesheet" href="{{ '/brand/tokens.css' | relative_url }}?v={{ site.time | date: '%s' }}">
 <link rel="stylesheet" href="{{ '/assets/css/stijl.css' | relative_url }}?v={{ site.time | date: '%s' }}">
 <script src="{{ '/assets/js/site.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
-{%- if page.url == "/hedonist/" and site.data.winkel.open %}
+{%- if page.url == "/hedonist/" and site.data.winkel.open and wacht != true %}
 <script src="{{ '/assets/js/winkel.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
 {%- endif %}
 
@@ -67,7 +71,7 @@
   "areaServed": "NL"
 }
 </script>
-{%- if page.collection == "producenten" %}
+{%- if page.collection == "producenten" and wacht != true %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",

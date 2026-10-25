@@ -119,7 +119,7 @@ Voorbeeldzinnen van de site:
 
 ## 4. Technische opzet
 
-- **Jekyll** op **GitHub Pages**: repo `vmvwijnimport/VMV-Wijnimport`, de live site draait vanaf `main`, op https://vmvwijnimport.com (bestand `CNAME`; het oude adres vmvwijnimport.github.io/VMV-Wijnimport stuurt door). De `baseurl` is leeg, maar gebruik altijd `| relative_url`. Tot de lancering in november toont de homepage een wachtpagina (`wachtpagina: true` in `_config.yml`).
+- **Jekyll** op **GitHub Pages**: repo `vmvwijnimport/VMV-Wijnimport`, de live site draait vanaf `main`, op https://vmvwijnimport.com (bestand `CNAME`; het oude adres vmvwijnimport.github.io/VMV-Wijnimport stuurt door). De `baseurl` is leeg, maar gebruik altijd `| relative_url`. Tot de lancering in november tonen alle pagina's een wachtpagina (`wachtpagina: true` in `_config.yml`), behalve de pagina's in `wachtpagina_open` (horeca, backoffice, voorwaarden, privacy, /bestelling/).
 - **Mappen:**
   - `_layouts/`: `default`, `pagina` (tekstpagina) en `producent`.
   - `_includes/`: header, footer, head (SEO, JSON-LD), contactblok, contactregel, producentregel, euro, leeftijdscheck en hedonist-winkel.
@@ -196,3 +196,4 @@ Horecaklanten vragen een inlog aan; de eigenaar keurt die handmatig goed. Alleen
 | 19 okt 2026 | Hedonist voor horeca: een lagere glasprijs vanaf 12 glazen (modellen gemengd), daaronder een hogere; tonen excl. btw. De bedragen staan alleen in de database | keuze van de eigenaar |
 | 23 okt 2026 | Maximum per wijn blijft per bestelling (niet per klant per jaar); overstap naar vmvwijnimport.com later, na het bijwerken van de foto's | keuze van de eigenaar; elke bestelling wordt toch goedgekeurd |
 | 23 okt 2026 | Eigen domein vmvwijnimport.com; tot de lancering in november alleen een wachtpagina op de homepage (geen links, geen leeftijdscheck). Horeca, Hedonist en de backoffice blijven bereikbaar via hun eigen adres | keuze van de eigenaar |
+| 25 okt 2026 | Tot november gaan alle pagina's naar de wachtpagina, ook de Hedonist-winkel. Alleen het horecaportaal, de backoffice, de voorwaarden, de privacyverklaring en /bestelling/ blijven werken (`wachtpagina_open`). vmvwijnimport.nl stuurt via GoDaddy door naar vmvwijnimport.com | keuze van de eigenaar |
