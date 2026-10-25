@@ -11,6 +11,7 @@ Gemfile.lock
 prijslijst/
 foto-originelen/
 huisstijl/
+drukwerk/
 
 # Lokale geheimen: nooit committen
 .env
