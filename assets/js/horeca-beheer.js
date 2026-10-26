@@ -57,7 +57,7 @@
   var TYPE_ZAAK = { restaurant: "Restaurant", bar: "Bar", wijnbar: "Wijnbar", slijterij: "Slijterij", overig: "Overig" };
 
   // ---------- Gegevens ----------
-  var data = { bestellingen: [], klanten: [], inst: null, producten: [], hedonist: [] };
+  var data = { bestellingen: [], klanten: [], inst: null, producten: [], hedonist: [], nieuws: [] };
   var laadAlles = function () {
     return Promise.all([
       db.from("bestellingen")
@@ -66,11 +66,13 @@
       db.from("klanten").select("*").order("aangemaakt_op", { ascending: false }),
       db.from("instellingen").select("*").maybeSingle(),
       db.from("producten").select("*").order("volgorde").order("id"),
-      db.from("hedonist_bestellingen").select("*").order("betaald_op", { ascending: false })
+      db.from("hedonist_bestellingen").select("*").order("betaald_op", { ascending: false }),
+      db.from("nieuwsbrieven").select("id, verstuurd_op, door, onderwerp, aantal").order("verstuurd_op", { ascending: false })
     ]).then(function (r) {
       // De Hedonist-tabel bestaat pas na supabase/015; zonder die tabel werkt de rest gewoon
       r.slice(0, 4).forEach(function (x) { if (x.error) throw x.error; });
       data.hedonist = r[4].error ? [] : r[4].data;
+      data.nieuws = r[5].error ? [] : r[5].data;   // bestaat pas na supabase/016
       data.bestellingen = r[0].data;
       data.bestellingen.forEach(function (b) { b.bestelregels.sort(function (x, y) { return x.id - y.id; }); });
       data.klanten = r[1].data;
@@ -121,9 +123,9 @@
     melding(veld("lijstmelding"));
     var h = location.hash.slice(1) || "bestellingen";
     var m = /^(bestelling|klant|wijn)-(.+)$/.exec(h);
-    var scherm = m ? m[1] : (["klanten", "wijnen", "overzicht", "hedonist"].indexOf(h) >= 0 ? h : "bestellingen");
+    var scherm = m ? m[1] : (["klanten", "wijnen", "overzicht", "hedonist", "nieuwsmail"].indexOf(h) >= 0 ? h : "bestellingen");
     schermen.forEach(function (s) { s.hidden = s.dataset.scherm !== scherm; });
-    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : scherm === "wijn" || scherm === "wijnen" ? "wijnen" : scherm === "overzicht" || scherm === "hedonist" ? scherm : "bestellingen";
+    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : scherm === "wijn" || scherm === "wijnen" ? "wijnen" : ["overzicht", "hedonist", "nieuwsmail"].indexOf(scherm) >= 0 ? scherm : "bestellingen";
     pagina.querySelectorAll("[data-tab]").forEach(function (a) {
       if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
@@ -134,6 +136,7 @@
     if (scherm === "wijn") toonWijn(m[2]);
     if (scherm === "overzicht") toonOverzicht();
     if (scherm === "hedonist") toonHedonist();
+    if (scherm === "nieuwsmail") toonNieuws();
   };
   window.addEventListener("hashchange", function () { route(); window.scrollTo(0, 0); });
 
@@ -546,6 +549,7 @@
       return;
     }
     var k = klant;
+    veld("geennieuws").checked = !!k.geen_nieuwsmail;
     veld("klantnaam").textContent = k.bedrijfsnaam;
     veld("klantstatus").hidden = false;
     veld("klantstatus").textContent = naMelding || KLANTTEKST[k.status] || "";
@@ -717,6 +721,170 @@
     leeg.hidden = gekozen.length > 0;
     leeg.textContent = hfilter === "te_leveren" ? "Er zijn geen Hedonist-bestellingen om te leveren." : "Geen Hedonist-bestellingen.";
   };
+
+  // ---------- Nieuwsmail ----------
+  // Opstellen, voorbeeld en proef gaan via de functie bestelmail, die controleert of je beheerder bent
+  // en in twee stappen bent ingelogd. Versturen kan alleen na een tweede klik.
+  var nieuwsForm = document.getElementById("nieuwsformulier");
+  var NIEUWS_CONCEPT = "vmv-nieuwsmail-concept";
+  var nieuwsVelden = ["onderwerp", "kop", "tekst", "knoptekst", "knoplink"];
+  try {
+    var concept = JSON.parse(localStorage.getItem(NIEUWS_CONCEPT) || "{}");
+    nieuwsVelden.forEach(function (n) { if (concept[n]) nieuwsForm.elements[n].value = concept[n]; });
+  } catch (e) {}
+  var nieuwsGegevens = function () {
+    var g = {};
+    nieuwsVelden.forEach(function (n) { g[n] = nieuwsForm.elements[n].value.trim(); });
+    return g;
+  };
+  var versturenKnop = veld("nieuwsknop");
+  var nieuwsKlaar = function () { delete versturenKnop.dataset.zeker; telOntvangers(); };
+  nieuwsForm.addEventListener("input", function () {
+    try { localStorage.setItem(NIEUWS_CONCEPT, JSON.stringify(nieuwsGegevens())); } catch (e) {}
+    nieuwsKlaar();
+  });
+  var gekozenOntvangers = function () {
+    return [].map.call(veld("ontvangers").querySelectorAll("input:checked"), function (i) { return i.value; });
+  };
+  var telOntvangers = function () {
+    var n = gekozenOntvangers().length;
+    if (!versturenKnop.dataset.zeker) versturenKnop.textContent = "Versturen naar " + n + (n === 1 ? " klant" : " klanten");
+    var alle = veld("ontvangers").querySelectorAll("input:not(:disabled)");
+    nieuwsForm.querySelector("[data-actie=allen]").checked = alle.length > 0 && n === alle.length;
+  };
+  nieuwsForm.querySelector("[data-actie=allen]").addEventListener("change", function (e) {
+    veld("ontvangers").querySelectorAll("input:not(:disabled)").forEach(function (i) { i.checked = e.target.checked; });
+    nieuwsKlaar();
+  });
+  var toonNieuws = function () {
+    var plek = veld("ontvangers");
+    var eerder = gekozenOntvangers();
+    var eersteKeer = !plek.children.length;
+    plek.textContent = "";
+    data.klanten.filter(function (k) { return k.status === "goedgekeurd"; })
+      .sort(function (x, y) { return x.bedrijfsnaam.localeCompare(y.bedrijfsnaam, "nl"); })
+      .forEach(function (k) {
+        var label = el("label", "akkoord");
+        var vak = el("input");
+        vak.type = "checkbox";
+        vak.value = k.id;
+        vak.disabled = !!k.geen_nieuwsmail;
+        vak.checked = !k.geen_nieuwsmail && (eersteKeer || eerder.indexOf(k.id) >= 0);
+        vak.addEventListener("change", nieuwsKlaar);
+        label.appendChild(vak);
+        label.appendChild(document.createTextNode(" " + k.bedrijfsnaam + " (" + k.contactpersoon + ")" + (k.geen_nieuwsmail ? ": wil geen nieuwsmail" : "")));
+        plek.appendChild(label);
+      });
+    if (!plek.children.length) plek.appendChild(el("p", "beheer__klein", "Er zijn nog geen goedgekeurde klanten."));
+    telOntvangers();
+    var lijst = veld("nieuwsgeschiedenis");
+    lijst.textContent = "";
+    data.nieuws.forEach(function (n) {
+      var li = el("li");
+      li.appendChild(el("strong", null, n.onderwerp));
+      li.appendChild(el("span", null, datum(n.verstuurd_op, true) + ", " + n.aantal + (n.aantal === 1 ? " klant" : " klanten")));
+      lijst.appendChild(li);
+    });
+    if (!data.nieuws.length) lijst.appendChild(el("li", null, "Nog geen nieuwsmail verstuurd."));
+  };
+  var nieuwsFout = function (naam, tekst) {
+    var invoer = nieuwsForm.elements[naam];
+    var f = document.getElementById(invoer.id + "-fout");
+    f.textContent = tekst || "";
+    f.hidden = !tekst;
+    if (tekst) invoer.setAttribute("aria-invalid", "true"); else invoer.removeAttribute("aria-invalid");
+    return !tekst;
+  };
+  var nieuwsControle = function (voorbeeld) {
+    var g = nieuwsGegevens();
+    var goed = [
+      nieuwsFout("onderwerp", voorbeeld || g.onderwerp ? "" : "Vul een onderwerp in"),
+      nieuwsFout("tekst", voorbeeld || g.tekst ? "" : "Vul de tekst van de mail in"),
+      nieuwsFout("knoplink", !g.knoplink || /^https:\/\/\S+$/.test(g.knoplink) ? (g.knoptekst && !g.knoplink ? "Vul de link van de knop in" : "") : "De link moet met https:// beginnen")
+    ].every(Boolean);
+    if (!goed) nieuwsForm.querySelector("[aria-invalid=true]").focus();
+    return goed ? g : null;
+  };
+  // Aanroep van de functie; een foutmelding van de functie zelf tonen we zoals hij is
+  var nieuwsFunctie = function (body) {
+    return db.functions.invoke("bestelmail", { body: body }).then(function (r) {
+      if (!r.error) return r.data;
+      var ctx = r.error.context;
+      return (ctx && ctx.json ? ctx.json() : Promise.reject(r.error)).then(function (j) {
+        throw new Error((j && j.fout) || "Er ging iets mis. Probeer het opnieuw.");
+      });
+    });
+  };
+  var nieuwsStatus = function (tekst, soort) { melding(nieuwsForm.querySelector(".formulier__status"), tekst, soort); };
+  var nieuwsMis = function (err) { nieuwsStatus((err && err.message) || "Er ging iets mis. Probeer het opnieuw.", "fout"); };
+
+  nieuwsForm.querySelector("[data-actie=voorbeeld]").addEventListener("click", function () {
+    var g = nieuwsControle(true), knop = this;
+    if (!g) return;
+    nieuwsStatus();
+    bezig(knop, "Bezig…");
+    nieuwsFunctie({ nieuwsmail: g, soort: "voorbeeld" })
+      .then(function (d) {
+        var vak = veld("nieuwsvoorbeeld");
+        vak.hidden = false;
+        vak.querySelector("iframe").srcdoc = d.html;
+        vak.scrollIntoView({ behavior: "smooth", block: "start" });
+      })
+      .catch(nieuwsMis)
+      .finally(function () { bezig(knop); });
+  });
+  nieuwsForm.querySelector("[data-actie=proef]").addEventListener("click", function () {
+    var g = nieuwsControle(false), knop = this;
+    if (!g) return;
+    nieuwsStatus();
+    bezig(knop, "Versturen…");
+    nieuwsFunctie({ nieuwsmail: g, soort: "proef" })
+      .then(function () { nieuwsStatus("Proefmail verstuurd naar info@. Kijk hoe hij eruitziet voordat je hem naar de klanten stuurt.", "goed"); })
+      .catch(nieuwsMis)
+      .finally(function () { bezig(knop); });
+  });
+  nieuwsForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var g = nieuwsControle(false);
+    if (!g) return;
+    var ids = gekozenOntvangers();
+    if (!ids.length) { nieuwsStatus("Kies minstens één klant.", "fout"); return; }
+    if (!versturenKnop.dataset.zeker) {
+      versturenKnop.dataset.zeker = "1";
+      versturenKnop.textContent = "Zeker weten? Klik nogmaals om naar " + ids.length + (ids.length === 1 ? " klant" : " klanten") + " te sturen";
+      return;
+    }
+    nieuwsStatus();
+    bezig(versturenKnop, "Versturen…");
+    nieuwsFunctie({ nieuwsmail: g, soort: "versturen", klanten: ids })
+      .then(function (d) {
+        bezig(versturenKnop);
+        nieuwsForm.reset();
+        try { localStorage.removeItem(NIEUWS_CONCEPT); } catch (e) {}
+        veld("nieuwsvoorbeeld").hidden = true;
+        return laadAlles().then(function () {
+          delete versturenKnop.dataset.zeker;
+          toonNieuws();
+          nieuwsStatus("Verstuurd naar " + d.verstuurd + (d.verstuurd === 1 ? " klant." : " klanten."), "goed");
+        });
+      })
+      .catch(function (err) { bezig(versturenKnop); delete versturenKnop.dataset.zeker; telOntvangers(); nieuwsMis(err); });
+  });
+
+  // Op het klantscherm: wil geen nieuwsmail
+  veld("geennieuws").addEventListener("change", function (e) {
+    var vak = e.target, plek = veld("klantmelding");
+    vak.disabled = true;
+    melding(plek);
+    db.rpc("beheer_nieuwsmail", { klant: klant.id, geen: vak.checked })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        klant.geen_nieuwsmail = vak.checked;
+        melding(plek, vak.checked ? "Deze klant krijgt geen nieuwsmail meer." : "Deze klant krijgt weer nieuwsmail.", "goed");
+      })
+      .catch(function (err) { vak.checked = !vak.checked; melding(plek, vertaal(err), "fout"); })
+      .finally(function () { vak.disabled = false; });
+  });
 
   // ---------- Overzicht: best bestellende klanten en meest bestelde wijnen ----------
   // Alleen bevestigde en geleverde bestellingen, met het aantal dat VMV levert. Geen omzet:

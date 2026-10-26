@@ -80,6 +80,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
       <a href="#wijnen" data-tab="wijnen">Wijnen</a>
       <a href="#hedonist" data-tab="hedonist">Hedonist <span data-teller="hedonist"></span></a>
       <a href="#overzicht" data-tab="overzicht">Overzicht</a>
+      <a href="#nieuwsmail" data-tab="nieuwsmail">Nieuwsmail</a>
     </nav>
 
     {%- comment -%} Lijst met bestellingen {%- endcomment -%}
@@ -175,6 +176,61 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
       <p class="formulier__status" data-veld="hedonistmelding" role="status" aria-live="polite"></p>
       <div class="beheer__hedonist" data-veld="hedonistlijst"></div>
       <p class="beheer__leeg" data-veld="hedonistleeg" hidden></p>
+    </div>
+
+    {%- comment -%} Nieuwsmail aan horecaklanten: alleen versturen na twee keer klikken {%- endcomment -%}
+    <div data-scherm="nieuwsmail" hidden>
+      <div class="beheer__raster">
+        <form class="formulier beheer__nieuws" id="nieuwsformulier" novalidate>
+          <h2>Nieuwsmail opstellen</h2>
+          <p class="beheer__klein">Je concept wordt in deze browser bewaard. Er gaat pas iets weg als je op versturen klikt.</p>
+          <div class="veld">
+            <label for="nm-onderwerp">Onderwerp</label>
+            <input id="nm-onderwerp" name="onderwerp" maxlength="150" autocomplete="off" required aria-describedby="nm-onderwerp-fout">
+            <p class="veld__fout" id="nm-onderwerp-fout" hidden></p>
+          </div>
+          <div class="veld">
+            <label for="nm-kop">Kop in de mail <span class="veld__optioneel">(leeg = het onderwerp)</span></label>
+            <input id="nm-kop" name="kop" maxlength="150" autocomplete="off">
+          </div>
+          <div class="veld">
+            <label for="nm-tekst">Tekst</label>
+            <textarea id="nm-tekst" name="tekst" rows="10" required aria-describedby="nm-tekst-uitleg nm-tekst-fout"></textarea>
+            <p class="beheer__klein" id="nm-tekst-uitleg">Een witregel begint een nieuwe alinea. "Beste [naam]," en je contactgegevens komen er vanzelf bij.</p>
+            <p class="veld__fout" id="nm-tekst-fout" hidden></p>
+          </div>
+          <div class="beheer__velden">
+            <div class="veld">
+              <label for="nm-knoptekst">Knop <span class="veld__optioneel">(niet verplicht)</span></label>
+              <input id="nm-knoptekst" name="knoptekst" maxlength="60" autocomplete="off" placeholder="Naar het horecaportaal">
+            </div>
+            <div class="veld">
+              <label for="nm-knoplink">Link van de knop</label>
+              <input id="nm-knoplink" name="knoplink" type="url" autocomplete="off" placeholder="https://vmvwijnimport.com/horeca/" aria-describedby="nm-knoplink-fout">
+              <p class="veld__fout" id="nm-knoplink-fout" hidden></p>
+            </div>
+          </div>
+          <fieldset class="beheer__ontvangers">
+            <legend>Aan wie?</legend>
+            <label class="akkoord"><input type="checkbox" data-actie="allen"> Alle goedgekeurde klanten</label>
+            <div data-veld="ontvangers"></div>
+          </fieldset>
+          <div class="beheer__knoppen">
+            <button class="knop knop--secundair" type="button" data-actie="voorbeeld">Voorbeeld bekijken</button>
+            <button class="knop knop--secundair" type="button" data-actie="proef">Proefmail naar info@</button>
+            <button class="knop knop--primair" type="submit" data-veld="nieuwsknop">Versturen</button>
+          </div>
+          <p class="formulier__status" role="status" aria-live="polite"></p>
+        </form>
+        <aside class="beheer__klant">
+          <h2 class="beheer__klantkop">Eerder verstuurd</h2>
+          <ul class="beheer__mini" data-veld="nieuwsgeschiedenis"></ul>
+        </aside>
+      </div>
+      <div class="beheer__voorbeeld" data-veld="nieuwsvoorbeeld" hidden>
+        <h2 class="beheer__producent">Voorbeeld</h2>
+        <iframe title="Voorbeeld van de nieuwsmail" sandbox=""></iframe>
+      </div>
     </div>
 
     {%- comment -%} Overzicht: best bestellende klanten en meest bestelde wijnen {%- endcomment -%}
@@ -328,6 +384,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
           <dl class="beheer__gegevens beheer__gegevens--breed" data-veld="klantgegevens"></dl>
           <p class="beheer__klein beheer__controle" data-veld="controle"></p>
           <div class="beheer__knoppen" data-veld="klantknoppen"></div>
+          <label class="akkoord beheer__geennieuws"><input type="checkbox" data-veld="geennieuws"> Wil geen nieuwsmail</label>
           <p class="formulier__status" data-veld="klantmelding" role="status" aria-live="polite"></p>
         </div>
         <aside class="beheer__klant">

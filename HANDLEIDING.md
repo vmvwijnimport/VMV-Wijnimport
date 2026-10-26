@@ -211,7 +211,7 @@ De horecaprijzen staan **alleen** in Supabase, nooit op GitHub of in de broncode
 
 ### De backoffice
 
-Bovenaan staan drie tabbladen: **Bestellingen**, **Klanten** en **Wijnen**. Erachter zie je hoeveel nieuwe bestellingen en aanvragen er zijn. Met de knoppen eronder kies je wat je ziet, bijvoorbeeld alleen nieuwe bestellingen of alles. Klik op een regel om hem te openen.
+Bovenaan staan de tabbladen **Bestellingen**, **Klanten**, **Wijnen**, **Hedonist**, **Overzicht** en **Nieuwsmail**. Erachter zie je hoeveel nieuwe bestellingen en aanvragen er zijn. Met de knoppen eronder kies je wat je ziet, bijvoorbeeld alleen nieuwe bestellingen of alles. Klik op een regel om hem te openen.
 
 **Een beheerder toevoegen** (bijvoorbeeld voor Tim):
 1. Supabase → **Authentication → Users → Add user → Create new user**. Vul het e-mailadres en een wachtwoord in en zet **Auto Confirm User** aan.
@@ -220,6 +220,8 @@ Bovenaan staan drie tabbladen: **Bestellingen**, **Klanten** en **Wijnen**. Erac
    Klik op **Run**.
 
 Gebruik voor een beheerder een ander e-mailadres dan voor een horecaklant. Een beheerder die op /horeca/ inlogt, komt vanzelf in de backoffice.
+
+**Inloggen in twee stappen.** Na je wachtwoord vraagt de backoffice een code van 6 cijfers uit een app op je telefoon (Microsoft Authenticator, Google Authenticator of Wachtwoorden op de iPhone). De eerste keer scan je een QR-code om de app in te stellen. Zonder code geeft de database geen toegang, ook niet met het juiste wachtwoord. **Telefoon kwijt of nieuw?** Supabase → **Authentication → Users** → jouw account → bij **Multi-factor authentication** de factor verwijderen. Bij het inloggen stel je dan een nieuwe app in.
 
 ### Een aanvraag goedkeuren of afwijzen
 
@@ -256,6 +258,28 @@ Onderaan het tabblad **Wijnen** staat **Instellingen**:
 - **Betaaltermijn**: in dagen, staat in de mails en de bevestiging.
 
 Klik op **Instellingen opslaan**. Het geldt voor nieuwe bestellingen.
+
+### Hedonist-bestellingen
+
+Is een betaling via Mollie binnen, dan staat de bestelling in de backoffice onder **Hedonist** bij **Te leveren** (je krijgt ook nog steeds de mail). Klik op een bestelling voor het adres, de telefoon en de opmerking. Verstuurd of opgehaald? Klik op **Op geleverd zetten** (of **Opgehaald**). Per ongeluk? Met **Terug naar te leveren** zet je het terug. De factuur maak je zoals altijd in e-Boekhouden.
+
+### Overzicht
+
+Onder **Overzicht** zie je welke klanten het meest bestellen (aantal bestellingen, flessen, glazen en de laatste bestelling) en welke wijnen het meest worden besteld. Kies dit jaar, vorig jaar, de afgelopen 12 maanden of alles. Alleen bevestigde en geleverde horecabestellingen tellen mee, met de aantallen die je levert. Er staat bewust geen omzet: wat je buiten het portaal verkoopt, telt niet mee.
+
+### Nieuwsmail
+
+Onder **Nieuwsmail** schrijf je een mail aan je horecaklanten, bijvoorbeeld over een nieuwe jaargang.
+1. Vul het onderwerp en de tekst in. Een witregel begint een nieuwe alinea; "Beste [naam]," en je contactgegevens komen er vanzelf bij. Een knop (bijvoorbeeld naar het horecaportaal) mag, hoeft niet.
+2. Kies bij **Aan wie?** de klanten. Standaard staan alle goedgekeurde klanten aan.
+3. Klik op **Voorbeeld bekijken** en eventueel op **Proefmail naar info@**.
+4. Klik op **Versturen naar … klanten** en daarna nog een keer ter controle. Elke klant krijgt een eigen mail; ze zien elkaars adres niet. Antwoorden komen op info@.
+
+Je concept blijft bewaard in je browser tot je verstuurt. Er gaat nooit iets vanzelf. Wil een klant geen nieuwsmail meer? Open de klant onder **Klanten** en zet het vinkje **Wil geen nieuwsmail** aan.
+
+### Reservekopie
+
+Elke **zondagavond** krijg je op info@ een mail "Reservekopie horecaportaal" met een bijlage (`vmv-reservekopie-….json`): alle klanten, wijnen, prijzen, instellingen en bestellingen. Bewaar die bijlage op een veilige plek, bijvoorbeeld in een map in OneDrive. Gaat er ooit iets mis met de database, vraag Claude dan om de gegevens terug te zetten. Stuur het bestand niet door: er staan klantgegevens en horecaprijzen in.
 
 ### Bestellingen afhandelen
 

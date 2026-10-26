@@ -89,3 +89,14 @@ Bij een nieuwe accountaanvraag stuurt de database nu zelf een mail "Nieuwe aanvr
 ## Update 26 okt: wijnen, prijzen en voorraad in de backoffice
 
 **SQL Editor → New query** → plak `supabase/012-wijnen-beheren.sql` → **Run**. Je krijgt "Success". Daarna werkt het tabblad **Wijnen** in de backoffice (na het live zetten van de site). De functie bestelmail hoeft hiervoor niet opnieuw.
+
+## Update 26 okt: reservekopie, tweestaps, Hedonist in de backoffice en nieuwsmail
+
+De volgorde is belangrijk:
+1. **Functie bijwerken:** **Edge Functions → bestelmail → Code**: plak de nieuwe inhoud van `supabase/functions/bestelmail/index.ts` en klik op **Deploy**. Verify JWT blijft uit.
+2. **SQL Editor:** voer `supabase/013-reservekopie.sql`, `015-hedonist.sql` en `016-nieuwsmail.sql` uit. 015 laat als uitkomst een sleutel zien: die heb je bij stap 3 nodig. (014 nog niet.)
+3. **Cloudflare → vmv-betalen:** plak de nieuwe `betalen/worker.js` en klik op **Deploy**. Voeg bij **Settings → Variables and Secrets** het geheim `HEDONIST_SLEUTEL` toe met de sleutel uit stap 2.
+4. De site live zetten.
+5. Log in op de backoffice en stel inloggen in twee stappen in (QR-code scannen, code invullen).
+6. Pas daarna: **SQL Editor** → `supabase/014-tweestaps.sql` → **Run**. Vanaf nu geeft de database alleen toegang na wachtwoord én code.
+7. **Testen:** reservekopie nu meteen: `select net.http_post(url := 'https://iemduldvpylppckpttja.supabase.co/functions/v1/bestelmail', body := '{"reservekopie": true}'::jsonb, timeout_milliseconds := 60000);` en een proefmail vanuit **Nieuwsmail**.
