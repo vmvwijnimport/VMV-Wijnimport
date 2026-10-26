@@ -9,7 +9,9 @@
 //    De functie leest alles zelf uit de database en verstuurt elke mail maar één keer.
 // 3. Weekoverzicht. Elke zondagavond roept de database deze functie aan (supabase/009) voor een mail
 //    aan VMV met de bevestigde bestellingen die nog geleverd moeten worden. Hooguit één per 20 uur.
-// 4. GET ?beeld=kop geeft de kopband van de mails (zwart met het witte logo).
+// 4. Reservekopie. Elke zondagavond roept de database deze functie aan (supabase/013) voor een mail
+//    aan VMV met alle klanten, wijnen, instellingen en bestellingen als bijlage. Hooguit één per 20 uur.
+// 5. GET ?beeld=kop geeft de kopband van de mails (zwart met het witte logo).
 // Bestellingen afhandelen gebeurt in de backoffice op /horeca/beheer/ (inloggen als beheerder);
 // de knoppen in de mail aan VMV openen die pagina.
 //
@@ -295,6 +297,19 @@ export const mailWeekoverzicht = (teLeveren, nieuw, ctx) => {
   };
 };
 
+// Naar VMV, elke zondagavond: de reservekopie als bijlage
+const TABELNAAM = { klanten: "Klanten", producten: "Wijnen en glazen", instellingen: "Instellingen", bestellingen: "Bestellingen", bestelregels: "Bestelregels", beheerders: "Beheerders" };
+export const mailReservekopie = (aantallen, bestand, ctx) => {
+  const inhoud =
+    alinea("Hierbij de wekelijkse reservekopie van het horecaportaal. Bewaar de bijlage op een veilige plek, bijvoorbeeld in een map in OneDrive of Google Drive.") +
+    gegevens(Object.entries(aantallen).map(([tabel, n]) => [TABELNAAM[tabel] || tabel, String(n)])) +
+    alinea("Gaat er ooit iets mis met de database? Vraag Claude dan om de gegevens uit dit bestand terug te zetten. Het bestand bevat klantgegevens en horecaprijzen: stuur het niet door.", `font-size:14px;color:${KLEUR.zacht};margin:24px 0 0;`);
+  return {
+    onderwerp: `Reservekopie horecaportaal ${datum(new Date())}`,
+    html: omhulsel({ voorvertoning: `Bijlage: ${bestand}`, kop: "Reservekopie", inhoud }, ctx)
+  };
+};
+
 // ---------- Versturen ----------
 const verstuur = async (aan, antwoordAan, mail) => {
   const r = await fetch("https://api.resend.com/emails", {
@@ -302,7 +317,8 @@ const verstuur = async (aan, antwoordAan, mail) => {
     headers: { Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       from: Deno.env.get("AFZENDER") || "VMV Wijnimport <onboarding@resend.dev>",
-      to: [aan], reply_to: antwoordAan, subject: mail.onderwerp, html: mail.html
+      to: [aan], reply_to: antwoordAan, subject: mail.onderwerp, html: mail.html,
+      ...(mail.bijlagen ? { attachments: mail.bijlagen } : {})
     })
   });
   if (!r.ok) throw new Error(`Resend ${r.status}: ${await r.text()}`);
@@ -431,6 +447,47 @@ const weekoverzicht = async (db) => {
   return antwoord({ verstuurd: ["weekoverzicht"] });
 };
 
+// ---------- Reservekopie (aanroep door de database, elke zondagavond) ----------
+const TABELLEN = ["klanten", "producten", "instellingen", "bestellingen", "bestelregels", "beheerders"];
+const alleRijen = async (db, tabel) => {
+  const rijen = [];
+  for (let van = 0; ; van += 1000) {
+    const { data, error } = await db.from(tabel).select("*").order("id").range(van, van + 999);
+    if (error) throw error;
+    rijen.push(...data);
+    if (data.length < 1000) return rijen;
+  }
+};
+const base64 = (tekst) => {
+  const bytes = new TextEncoder().encode(tekst);
+  let s = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
+const reservekopie = async (db) => {
+  // Tijdstempel zetten; lukt dat niet, dan is er de afgelopen 20 uur al een verstuurd
+  const grens = new Date(Date.now() - 20 * 3600e3).toISOString();
+  const { data: gezet, error: fout } = await db.from("instellingen").update({ reservekopie_op: new Date().toISOString() })
+    .eq("id", 1).or(`reservekopie_op.is.null,reservekopie_op.lt.${grens}`).select("id");
+  if (fout) throw fout;
+  if (!(gezet && gezet.length)) return antwoord({ verstuurd: [] });
+  try {
+    const tabellen = {};
+    const aantallen = {};
+    for (const t of TABELLEN) { tabellen[t] = await alleRijen(db, t); aantallen[t] = tabellen[t].length; }
+    const dag = new Date().toISOString().slice(0, 10);
+    const bestand = `vmv-reservekopie-${dag}.json`;
+    const inhoud = JSON.stringify({ gemaakt_op: new Date().toISOString(), tabellen }, null, 1);
+    const vmv = Deno.env.get("VMV_MAIL") || "info@vmvwijnimport.com";
+    const mail = mailReservekopie(aantallen, bestand, { kopband: kopband() });
+    await verstuur(vmv, vmv, { ...mail, bijlagen: [{ filename: bestand, content: base64(inhoud) }] });
+  } catch (e) {
+    await db.from("instellingen").update({ reservekopie_op: null }).eq("id", 1);
+    throw e;
+  }
+  return antwoord({ verstuurd: ["reservekopie"] });
+};
+
 if (typeof Deno !== "undefined") Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method === "GET") {
@@ -445,10 +502,12 @@ if (typeof Deno !== "undefined") Deno.serve(async (req) => {
     const vraag = await req.json();
     const klant = typeof vraag.klant === "string" && /^[0-9a-f-]{36}$/i.test(vraag.klant);
     const week = vraag.weekoverzicht === true;
-    if (!klant && !week && !Number.isInteger(vraag.id)) return antwoord({ fout: "geen geldig id" }, 400);
+    const kopie = vraag.reservekopie === true;
+    if (!klant && !week && !kopie && !Number.isInteger(vraag.id)) return antwoord({ fout: "geen geldig id" }, 400);
     const { createClient } = await import("jsr:@supabase/supabase-js@2");
     const db = createClient(Deno.env.get("SUPABASE_URL"), Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"));
     if (week) return await weekoverzicht(db);
+    if (kopie) return await reservekopie(db);
     if (klant) return vraag.soort === "aanvraag" ? await aanvraagVoor(db, vraag.klant) : await welkomVoor(db, vraag.klant);
     return await mailsVoor(db, vraag.id);
   } catch (e) {
