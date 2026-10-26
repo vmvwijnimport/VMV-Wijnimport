@@ -118,9 +118,9 @@
     melding(veld("lijstmelding"));
     var h = location.hash.slice(1) || "bestellingen";
     var m = /^(bestelling|klant|wijn)-(.+)$/.exec(h);
-    var scherm = m ? m[1] : (h === "klanten" || h === "wijnen" ? h : "bestellingen");
+    var scherm = m ? m[1] : (["klanten", "wijnen", "overzicht"].indexOf(h) >= 0 ? h : "bestellingen");
     schermen.forEach(function (s) { s.hidden = s.dataset.scherm !== scherm; });
-    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : scherm === "wijn" || scherm === "wijnen" ? "wijnen" : "bestellingen";
+    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : scherm === "wijn" || scherm === "wijnen" ? "wijnen" : scherm === "overzicht" ? "overzicht" : "bestellingen";
     pagina.querySelectorAll("[data-tab]").forEach(function (a) {
       if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
@@ -129,6 +129,7 @@
     if (scherm === "klant") toonKlant(m[2]);
     if (scherm === "wijnen") toonWijnen();
     if (scherm === "wijn") toonWijn(m[2]);
+    if (scherm === "overzicht") toonOverzicht();
   };
   window.addEventListener("hashchange", function () { route(); window.scrollTo(0, 0); });
 
@@ -621,6 +622,85 @@
       .catch(function (err) { melding(status, vertaal(err), "fout"); })
       .finally(function () { bezig(knop); });
   });
+
+  // ---------- Overzicht: best bestellende klanten en meest bestelde wijnen ----------
+  // Alleen bevestigde en geleverde bestellingen, met het aantal dat VMV levert. Geen omzet:
+  // het portaal ziet alleen de horecabestellingen, dus een omzetcijfer zou een vertekend beeld geven.
+  var periode = "jaar";
+  var PERIODES = { jaar: "Dit jaar", vorig: "Vorig jaar", twaalf: "Afgelopen 12 maanden", alles: "Alles" };
+  var inPeriode = function (d) {
+    var t = new Date(d), nu = new Date();
+    if (periode === "jaar") return t.getFullYear() === nu.getFullYear();
+    if (periode === "vorig") return t.getFullYear() === nu.getFullYear() - 1;
+    if (periode === "twaalf") return t >= new Date(nu.getFullYear() - 1, nu.getMonth(), nu.getDate());
+    return true;
+  };
+  var tabel = function (doel, koppen, rijen, leeg) {
+    doel.textContent = "";
+    if (!rijen.length) {
+      var c = el("caption", "beheer__leeg", leeg);
+      doel.appendChild(c);
+      return;
+    }
+    var thead = el("thead"), tr = el("tr");
+    koppen.forEach(function (k, i) { var th = el("th", i ? "beheer__getal" : null, k); th.scope = "col"; tr.appendChild(th); });
+    thead.appendChild(tr);
+    var tbody = el("tbody");
+    rijen.forEach(function (r) {
+      var rij = el("tr");
+      r.forEach(function (v, i) {
+        var td = el(i ? "td" : "th", i ? "beheer__getal" : null);
+        if (!i) td.scope = "row";
+        if (v && v.nodeType) td.appendChild(v); else td.textContent = v;
+        rij.appendChild(td);
+      });
+      tbody.appendChild(rij);
+    });
+    doel.appendChild(thead);
+    doel.appendChild(tbody);
+  };
+  var toonOverzicht = function () {
+    var knoppen = veld("periodes");
+    if (!knoppen.children.length) {
+      Object.keys(PERIODES).forEach(function (p) {
+        var k = el("button", null, PERIODES[p]);
+        k.type = "button";
+        k.dataset.periode = p;
+        k.addEventListener("click", function () { periode = p; toonOverzicht(); });
+        knoppen.appendChild(k);
+      });
+    }
+    knoppen.querySelectorAll("button").forEach(function (k) { k.setAttribute("aria-pressed", k.dataset.periode === periode ? "true" : "false"); });
+
+    var klanten = {}, wijnen = {};
+    data.bestellingen.forEach(function (b) {
+      if ((b.status !== "bevestigd" && b.status !== "geleverd") || !inPeriode(b.besteld_op)) return;
+      var naam = b.klanten ? b.klanten.bedrijfsnaam : "Onbekende klant";
+      var k = klanten[b.klant_id] || (klanten[b.klant_id] = { id: b.klant_id, naam: naam, bestellingen: 0, flessen: 0, glazen: 0, laatst: b.besteld_op });
+      k.bestellingen++;
+      if (b.besteld_op > k.laatst) k.laatst = b.besteld_op;
+      b.bestelregels.forEach(function (r) {
+        var n = getoond(b, r);
+        if (!n) return;
+        if (isGlas(r)) k.glazen += n; else k.flessen += n;
+        var w = wijnen[r.omschrijving] || (wijnen[r.omschrijving] = { naam: r.omschrijving, glas: isGlas(r), aantal: 0, klanten: {} });
+        w.aantal += n;
+        w.klanten[b.klant_id] = true;
+      });
+    });
+    var topKlanten = Object.keys(klanten).map(function (id) { return klanten[id]; })
+      .sort(function (x, y) { return (y.flessen - x.flessen) || (y.bestellingen - x.bestellingen); });
+    tabel(veld("topklanten"), ["Zaak", "Bestellingen", "Flessen", "Glazen", "Laatste"], topKlanten.map(function (k) {
+      var a = el("a", null, k.naam);
+      a.href = "#klant-" + k.id;
+      return [a, k.bestellingen, k.flessen, k.glazen || "", datum(k.laatst, true)];
+    }), "Nog geen bevestigde bestellingen in deze periode.");
+    var topWijnen = Object.keys(wijnen).map(function (n) { return wijnen[n]; })
+      .sort(function (x, y) { return (y.aantal - x.aantal) || x.naam.localeCompare(y.naam, "nl"); });
+    tabel(veld("topwijnen"), ["Wijn", "Aantal", "Klanten"], topWijnen.map(function (w) {
+      return [w.naam, w.aantal + (w.glas ? " glazen" : " fl."), Object.keys(w.klanten).length];
+    }), "Nog geen bevestigde bestellingen in deze periode.");
+  };
 
   // ---------- Wijnen, prijzen en voorraad ----------
   // Opslaan gaat via de databasefuncties beheer_product en beheer_instellingen (supabase/012),

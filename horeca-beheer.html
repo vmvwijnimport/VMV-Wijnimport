@@ -78,6 +78,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
       <a href="#bestellingen" data-tab="bestellingen">Bestellingen <span data-teller="bestellingen"></span></a>
       <a href="#klanten" data-tab="klanten">Klanten <span data-teller="klanten"></span></a>
       <a href="#wijnen" data-tab="wijnen">Wijnen</a>
+      <a href="#overzicht" data-tab="overzicht">Overzicht</a>
     </nav>
 
     {%- comment -%} Lijst met bestellingen {%- endcomment -%}
@@ -160,6 +161,22 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
         <button class="knop knop--primair" type="submit">Instellingen opslaan</button>
         <p class="formulier__status" role="status" aria-live="polite"></p>
       </form>
+    </div>
+
+    {%- comment -%} Overzicht: best bestellende klanten en meest bestelde wijnen {%- endcomment -%}
+    <div data-scherm="overzicht" hidden>
+      <div class="regiokeuze beheer__filter" role="group" aria-label="Periode" data-veld="periodes"></div>
+      <p class="beheer__klein beheer__lijstuitleg">Alleen bestellingen via het horecaportaal die je hebt bevestigd of geleverd, met de aantallen die je levert. Nieuwe en afgekeurde bestellingen tellen niet mee.</p>
+      <div class="beheer__overzicht">
+        <section>
+          <h2 class="beheer__producent">Klanten</h2>
+          <div class="beheer__tabel"><table data-veld="topklanten"></table></div>
+        </section>
+        <section>
+          <h2 class="beheer__producent">Wijnen en glazen</h2>
+          <div class="beheer__tabel"><table data-veld="topwijnen"></table></div>
+        </section>
+      </div>
     </div>
 
     {%- comment -%} Eén wijn toevoegen of wijzigen {%- endcomment -%}

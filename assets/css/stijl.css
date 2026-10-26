@@ -996,6 +996,16 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .beheer__mini { margin: 0; padding: 0; list-style: none; font-size: var(--fs-klein); }
 .beheer__mini li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px var(--s-1); padding: 6px 0; border-bottom: 1px solid var(--lijn); }
 .beheer__mini span { color: var(--tekst-zacht); }
+/* Backoffice: overzicht */
+.beheer__overzicht { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-6); align-items: start; }
+.beheer__overzicht .beheer__producent { margin-top: 0; }
+.beheer__tabel { overflow-x: auto; }
+.beheer__tabel table { width: 100%; border-collapse: collapse; border-top: 1px solid var(--zwart); font-size: var(--fs-klein); }
+.beheer__tabel th, .beheer__tabel td { padding: 10px var(--s-1); border-bottom: 1px solid var(--lijn); text-align: left; vertical-align: top; }
+.beheer__tabel thead th { font-weight: 400; color: var(--tekst-zacht); }
+.beheer__tabel tbody th { font-weight: 400; color: var(--zwart); }
+.beheer__tabel .beheer__getal { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.beheer__tabel caption { caption-side: bottom; text-align: left; }
 /* Backoffice: wijnen, prijzen en voorraad */
 .beheer__wijnbalk { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--s-2); }
 .beheer__wijnbalk > .knop { margin-bottom: var(--s-3); }
@@ -1039,6 +1049,7 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   .beheer__wijn .beheer__bedrag { grid-column: 2; grid-row: 1; }
   .beheer__wijn .beheer__cel:last-child { grid-column: 1 / -1; grid-row: 2; }
   .beheer__velden { grid-template-columns: 1fr; }
+  .beheer__overzicht { grid-template-columns: 1fr; }
 }
 @media (max-width: 36rem) {
   .tabbladen { gap: var(--s-3); }
