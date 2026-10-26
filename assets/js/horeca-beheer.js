@@ -935,7 +935,14 @@
     // afgesneden). Daarom eerst naar boven, en daarna terug naar waar je was.
     var waar = window.scrollY;
     window.scrollTo(0, 0);
-    laadPdf()
+    // In de PDF het logo als PNG: niet elke browser tekent een SVG goed in de momentopname
+    var logo = kopie.querySelector(".prijslijst__logo");
+    var logoKlaar = Promise.resolve();
+    if (logo && pagina.dataset.logoPng) {
+      logo.src = pagina.dataset.logoPng;
+      logoKlaar = logo.decode ? logo.decode().catch(function () {}) : Promise.resolve();
+    }
+    logoKlaar.then(laadPdf)
       .then(function () { return document.fonts ? document.fonts.ready : null; })
       .then(function () {
         return window.html2pdf().set({

@@ -1048,6 +1048,7 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 /* Voor PDF downloaden: een kopie buiten beeld, zo breed als een A4 binnen de marges (180 mm) */
 .prijslijst__houder { position: absolute; left: -10000px; top: 0; }
 .prijslijst.prijslijst--pdf { width: 680px; max-width: none; margin: 0; padding: 0; border: 0; }
+.prijslijst--pdf .prijslijst__logo { margin-left: 0; }
 .prijslijst__prijs { text-align: right; font-variant-numeric: tabular-nums; color: var(--zwart); }
 .prijslijst__voet { margin-top: var(--s-6); padding-top: var(--s-2); border-top: 1px solid var(--zwart); font-size: var(--fs-klein); color: var(--tekst-zacht); break-inside: avoid; }
 .prijslijst__voorwaarden { margin: 0 0 var(--s-2); padding-left: 1.1em; color: var(--tekst); }
