@@ -1,5 +1,6 @@
 // Backoffice, alleen voor VMV: bestellingen bevestigen (eventueel met andere aantallen), afkeuren
-// en op geleverd zetten, en aanvragen van horecazaken goedkeuren of afwijzen.
+// en op geleverd zetten, aanvragen van horecazaken goedkeuren of afwijzen, en wijnen, prijzen,
+// voorraad en instellingen beheren (supabase/012-wijnen-beheren.sql).
 // Je logt in met een beheerdersaccount. De database controleert bij alles of je beheerder bent
 // (supabase/008-backoffice.sql); deze code toont alleen wat de database teruggeeft.
 // Na bevestigen of afkeuren krijgt de klant automatisch een mail (supabase/006 en de functie bestelmail),
@@ -47,7 +48,7 @@
     if (/rate limit|too many/i.test(m)) return "Te veel pogingen. Probeer het over een paar minuten opnieuw.";
     if (/geen toegang/i.test(m)) return "Dit account heeft geen toegang tot de backoffice.";
     // Meldingen uit de database (supabase/008) zijn al in gewoon Nederlands
-    if (/afgehandeld|leveren|levert|geleverd|bestaat niet|aantal/i.test(m)) return m.replace(/\.?$/, ".");
+    if (/afgehandeld|leveren|levert|geleverd|bestaat niet|aantal|^vul |^kies /i.test(m)) return m.replace(/\.?$/, ".");
     return "Er ging iets mis. Probeer het opnieuw.";
   };
 
@@ -56,20 +57,22 @@
   var TYPE_ZAAK = { restaurant: "Restaurant", bar: "Bar", wijnbar: "Wijnbar", slijterij: "Slijterij", overig: "Overig" };
 
   // ---------- Gegevens ----------
-  var data = { bestellingen: [], klanten: [], inst: null };
+  var data = { bestellingen: [], klanten: [], inst: null, producten: [] };
   var laadAlles = function () {
     return Promise.all([
       db.from("bestellingen")
         .select("*, klanten(id, bedrijfsnaam, contactpersoon, email, telefoon, straat, postcode, plaats), bestelregels(*, producten(soort, prijs_ex))")
         .order("besteld_op", { ascending: false }).limit(1000),
       db.from("klanten").select("*").order("aangemaakt_op", { ascending: false }),
-      db.from("instellingen").select("*").maybeSingle()
+      db.from("instellingen").select("*").maybeSingle(),
+      db.from("producten").select("*").order("volgorde").order("id")
     ]).then(function (r) {
       r.forEach(function (x) { if (x.error) throw x.error; });
       data.bestellingen = r[0].data;
       data.bestellingen.forEach(function (b) { b.bestelregels.sort(function (x, y) { return x.id - y.id; }); });
       data.klanten = r[1].data;
       data.inst = r[2].data;
+      data.producten = r[3].data;
     });
   };
   var afgehandeld = function (b) { return b.status !== "ontvangen"; };
@@ -114,16 +117,18 @@
   var route = function () {
     melding(veld("lijstmelding"));
     var h = location.hash.slice(1) || "bestellingen";
-    var m = /^(bestelling|klant)-(.+)$/.exec(h);
-    var scherm = m ? m[1] : (h === "klanten" ? "klanten" : "bestellingen");
+    var m = /^(bestelling|klant|wijn)-(.+)$/.exec(h);
+    var scherm = m ? m[1] : (h === "klanten" || h === "wijnen" ? h : "bestellingen");
     schermen.forEach(function (s) { s.hidden = s.dataset.scherm !== scherm; });
-    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : "bestellingen";
+    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : scherm === "wijn" || scherm === "wijnen" ? "wijnen" : "bestellingen";
     pagina.querySelectorAll("[data-tab]").forEach(function (a) {
       if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
     if (scherm === "bestellingen" || scherm === "klanten") toonLijst(scherm);
     if (scherm === "bestelling") toonBestelling(Number(m[2]));
     if (scherm === "klant") toonKlant(m[2]);
+    if (scherm === "wijnen") toonWijnen();
+    if (scherm === "wijn") toonWijn(m[2]);
   };
   window.addEventListener("hashchange", function () { route(); window.scrollTo(0, 0); });
 
@@ -612,6 +617,287 @@
         if (r.error) throw r.error;
         klant.notitie = tekst.trim() || null;
         melding(status, "Opgeslagen.", "goed");
+      })
+      .catch(function (err) { melding(status, vertaal(err), "fout"); })
+      .finally(function () { bezig(knop); });
+  });
+
+  // ---------- Wijnen, prijzen en voorraad ----------
+  // Opslaan gaat via de databasefuncties beheer_product en beheer_instellingen (supabase/012),
+  // die zelf controleren of je beheerder bent en de invoer nakijken.
+  var BESCHIKBAAR = { op_voorraad: "Op voorraad", binnenkort: "Binnenkort", uitverkocht: "Uitverkocht" };
+  var siteProducenten = [];
+  try { siteProducenten = JSON.parse(document.getElementById("beheer-producenten").textContent); } catch (e) { siteProducenten = []; }
+  var wfilter = "";
+  var wijnZoek = document.getElementById("wijn-zoek");
+  var wijnForm = document.getElementById("wijnformulier");
+  var instForm = document.getElementById("instellingenformulier");
+  var wijn = null;            // de wijn die open staat; null = nieuwe wijn
+  var wijnKopie = null;       // gegevens voor "Nieuwe jaargang van deze wijn"
+  var wijnMelding = "";       // melding na opslaan, getoond boven de lijst
+
+  // "12,50" of "12.50" → 12.5; leeg of onzin → NaN
+  var getal = function (tekst) {
+    var t = String(tekst == null ? "" : tekst).trim().replace(/\s|€/g, "");
+    if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(t)) t = t.replace(/\./g, "");
+    t = t.replace(",", ".");
+    return /^\d+(\.\d+)?$/.test(t) ? Number(t) : NaN;
+  };
+  var kaal = function (n) { return n == null ? "" : String(Number(n)).replace(".", ","); };
+  var zoekTekst = function (s) { return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); };
+  var wijnNaam = function (p) { return [p.naam, p.jaargang].filter(Boolean).join(" "); };
+  var naarDb = function (p) {
+    return {
+      id: p.id || null, soort: p.soort, producent: p.producent, producent_slug: p.producent_slug || "",
+      regio: p.regio || "", naam: p.naam, druif: p.druif || "", jaargang: p.jaargang || "", formaat: p.formaat || "",
+      kleur: p.kleur || "", prijs_ex: String(p.prijs_ex), beschikbaarheid: p.beschikbaarheid, allocatie: !!p.allocatie,
+      max_per_bestelling: p.max_per_bestelling == null ? "" : String(p.max_per_bestelling), actief: p.actief !== false
+    };
+  };
+
+  pagina.querySelectorAll("[data-wfilter]").forEach(function (k) {
+    k.addEventListener("click", function () { wfilter = k.dataset.wfilter; toonWijnen(); });
+  });
+  wijnZoek.addEventListener("input", function () { toonWijnen(); });
+
+  // Beschikbaarheid direct in de lijst wijzigen
+  var snelStatus = function (p, keuze) {
+    var plek = veld("wijnmelding");
+    keuze.disabled = true;
+    melding(plek);
+    var nieuw = naarDb(p);
+    nieuw.beschikbaarheid = keuze.value;
+    db.rpc("beheer_product", { product: nieuw })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        p.beschikbaarheid = keuze.value;
+        melding(plek, p.producent + ", " + wijnNaam(p) + ": " + BESCHIKBAAR[p.beschikbaarheid].toLowerCase() + ". Opgeslagen.", "goed");
+        toonWijnen(true);
+      })
+      .catch(function (err) { keuze.value = p.beschikbaarheid; melding(plek, vertaal(err), "fout"); })
+      .finally(function () { keuze.disabled = false; });
+  };
+
+  var rijWijn = function (p) {
+    var li = el("li", "beheer__wijn" + (p.actief === false ? " beheer__wijn--verborgen" : ""));
+    var a = el("a", "beheer__cel beheer__wijnnaam");
+    a.href = "#wijn-" + p.id;
+    a.appendChild(el("strong", null, wijnNaam(p)));
+    var meer = [p.druif, p.formaat].filter(Boolean).join(", ");
+    if (meer) a.appendChild(el("small", null, meer));
+    var labels = el("span", "beheer__cel beheer__labels");
+    if (p.allocatie) labels.appendChild(el("span", "label", "Allocatie"));
+    if (p.max_per_bestelling) labels.appendChild(el("span", "label", "max. " + p.max_per_bestelling));
+    if (p.actief === false) labels.appendChild(el("span", "label label--geannuleerd", "Niet zichtbaar"));
+    var prijs = el("span", "beheer__cel beheer__bedrag", euro(p.prijs_ex));
+    var vak = el("span", "beheer__cel");
+    var label = el("label", "visueel-verborgen", "Beschikbaarheid van " + p.producent + ", " + wijnNaam(p));
+    label.htmlFor = "wb-" + p.id;
+    var keuze = el("select", "beheer__keuzelijst");
+    keuze.id = "wb-" + p.id;
+    Object.keys(BESCHIKBAAR).forEach(function (w) {
+      var o = el("option", null, BESCHIKBAAR[w]);
+      o.value = w;
+      keuze.appendChild(o);
+    });
+    keuze.value = p.beschikbaarheid;
+    keuze.addEventListener("change", function () { snelStatus(p, keuze); });
+    vak.appendChild(label);
+    vak.appendChild(keuze);
+    li.appendChild(a); li.appendChild(labels); li.appendChild(prijs); li.appendChild(vak);
+    return li;
+  };
+
+  var toonWijnen = function (meldingHouden) {
+    var plek = veld("wijnlijst");
+    if (wijnMelding) { melding(veld("wijnmelding"), wijnMelding, "goed"); wijnMelding = ""; }
+    else if (!meldingHouden && document.activeElement !== wijnZoek) melding(veld("wijnmelding"));
+    var past = function (p, f) {
+      if (f === "verborgen") return p.actief === false;
+      return !f || p.beschikbaarheid === f;
+    };
+    pagina.querySelectorAll("[data-wfilter]").forEach(function (k) {
+      var f = k.dataset.wfilter;
+      var n = data.producten.filter(function (p) { return past(p, f); }).length;
+      k.textContent = (f ? (f === "verborgen" ? "Niet zichtbaar" : BESCHIKBAAR[f]) : "Alle") + " (" + n + ")";
+      k.setAttribute("aria-pressed", f === wfilter ? "true" : "false");
+    });
+    var woorden = zoekTekst(wijnZoek.value).split(/\s+/).filter(Boolean);
+    var gekozen = data.producten.filter(function (p) {
+      if (!past(p, wfilter)) return false;
+      var tekst = zoekTekst([p.producent, p.naam, p.jaargang, p.druif, p.regio, p.formaat].join(" "));
+      return woorden.every(function (w) { return tekst.indexOf(w) >= 0; });
+    });
+    // Groeperen per producent, in de volgorde van het portaal; glazen samen
+    var groepen = [], index = {};
+    gekozen.forEach(function (p) {
+      var sleutel = p.soort === "glas" ? "Hedonist-glazen" : p.producent;
+      if (!index[sleutel]) { index[sleutel] = { naam: sleutel, regio: p.soort === "glas" ? "" : p.regio, items: [] }; groepen.push(index[sleutel]); }
+      index[sleutel].items.push(p);
+    });
+    plek.textContent = "";
+    groepen.forEach(function (g) {
+      var kop = el("h3", "beheer__producent", g.naam);
+      if (g.regio) kop.appendChild(el("small", null, g.regio));
+      var ul = el("ul", "beheer__wijnen");
+      g.items.forEach(function (p) { ul.appendChild(rijWijn(p)); });
+      plek.appendChild(kop);
+      plek.appendChild(ul);
+    });
+    veld("wijnleeg").hidden = gekozen.length > 0;
+    vulInstellingen();
+  };
+
+  // ---------- Eén wijn ----------
+  var datalist = document.getElementById("w-producenten");
+  var vulProducenten = function () {
+    var namen = [];
+    siteProducenten.forEach(function (p) { if (namen.indexOf(p.naam) < 0) namen.push(p.naam); });
+    data.producten.forEach(function (p) { if (namen.indexOf(p.producent) < 0) namen.push(p.producent); });
+    datalist.textContent = "";
+    namen.sort(function (a, b) { return a.localeCompare(b, "nl"); }).forEach(function (n) {
+      var o = el("option");
+      o.value = n;
+      datalist.appendChild(o);
+    });
+  };
+  // Bekende producent gekozen: regio invullen als die nog leeg is
+  var zoekProducent = function (naam) {
+    var n = naam.trim().toLowerCase();
+    return siteProducenten.filter(function (p) { return p.naam.toLowerCase() === n; })[0] || null;
+  };
+  wijnForm.producent.addEventListener("change", function () {
+    var sp = zoekProducent(wijnForm.producent.value);
+    var db_ = data.producten.filter(function (p) { return p.producent.toLowerCase() === wijnForm.producent.value.trim().toLowerCase(); })[0];
+    if (!wijnForm.regio.value.trim()) wijnForm.regio.value = (sp && sp.regio) || (db_ && db_.regio) || "";
+  });
+
+  var wijnFout = function (naam, tekst) {
+    var invoer = wijnForm.elements[naam];
+    var f = document.getElementById(invoer.id + "-fout");
+    f.textContent = tekst || "";
+    f.hidden = !tekst;
+    if (tekst) invoer.setAttribute("aria-invalid", "true"); else invoer.removeAttribute("aria-invalid");
+    return !tekst;
+  };
+
+  var toonWijn = function (id) {
+    vulProducenten();
+    melding(wijnForm.querySelector(".formulier__status"));
+    ["producent", "naam", "prijs_ex", "max_per_bestelling"].forEach(function (n) { wijnFout(n); });
+    var nieuw = id === "nieuw";
+    wijn = nieuw ? null : data.producten.filter(function (p) { return String(p.id) === id; })[0];
+    if (!nieuw && !wijn) {
+      veld("wijnkop").textContent = "Deze wijn bestaat niet (meer).";
+      wijnForm.hidden = true;
+      return;
+    }
+    wijnForm.hidden = false;
+    var p = wijn || wijnKopie || { soort: "wijn", formaat: "75 cl", beschikbaarheid: "op_voorraad", actief: true };
+    veld("wijnkop").textContent = wijn ? wijn.producent + ", " + wijnNaam(wijn) : (wijnKopie ? "Nieuwe jaargang van " + wijnKopie.naam : "Nieuwe wijn");
+    wijnForm.producent.value = p.producent || "";
+    wijnForm.regio.value = p.regio || "";
+    wijnForm.naam.value = p.naam || "";
+    wijnForm.druif.value = p.druif || "";
+    wijnForm.jaargang.value = p.jaargang || "";
+    wijnForm.formaat.value = p.formaat || "";
+    wijnForm.kleur.value = p.kleur || "";
+    wijnForm.soort.value = p.soort || "wijn";
+    wijnForm.prijs_ex.value = p.prijs_ex != null ? kaal(p.prijs_ex) : "";
+    wijnForm.beschikbaarheid.value = p.beschikbaarheid || "op_voorraad";
+    wijnForm.max_per_bestelling.value = p.max_per_bestelling || "";
+    wijnForm.allocatie.checked = !!p.allocatie;
+    wijnForm.actief.checked = p.actief !== false;
+    veld("wijnknop").textContent = wijn ? "Wijzigingen opslaan" : "Wijn toevoegen";
+    wijnForm.querySelector("[data-actie=jaargang]").hidden = !wijn;
+    wijnKopie = null;
+    veld("wijnkop").focus({ preventScroll: true });
+  };
+
+  wijnForm.querySelector("[data-actie=jaargang]").addEventListener("click", function () {
+    wijnKopie = Object.assign({}, wijn, { id: null, jaargang: "", beschikbaarheid: "op_voorraad", actief: true });
+    if (location.hash === "#wijn-nieuw") route(); else location.hash = "wijn-nieuw";
+  });
+
+  wijnForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var status = wijnForm.querySelector(".formulier__status");
+    var prijs = getal(wijnForm.prijs_ex.value);
+    var max = wijnForm.max_per_bestelling.value.trim();
+    var goed = [
+      wijnFout("producent", wijnForm.producent.value.trim() ? "" : "Vul de producent in"),
+      wijnFout("naam", wijnForm.naam.value.trim() ? "" : "Vul de naam van de wijn in"),
+      wijnFout("prijs_ex", isNaN(prijs) ? "Vul een prijs in, bijvoorbeeld 12,50" : ""),
+      wijnFout("max_per_bestelling", max && !(/^\d+$/.test(max) && Number(max) > 0) ? "Vul een heel getal in, of laat het leeg" : "")
+    ].every(Boolean);
+    if (!goed) { wijnForm.querySelector("[aria-invalid=true]").focus(); return; }
+    var sp = zoekProducent(wijnForm.producent.value);
+    var gegevens = {
+      id: wijn ? wijn.id : null,
+      soort: wijnForm.soort.value,
+      producent: wijnForm.producent.value.trim(),
+      // Link naar de producentpagina: van de site, anders die van de wijn zelf (als de producent niet is veranderd)
+      producent_slug: sp ? sp.slug : (wijn && wijn.producent === wijnForm.producent.value.trim() ? wijn.producent_slug : ""),
+      regio: wijnForm.regio.value.trim(),
+      naam: wijnForm.naam.value.trim(),
+      druif: wijnForm.druif.value.trim(),
+      jaargang: wijnForm.jaargang.value.trim(),
+      formaat: wijnForm.formaat.value.trim(),
+      kleur: wijnForm.kleur.value,
+      prijs_ex: prijs,
+      beschikbaarheid: wijnForm.beschikbaarheid.value,
+      allocatie: wijnForm.allocatie.checked,
+      max_per_bestelling: max ? Number(max) : null,
+      actief: wijnForm.actief.checked
+    };
+    var knop = veld("wijnknop");
+    melding(status);
+    bezig(knop, "Opslaan…");
+    db.rpc("beheer_product", { product: naarDb(gegevens) })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        bezig(knop);
+        wijnMelding = gegevens.producent + ", " + wijnNaam(gegevens) + (wijn ? ": wijzigingen opgeslagen." : ": toegevoegd.") +
+          (gegevens.actief ? "" : " Niet zichtbaar in het portaal.");
+        return laadAlles().then(function () { history.replaceState(null, "", "#wijnen"); route(); window.scrollTo(0, 0); });
+      })
+      .catch(function (err) { bezig(knop); melding(status, vertaal(err), "fout"); });
+  });
+
+  // ---------- Instellingen ----------
+  var vulInstellingen = function () {
+    var i = data.inst;
+    if (!i || instForm.contains(document.activeElement)) return;
+    instForm.schenk_vanaf.value = i.schenk_vanaf;
+    instForm.schenk_korting_pct.value = kaal(i.schenk_korting_pct);
+    instForm.glas_staffel_vanaf.value = i.glas_staffel_vanaf;
+    instForm.glas_staffel_prijs_ex.value = kaal(i.glas_staffel_prijs_ex);
+    instForm.minimale_bestelling_ex.value = i.minimale_bestelling_ex == null ? "" : kaal(i.minimale_bestelling_ex);
+    instForm.betaaltermijn_dagen.value = i.betaaltermijn_dagen;
+  };
+  instForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var status = instForm.querySelector(".formulier__status");
+    var knop = instForm.querySelector("button[type=submit]");
+    var nieuw = {
+      schenk_vanaf: getal(instForm.schenk_vanaf.value),
+      schenk_korting_pct: getal(instForm.schenk_korting_pct.value),
+      glas_staffel_vanaf: getal(instForm.glas_staffel_vanaf.value),
+      glas_staffel_prijs_ex: getal(instForm.glas_staffel_prijs_ex.value),
+      minimale_bestelling_ex: instForm.minimale_bestelling_ex.value.trim() ? getal(instForm.minimale_bestelling_ex.value) : null,
+      betaaltermijn_dagen: getal(instForm.betaaltermijn_dagen.value)
+    };
+    var fouten = Object.keys(nieuw).filter(function (k) { return nieuw[k] !== null && isNaN(nieuw[k]); });
+    if (fouten.length) { melding(status, "Vul overal een geldig getal in.", "fout"); instForm.elements[fouten[0]].focus(); return; }
+    var verzend = {};
+    Object.keys(nieuw).forEach(function (k) { verzend[k] = nieuw[k] === null ? "" : String(nieuw[k]); });
+    melding(status);
+    bezig(knop, "Opslaan…");
+    db.rpc("beheer_instellingen", { inst: verzend })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        Object.keys(nieuw).forEach(function (k) { data.inst[k] = nieuw[k]; });
+        melding(status, "Instellingen opgeslagen.", "goed");
       })
       .catch(function (err) { melding(status, vertaal(err), "fout"); })
       .finally(function () { bezig(knop); });

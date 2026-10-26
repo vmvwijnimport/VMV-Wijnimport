@@ -57,6 +57,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
     <nav class="tabbladen" aria-label="Backoffice">
       <a href="#bestellingen" data-tab="bestellingen">Bestellingen <span data-teller="bestellingen"></span></a>
       <a href="#klanten" data-tab="klanten">Klanten <span data-teller="klanten"></span></a>
+      <a href="#wijnen" data-tab="wijnen">Wijnen</a>
     </nav>
 
     {%- comment -%} Lijst met bestellingen {%- endcomment -%}
@@ -84,6 +85,139 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
       </div>
       <ul class="beheer__lijst" data-lijst="klanten"></ul>
       <p class="beheer__leeg" data-leeg="klanten" hidden></p>
+    </div>
+
+    {%- comment -%} Wijnen, prijzen en voorraad {%- endcomment -%}
+    <div data-scherm="wijnen" hidden>
+      <div class="beheer__wijnbalk">
+        <div class="regiokeuze beheer__filter" role="group" aria-label="Toon wijnen">
+          <button type="button" data-wfilter="" aria-pressed="true">Alle</button>
+          <button type="button" data-wfilter="op_voorraad" aria-pressed="false">Op voorraad</button>
+          <button type="button" data-wfilter="binnenkort" aria-pressed="false">Binnenkort</button>
+          <button type="button" data-wfilter="uitverkocht" aria-pressed="false">Uitverkocht</button>
+          <button type="button" data-wfilter="verborgen" aria-pressed="false">Niet zichtbaar</button>
+        </div>
+        <a class="knop knop--secundair" href="#wijn-nieuw">Nieuwe wijn</a>
+      </div>
+      <div class="veld beheer__zoek">
+        <label for="wijn-zoek">Zoeken</label>
+        <input id="wijn-zoek" type="search" autocomplete="off" placeholder="Wijn, producent, druif of jaargang">
+      </div>
+      <p class="beheer__klein beheer__lijstuitleg">Prijzen per fles of glas, excl. btw. Een andere beschikbaarheid kies je direct in de lijst; die wordt meteen opgeslagen.</p>
+      <p class="formulier__status" data-veld="wijnmelding" role="status" aria-live="polite"></p>
+      <div data-veld="wijnlijst"></div>
+      <p class="beheer__leeg" data-veld="wijnleeg" hidden>Geen wijnen gevonden.</p>
+
+      <form class="formulier beheer__instellingen" id="instellingenformulier" novalidate>
+        <h2>Instellingen</h2>
+        <p class="beheer__klein">Gelden voor nieuwe bestellingen. Bestellingen die al zijn geplaatst, veranderen niet.</p>
+        <div class="beheer__velden">
+          <div class="veld">
+            <label for="in-schenk">Schenkkorting vanaf (flessen)</label>
+            <input id="in-schenk" name="schenk_vanaf" type="number" min="1" step="1" inputmode="numeric" required>
+          </div>
+          <div class="veld">
+            <label for="in-pct">Schenkkorting (%)</label>
+            <input id="in-pct" name="schenk_korting_pct" type="text" inputmode="decimal" required>
+          </div>
+          <div class="veld">
+            <label for="in-glas">Staffelprijs glazen vanaf (glazen)</label>
+            <input id="in-glas" name="glas_staffel_vanaf" type="number" min="1" step="1" inputmode="numeric" required>
+          </div>
+          <div class="veld">
+            <label for="in-glasprijs">Staffelprijs per glas (excl. btw)</label>
+            <input id="in-glasprijs" name="glas_staffel_prijs_ex" type="text" inputmode="decimal" required>
+          </div>
+          <div class="veld">
+            <label for="in-min">Minimum (excl. btw) <span class="veld__optioneel">(leeg = geen)</span></label>
+            <input id="in-min" name="minimale_bestelling_ex" type="text" inputmode="decimal">
+          </div>
+          <div class="veld">
+            <label for="in-termijn">Betaaltermijn (dagen)</label>
+            <input id="in-termijn" name="betaaltermijn_dagen" type="number" min="0" step="1" inputmode="numeric" required>
+          </div>
+        </div>
+        <button class="knop knop--primair" type="submit">Instellingen opslaan</button>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+
+    {%- comment -%} Eén wijn toevoegen of wijzigen {%- endcomment -%}
+    <div data-scherm="wijn" hidden>
+      <p class="beheer__terug"><a href="#wijnen">Alle wijnen</a></p>
+      <h2 class="beheer__nummer" data-veld="wijnkop" tabindex="-1"></h2>
+      <form class="formulier beheer__wijnform" id="wijnformulier" novalidate>
+        <div class="beheer__velden">
+          <div class="veld">
+            <label for="w-producent">Producent</label>
+            <input id="w-producent" name="producent" list="w-producenten" autocomplete="off" required aria-describedby="w-producent-fout">
+            <datalist id="w-producenten"></datalist>
+            <p class="veld__fout" id="w-producent-fout" hidden></p>
+          </div>
+          <div class="veld">
+            <label for="w-regio">Regio</label>
+            <input id="w-regio" name="regio" autocomplete="off">
+          </div>
+          <div class="veld">
+            <label for="w-naam">Naam (cuvée)</label>
+            <input id="w-naam" name="naam" autocomplete="off" required aria-describedby="w-naam-fout">
+            <p class="veld__fout" id="w-naam-fout" hidden></p>
+          </div>
+          <div class="veld">
+            <label for="w-druif">Druif <span class="veld__optioneel">(niet verplicht)</span></label>
+            <input id="w-druif" name="druif" autocomplete="off">
+          </div>
+          <div class="veld">
+            <label for="w-jaargang">Jaargang <span class="veld__optioneel">(bijv. 2021 of B20)</span></label>
+            <input id="w-jaargang" name="jaargang" autocomplete="off">
+          </div>
+          <div class="veld">
+            <label for="w-formaat">Formaat</label>
+            <input id="w-formaat" name="formaat" autocomplete="off" placeholder="75 cl">
+          </div>
+          <div class="veld">
+            <label for="w-kleur">Kleur</label>
+            <select id="w-kleur" name="kleur">
+              <option value="">Geen</option>
+              <option value="wit">Wit</option>
+              <option value="rood">Rood</option>
+              <option value="rose">Rosé</option>
+            </select>
+          </div>
+          <div class="veld">
+            <label for="w-soort">Soort</label>
+            <select id="w-soort" name="soort">
+              <option value="wijn">Wijn</option>
+              <option value="glas">Hedonist-glas</option>
+            </select>
+          </div>
+          <div class="veld">
+            <label for="w-prijs">Prijs per fles of glas (excl. btw)</label>
+            <input id="w-prijs" name="prijs_ex" type="text" inputmode="decimal" autocomplete="off" required aria-describedby="w-prijs-fout">
+            <p class="veld__fout" id="w-prijs-fout" hidden></p>
+          </div>
+          <div class="veld">
+            <label for="w-status">Beschikbaarheid</label>
+            <select id="w-status" name="beschikbaarheid">
+              <option value="op_voorraad">Op voorraad</option>
+              <option value="binnenkort">Binnenkort</option>
+              <option value="uitverkocht">Uitverkocht</option>
+            </select>
+          </div>
+          <div class="veld">
+            <label for="w-max">Maximum per bestelling <span class="veld__optioneel">(leeg = geen)</span></label>
+            <input id="w-max" name="max_per_bestelling" type="number" min="1" step="1" inputmode="numeric" aria-describedby="w-max-fout">
+            <p class="veld__fout" id="w-max-fout" hidden></p>
+          </div>
+        </div>
+        <label class="akkoord"><input type="checkbox" name="allocatie"> Op allocatie: de klant vraagt een aantal aan en jij bevestigt wat je levert</label>
+        <label class="akkoord"><input type="checkbox" name="actief"> Zichtbaar in het horecaportaal</label>
+        <div class="beheer__knoppen">
+          <button class="knop knop--primair" type="submit" data-veld="wijnknop">Opslaan</button>
+          <button class="knop knop--secundair" type="button" data-actie="jaargang" hidden>Nieuwe jaargang van deze wijn</button>
+        </div>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+      </form>
     </div>
 
     {%- comment -%} Eén bestelling {%- endcomment -%}
@@ -162,5 +296,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
   </div>
 </section>
 
+{%- comment -%} Producenten van de site: om bij een nieuwe wijn de regio en de link naar de producentpagina in te vullen {%- endcomment -%}
+<script type="application/json" id="beheer-producenten">[{%- for p in site.producenten -%}{"naam": {{ p.naam | jsonify }}, "regio": {{ p.regio | jsonify }}, "slug": {{ p.slug | jsonify }}}{% unless forloop.last %},{% endunless %}{%- endfor -%}]</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="{{ '/assets/js/horeca-beheer.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

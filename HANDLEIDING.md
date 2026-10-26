@@ -205,13 +205,13 @@ Wat helpt:
 
 Op **/horeca/** kunnen horecazaken een account aanvragen. Na jouw goedkeuring zien ze de horecaprijzen en kunnen ze bestellen op factuur.
 
-Het dagelijkse werk doe je in de **backoffice**: **/horeca/beheer/** op de site. Log in met je eigen beheerdersaccount. Daar staan alle bestellingen en alle klanten. Wijnen, prijzen en instellingen beheer je nog in **Supabase**: ga naar supabase.com, log in en open het project **vmv-horeca**. Links zie je **Table Editor**, met daarin de tabellen.
+Het dagelijkse werk doe je in de **backoffice**: **/horeca/beheer/** op de site. Log in met je eigen beheerdersaccount. Daar staan alle bestellingen, alle klanten en alle wijnen met hun prijzen. Alleen voor een paar zeldzame dingen (zoals een beheerder toevoegen) heb je nog **Supabase** nodig: ga naar supabase.com, log in en open het project **vmv-horeca**.
 
 De horecaprijzen staan **alleen** in Supabase, nooit op GitHub of in de broncode van de site. Bezoekers zonder (goedgekeurd) account zien ze nergens.
 
 ### De backoffice
 
-Bovenaan staan twee tabbladen: **Bestellingen** en **Klanten**. Erachter zie je hoeveel nieuwe bestellingen en aanvragen er zijn. Met de knoppen eronder kies je wat je ziet, bijvoorbeeld alleen nieuwe bestellingen of alles. Klik op een regel om hem te openen.
+Bovenaan staan drie tabbladen: **Bestellingen**, **Klanten** en **Wijnen**. Erachter zie je hoeveel nieuwe bestellingen en aanvragen er zijn. Met de knoppen eronder kies je wat je ziet, bijvoorbeeld alleen nieuwe bestellingen of alles. Klik op een regel om hem te openen.
 
 **Een beheerder toevoegen** (bijvoorbeeld voor Tim):
 1. Supabase → **Authentication → Users → Add user → Create new user**. Vul het e-mailadres en een wachtwoord in en zet **Auto Confirm User** aan.
@@ -234,29 +234,28 @@ Een goedgekeurde klant blokkeren? Open de klant en klik op **Toegang intrekken**
 
 ### Prijzen, voorraad en wijnen beheren
 
-Ga naar **Table Editor → producten**. Elke regel is één wijn (of glas). Dubbelklik op een vakje om het aan te passen; het portaal laat het meteen zien.
+Open de backoffice → **Wijnen**. Je ziet alle wijnen per producent, met de prijs per fles (of glas) excl. btw. Met de knoppen bovenaan kies je wat je ziet (op voorraad, uitverkocht, niet zichtbaar), en met **Zoeken** vind je snel een wijn.
 
-| Kolom | Wat het doet |
-|---|---|
-| `prijs_ex` | prijs per fles, excl. btw (met een punt, bijvoorbeeld `12.34`) |
-| `beschikbaarheid` | `op_voorraad`, `binnenkort` of `uitverkocht` (uitverkocht is zichtbaar maar niet te bestellen) |
-| `allocatie` | aan: de klant vraagt een aantal aan en jullie bevestigen hoeveel er kan |
-| `max_per_bestelling` | maximum aantal flessen per bestelling (leeg = geen maximum) |
-| `actief` | uit: de wijn is helemaal niet zichtbaar |
-| `volgorde` | de volgorde in het overzicht (lager = hoger op de pagina) |
-| `jaargang`, `druif`, `formaat` | wat er bij de wijn staat, bijvoorbeeld `B22` of `Magnum 150 cl` |
+- **Uitverkocht of weer op voorraad:** kies het in de keuzelijst achter de wijn. Dat wordt meteen opgeslagen en het portaal laat het direct zien. Uitverkocht is zichtbaar maar niet te bestellen; binnenkort is zichtbaar en wel te bestellen.
+- **Prijs of gegevens aanpassen:** klik op de naam van de wijn, pas aan en klik op **Wijzigingen opslaan**. Prijzen schrijf je gewoon met een komma, bijvoorbeeld `12,50`.
+- **Nieuwe wijn:** klik op **Nieuwe wijn**. Kies je een producent van de site, dan vult de regio zich vanzelf in en linkt de wijn in het portaal naar de producentpagina.
+- **Nieuwe jaargang:** open de oude wijn en klik op **Nieuwe jaargang van deze wijn**. Alles is al ingevuld behalve de jaargang. Zet de oude jaargang daarna eventueel op uitverkocht of niet zichtbaar.
+- **Een wijn weghalen:** zet het vinkje **Zichtbaar in het horecaportaal** uit. Verwijderen kan niet, zodat oude bestellingen altijd kloppen.
+- **Op allocatie:** de klant vraagt een aantal aan en jij bevestigt hoeveel er kan. **Maximum per bestelling** leeg = geen maximum.
 
-**Nieuwe wijn:** klik op **Insert → Insert row** en vul minimaal `producent`, `naam` en `prijs_ex` in. Voor een wijn van een producent op de site vul je ook `producent_slug` in (de naam van het bestand in `_producenten`, bijvoorbeeld `sacy-soeur-et-frere`), zodat de link naar de producentpagina werkt.
+Prijzen aanpassen verandert niets aan bestellingen die al zijn geplaatst.
 
 **Nieuwe prijslijst?** Zet de nieuwe PDF in de map `prijslijst/` en vraag Claude om er een importbestand van te maken. Dat bestand komt nooit op GitHub.
 
 ### Algemene instellingen
 
-**Table Editor → instellingen** (één regel):
-- `schenk_vanaf` en `schenk_korting_pct`: schenkwijnkorting (nu 5% vanaf 24 flessen van dezelfde wijn, niet voor allocatiewijnen);
-- `glas_staffel_vanaf` en `glas_staffel_prijs_ex`: lagere Hedonist-glasprijs vanaf een aantal glazen (modellen gemengd);
-- `minimale_bestelling_ex`: minimale bestelling excl. btw (leeg = geen minimum);
-- `betaaltermijn_dagen`: betaaltermijn van de factuur (nu 14).
+Onderaan het tabblad **Wijnen** staat **Instellingen**:
+- **Schenkkorting**: vanaf hoeveel flessen van dezelfde wijn, en hoeveel procent (niet voor allocatiewijnen);
+- **Staffelprijs glazen**: de lagere Hedonist-glasprijs vanaf een aantal glazen (modellen gemengd);
+- **Minimum**: minimale bestelling excl. btw (leeg = geen minimum);
+- **Betaaltermijn**: in dagen, staat in de mails en de bevestiging.
+
+Klik op **Instellingen opslaan**. Het geldt voor nieuwe bestellingen.
 
 ### Bestellingen afhandelen
 

@@ -85,3 +85,7 @@ Bij een nieuwe accountaanvraag stuurt de database nu zelf een mail "Nieuwe aanvr
    Plak in dezelfde query ook `supabase/011-bestelling-verwijderen.sql` (de knop **Bestelling verwijderen** in de backoffice).
 3. Daarna gaat de wijziging op de site live (het FormSubmit-mailtje vervalt).
 4. **Testen:** vraag op /horeca/ een account aan met een eigen adres. Binnen een minuut komt "Nieuwe aanvraag: …" binnen op info@. Wijs de testaanvraag daarna af of verwijder hem.
+
+## Update 26 okt: wijnen, prijzen en voorraad in de backoffice
+
+**SQL Editor → New query** → plak `supabase/012-wijnen-beheren.sql` → **Run**. Je krijgt "Success". Daarna werkt het tabblad **Wijnen** in de backoffice (na het live zetten van de site). De functie bestelmail hoeft hiervoor niet opnieuw.

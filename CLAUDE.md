@@ -142,7 +142,7 @@ Voorbeeldzinnen van de site:
 Horecaklanten vragen een inlog aan; de eigenaar keurt die handmatig goed. Alleen goedgekeurde klanten zien de horecaprijzen en kunnen wijn bestellen.
 
 - **Aanvragen** op de pagina "Horeca", met de velden bedrijfsnaam, contactpersoon, e-mail, telefoon, KvK, btw, afleveradres en type zaak (restaurant, bar, wijnbar, slijterij, overig). Daarna staat de aanvraag op **in afwachting**: de klant krijgt een bevestiging en info@ een mail.
-- **Goedkeuren** en bestellingen afhandelen gaan via de backoffice op /horeca/beheer/ (inloggen als beheerder, tabel `beheerders`, script `supabase/008-backoffice.sql`). Wijnen, prijzen en instellingen staan nog in het Supabase-dashboard.
+- **Goedkeuren**, bestellingen afhandelen en wijnen, prijzen, voorraad en instellingen beheren gaan via de backoffice op /horeca/beheer/ (inloggen als beheerder, tabel `beheerders`, scripts `supabase/008-backoffice.sql` en `012-wijnen-beheren.sql`).
 - **Besloten deel:**
   - wijnen met horecaprijzen (excl. btw), per producent;
   - aantallen per fles of per doos;

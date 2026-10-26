@@ -158,7 +158,7 @@
     doel.textContent = "";
     doel.appendChild(el("p", "horeca__laden", "Het assortiment wordt geladen…"));
     Promise.all([
-      db.from("producten").select("id, soort, producent, producent_slug, regio, naam, jaargang, druif, formaat, kleur, prijs_ex, beschikbaarheid, allocatie, max_per_bestelling").order("volgorde"),
+      db.from("producten").select("id, soort, producent, producent_slug, regio, naam, jaargang, druif, formaat, kleur, prijs_ex, beschikbaarheid, allocatie, max_per_bestelling").order("volgorde").order("id"),
       db.from("instellingen").select("*").maybeSingle()
     ]).then(function (r) {
       if (r[0].error || r[1].error) throw r[0].error || r[1].error;
