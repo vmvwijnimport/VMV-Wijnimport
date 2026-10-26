@@ -922,8 +922,16 @@
       if (!metUit && p.beschikbaarheid === "uitverkocht") return false;
       return horeca || p.prijs_particulier != null;
     });
-    var doel = veld("prijslijst");
-    doel.textContent = "";
+    var plek = veld("prijslijst");
+    plek.textContent = "";
+    // Een tabel met lege kop en voet: bij het afdrukken krijgt zo elke pagina dezelfde witrand
+    // (de pagina zelf heeft geen marge, zodat de browser er geen datum of adres bij zet)
+    var blad = el("table", "prijslijst__blad");
+    var rand = function (deel) { var d = el(deel), tr = el("tr"), td = el("td", "prijslijst__rand"); tr.appendChild(td); d.appendChild(tr); return d; };
+    var lijf = el("tbody"), lijfrij = el("tr"), doel = el("td", "prijslijst__inhoud");
+    lijfrij.appendChild(doel); lijf.appendChild(lijfrij);
+    blad.appendChild(rand("thead")); blad.appendChild(lijf); blad.appendChild(rand("tfoot"));
+    plek.appendChild(blad);
 
     var kop = el("header", "prijslijst__kop");
     var logo = el("img", "prijslijst__logo");
@@ -970,7 +978,14 @@
           if (p.allocatie) lab.push(horeca ? "allocatie" : "zeer beperkt");
           if (p.beschikbaarheid === "binnenkort") lab.push("binnenkort");
           if (p.beschikbaarheid === "uitverkocht") lab.push("uitverkocht");
-          li.appendChild(el("span", "prijslijst__label", lab.join(", ")));
+          // Glazen: de lagere prijs bij meer glazen groot achter de prijs
+          var stVanaf = horeca ? inst.glas_staffel_vanaf : inst.part_glas_staffel_vanaf;
+          var stPrijs = horeca ? inst.glas_staffel_prijs_ex : inst.part_glas_staffel_prijs;
+          if (p.soort === "glas" && stVanaf && stPrijs != null) {
+            li.appendChild(el("span", "prijslijst__staffel", "vanaf " + stVanaf + " glazen " + euro(stPrijs)));
+          } else {
+            li.appendChild(el("span", "prijslijst__label", lab.join(", ")));
+          }
           li.appendChild(el("span", "prijslijst__prijs", euro(horeca ? p.prijs_ex : p.prijs_particulier)));
           ul.appendChild(li);
         });
@@ -979,12 +994,9 @@
       });
       doel.appendChild(sectie);
     });
-    if (!wijnen.length) doel.appendChild(el("p", "beheer__leeg", horeca ? "Er staan geen wijnen op deze lijst." : "Nog geen wijnen met een particuliere prijs. Vul die in bij Wijnen."));
+    if (!wijnen.length) doel.appendChild(el("p", "beheer__leeg", horeca ? "Er staan geen wijnen op deze lijst." : "Nog geen wijnen met een particuliere prijs."));
 
     var voet = el("footer", "prijslijst__voet");
-    if (!horeca && inst.part_glas_staffel_vanaf && inst.part_glas_staffel_prijs != null && wijnen.some(function (p) { return p.soort === "glas"; })) {
-      voet.appendChild(el("p", "prijslijst__klein", "Hedonist-glazen: " + euro(inst.part_glas_staffel_prijs) + " per glas vanaf " + inst.part_glas_staffel_vanaf + " glazen."));
-    }
     if (!horeca && wijnen.some(function (p) { return p.allocatie; })) {
       voet.appendChild(el("p", "prijslijst__klein", "Zeer beperkt: kleine productie, op allocatie of in overleg."));
     }
@@ -992,7 +1004,7 @@
       var regels = [];
       if (inst.schenk_vanaf) regels.push("Schenkkorting: " + procent(inst.schenk_korting_pct) + " vanaf " + inst.schenk_vanaf + " flessen van dezelfde wijn, niet voor wijnen op allocatie.");
       if (wijnen.some(function (p) { return p.allocatie; })) regels.push("Allocatie: je vraagt een aantal aan, wij bevestigen wat we kunnen leveren.");
-      if (inst.glas_staffel_vanaf && wijnen.some(function (p) { return p.soort === "glas"; })) regels.push("Hedonist-glazen: " + euro(inst.glas_staffel_prijs_ex) + " per glas vanaf " + inst.glas_staffel_vanaf + " glazen (modellen gemengd).");
+      if (inst.glas_staffel_vanaf && wijnen.some(function (p) { return p.soort === "glas"; })) regels.push("Hedonist-glazen: de lagere prijs geldt vanaf " + inst.glas_staffel_vanaf + " glazen, modellen gemengd.");
       if (inst.minimale_bestelling_ex) regels.push("Minimale bestelling: " + euro(inst.minimale_bestelling_ex) + " excl. btw.");
       regels.push("Bestellen via het horecaportaal op vmvwijnimport.com/horeca. Elke bestelling bevestigen we eerst. Betaling op factuur binnen " + (inst.betaaltermijn_dagen || 14) + " dagen.");
       var ul2 = el("ul", "prijslijst__voorwaarden");
@@ -1002,7 +1014,7 @@
     var contact = el("p", "prijslijst__contact");
     ["VMV Wijnimport B.V.", "info@vmvwijnimport.com", "WhatsApp 06 15 74 23 32", "vmvwijnimport.com"].forEach(function (t) { contact.appendChild(el("span", null, t)); });
     voet.appendChild(contact);
-    voet.appendChild(el("p", "prijslijst__klein", "KvK 99082918, btw NL868786901B01"));
+    voet.appendChild(el("p", "prijslijst__klein", "Prijzen onder voorbehoud van tik- en drukfouten. KvK 99082918, btw NL868786901B01"));
     doel.appendChild(voet);
   };
 

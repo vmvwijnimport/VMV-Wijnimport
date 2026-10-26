@@ -1043,6 +1043,10 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .prijslijst__naam { color: var(--zwart); }
 .prijslijst__wijn small { margin-left: var(--s-1); font-size: var(--fs-klein); color: var(--tekst-zacht); }
 .prijslijst__label { font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.prijslijst__staffel { font-weight: 500; color: var(--zwart); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.prijslijst__blad { width: 100%; border-collapse: collapse; }
+.prijslijst__blad td { padding: 0; }
+.prijslijst__rand { height: 0; }
 .prijslijst__prijs { text-align: right; font-variant-numeric: tabular-nums; color: var(--zwart); }
 .prijslijst__voet { margin-top: var(--s-6); padding-top: var(--s-2); border-top: 1px solid var(--zwart); font-size: var(--fs-klein); color: var(--tekst-zacht); break-inside: avoid; }
 .prijslijst__voorwaarden { margin: 0 0 var(--s-2); padding-left: 1.1em; color: var(--tekst); }
@@ -1058,11 +1062,15 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   .prijslijst__wijn small { display: block; margin-left: 0; }
 }
 @media print {
-  @page { size: A4; margin: 14mm 15mm; }
+  /* Geen paginamarge: dan zet de browser er geen datum, titel of adres bij. De witrand komt van de tabel. */
+  @page { size: A4; margin: 0; }
   body.drukt-prijslijst { background: var(--wit); }
   body.drukt-prijslijst .naar-inhoud, body.drukt-prijslijst .kop, body.drukt-prijslijst .voet, body.drukt-prijslijst .leeftijd,
   body.drukt-prijslijst .pagina__kop, body.drukt-prijslijst .horeca__balk, body.drukt-prijslijst .tabbladen,
-  body.drukt-prijslijst .beheer__prijsbalk, body.drukt-prijslijst .beheer__lijstuitleg { display: none !important; }
+  body.drukt-prijslijst .beheer__prijsbalk, body.drukt-prijslijst .beheer__lijstuitleg,
+  body.drukt-prijslijst .beheer__terug { display: none !important; }
+  body.drukt-prijslijst .prijslijst__rand { height: 14mm; }
+  body.drukt-prijslijst .prijslijst__inhoud { padding: 0 15mm; }
   body.drukt-prijslijst .pagina { padding: 0; margin: 0; max-width: none; }
   body.drukt-prijslijst .prijslijst { max-width: none; margin: 0; padding: 0; border: 0; }
   body.drukt-prijslijst .prijslijst__wijnen li { font-size: 10.5pt; padding: 5px 0; }
