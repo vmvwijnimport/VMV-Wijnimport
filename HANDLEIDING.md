@@ -211,7 +211,7 @@ De horecaprijzen staan **alleen** in Supabase, nooit op GitHub of in de broncode
 
 ### De backoffice
 
-Bovenaan staan de tabbladen **Bestellingen**, **Klanten**, **Wijnen**, **Hedonist**, **Overzicht**, **Nieuwsmail** en **Prijslijst**. Erachter zie je hoeveel nieuwe bestellingen en aanvragen er zijn. Met de knoppen eronder kies je wat je ziet, bijvoorbeeld alleen nieuwe bestellingen of alles. Klik op een regel om hem te openen.
+Bovenaan staan de tabbladen **Bestellingen**, **Klanten**, **Prijslijst**, **Hedonist**, **Overzicht** en **Nieuwsmail**. Erachter zie je hoeveel nieuwe bestellingen en aanvragen er zijn. Met de knoppen eronder kies je wat je ziet, bijvoorbeeld alleen nieuwe bestellingen of alles. Klik op een regel om hem te openen.
 
 **Een beheerder toevoegen** (bijvoorbeeld voor Tim):
 1. Supabase → **Authentication → Users → Add user → Create new user**. Vul het e-mailadres en een wachtwoord in en zet **Auto Confirm User** aan.
@@ -236,11 +236,11 @@ Een goedgekeurde klant blokkeren? Open de klant en klik op **Toegang intrekken**
 
 ### Prijzen, voorraad en wijnen beheren
 
-Open de backoffice → **Wijnen**. Je ziet alle wijnen per producent, met de prijs per fles (of glas) excl. btw. Met de knoppen bovenaan kies je wat je ziet (op voorraad, uitverkocht, niet zichtbaar), en met **Zoeken** vind je snel een wijn.
+Open de backoffice → **Prijslijst**. Je ziet alle wijnen per producent, met de horecaprijs (excl. btw) en daaronder de particuliere prijs (incl. btw) of "alleen horeca". Met de knoppen bovenaan kies je wat je ziet (op voorraad, uitverkocht, niet zichtbaar), en met **Zoeken** vind je snel een wijn.
 
 - **Uitverkocht of weer op voorraad:** kies het in de keuzelijst achter de wijn. Dat wordt meteen opgeslagen en het portaal laat het direct zien. Uitverkocht is zichtbaar maar niet te bestellen; binnenkort is zichtbaar en wel te bestellen.
 - **Prijs of gegevens aanpassen:** klik op de naam van de wijn, pas aan en klik op **Wijzigingen opslaan**. Prijzen schrijf je gewoon met een komma, bijvoorbeeld `12,50`.
-- **Nieuwe wijn:** klik op **Nieuwe wijn**. Kies je een producent van de site, dan vult de regio zich vanzelf in en linkt de wijn in het portaal naar de producentpagina.
+- **Nieuwe wijn:** klik op **Nieuwe wijn toevoegen** en vul beide prijzen in: de **horecaprijs** (komt in het portaal en op de horecalijst) en de **particuliere prijs** (komt op de particuliere lijst). Is de wijn alleen voor horeca, vink dat dan aan. Kies je een producent van de site, dan vult de regio zich vanzelf in en linkt de wijn in het portaal naar de producentpagina.
 - **Nieuwe jaargang:** open de oude wijn en klik op **Nieuwe jaargang van deze wijn**. Alles is al ingevuld behalve de jaargang. Zet de oude jaargang daarna eventueel op uitverkocht of niet zichtbaar.
 - **Een wijn weghalen:** zet het vinkje **Zichtbaar in het horecaportaal** uit. Verwijderen kan niet, zodat oude bestellingen altijd kloppen.
 - **Op allocatie:** de klant vraagt een aantal aan en jij bevestigt hoeveel er kan. **Maximum per bestelling** leeg = geen maximum.
@@ -251,7 +251,7 @@ Prijzen aanpassen verandert niets aan bestellingen die al zijn geplaatst.
 
 ### Algemene instellingen
 
-Onderaan het tabblad **Wijnen** staat **Instellingen**:
+Onderaan het tabblad **Prijslijst** staat **Instellingen**:
 - **Schenkkorting**: vanaf hoeveel flessen van dezelfde wijn, en hoeveel procent (niet voor allocatiewijnen);
 - **Staffelprijs glazen**: de lagere Hedonist-glasprijs vanaf een aantal glazen (modellen gemengd);
 - **Minimum**: minimale bestelling excl. btw (leeg = geen minimum);
@@ -261,13 +261,13 @@ Klik op **Instellingen opslaan**. Het geldt voor nieuwe bestellingen.
 
 ### Prijslijst afdrukken
 
-Onder **Prijslijst** maak je een prijslijst in de huisstijl, met de actuele prijzen uit de backoffice:
+Bovenaan het tabblad **Prijslijst** staan de knoppen **Horecalijst afdrukken** en **Particuliere lijst afdrukken**. Je ziet dan de lijst in de huisstijl, met de actuele prijzen:
 - **Horeca (excl. btw):** alle zichtbare wijnen met de horecaprijs, de labels allocatie en binnenkort, en onderaan de voorwaarden uit de instellingen (schenkkorting, allocatie, staffelprijs glazen, betaaltermijn).
-- **Particulier (incl. btw):** alleen wijnen met een **particuliere prijs**. Die vul je per wijn in onder **Wijnen** (veld "Prijs particulier (incl. btw)"). Leeg = niet op de particuliere lijst.
+- **Particulier (incl. btw):** alleen wijnen met een **particuliere prijs**. Wijnen die alleen voor horeca zijn, staan er niet op.
 
 Uitverkochte wijnen staan er standaard niet op; met het vinkje toon je ze wel. Klik op **Afdrukken of bewaren als PDF** en kies in het venster **Bewaar als PDF** om hem te mailen.
 
-Onder **Instellingen** (tabblad Wijnen) staat ook de particuliere staffelprijs voor de Hedonist-glazen; die komt onderaan de particuliere lijst.
+Onder **Instellingen** staat ook de particuliere staffelprijs voor de Hedonist-glazen; die komt onderaan de particuliere lijst.
 
 **Nieuwe particuliere prijslijst?** Zet hem in de map `prijslijst/` en vraag Claude om er een importbestand van te maken. Dat bestand komt nooit op GitHub.
 

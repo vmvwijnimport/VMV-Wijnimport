@@ -1081,6 +1081,13 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 /* Backoffice: wijnen, prijzen en voorraad */
 .beheer__wijnbalk { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--s-2); }
 .beheer__wijnbalk > .knop { margin-bottom: var(--s-3); }
+.beheer__afdrukbalk { justify-content: flex-start; }
+.beheer__alleenhoreca { margin: var(--s-1) 0 0; }
+.veld .akkoord { font-weight: 400; color: var(--tekst); }
+.veld .akkoord input { width: auto; height: auto; padding: 0; border: 0; }
+.beheer__wijnform .beheer__velden { align-items: start; }
+.beheer__wijnform input:disabled { background: var(--champagne-licht); color: var(--tekst-zacht); }
+.beheer__bedrag small { display: block; font-size: var(--fs-klein); color: var(--tekst-zacht); }
 .beheer__zoek { max-width: 30rem; margin-bottom: var(--s-2); }
 .beheer__producent { margin: var(--s-4) 0 var(--s-1); font-size: var(--fs-ui); font-weight: 500; color: var(--zwart); }
 .beheer__producent small { margin-left: var(--s-1); font-size: var(--fs-klein); font-weight: 400; color: var(--tekst-zacht); }

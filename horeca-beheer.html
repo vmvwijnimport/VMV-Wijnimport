@@ -78,11 +78,10 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
     <nav class="tabbladen" aria-label="Backoffice">
       <a href="#bestellingen" data-tab="bestellingen">Bestellingen <span data-teller="bestellingen"></span></a>
       <a href="#klanten" data-tab="klanten">Klanten <span data-teller="klanten"></span></a>
-      <a href="#wijnen" data-tab="wijnen">Wijnen</a>
+      <a href="#prijslijst" data-tab="prijslijst">Prijslijst</a>
       <a href="#hedonist" data-tab="hedonist">Hedonist <span data-teller="hedonist"></span></a>
       <a href="#overzicht" data-tab="overzicht">Overzicht</a>
       <a href="#nieuwsmail" data-tab="nieuwsmail">Nieuwsmail</a>
-      <a href="#prijslijst" data-tab="prijslijst">Prijslijst</a>
     </nav>
 
     {%- comment -%} Lijst met bestellingen {%- endcomment -%}
@@ -114,6 +113,11 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
 
     {%- comment -%} Wijnen, prijzen en voorraad {%- endcomment -%}
     <div data-scherm="wijnen" hidden>
+      <div class="beheer__wijnbalk beheer__afdrukbalk">
+        <a class="knop knop--secundair" href="#wijn-nieuw">Nieuwe wijn toevoegen</a>
+        <a class="knop knop--secundair" href="#lijst-horeca">Horecalijst afdrukken</a>
+        <a class="knop knop--secundair" href="#lijst-particulier">Particuliere lijst afdrukken</a>
+      </div>
       <div class="beheer__wijnbalk">
         <div class="regiokeuze beheer__filter" role="group" aria-label="Toon wijnen">
           <button type="button" data-wfilter="" aria-pressed="true">Alle</button>
@@ -122,13 +126,12 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
           <button type="button" data-wfilter="uitverkocht" aria-pressed="false">Uitverkocht</button>
           <button type="button" data-wfilter="verborgen" aria-pressed="false">Niet zichtbaar</button>
         </div>
-        <a class="knop knop--secundair" href="#wijn-nieuw">Nieuwe wijn</a>
       </div>
       <div class="veld beheer__zoek">
         <label for="wijn-zoek">Zoeken</label>
         <input id="wijn-zoek" type="search" autocomplete="off" placeholder="Wijn, producent, druif of jaargang">
       </div>
-      <p class="beheer__klein beheer__lijstuitleg">Prijzen per fles of glas, excl. btw. Een andere beschikbaarheid kies je direct in de lijst; die wordt meteen opgeslagen.</p>
+      <p class="beheer__klein beheer__lijstuitleg">Per wijn de horecaprijs (excl. btw, voor het portaal en de horecalijst) en daaronder de particuliere prijs (incl. btw, voor de particuliere lijst). Een andere beschikbaarheid kies je direct in de lijst; die wordt meteen opgeslagen.</p>
       <p class="formulier__status" data-veld="wijnmelding" role="status" aria-live="polite"></p>
       <div data-veld="wijnlijst"></div>
       <p class="beheer__leeg" data-veld="wijnleeg" hidden>Geen wijnen gevonden.</p>
@@ -244,7 +247,8 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
     </div>
 
     {%- comment -%} Prijslijst afdrukken of als PDF bewaren, voor horeca of particulier {%- endcomment -%}
-    <div data-scherm="prijslijst" hidden>
+    <div data-scherm="lijst" hidden>
+      <p class="beheer__terug"><a href="#prijslijst">Terug naar de prijslijst</a></p>
       <div class="beheer__prijsbalk">
         <div class="regiokeuze" role="group" aria-label="Welke prijslijst?">
           <button type="button" data-lijstsoort="horeca" aria-pressed="true">Horeca (excl. btw)</button>
@@ -253,7 +257,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
         <label class="akkoord"><input type="checkbox" data-veld="metuitverkocht"> Uitverkochte wijnen tonen</label>
         <button class="knop knop--primair" type="button" data-actie="afdrukken">Afdrukken of bewaren als PDF</button>
       </div>
-      <p class="beheer__klein beheer__lijstuitleg">Kies bij het afdrukken "Bewaar als PDF" om hem te mailen. De lijst toont de actuele prijzen uit de backoffice. Wijnen die niet zichtbaar zijn, staan er niet op; op de particuliere lijst alleen wijnen met een particuliere prijs.</p>
+      <p class="beheer__klein beheer__lijstuitleg">Kies bij het afdrukken "Bewaar als PDF" om hem te mailen. De lijst toont de actuele prijzen. Wijnen die niet zichtbaar zijn, staan er niet op; wijnen die alleen voor horeca zijn, staan niet op de particuliere lijst.</p>
       <article class="prijslijst" data-veld="prijslijst" aria-label="Voorbeeld van de prijslijst"></article>
     </div>
 
@@ -275,7 +279,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
 
     {%- comment -%} Eén wijn toevoegen of wijzigen {%- endcomment -%}
     <div data-scherm="wijn" hidden>
-      <p class="beheer__terug"><a href="#wijnen">Alle wijnen</a></p>
+      <p class="beheer__terug"><a href="#prijslijst">Terug naar de prijslijst</a></p>
       <h2 class="beheer__nummer" data-veld="wijnkop" tabindex="-1"></h2>
       <form class="formulier beheer__wijnform" id="wijnformulier" novalidate>
         <div class="beheer__velden">
@@ -323,14 +327,15 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
             </select>
           </div>
           <div class="veld">
-            <label for="w-prijs">Prijs per fles of glas (excl. btw)</label>
+            <label for="w-prijs">Prijs horeca (excl. btw)</label>
             <input id="w-prijs" name="prijs_ex" type="text" inputmode="decimal" autocomplete="off" required aria-describedby="w-prijs-fout">
             <p class="veld__fout" id="w-prijs-fout" hidden></p>
           </div>
           <div class="veld">
-            <label for="w-particulier">Prijs particulier (incl. btw) <span class="veld__optioneel">(leeg = niet op de particuliere lijst)</span></label>
+            <label for="w-particulier">Prijs particulier (incl. btw)</label>
             <input id="w-particulier" name="prijs_particulier" type="text" inputmode="decimal" autocomplete="off" aria-describedby="w-particulier-fout">
             <p class="veld__fout" id="w-particulier-fout" hidden></p>
+            <label class="akkoord beheer__alleenhoreca"><input type="checkbox" name="alleen_horeca"> Alleen voor horeca, niet voor particulieren</label>
           </div>
           <div class="veld">
             <label for="w-status">Beschikbaarheid</label>
