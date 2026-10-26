@@ -27,6 +27,7 @@ Let op: Mollie controleert de website voordat je live mag. Daarvoor moeten de al
    - `MOLLIE_API_KEY` als type **Secret**, met je testsleutel (`test_...`)
    - `SITE_URL` als type **Text**: `https://vmvwijnimport.com`, zonder `/` aan het eind
    - `RESEND_API_KEY` als type **Secret**: een sleutel uit Resend (**API Keys → Create API Key**, naam `cloudflare`, **Sending access**). Daarmee verstuurt de Worker na betaling een mail in de huisstijl naar de klant en naar info@.
+   - `HEDONIST_SLEUTEL` als type **Secret**: de sleutel die `supabase/015-hedonist.sql` laat zien. Daarmee komt elke betaalde bestelling ook in de backoffice onder **Hedonist**. Zonder deze sleutel werkt alles, maar komen de bestellingen alleen per mail.
 5. Kopieer het adres van de Worker, bijvoorbeeld `https://vmv-betalen.jouwnaam.workers.dev`.
 
 ## Stap 3: De website koppelen
@@ -59,6 +60,7 @@ Zodra Mollie je account heeft goedgekeurd, vervang je bij Cloudflare `MOLLIE_API
 
 - Er gaat pas een mail uit als de betaling binnen is. Een afgebroken betaling geeft dus geen mail; die zie je alleen in het Mollie-dashboard.
 - In de mail en in het Mollie-dashboard staan het bestelnummer (`VMV-...`), de klantgegevens en de bestelling.
+- In de backoffice staat de bestelling onder **Hedonist** bij **Te leveren**. Is hij verstuurd of opgehaald, klik dan op **Op geleverd zetten** (of **Opgehaald**).
 - **Maak de factuur in e-Boekhouden.** Zo blijft je nummering kloppen. De website en Mollie maken geen facturen.
 - Bij een bankoverschrijving staat de betaling in Mollie op **open** tot het geld binnen is.
 

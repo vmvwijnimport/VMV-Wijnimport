@@ -57,7 +57,7 @@
   var TYPE_ZAAK = { restaurant: "Restaurant", bar: "Bar", wijnbar: "Wijnbar", slijterij: "Slijterij", overig: "Overig" };
 
   // ---------- Gegevens ----------
-  var data = { bestellingen: [], klanten: [], inst: null, producten: [] };
+  var data = { bestellingen: [], klanten: [], inst: null, producten: [], hedonist: [] };
   var laadAlles = function () {
     return Promise.all([
       db.from("bestellingen")
@@ -65,9 +65,12 @@
         .order("besteld_op", { ascending: false }).limit(1000),
       db.from("klanten").select("*").order("aangemaakt_op", { ascending: false }),
       db.from("instellingen").select("*").maybeSingle(),
-      db.from("producten").select("*").order("volgorde").order("id")
+      db.from("producten").select("*").order("volgorde").order("id"),
+      db.from("hedonist_bestellingen").select("*").order("betaald_op", { ascending: false })
     ]).then(function (r) {
-      r.forEach(function (x) { if (x.error) throw x.error; });
+      // De Hedonist-tabel bestaat pas na supabase/015; zonder die tabel werkt de rest gewoon
+      r.slice(0, 4).forEach(function (x) { if (x.error) throw x.error; });
+      data.hedonist = r[4].error ? [] : r[4].data;
       data.bestellingen = r[0].data;
       data.bestellingen.forEach(function (b) { b.bestelregels.sort(function (x, y) { return x.id - y.id; }); });
       data.klanten = r[1].data;
@@ -118,9 +121,9 @@
     melding(veld("lijstmelding"));
     var h = location.hash.slice(1) || "bestellingen";
     var m = /^(bestelling|klant|wijn)-(.+)$/.exec(h);
-    var scherm = m ? m[1] : (["klanten", "wijnen", "overzicht"].indexOf(h) >= 0 ? h : "bestellingen");
+    var scherm = m ? m[1] : (["klanten", "wijnen", "overzicht", "hedonist"].indexOf(h) >= 0 ? h : "bestellingen");
     schermen.forEach(function (s) { s.hidden = s.dataset.scherm !== scherm; });
-    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : scherm === "wijn" || scherm === "wijnen" ? "wijnen" : scherm === "overzicht" ? "overzicht" : "bestellingen";
+    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : scherm === "wijn" || scherm === "wijnen" ? "wijnen" : scherm === "overzicht" || scherm === "hedonist" ? scherm : "bestellingen";
     pagina.querySelectorAll("[data-tab]").forEach(function (a) {
       if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
@@ -130,6 +133,7 @@
     if (scherm === "wijnen") toonWijnen();
     if (scherm === "wijn") toonWijn(m[2]);
     if (scherm === "overzicht") toonOverzicht();
+    if (scherm === "hedonist") toonHedonist();
   };
   window.addEventListener("hashchange", function () { route(); window.scrollTo(0, 0); });
 
@@ -138,6 +142,8 @@
     var aanvragen = data.klanten.filter(function (k) { return k.status === "in_afwachting"; }).length;
     pagina.querySelector("[data-teller=bestellingen]").textContent = nieuw ? "(" + nieuw + " nieuw)" : "";
     pagina.querySelector("[data-teller=klanten]").textContent = aanvragen ? "(" + aanvragen + (aanvragen === 1 ? " aanvraag)" : " aanvragen)") : "";
+    var teLeveren = data.hedonist.filter(function (h) { return h.status === "te_leveren"; }).length;
+    pagina.querySelector("[data-teller=hedonist]").textContent = teLeveren ? "(" + teLeveren + " te leveren)" : "";
   };
 
   // ---------- Lijsten ----------
@@ -622,6 +628,95 @@
       .catch(function (err) { melding(status, vertaal(err), "fout"); })
       .finally(function () { bezig(knop); });
   });
+
+  // ---------- Hedonist-bestellingen ----------
+  // De betaal-Worker zet betaalde bestellingen in de database (supabase/015); hier zet je ze op geleverd.
+  var hfilter = "te_leveren";
+  pagina.querySelectorAll("[data-hfilter]").forEach(function (k) {
+    k.addEventListener("click", function () { hfilter = k.dataset.hfilter; toonHedonist(); });
+  });
+  var hedonistActie = function (h, status, knop) {
+    var plek = veld("hedonistmelding");
+    melding(plek);
+    bezig(knop, "Bezig…");
+    db.rpc("beheer_hedonist", { bestelling: h.id, status: status })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        h.status = status;
+        h.geleverd_op = status === "geleverd" ? new Date().toISOString() : null;
+        tellers();
+        toonHedonist();
+        melding(veld("hedonistmelding"), h.bestelnummer + (status === "geleverd" ? " staat op geleverd." : " staat weer op te leveren."), "goed");
+      })
+      .catch(function (err) { bezig(knop); melding(plek, vertaal(err), "fout"); });
+  };
+  var toonHedonist = function () {
+    var namen = { te_leveren: "Te leveren", geleverd: "Geleverd" };
+    pagina.querySelectorAll("[data-hfilter]").forEach(function (k) {
+      var f = k.dataset.hfilter;
+      var n = data.hedonist.filter(function (h) { return !f || h.status === f; }).length;
+      k.textContent = (f ? namen[f] : "Alle") + " (" + n + ")";
+      k.setAttribute("aria-pressed", f === hfilter ? "true" : "false");
+    });
+    var doel = veld("hedonistlijst");
+    doel.textContent = "";
+    var gekozen = data.hedonist.filter(function (h) { return !hfilter || h.status === hfilter; });
+    gekozen.forEach(function (h) {
+      var d = el("details", "bestelling");
+      var s = el("summary", "bestelling__kop beheer__hkop");
+      var c1 = el("span", "beheer__cel");
+      c1.appendChild(el("strong", null, h.bestelnummer));
+      c1.appendChild(el("small", null, datum(h.betaald_op, true)));
+      var c2 = el("span", "beheer__cel");
+      c2.appendChild(el("span", null, h.naam));
+      c2.appendChild(el("small", null, h.bestelling));
+      var c3 = el("span", "beheer__cel beheer__labels");
+      if (h.status === "te_leveren") c3.appendChild(el("span", "label", h.bezorging || "Te leveren"));
+      c3.appendChild(el("span", "label label--" + (h.status === "geleverd" ? "geleverd" : "ontvangen"), namen[h.status]));
+      s.appendChild(c1); s.appendChild(c2); s.appendChild(c3);
+      s.appendChild(el("span", "beheer__cel beheer__bedrag", euro(h.totaal)));
+      d.appendChild(s);
+      var dl = el("dl", "beheer__gegevens beheer__gegevens--breed");
+      var kaartlink = function (adres) {
+        var a = el("a", null, adres);
+        a.href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(adres);
+        a.target = "_blank"; a.rel = "noopener";
+        return a;
+      };
+      var mail = el("a", null, h.email); mail.href = "mailto:" + h.email;
+      var tel = el("a", null, h.telefoon); tel.href = "tel:" + String(h.telefoon || "").replace(/[^\d+]/g, "");
+      [
+        ["Bestelling", h.bestelling], ["Bezorging", h.bezorging],
+        ["Adres", h.adres && h.adres !== "Ophalen" ? kaartlink(h.adres) : ""],
+        ["E-mail", h.email ? mail : ""], ["Telefoon", h.telefoon ? tel : ""], ["Opmerking", h.opmerking || ""],
+        ["Glazen", h.glazen != null ? euro(h.glazen) : ""], ["Verzending", h.verzending != null ? euro(h.verzending) : ""],
+        ["Totaal incl. btw", euro(h.totaal)],
+        ["Betaald", datum(h.betaald_op) + ({ ideal: ", iDEAL", banktransfer: ", overschrijving" }[h.methode] || "")],
+        ["Geleverd", h.geleverd_op ? datum(h.geleverd_op) : ""],
+        ["Mollie", h.mollie_id]
+      ].forEach(function (p) {
+        if (!p[1]) return;
+        var rij = el("div");
+        rij.appendChild(el("dt", null, p[0]));
+        var dd = el("dd");
+        if (typeof p[1] === "string") dd.textContent = p[1]; else dd.appendChild(p[1]);
+        rij.appendChild(dd);
+        dl.appendChild(rij);
+      });
+      d.appendChild(dl);
+      var knop = el("button", "knop " + (h.status === "te_leveren" ? "knop--primair" : "knop--secundair"),
+        h.status === "te_leveren" ? (h.adres === "Ophalen" ? "Opgehaald" : "Op geleverd zetten") : "Terug naar te leveren");
+      knop.type = "button";
+      knop.addEventListener("click", function () { hedonistActie(h, h.status === "te_leveren" ? "geleverd" : "te_leveren", knop); });
+      var vak = el("div", "beheer__hknop");
+      vak.appendChild(knop);
+      d.appendChild(vak);
+      doel.appendChild(d);
+    });
+    var leeg = veld("hedonistleeg");
+    leeg.hidden = gekozen.length > 0;
+    leeg.textContent = hfilter === "te_leveren" ? "Er zijn geen Hedonist-bestellingen om te leveren." : "Geen Hedonist-bestellingen.";
+  };
 
   // ---------- Overzicht: best bestellende klanten en meest bestelde wijnen ----------
   // Alleen bevestigde en geleverde bestellingen, met het aantal dat VMV levert. Geen omzet:

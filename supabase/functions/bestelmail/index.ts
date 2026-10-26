@@ -298,7 +298,7 @@ export const mailWeekoverzicht = (teLeveren, nieuw, ctx) => {
 };
 
 // Naar VMV, elke zondagavond: de reservekopie als bijlage
-const TABELNAAM = { klanten: "Klanten", producten: "Wijnen en glazen", instellingen: "Instellingen", bestellingen: "Bestellingen", bestelregels: "Bestelregels", beheerders: "Beheerders" };
+const TABELNAAM = { klanten: "Klanten", producten: "Wijnen en glazen", instellingen: "Instellingen", bestellingen: "Bestellingen", bestelregels: "Bestelregels", beheerders: "Beheerders", hedonist_bestellingen: "Hedonist-bestellingen" };
 export const mailReservekopie = (aantallen, bestand, ctx) => {
   const inhoud =
     alinea("Hierbij de wekelijkse reservekopie van het horecaportaal. Bewaar de bijlage op een veilige plek, bijvoorbeeld in een map in OneDrive of Google Drive.") +
@@ -448,11 +448,12 @@ const weekoverzicht = async (db) => {
 };
 
 // ---------- Reservekopie (aanroep door de database, elke zondagavond) ----------
-const TABELLEN = ["klanten", "producten", "instellingen", "bestellingen", "bestelregels", "beheerders"];
+const TABELLEN = ["klanten", "producten", "instellingen", "bestellingen", "bestelregels", "beheerders", "hedonist_bestellingen"];
 const alleRijen = async (db, tabel) => {
   const rijen = [];
   for (let van = 0; ; van += 1000) {
     const { data, error } = await db.from(tabel).select("*").order("id").range(van, van + 999);
+    if (error && tabel === "hedonist_bestellingen") return rijen;   // bestaat pas na supabase/015
     if (error) throw error;
     rijen.push(...data);
     if (data.length < 1000) return rijen;

@@ -996,6 +996,17 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .beheer__mini { margin: 0; padding: 0; list-style: none; font-size: var(--fs-klein); }
 .beheer__mini li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px var(--s-1); padding: 6px 0; border-bottom: 1px solid var(--lijn); }
 .beheer__mini span { color: var(--tekst-zacht); }
+/* Backoffice: Hedonist-bestellingen */
+.beheer__hedonist { border-top: 1px solid var(--zwart); }
+.beheer__hkop { grid-template-columns: 11rem minmax(0, 1fr) auto 7rem; align-items: center; }
+.beheer__hedonist .beheer__gegevens--breed { margin: 0 0 var(--s-2); }
+.beheer__hknop { padding-bottom: var(--s-3); }
+@media (max-width: 48rem) {
+  .beheer__hkop { grid-template-columns: minmax(0, 1fr) auto; }
+  .beheer__hkop .beheer__cel:nth-child(2) { grid-column: 1; grid-row: 2; }
+  .beheer__hkop .beheer__labels { grid-column: 1 / -1; grid-row: 3; justify-content: flex-start; }
+  .beheer__hkop .beheer__bedrag { grid-column: 2; grid-row: 1; }
+}
 /* Backoffice: overzicht */
 .beheer__overzicht { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-6); align-items: start; }
 .beheer__overzicht .beheer__producent { margin-top: 0; }

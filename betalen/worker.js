@@ -8,15 +8,21 @@
 //    RESEND_API_KEY  (geheim)  sleutel uit Resend, voor de mails na betaling
 //    AFZENDER                  standaard "VMV Wijnimport <bestellingen@vmvwijnimport.com>"
 //    VMV_MAIL                  standaard info@vmvwijnimport.com
+//    HEDONIST_SLEUTEL (geheim) sleutel uit supabase/015-hedonist.sql; zet betaalde bestellingen
+//                              in de backoffice. Zonder deze sleutel komen ze alleen per mail.
 //
 //  Endpoints:
 //    POST /betaling        maakt een Mollie-betaling aan, geeft de betaallink terug
 //    GET  /status?id=tr_…  geeft de status van een betaling terug
 //    POST /webhook         Mollie meldt een statuswijziging; is de betaling binnen,
-//                          dan krijgen de klant en VMV een mail in de huisstijl
+//                          dan krijgen de klant en VMV een mail in de huisstijl en komt
+//                          de bestelling in de backoffice
 // ------------------------------------------------------------------
 
 const MOLLIE = "https://api.mollie.com/v2";
+// Horecaportaal (Supabase): openbare gegevens, staan ook in _config.yml. De beveiliging zit in de sleutel.
+const SUPABASE_URL = "https://iemduldvpylppckpttja.supabase.co";
+const SUPABASE_KEY = "sb_publishable_w0sVLgS2_qy-HdTgVyvfqw_xpahvjXV";
 
 export default {
   async fetch(request, env) {
@@ -288,4 +294,25 @@ async function naBetaling(betaling, env, site) {
   const m = betaling.metadata;
   await verstuur(env, `hedonist-vmv-${betaling.id}`, vmv, m.email, mailVmv(betaling, levering));
   await verstuur(env, `hedonist-klant-${betaling.id}`, m.email, vmv, mailKlant(betaling, levering, site));
+  await opslaan(betaling, env);
+}
+
+// De betaalde bestelling in de backoffice zetten. Een tweede melding van Mollie slaat de database over.
+async function opslaan(betaling, env) {
+  if (!env.HEDONIST_SLEUTEL) return;
+  const m = betaling.metadata;
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/hedonist_opslaan`, {
+    method: "POST",
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      sleutel: env.HEDONIST_SLEUTEL,
+      gegevens: {
+        mollie_id: betaling.id, bestelnummer: m.bestelnummer, methode: betaling.method || "",
+        naam: m.naam, email: m.email, telefoon: m.telefoon, bezorging: m.bezorging, adres: m.adres,
+        opmerking: m.opmerking || "", bestelling: m.bestelling || "",
+        glazen: m.glazen || "", verzending: m.verzending || "", totaal: betaling.amount.value
+      }
+    })
+  });
+  if (!r.ok) throw new Fout(`Opslaan in de backoffice mislukt (${r.status})`, 502);
 }

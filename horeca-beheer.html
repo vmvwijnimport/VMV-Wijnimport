@@ -78,6 +78,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
       <a href="#bestellingen" data-tab="bestellingen">Bestellingen <span data-teller="bestellingen"></span></a>
       <a href="#klanten" data-tab="klanten">Klanten <span data-teller="klanten"></span></a>
       <a href="#wijnen" data-tab="wijnen">Wijnen</a>
+      <a href="#hedonist" data-tab="hedonist">Hedonist <span data-teller="hedonist"></span></a>
       <a href="#overzicht" data-tab="overzicht">Overzicht</a>
     </nav>
 
@@ -161,6 +162,19 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
         <button class="knop knop--primair" type="submit">Instellingen opslaan</button>
         <p class="formulier__status" role="status" aria-live="polite"></p>
       </form>
+    </div>
+
+    {%- comment -%} Hedonist-bestellingen (betaald via Mollie) {%- endcomment -%}
+    <div data-scherm="hedonist" hidden>
+      <div class="regiokeuze beheer__filter" role="group" aria-label="Toon Hedonist-bestellingen">
+        <button type="button" data-hfilter="te_leveren" aria-pressed="true">Te leveren</button>
+        <button type="button" data-hfilter="geleverd" aria-pressed="false">Geleverd</button>
+        <button type="button" data-hfilter="" aria-pressed="false">Alle</button>
+      </div>
+      <p class="beheer__klein beheer__lijstuitleg">Betaalde bestellingen van de Hedonist-pagina. Klik op een bestelling voor de gegevens. Facturen maak je zoals altijd in e-Boekhouden.</p>
+      <p class="formulier__status" data-veld="hedonistmelding" role="status" aria-live="polite"></p>
+      <div class="beheer__hedonist" data-veld="hedonistlijst"></div>
+      <p class="beheer__leeg" data-veld="hedonistleeg" hidden></p>
     </div>
 
     {%- comment -%} Overzicht: best bestellende klanten en meest bestelde wijnen {%- endcomment -%}
