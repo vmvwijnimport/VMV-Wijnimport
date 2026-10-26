@@ -904,10 +904,53 @@
     });
   });
   veld("metuitverkocht").addEventListener("change", function () { toonPrijslijst(); });
+  // PDF downloaden: de lijst wordt in de browser zelf een PDF (A4), zonder afdrukvenster en zonder
+  // datum of adres van de browser. Een wijnregel wordt nooit over twee pagina's verdeeld.
+  // De bibliotheek (html2pdf.js) wordt pas geladen bij de eerste klik, met een controle op de inhoud.
+  var HTML2PDF = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+  var HTML2PDF_SRI = "sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==";
+  var laadPdf = function () {
+    if (window.html2pdf) return Promise.resolve();
+    return new Promise(function (goed, fout) {
+      var sc = document.createElement("script");
+      sc.src = HTML2PDF; sc.integrity = HTML2PDF_SRI; sc.crossOrigin = "anonymous"; sc.referrerPolicy = "no-referrer";
+      sc.onload = goed; sc.onerror = fout;
+      document.head.appendChild(sc);
+    });
+  };
+  var bestandsnaam = function () {
+    return "VMV Wijnimport prijslijst " + (lijstsoort === "horeca" ? "horeca " : "") + new Date().toISOString().slice(0, 10);
+  };
+  pagina.querySelector("[data-actie=pdf]").addEventListener("click", function () {
+    var knop = this, plek = veld("pdfmelding");
+    melding(plek);
+    bezig(knop, "PDF maken…");
+    var kopie = veld("prijslijst").cloneNode(true);
+    kopie.classList.add("prijslijst--pdf");
+    kopie.removeAttribute("data-veld");
+    var houder = el("div", "prijslijst__houder");
+    houder.appendChild(kopie);
+    document.body.appendChild(houder);
+    laadPdf()
+      .then(function () { return document.fonts ? document.fonts.ready : null; })
+      .then(function () {
+        return window.html2pdf().set({
+          margin: [14, 15, 14, 15],
+          filename: bestandsnaam() + ".pdf",
+          image: { type: "jpeg", quality: 0.95 },
+          html2canvas: { scale: 2, backgroundColor: "#FFFFFF" },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+          pagebreak: { mode: ["css"], avoid: [".prijslijst__wijnen li", ".prijslijst__producent h4", ".prijslijst__regionaam", ".prijslijst__voet", ".prijslijst__kop"] }
+        }).from(kopie).save();
+      })
+      .then(function () { melding(plek, "De PDF staat in je map Downloads.", "goed"); })
+      .catch(function () { melding(plek, "De PDF kon niet worden gemaakt. Probeer het opnieuw, of kies Afdrukken.", "fout"); })
+      .finally(function () { houder.remove(); bezig(knop); });
+  });
   pagina.querySelector("[data-actie=afdrukken]").addEventListener("click", function () {
     var oud = document.title;
     // De titel wordt de bestandsnaam van de PDF
-    document.title = "VMV Wijnimport prijslijst " + (lijstsoort === "horeca" ? "horeca " : "") + new Date().toISOString().slice(0, 10);
+    document.title = bestandsnaam();
     window.print();
     document.title = oud;
   });
@@ -922,16 +965,8 @@
       if (!metUit && p.beschikbaarheid === "uitverkocht") return false;
       return horeca || p.prijs_particulier != null;
     });
-    var plek = veld("prijslijst");
-    plek.textContent = "";
-    // Een tabel met lege kop en voet: bij het afdrukken krijgt zo elke pagina dezelfde witrand
-    // (de pagina zelf heeft geen marge, zodat de browser er geen datum of adres bij zet)
-    var blad = el("table", "prijslijst__blad");
-    var rand = function (deel) { var d = el(deel), tr = el("tr"), td = el("td", "prijslijst__rand"); tr.appendChild(td); d.appendChild(tr); return d; };
-    var lijf = el("tbody"), lijfrij = el("tr"), doel = el("td", "prijslijst__inhoud");
-    lijfrij.appendChild(doel); lijf.appendChild(lijfrij);
-    blad.appendChild(rand("thead")); blad.appendChild(lijf); blad.appendChild(rand("tfoot"));
-    plek.appendChild(blad);
+    var doel = veld("prijslijst");
+    doel.textContent = "";
 
     var kop = el("header", "prijslijst__kop");
     var logo = el("img", "prijslijst__logo");
@@ -971,7 +1006,8 @@
           li.appendChild(el("span", "stip stip--" + (p.kleur || "leeg")));
           var t = el("span", "prijslijst__wijn");
           t.appendChild(el("span", "prijslijst__naam", wijnNaam(p)));
-          var meer = [p.druif, p.formaat && p.formaat !== "75 cl" ? p.formaat : null, p.soort === "glas" ? "per glas" : null].filter(Boolean).join(", ");
+          // Bij glazen één keer "per glas" (het formaat van een glas is vaak al "per glas")
+          var meer = [p.druif, p.formaat && p.formaat !== "75 cl" && !(p.soort === "glas" && /glas/i.test(p.formaat)) ? p.formaat : null, p.soort === "glas" ? "per glas" : null].filter(Boolean).join(", ");
           if (meer) t.appendChild(el("small", null, meer));
           li.appendChild(t);
           var lab = [];

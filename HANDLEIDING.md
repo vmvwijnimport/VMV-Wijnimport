@@ -261,11 +261,11 @@ Klik op **Instellingen opslaan**. Het geldt voor nieuwe bestellingen.
 
 ### Prijslijst afdrukken
 
-Bovenaan het tabblad **Prijslijst** staan de knoppen **Horecalijst afdrukken** en **Particuliere lijst afdrukken**. Je ziet dan de lijst in de huisstijl, met de actuele prijzen:
+Bovenaan het tabblad **Prijslijst** staan de knoppen **Horecalijst afdrukken** en **Particuliere lijst afdrukken**. Je ziet dan de lijst in de huisstijl, met de actuele prijzen. Met **PDF downloaden** krijg je meteen een PDF (A4) in je map Downloads, zonder afdrukvenster:
 - **Horeca (excl. btw):** alle zichtbare wijnen met de horecaprijs, de labels allocatie en binnenkort, en onderaan de voorwaarden uit de instellingen (schenkkorting, allocatie, staffelprijs glazen, betaaltermijn).
 - **Particulier (incl. btw):** alleen wijnen met een **particuliere prijs**. Wijnen die alleen voor horeca zijn, staan er niet op.
 
-Uitverkochte wijnen staan er standaard niet op; met het vinkje toon je ze wel. Klik op **Afdrukken of bewaren als PDF** en kies in het venster **Bewaar als PDF** om hem te mailen.
+Uitverkochte wijnen staan er standaard niet op; met het vinkje toon je ze wel. Die PDF kun je mailen of afdrukken. Een wijnregel wordt nooit over twee pagina's verdeeld.
 
 Onder **Instellingen** staat ook de particuliere staffelprijs voor de Hedonist-glazen; die komt onderaan de particuliere lijst.
 

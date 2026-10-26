@@ -255,9 +255,11 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
           <button type="button" data-lijstsoort="particulier" aria-pressed="false">Particulier (incl. btw)</button>
         </div>
         <label class="akkoord"><input type="checkbox" data-veld="metuitverkocht"> Uitverkochte wijnen tonen</label>
-        <button class="knop knop--primair" type="button" data-actie="afdrukken">Afdrukken of bewaren als PDF</button>
+        <button class="knop knop--primair" type="button" data-actie="pdf">PDF downloaden</button>
+        <button class="knop knop--secundair" type="button" data-actie="afdrukken">Afdrukken</button>
       </div>
-      <p class="beheer__klein beheer__lijstuitleg">Kies bij het afdrukken "Bewaar als PDF" om hem te mailen. De lijst toont de actuele prijzen. Wijnen die niet zichtbaar zijn, staan er niet op; wijnen die alleen voor horeca zijn, staan niet op de particuliere lijst.</p>
+      <p class="formulier__status" data-veld="pdfmelding" role="status" aria-live="polite"></p>
+      <p class="beheer__klein beheer__lijstuitleg">Met PDF downloaden krijg je een bestand in de huisstijl om te mailen of af te drukken. De lijst toont de actuele prijzen. Wijnen die niet zichtbaar zijn, staan er niet op; wijnen die alleen voor horeca zijn, staan niet op de particuliere lijst.</p>
       <article class="prijslijst" data-veld="prijslijst" aria-label="Voorbeeld van de prijslijst"></article>
     </div>
 
