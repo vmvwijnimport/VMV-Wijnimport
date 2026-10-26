@@ -931,6 +931,10 @@
     var houder = el("div", "prijslijst__houder");
     houder.appendChild(kopie);
     document.body.appendChild(houder);
+    // Is de pagina naar beneden gescrold, dan verschuift de momentopname (bovenkant weg, onderkant
+    // afgesneden). Daarom eerst naar boven, en daarna terug naar waar je was.
+    var waar = window.scrollY;
+    window.scrollTo(0, 0);
     laadPdf()
       .then(function () { return document.fonts ? document.fonts.ready : null; })
       .then(function () {
@@ -938,14 +942,14 @@
           margin: [14, 15, 14, 15],
           filename: bestandsnaam() + ".pdf",
           image: { type: "jpeg", quality: 0.95 },
-          html2canvas: { scale: 2, backgroundColor: "#FFFFFF" },
+          html2canvas: { scale: 2, backgroundColor: "#FFFFFF", scrollX: 0, scrollY: 0 },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
           pagebreak: { mode: ["css"], avoid: [".prijslijst__wijnen li", ".prijslijst__producent h4", ".prijslijst__regionaam", ".prijslijst__voet", ".prijslijst__kop"] }
         }).from(kopie).save();
       })
       .then(function () { melding(plek, "De PDF staat in je map Downloads.", "goed"); })
       .catch(function () { melding(plek, "De PDF kon niet worden gemaakt. Probeer het opnieuw, of kies Afdrukken.", "fout"); })
-      .finally(function () { houder.remove(); bezig(knop); });
+      .finally(function () { houder.remove(); bezig(knop); window.scrollTo(0, waar); });
   });
   pagina.querySelector("[data-actie=afdrukken]").addEventListener("click", function () {
     var oud = document.title;
