@@ -47,6 +47,26 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
     <button class="knop knop--secundair" type="button" data-actie="uitloggen">Uitloggen</button>
   </div>
 
+  {%- comment -%} ---------- Tweede stap: code uit de app op de telefoon ---------- {%- endcomment -%}
+  <form class="formulier beheer__inlog" id="beheer-code" data-toestand="code" novalidate hidden>
+    <h2 data-veld="codekop">Code invullen</h2>
+    <p data-veld="codeuitleg">Open de app voor codes op je telefoon en vul de code van 6 cijfers in.</p>
+    <div class="beheer__qr" data-veld="qr" hidden>
+      <img data-veld="qrbeeld" alt="QR-code om de backoffice aan je app toe te voegen" width="200" height="200">
+      <p class="beheer__klein">Lukt scannen niet? Kies in de app "sleutel invoeren" en vul dit in: <code data-veld="qrsleutel"></code></p>
+    </div>
+    <div class="veld">
+      <label for="bc-code">Code van 6 cijfers</label>
+      <input id="bc-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required aria-describedby="bc-code-fout">
+      <p class="veld__fout" id="bc-code-fout" hidden></p>
+    </div>
+    <div class="beheer__knoppen">
+      <button class="knop knop--primair" type="submit">Bevestigen</button>
+      <button class="knop knop--secundair" type="button" data-actie="uitloggen">Uitloggen</button>
+    </div>
+    <p class="formulier__status" role="status" aria-live="polite"></p>
+  </form>
+
   {%- comment -%} ---------- Ingelogd als beheerder ---------- {%- endcomment -%}
   <div data-toestand="backoffice" hidden>
     <div class="horeca__balk">

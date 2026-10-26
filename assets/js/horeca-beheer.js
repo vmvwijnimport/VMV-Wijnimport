@@ -911,6 +911,67 @@
     history.replaceState(null, "", location.pathname + "#bestelling-" + parseInt(zoek.get("id"), 10));
   }
 
+  // ---------- Tweede stap: een code uit een app op de telefoon ----------
+  // Een beheerder logt in met wachtwoord én code. De database geeft alleen toegang na beide
+  // (supabase/014-tweestaps.sql). De eerste keer stel je de app in met een QR-code.
+  var codeForm = document.getElementById("beheer-code");
+  var factor = null;
+  var vraagCode = function (bestaand) {
+    melding(codeForm.querySelector(".formulier__status"));
+    codeForm.reset();
+    if (bestaand) {
+      factor = bestaand.id;
+      veld("codekop").textContent = "Code invullen";
+      veld("codeuitleg").textContent = "Open de app voor codes op je telefoon en vul de code van 6 cijfers voor VMV Wijnimport in.";
+      veld("qr").hidden = true;
+      toon("code");
+      codeForm.code.focus();
+      return Promise.resolve();
+    }
+    // Nog geen app ingesteld: halfafgemaakte pogingen opruimen en een nieuwe QR-code maken
+    return db.auth.mfa.listFactors().then(function (f) {
+      var oud = ((f.data && f.data.all) || []).filter(function (x) { return x.status !== "verified"; });
+      return Promise.all(oud.map(function (x) { return db.auth.mfa.unenroll({ factorId: x.id }); }));
+    }).then(function () {
+      return db.auth.mfa.enroll({ factorType: "totp", friendlyName: "VMV backoffice " + new Date().toISOString().slice(0, 10) });
+    }).then(function (r) {
+      if (r.error) throw r.error;
+      factor = r.data.id;
+      veld("codekop").textContent = "Inloggen in twee stappen instellen";
+      veld("codeuitleg").textContent = "Eén keer instellen: scan de QR-code met een app voor codes op je telefoon, zoals Microsoft Authenticator, Google Authenticator of Wachtwoorden op de iPhone. Vul daarna de code van 6 cijfers in die de app laat zien.";
+      veld("qrbeeld").src = r.data.totp.qr_code;
+      veld("qrsleutel").textContent = r.data.totp.secret;
+      veld("qr").hidden = false;
+      toon("code");
+      codeForm.code.focus();
+    });
+  };
+  codeForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var code = codeForm.code.value.replace(/\s/g, "");
+    var f = document.getElementById("bc-code-fout");
+    var goed = /^\d{6}$/.test(code);
+    f.textContent = goed ? "" : "Vul de 6 cijfers uit de app in";
+    f.hidden = goed;
+    if (!goed) { codeForm.code.setAttribute("aria-invalid", "true"); codeForm.code.focus(); return; }
+    codeForm.code.removeAttribute("aria-invalid");
+    var knop = codeForm.querySelector("button[type=submit]");
+    var status = codeForm.querySelector(".formulier__status");
+    melding(status);
+    bezig(knop, "Controleren…");
+    db.auth.mfa.challengeAndVerify({ factorId: factor, code: code })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        bezig(knop);
+        return start();
+      })
+      .catch(function () {
+        bezig(knop);
+        melding(status, "Deze code klopt niet of is verlopen. Vul de nieuwe code uit de app in.", "fout");
+        codeForm.code.select();
+      });
+  });
+
   var start = function () {
     return db.auth.getSession().then(function (r) {
       var sessie = r.data && r.data.session;
@@ -919,7 +980,16 @@
         if (be.error) throw be.error;
         if (!be.data) { veld("account").textContent = sessie.user.email || "onbekend"; toon("geen-toegang"); return; }
         veld("naam").textContent = be.data.naam;
-        return laadAlles().then(function () { tellers(); toon("backoffice"); route(); });
+        return db.auth.mfa.getAuthenticatorAssuranceLevel().then(function (a) {
+          if (a.error) throw a.error;
+          if (a.data.currentLevel === "aal2") {
+            return laadAlles().then(function () { tellers(); toon("backoffice"); route(); });
+          }
+          return db.auth.mfa.listFactors().then(function (f) {
+            if (f.error) throw f.error;
+            return vraagCode(((f.data && f.data.totp) || []).filter(function (x) { return x.status === "verified"; })[0]);
+          });
+        });
       });
     }).catch(function () { fout("De backoffice kon niet worden geladen. Probeer het opnieuw."); });
   };

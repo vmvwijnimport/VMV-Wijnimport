@@ -946,6 +946,9 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 
 /* Backoffice: tabbladen, lijsten en klantgegevens */
 .beheer__inlog { max-width: 30rem; }
+.beheer__qr { margin-bottom: var(--s-3); }
+.beheer__qr img { display: block; width: 200px; height: 200px; margin-bottom: var(--s-2); background: var(--wit); }
+.beheer__qr code { font-size: var(--fs-klein); color: var(--zwart); overflow-wrap: anywhere; }
 /* Tabbladen (backoffice en horecaportaal) */
 .tabbladen { display: flex; flex-wrap: wrap; gap: var(--s-4); margin-bottom: var(--s-4); border-bottom: 1px solid var(--lijn); }
 .tabbladen a {
