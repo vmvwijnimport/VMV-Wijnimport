@@ -962,7 +962,7 @@
           if (meer) t.appendChild(el("small", null, meer));
           li.appendChild(t);
           var lab = [];
-          if (horeca && p.allocatie) lab.push("allocatie");
+          if (p.allocatie) lab.push(horeca ? "allocatie" : "zeer beperkt");
           if (p.beschikbaarheid === "binnenkort") lab.push("binnenkort");
           if (p.beschikbaarheid === "uitverkocht") lab.push("uitverkocht");
           li.appendChild(el("span", "prijslijst__label", lab.join(", ")));
@@ -977,6 +977,9 @@
     if (!wijnen.length) doel.appendChild(el("p", "beheer__leeg", horeca ? "Er staan geen wijnen op deze lijst." : "Nog geen wijnen met een particuliere prijs. Vul die in bij Wijnen."));
 
     var voet = el("footer", "prijslijst__voet");
+    if (!horeca && wijnen.some(function (p) { return p.allocatie; })) {
+      voet.appendChild(el("p", "prijslijst__klein", "Zeer beperkt: kleine productie, op allocatie of in overleg."));
+    }
     if (horeca) {
       var regels = [];
       if (inst.schenk_vanaf) regels.push("Schenkkorting: " + procent(inst.schenk_korting_pct) + " vanaf " + inst.schenk_vanaf + " flessen van dezelfde wijn, niet voor wijnen op allocatie.");
