@@ -112,6 +112,7 @@
   var filter = { bestellingen: "ontvangen", klanten: "in_afwachting" };
   var startModus = null;
   var route = function () {
+    melding(veld("lijstmelding"));
     var h = location.hash.slice(1) || "bestellingen";
     var m = /^(bestelling|klant)-(.+)$/.exec(h);
     var scherm = m ? m[1] : (h === "klanten" ? "klanten" : "bestellingen");
@@ -219,6 +220,7 @@
   var lijstRegels = pagina.querySelector(".beheer__regels");
   var form = document.getElementById("beheerformulier");
   var geleverdForm = document.getElementById("geleverdformulier");
+  var verwijderForm = document.getElementById("verwijderformulier");
   var keuze = pagina.querySelector(".beheer__keuze");
 
   var TEKST = {
@@ -389,6 +391,10 @@
     veld("status").hidden = !klaar;
     geleverdForm.hidden = b.status !== "bevestigd";
     melding(geleverdForm.querySelector(".formulier__status"));
+    melding(verwijderForm.querySelector(".formulier__status"));
+    var vk = verwijderForm.querySelector("button[type=submit]");
+    vk.textContent = "Bestelling verwijderen";
+    delete vk.dataset.zeker;
     form.reset();
     if (klaar) {
       veld("status").textContent = naMelding || STATUSTEKST[b.status] || "";
@@ -452,6 +458,33 @@
     bezig(knop, "Bezig…");
     db.rpc("beheer_geleverd", { bestelling: bestelling.id })
       .then(function (r) { if (r.error) throw r.error; bezig(knop); return vernieuw("Op geleverd gezet."); })
+      .catch(function (err) { bezig(knop); melding(status, vertaal(err), "fout"); });
+  });
+
+  // Verwijderen: eerst nogmaals klikken ter controle
+  verwijderForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var status = verwijderForm.querySelector(".formulier__status");
+    var knop = verwijderForm.querySelector("button[type=submit]");
+    if (!knop.dataset.zeker) {
+      knop.dataset.zeker = "1";
+      knop.textContent = "Zeker weten? Klik nogmaals om te verwijderen";
+      return;
+    }
+    var nummer = bestelling.bestelnummer;
+    melding(status);
+    bezig(knop, "Bezig…");
+    db.rpc("beheer_verwijder", { bestelling: bestelling.id })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        bezig(knop);
+        return laadAlles().then(function () {
+          tellers();
+          history.replaceState(null, "", "#bestellingen");
+          route();
+          melding(veld("lijstmelding"), "Bestelling " + nummer + " is verwijderd.", "goed");
+        });
+      })
       .catch(function (err) { bezig(knop); melding(status, vertaal(err), "fout"); });
   });
 

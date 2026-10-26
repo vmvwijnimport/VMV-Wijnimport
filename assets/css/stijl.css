@@ -924,6 +924,8 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .beheer__formulier { max-width: var(--kolom); }
 .beheer__formulier .veld { margin-bottom: var(--s-2); }
 .beheer__klein { margin: 0; font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.beheer__verwijderen { margin-top: var(--s-6); padding-top: var(--s-3); border-top: 1px solid var(--lijn); }
+.beheer__verwijderen .knop { margin-top: var(--s-2); }
 .beheer__klant { padding: var(--s-3); border: 1px solid var(--lijn); }
 .beheer__klantkop { font-size: var(--fs-h3); margin-bottom: var(--s-2); }
 .beheer__gegevens { margin: 0; }

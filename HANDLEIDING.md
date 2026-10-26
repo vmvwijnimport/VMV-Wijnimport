@@ -274,6 +274,8 @@ Daarna:
 1. **Maak de factuur in e-Boekhouden**, zoals altijd. De site maakt geen facturen, zodat je nummering klopt.
 2. Is de bestelling bezorgd, open hem dan in de backoffice (onder **Bevestigd**) en klik op **Op geleverd zetten**. De klant krijgt daarvan geen mail; in zijn overzicht staat dan "geleverd".
 
+**Een bestelling verwijderen.** Een testbestelling of een dubbele bestelling haal je weg met **Bestelling verwijderen**, onderaan een geopende bestelling. Klik twee keer (ter controle). De klant krijgt geen mail en de bestelling verdwijnt ook uit zijn overzicht. Dit kun je niet ongedaan maken. Een echte bestelling die niet doorgaat, kun je beter **afkeuren**: dan krijgt de klant bericht.
+
 **Leveringen plannen.** Onder **Bevestigd** staan de bestellingen die nog geleverd moeten worden, met het afleveradres, gesorteerd op postcode. In een geopende bestelling tik je op het adres om het in Google Maps te openen. Elke **zondagavond** krijg je ook een mail op info@ met alles wat nog geleverd moet worden: per zaak het adres, het telefoonnummer en wat erin zit, en onderaan een laadlijst met het totaal per wijn. Zijn er geen bestellingen, dan komt er geen mail.
 
 De bedragen berekent de database zelf. Wat een klant in zijn browser doet, kan de prijs niet veranderen. Lever je minder, dan geldt een korting alleen nog als het geleverde aantal er recht op geeft: de schenkkorting vanaf 24 flessen van dezelfde wijn, de staffelprijs voor Hedonist vanaf 12 glazen. Op de pagina zie je dat meteen ("geen schenkkorting meer"), en de bevestiging aan de klant heeft de juiste bedragen.

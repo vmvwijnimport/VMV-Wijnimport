@@ -82,5 +82,6 @@ Bij een nieuwe accountaanvraag stuurt de database nu zelf een mail "Nieuwe aanvr
 
 1. **Functie bijwerken:** **Edge Functions → bestelmail → Code**. Vervang alle code door de nieuwe inhoud van `supabase/functions/bestelmail/index.ts` en klik op **Deploy**. Verify JWT blijft uit.
 2. **SQL Editor → New query** → plak `supabase/010-aanvraagmail.sql` → **Run**. Je krijgt "Success". Bestaande klanten krijgen geen mail.
+   Plak in dezelfde query ook `supabase/011-bestelling-verwijderen.sql` (de knop **Bestelling verwijderen** in de backoffice).
 3. Daarna gaat de wijziging op de site live (het FormSubmit-mailtje vervalt).
 4. **Testen:** vraag op /horeca/ een account aan met een eigen adres. Binnen een minuut komt "Nieuwe aanvraag: …" binnen op info@. Wijs de testaanvraag daarna af of verwijder hem.

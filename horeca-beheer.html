@@ -68,6 +68,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
         <button type="button" data-filter="geannuleerd" aria-pressed="false">Afgekeurd</button>
         <button type="button" data-filter="" aria-pressed="false">Alle</button>
       </div>
+      <p class="formulier__status" data-veld="lijstmelding" role="status" aria-live="polite"></p>
       <p class="beheer__klein beheer__lijstuitleg" data-uitleg hidden>Nog te leveren, gesorteerd op postcode. Zet een bestelling na het bezorgen op geleverd.</p>
       <ul class="beheer__lijst" data-lijst="bestellingen"></ul>
       <p class="beheer__leeg" data-leeg="bestellingen" hidden></p>
@@ -116,6 +117,11 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
           <form class="beheer__formulier" id="geleverdformulier" novalidate hidden>
             <p class="beheer__klein">Is de bestelling bezorgd? Zet hem dan op geleverd. De klant krijgt hiervan geen mail.</p>
             <button class="knop knop--primair" type="submit">Op geleverd zetten</button>
+            <p class="formulier__status" role="status" aria-live="polite"></p>
+          </form>
+          <form class="beheer__formulier beheer__verwijderen" id="verwijderformulier" novalidate>
+            <p class="beheer__klein">Een testbestelling of een dubbele bestelling? Verwijder hem dan. De klant krijgt geen mail. Dit kun je niet ongedaan maken.</p>
+            <button class="knop knop--secundair" type="submit">Bestelling verwijderen</button>
             <p class="formulier__status" role="status" aria-live="polite"></p>
           </form>
         </div>
