@@ -223,7 +223,7 @@ Gebruik voor een beheerder een ander e-mailadres dan voor een horecaklant. Een b
 
 ### Een aanvraag goedkeuren of afwijzen
 
-Bij een nieuwe aanvraag krijg je een mail op info@ met de gegevens van de zaak.
+Bij een nieuwe aanvraag krijg je een mail op info@ in de huisstijl ("Nieuwe aanvraag: …") met de gegevens van de zaak en een knop **Bekijken in de backoffice**. Met Beantwoorden mail je de klant direct.
 
 1. Open de backoffice → **Klanten**. Nieuwe aanvragen staan onder **Aanvragen**.
 2. Open de aanvraag en controleer de gegevens. Met de links **KvK-nummer opzoeken** en **btw-nummer controleren** zie je of de zaak bestaat. Bel bij twijfel het nummer van de zaak, niet het nummer uit de aanvraag.

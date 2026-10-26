@@ -76,3 +76,11 @@ Doe deze stappen in deze volgorde.
    `select net.http_post(url := 'https://iemduldvpylppckpttja.supabase.co/functions/v1/bestelmail', body := '{"weekoverzicht": true}'::jsonb);`
    Binnen een minuut komt "Te leveren: …" binnen op info@ (alleen als er bevestigde of nieuwe bestellingen zijn).
 
+## Update 26 okt: aanvraagmail in de huisstijl
+
+Bij een nieuwe accountaanvraag stuurt de database nu zelf een mail "Nieuwe aanvraag: …" aan info@, in de huisstijl. Die vervangt de mail van FormSubmit; de klant krijgt alleen nog de mail "Bevestig je e-mailadres".
+
+1. **Functie bijwerken:** **Edge Functions → bestelmail → Code**. Vervang alle code door de nieuwe inhoud van `supabase/functions/bestelmail/index.ts` en klik op **Deploy**. Verify JWT blijft uit.
+2. **SQL Editor → New query** → plak `supabase/010-aanvraagmail.sql` → **Run**. Je krijgt "Success". Bestaande klanten krijgen geen mail.
+3. Daarna gaat de wijziging op de site live (het FormSubmit-mailtje vervalt).
+4. **Testen:** vraag op /horeca/ een account aan met een eigen adres. Binnen een minuut komt "Nieuwe aanvraag: …" binnen op info@. Wijs de testaanvraag daarna af of verwijder hem.

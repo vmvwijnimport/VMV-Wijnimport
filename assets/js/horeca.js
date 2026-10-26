@@ -194,18 +194,7 @@
         if (r.data.user && r.data.user.identities && r.data.user.identities.length === 0) {
           throw new Error("already registered");
         }
-        // Melding naar VMV; niet wachten als dat traag is
-        fetch(pagina.dataset.mail, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify(Object.assign({
-            _subject: "Nieuwe horeca-aanvraag: " + g.bedrijfsnaam,
-            _template: "table", _captcha: "false", _replyto: email,
-            _autoresponse: "Bedankt voor je aanvraag voor het horecaportaal van VMV Wijnimport. We kijken je gegevens na en laten je weten wanneer je account is goedgekeurd.",
-            email: email,
-            goedkeuren: "In de backoffice: " + location.origin + (pagina.dataset.basis || "/").replace(/\/$/, "") + "/horeca/beheer/#klanten"
-          }, g))
-        }).catch(function () {});
+        // De mail aan VMV verstuurt de database zelf (supabase/010); de klant krijgt de bevestigingsmail van Supabase
         aanvraag.reset();
         if (r.data.session) return laadKlant();
         status(aanvraag, "Bedankt voor je aanvraag. Bevestig je e-mailadres via de link in je mail; daarna kijken we je gegevens na.", "goed");

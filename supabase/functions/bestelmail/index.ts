@@ -4,6 +4,8 @@
 //    bestelling: bij een nieuwe bestelling, en wanneer de status "bevestigd" of "geannuleerd" wordt.
 // 2. Welkomstmail. De database roept deze functie aan (supabase/008) met het id van een klant
 //    zodra zijn account is goedgekeurd.
+//    Aanvraagmail. De database roept deze functie aan (supabase/010) met het id van een klant en
+//    soort "aanvraag" zodra iemand een account aanvraagt: een mail aan VMV met de gegevens.
 //    De functie leest alles zelf uit de database en verstuurt elke mail maar één keer.
 // 3. Weekoverzicht. Elke zondagavond roept de database deze functie aan (supabase/009) voor een mail
 //    aan VMV met de bevestigde bestellingen die nog geleverd moeten worden. Hooguit één per 20 uur.
@@ -220,6 +222,29 @@ export const mailAfgekeurd = (b, k, doorsturen, ctx) => {
   };
 };
 
+// Naar VMV, zodra iemand een account aanvraagt
+const TYPE_ZAAK = { restaurant: "Restaurant", bar: "Bar", wijnbar: "Wijnbar", slijterij: "Slijterij", overig: "Overig" };
+export const mailNieuweKlant = (k, ctx) => {
+  const inhoud =
+    alinea(`${html(k.contactpersoon)} heeft een account aangevraagd voor het horecaportaal. Controleer de gegevens en keur de aanvraag goed of wijs hem af in de backoffice.`) +
+    `<div style="margin:8px 0 24px;">${knop("Bekijken in de backoffice", ctx.klant, true)}</div>` +
+    kopje("Gegevens") +
+    gegevens([
+      ["Zaak", html(k.bedrijfsnaam)],
+      ["Type zaak", html(TYPE_ZAAK[k.type_zaak] || k.type_zaak)],
+      ["Contact", html(k.contactpersoon)],
+      ["Telefoon", `<a href="tel:${html(k.telefoon.replace(/\s/g, ""))}" style="color:${KLEUR.zwart};">${html(k.telefoon)}</a>`],
+      ["E-mail", `<a href="mailto:${html(k.email)}" style="color:${KLEUR.zwart};">${html(k.email)}</a>`],
+      ["Afleveradres", html(adres(k))],
+      ["KvK / btw", `${html(k.kvk)} / ${html(k.btw)}`]
+    ]) +
+    alinea("De klant moet ook nog zijn e-mailadres bevestigen. Met Beantwoorden mail je de klant direct.", `font-size:14px;color:${KLEUR.zacht};margin:24px 0 0;`);
+  return {
+    onderwerp: `Nieuwe aanvraag: ${k.bedrijfsnaam}`,
+    html: omhulsel({ voorvertoning: `${k.contactpersoon}, ${k.plaats}`, kop: `Nieuwe aanvraag van ${k.bedrijfsnaam}`, inhoud }, ctx)
+  };
+};
+
 // Naar de klant, zodra VMV het account heeft goedgekeurd
 export const mailWelkom = (k, doorsturen, ctx) => {
   const inhoud =
@@ -359,6 +384,26 @@ const welkomVoor = async (db, id) => {
   return antwoord({ verstuurd: ["welkom"] });
 };
 
+// ---------- Aanvraagmail (aanroep door de database bij een nieuwe aanvraag) ----------
+const aanvraagVoor = async (db, id) => {
+  const { data: k, error } = await db.from("klanten").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  if (!k) return antwoord({ fout: "onbekende klant" }, 404);
+  if (k.status !== "in_afwachting") return antwoord({ verstuurd: [] });
+  // Tijdstempel zetten; lukt dat niet (al gezet), dan is de mail al eens verstuurd
+  const { data: gezet } = await db.from("klanten").update({ mail_aanvraag_op: new Date().toISOString() })
+    .eq("id", id).is("mail_aanvraag_op", null).select("id");
+  if (!(gezet && gezet.length)) return antwoord({ verstuurd: [] });
+  const vmv = Deno.env.get("VMV_MAIL") || "info@vmvwijnimport.com";
+  try {
+    await verstuur(vmv, k.email, mailNieuweKlant(k, { kopband: kopband(), klant: `${beheerUrl()}#klant-${id}` }));
+  } catch (e) {
+    await db.from("klanten").update({ mail_aanvraag_op: null }).eq("id", id);
+    throw e;
+  }
+  return antwoord({ verstuurd: ["nieuwe klant"] });
+};
+
 // ---------- Weekoverzicht (aanroep door de database, elke zondagavond) ----------
 const weekoverzicht = async (db) => {
   // Tijdstempel zetten; lukt dat niet, dan is er de afgelopen 20 uur al een verstuurd
@@ -404,7 +449,8 @@ if (typeof Deno !== "undefined") Deno.serve(async (req) => {
     const { createClient } = await import("jsr:@supabase/supabase-js@2");
     const db = createClient(Deno.env.get("SUPABASE_URL"), Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"));
     if (week) return await weekoverzicht(db);
-    return klant ? await welkomVoor(db, vraag.klant) : await mailsVoor(db, vraag.id);
+    if (klant) return vraag.soort === "aanvraag" ? await aanvraagVoor(db, vraag.klant) : await welkomVoor(db, vraag.klant);
+    return await mailsVoor(db, vraag.id);
   } catch (e) {
     console.error(e);
     return antwoord({ fout: "Er ging iets mis. Probeer het opnieuw." }, 500);
