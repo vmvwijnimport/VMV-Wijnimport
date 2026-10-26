@@ -977,6 +977,9 @@
     if (!wijnen.length) doel.appendChild(el("p", "beheer__leeg", horeca ? "Er staan geen wijnen op deze lijst." : "Nog geen wijnen met een particuliere prijs. Vul die in bij Wijnen."));
 
     var voet = el("footer", "prijslijst__voet");
+    if (!horeca && inst.part_glas_staffel_vanaf && inst.part_glas_staffel_prijs != null && wijnen.some(function (p) { return p.soort === "glas"; })) {
+      voet.appendChild(el("p", "prijslijst__klein", "Hedonist-glazen: " + euro(inst.part_glas_staffel_prijs) + " per glas vanaf " + inst.part_glas_staffel_vanaf + " glazen."));
+    }
     if (!horeca && wijnen.some(function (p) { return p.allocatie; })) {
       voet.appendChild(el("p", "prijslijst__klein", "Zeer beperkt: kleine productie, op allocatie of in overleg."));
     }
@@ -1335,6 +1338,8 @@
     instForm.glas_staffel_prijs_ex.value = kaal(i.glas_staffel_prijs_ex);
     instForm.minimale_bestelling_ex.value = i.minimale_bestelling_ex == null ? "" : kaal(i.minimale_bestelling_ex);
     instForm.betaaltermijn_dagen.value = i.betaaltermijn_dagen;
+    instForm.part_glas_staffel_vanaf.value = i.part_glas_staffel_vanaf == null ? "" : i.part_glas_staffel_vanaf;
+    instForm.part_glas_staffel_prijs.value = i.part_glas_staffel_prijs == null ? "" : kaal(i.part_glas_staffel_prijs);
   };
   instForm.addEventListener("submit", function (e) {
     e.preventDefault();
@@ -1346,7 +1351,9 @@
       glas_staffel_vanaf: getal(instForm.glas_staffel_vanaf.value),
       glas_staffel_prijs_ex: getal(instForm.glas_staffel_prijs_ex.value),
       minimale_bestelling_ex: instForm.minimale_bestelling_ex.value.trim() ? getal(instForm.minimale_bestelling_ex.value) : null,
-      betaaltermijn_dagen: getal(instForm.betaaltermijn_dagen.value)
+      betaaltermijn_dagen: getal(instForm.betaaltermijn_dagen.value),
+      part_glas_staffel_vanaf: instForm.part_glas_staffel_vanaf.value.trim() ? getal(instForm.part_glas_staffel_vanaf.value) : null,
+      part_glas_staffel_prijs: instForm.part_glas_staffel_prijs.value.trim() ? getal(instForm.part_glas_staffel_prijs.value) : null
     };
     var fouten = Object.keys(nieuw).filter(function (k) { return nieuw[k] !== null && isNaN(nieuw[k]); });
     if (fouten.length) { melding(status, "Vul overal een geldig getal in.", "fout"); instForm.elements[fouten[0]].focus(); return; }

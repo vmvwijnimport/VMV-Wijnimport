@@ -3,7 +3,8 @@
 --  (wens van de eigenaar, 26 okt 2026). Een wijn zonder particuliere prijs staat niet op
 --  de particuliere lijst. In te vullen in de backoffice (tabblad Wijnen) of met een
 --  importbestand uit prijslijst/ (nooit op GitHub).
---  Veilig: voegt één kolom toe en vervangt de functie beheer_product (zie 012).
+--  Ook een particuliere staffelprijs voor de Hedonist-glazen (instellingen).
+--  Veilig: voegt kolommen toe en vervangt de functies beheer_product en beheer_instellingen (zie 012).
 -- ------------------------------------------------------------------
 
 alter table public.producten
@@ -85,4 +86,44 @@ begin
     returning id into uit;
   end if;
   return uit;
+end $$;
+
+-- ---------- Particuliere staffelprijs voor de Hedonist-glazen ----------
+alter table public.instellingen
+  add column if not exists part_glas_staffel_vanaf int check (part_glas_staffel_vanaf > 0),        -- glazen
+  add column if not exists part_glas_staffel_prijs numeric(10, 2) check (part_glas_staffel_prijs >= 0); -- per glas, incl. btw
+
+-- Zoals in 012, plus de twee particuliere velden (leeg = geen staffel; zonder deze velden blijven ze staan)
+create or replace function public.beheer_instellingen(inst jsonb)
+returns void
+language plpgsql security definer set search_path = public as $$
+declare
+  v_schenk int; v_pct numeric; v_glas int; v_glasprijs numeric; v_min numeric; v_termijn int;
+  v_pvanaf int; v_pprijs numeric;
+begin
+  if not public.is_beheerder() then raise exception 'Geen toegang' using errcode = '42501'; end if;
+  begin
+    v_schenk := (inst ->> 'schenk_vanaf')::int;
+    v_pct := round((inst ->> 'schenk_korting_pct')::numeric, 2);
+    v_glas := (inst ->> 'glas_staffel_vanaf')::int;
+    v_glasprijs := round((inst ->> 'glas_staffel_prijs_ex')::numeric, 2);
+    v_min := round(nullif(inst ->> 'minimale_bestelling_ex', '')::numeric, 2);
+    v_termijn := (inst ->> 'betaaltermijn_dagen')::int;
+    v_pvanaf := nullif(inst ->> 'part_glas_staffel_vanaf', '')::int;
+    v_pprijs := round(nullif(inst ->> 'part_glas_staffel_prijs', '')::numeric, 2);
+  exception when others then
+    raise exception 'Vul overal een geldig getal in';
+  end;
+  if v_schenk is null or v_schenk < 1 or v_glas is null or v_glas < 1 or v_termijn is null or v_termijn < 0
+     or v_pct is null or v_pct < 0 or v_pct > 100 or v_glasprijs is null or v_glasprijs < 0
+     or (v_min is not null and v_min < 0) or (v_pvanaf is not null and v_pvanaf < 1) or (v_pprijs is not null and v_pprijs < 0) then
+    raise exception 'Vul overal een geldig getal in';
+  end if;
+  update public.instellingen i set
+    schenk_vanaf = v_schenk, schenk_korting_pct = v_pct,
+    glas_staffel_vanaf = v_glas, glas_staffel_prijs_ex = v_glasprijs,
+    minimale_bestelling_ex = v_min, betaaltermijn_dagen = v_termijn,
+    part_glas_staffel_vanaf = case when inst ? 'part_glas_staffel_vanaf' then v_pvanaf else i.part_glas_staffel_vanaf end,
+    part_glas_staffel_prijs = case when inst ? 'part_glas_staffel_prijs' then v_pprijs else i.part_glas_staffel_prijs end
+  where id = 1;
 end $$;

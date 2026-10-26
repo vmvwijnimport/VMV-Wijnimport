@@ -161,6 +161,14 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
             <label for="in-termijn">Betaaltermijn (dagen)</label>
             <input id="in-termijn" name="betaaltermijn_dagen" type="number" min="0" step="1" inputmode="numeric" required>
           </div>
+          <div class="veld">
+            <label for="in-pvanaf">Particulier: staffelprijs glazen vanaf <span class="veld__optioneel">(glazen)</span></label>
+            <input id="in-pvanaf" name="part_glas_staffel_vanaf" type="number" min="1" step="1" inputmode="numeric">
+          </div>
+          <div class="veld">
+            <label for="in-pprijs">Particulier: staffelprijs per glas <span class="veld__optioneel">(incl. btw)</span></label>
+            <input id="in-pprijs" name="part_glas_staffel_prijs" type="text" inputmode="decimal">
+          </div>
         </div>
         <button class="knop knop--primair" type="submit">Instellingen opslaan</button>
         <p class="formulier__status" role="status" aria-live="polite"></p>

@@ -267,6 +267,8 @@ Onder **Prijslijst** maak je een prijslijst in de huisstijl, met de actuele prij
 
 Uitverkochte wijnen staan er standaard niet op; met het vinkje toon je ze wel. Klik op **Afdrukken of bewaren als PDF** en kies in het venster **Bewaar als PDF** om hem te mailen.
 
+Onder **Instellingen** (tabblad Wijnen) staat ook de particuliere staffelprijs voor de Hedonist-glazen; die komt onderaan de particuliere lijst.
+
 **Nieuwe particuliere prijslijst?** Zet hem in de map `prijslijst/` en vraag Claude om er een importbestand van te maken. Dat bestand komt nooit op GitHub.
 
 ### Hedonist-bestellingen
