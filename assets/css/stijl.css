@@ -824,6 +824,8 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 }
 .bestelling__kop::-webkit-details-marker { display: none; }
 .bestelling__kop .label { justify-self: start; }
+.bestelling__opnieuw { margin-top: var(--s-2); }
+.bestelling__opnieuw .formulier__status { margin-top: var(--s-1); }
 .bestelling__nummer { font-weight: 500; color: var(--zwart); }
 .bestelling__totaal { font-variant-numeric: tabular-nums; }
 .bestelling[open] .bestelling__kop { color: var(--rood); }

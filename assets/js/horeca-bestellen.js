@@ -271,12 +271,44 @@
   });
   tabblad();
 
+  // ---------- Bestel opnieuw: dezelfde wijnen en aantallen in het mandje ----------
+  // Wat niet meer te bestellen is (uitverkocht of uit het assortiment), slaan we over en noemen we.
+  var opnieuwKnop = function (b) {
+    var vak = el("div", "bestelling__opnieuw");
+    var knop = el("button", "knop knop--secundair", "Bestel opnieuw");
+    knop.type = "button";
+    var status = el("p", "formulier__status");
+    status.setAttribute("role", "status");
+    knop.addEventListener("click", function () {
+      var gezet = 0, overgeslagen = [];
+      b.bestelregels.forEach(function (x) {
+        var p = perId[x.product_id];
+        if (!p || p.beschikbaarheid === "uitverkocht") { overgeslagen.push(x.omschrijving); return; }
+        zet(p.id, (mandje[p.id] || 0) + x.aantal);
+        gezet++;
+      });
+      status.textContent = "";
+      status.className = "formulier__status" + (gezet ? " goed" : " fout");
+      status.appendChild(document.createTextNode(gezet
+        ? "In je mandje gezet. " + (overgeslagen.length ? "Niet meer te bestellen: " + overgeslagen.join(", ") + ". " : "")
+        : "Deze wijnen zijn niet meer te bestellen."));
+      if (gezet) {
+        var a = el("a", null, "Naar je mandje");
+        a.href = "#bestellen-horeca";
+        status.appendChild(a);
+      }
+    });
+    vak.appendChild(knop);
+    vak.appendChild(status);
+    return vak;
+  };
+
   // ---------- Eerdere bestellingen ----------
   var STATUS = { ontvangen: "Wacht op bevestiging", bevestigd: "Bevestigd", geleverd: "Geleverd", geannuleerd: "Geannuleerd" };
   var bestelDoel = pagina.querySelector("[data-bestellingen]");
   var laadBestellingen = function () {
     window.vmvHoreca.db.from("bestellingen")
-      .select("bestelnummer, besteld_op, status, spoed, totaal_ex, bevat_aanvraag, bericht_klant, bestelregels(omschrijving, aantal, prijs_ex, korting_pct, regel_ex, allocatie, toegewezen)")
+      .select("bestelnummer, besteld_op, status, spoed, totaal_ex, bevat_aanvraag, bericht_klant, bestelregels(product_id, omschrijving, aantal, prijs_ex, korting_pct, regel_ex, allocatie, toegewezen)")
       .order("besteld_op", { ascending: false })
       .then(function (r) {
         bestelDoel.textContent = "";
@@ -316,6 +348,7 @@
           if (b.bericht_klant) d.appendChild(el("p", "bestel__voorbehoud", "Bericht van ons: " + b.bericht_klant));
           d.appendChild(ul);
           if (b.spoed) d.appendChild(el("p", "horeca__klein", "Met spoed besteld."));
+          d.appendChild(opnieuwKnop(b));
           bestelDoel.appendChild(d);
         });
       })
