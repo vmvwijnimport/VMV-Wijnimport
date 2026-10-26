@@ -1019,6 +1019,55 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .beheer__voorbeeld iframe { display: block; width: 100%; max-width: 40rem; height: 50rem; border: 1px solid var(--lijn); background: var(--wit); }
 .beheer__mini strong { font-weight: 500; color: var(--zwart); }
 .beheer__geennieuws { margin-top: var(--s-2); }
+/* Backoffice: prijslijst (voorbeeld op het scherm en afdruk) */
+.beheer__prijsbalk { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-3); margin-bottom: var(--s-2); }
+.beheer__prijsbalk .akkoord { margin: 0; }
+.beheer__prijsbalk .regiokeuze { margin: 0; }
+.prijslijst { max-width: 52rem; margin-top: var(--s-3); padding: var(--s-6); border: 1px solid var(--lijn); background: var(--wit); color: var(--tekst); }
+.prijslijst__kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--s-3); padding-bottom: var(--s-3); border-bottom: 1px solid var(--zwart); }
+.prijslijst__logo { display: block; width: 200px; height: auto; margin-left: -8px; }
+.prijslijst__titel { text-align: right; }
+.prijslijst__titel h2 { margin: 0; font-size: var(--fs-h2); font-weight: 300; color: var(--zwart); }
+.prijslijst__titel p { margin: 4px 0 0; font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.prijslijst__regio { margin-top: var(--s-4); }
+.prijslijst__regionaam { margin: 0 0 var(--s-1); font-size: var(--fs-h3); font-weight: 300; color: var(--zwart); }
+.prijslijst__producent { margin-top: var(--s-2); break-inside: avoid; page-break-inside: avoid; }
+.prijslijst__producent h4 { margin: 0; padding-bottom: 6px; border-bottom: 1px solid var(--zwart); font-size: var(--fs-ui); font-weight: 500; color: var(--zwart); }
+.prijslijst__producent h4 small { margin-left: var(--s-1); font-size: var(--fs-klein); font-weight: 400; color: var(--tekst-zacht); }
+.prijslijst__wijnen { margin: 0; padding: 0; list-style: none; }
+.prijslijst__wijnen li {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto 6.5rem; gap: var(--s-2); align-items: baseline;
+  padding: 7px 0; border-bottom: 1px solid var(--lijn); font-size: 15px;
+}
+.prijslijst__wijnen .stip { --stip: 9px; align-self: center; }
+.prijslijst__naam { color: var(--zwart); }
+.prijslijst__wijn small { margin-left: var(--s-1); font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.prijslijst__label { font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.prijslijst__prijs { text-align: right; font-variant-numeric: tabular-nums; color: var(--zwart); }
+.prijslijst__voet { margin-top: var(--s-6); padding-top: var(--s-2); border-top: 1px solid var(--zwart); font-size: var(--fs-klein); color: var(--tekst-zacht); break-inside: avoid; }
+.prijslijst__voorwaarden { margin: 0 0 var(--s-2); padding-left: 1.1em; color: var(--tekst); }
+.prijslijst__voorwaarden li { margin-bottom: 4px; }
+.prijslijst__contact { display: flex; flex-wrap: wrap; gap: 4px var(--s-3); margin: 0 0 4px; color: var(--zwart); }
+.prijslijst__klein { margin: 0; }
+@media (max-width: 36rem) {
+  .prijslijst { padding: var(--s-3); }
+  .prijslijst__titel { text-align: left; }
+  .prijslijst__wijnen li { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .prijslijst__label { grid-column: 2; grid-row: 2; }
+  .prijslijst__prijs { grid-column: 3; grid-row: 1; }
+  .prijslijst__wijn small { display: block; margin-left: 0; }
+}
+@media print {
+  @page { size: A4; margin: 14mm 15mm; }
+  body.drukt-prijslijst { background: var(--wit); }
+  body.drukt-prijslijst .naar-inhoud, body.drukt-prijslijst .kop, body.drukt-prijslijst .voet, body.drukt-prijslijst .leeftijd,
+  body.drukt-prijslijst .pagina__kop, body.drukt-prijslijst .horeca__balk, body.drukt-prijslijst .tabbladen,
+  body.drukt-prijslijst .beheer__prijsbalk, body.drukt-prijslijst .beheer__lijstuitleg { display: none !important; }
+  body.drukt-prijslijst .pagina { padding: 0; margin: 0; max-width: none; }
+  body.drukt-prijslijst .prijslijst { max-width: none; margin: 0; padding: 0; border: 0; }
+  body.drukt-prijslijst .prijslijst__wijnen li { font-size: 10.5pt; padding: 5px 0; }
+  body.drukt-prijslijst * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
 /* Backoffice: overzicht */
 .beheer__overzicht { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-6); align-items: start; }
 .beheer__overzicht .beheer__producent { margin-top: 0; }

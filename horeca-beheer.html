@@ -14,7 +14,8 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
   De knoppen in de mail "Nieuwe bestelling" openen deze pagina met ?id=…&actie=….
 {%- endcomment -%}
 <section class="pagina pagina--breed beheer" id="beheer"
-         data-url="{{ site.horeca.supabase_url }}" data-sleutel="{{ site.horeca.supabase_key }}" data-basis="{{ '/' | relative_url }}">
+         data-url="{{ site.horeca.supabase_url }}" data-sleutel="{{ site.horeca.supabase_key }}" data-basis="{{ '/' | relative_url }}"
+         data-logo="{{ '/brand/logo/svg/vmv-logo-horizontaal.svg' | relative_url }}">
   <header class="pagina__kop">
     <h1>Backoffice</h1>
   </header>
@@ -81,6 +82,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
       <a href="#hedonist" data-tab="hedonist">Hedonist <span data-teller="hedonist"></span></a>
       <a href="#overzicht" data-tab="overzicht">Overzicht</a>
       <a href="#nieuwsmail" data-tab="nieuwsmail">Nieuwsmail</a>
+      <a href="#prijslijst" data-tab="prijslijst">Prijslijst</a>
     </nav>
 
     {%- comment -%} Lijst met bestellingen {%- endcomment -%}
@@ -233,6 +235,20 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
       </div>
     </div>
 
+    {%- comment -%} Prijslijst afdrukken of als PDF bewaren, voor horeca of particulier {%- endcomment -%}
+    <div data-scherm="prijslijst" hidden>
+      <div class="beheer__prijsbalk">
+        <div class="regiokeuze" role="group" aria-label="Welke prijslijst?">
+          <button type="button" data-lijstsoort="horeca" aria-pressed="true">Horeca (excl. btw)</button>
+          <button type="button" data-lijstsoort="particulier" aria-pressed="false">Particulier (incl. btw)</button>
+        </div>
+        <label class="akkoord"><input type="checkbox" data-veld="metuitverkocht"> Uitverkochte wijnen tonen</label>
+        <button class="knop knop--primair" type="button" data-actie="afdrukken">Afdrukken of bewaren als PDF</button>
+      </div>
+      <p class="beheer__klein beheer__lijstuitleg">Kies bij het afdrukken "Bewaar als PDF" om hem te mailen. De lijst toont de actuele prijzen uit de backoffice. Wijnen die niet zichtbaar zijn, staan er niet op; op de particuliere lijst alleen wijnen met een particuliere prijs.</p>
+      <article class="prijslijst" data-veld="prijslijst" aria-label="Voorbeeld van de prijslijst"></article>
+    </div>
+
     {%- comment -%} Overzicht: best bestellende klanten en meest bestelde wijnen {%- endcomment -%}
     <div data-scherm="overzicht" hidden>
       <div class="regiokeuze beheer__filter" role="group" aria-label="Periode" data-veld="periodes"></div>
@@ -302,6 +318,11 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
             <label for="w-prijs">Prijs per fles of glas (excl. btw)</label>
             <input id="w-prijs" name="prijs_ex" type="text" inputmode="decimal" autocomplete="off" required aria-describedby="w-prijs-fout">
             <p class="veld__fout" id="w-prijs-fout" hidden></p>
+          </div>
+          <div class="veld">
+            <label for="w-particulier">Prijs particulier (incl. btw) <span class="veld__optioneel">(leeg = niet op de particuliere lijst)</span></label>
+            <input id="w-particulier" name="prijs_particulier" type="text" inputmode="decimal" autocomplete="off" aria-describedby="w-particulier-fout">
+            <p class="veld__fout" id="w-particulier-fout" hidden></p>
           </div>
           <div class="veld">
             <label for="w-status">Beschikbaarheid</label>
@@ -405,6 +426,6 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
 </section>
 
 {%- comment -%} Producenten van de site: om bij een nieuwe wijn de regio en de link naar de producentpagina in te vullen {%- endcomment -%}
-<script type="application/json" id="beheer-producenten">[{%- for p in site.producenten -%}{"naam": {{ p.naam | jsonify }}, "regio": {{ p.regio | jsonify }}, "slug": {{ p.slug | jsonify }}}{% unless forloop.last %},{% endunless %}{%- endfor -%}]</script>
+<script type="application/json" id="beheer-producenten">[{%- for p in site.producenten -%}{"naam": {{ p.naam | jsonify }}, "regio": {{ p.regio | jsonify }}, "plaats": {{ p.plaats | jsonify }}, "slug": {{ p.slug | jsonify }}}{% unless forloop.last %},{% endunless %}{%- endfor -%}]</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="{{ '/assets/js/horeca-beheer.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

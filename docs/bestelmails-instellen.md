@@ -100,3 +100,7 @@ De volgorde is belangrijk:
 5. Log in op de backoffice en stel inloggen in twee stappen in (QR-code scannen, code invullen).
 6. Pas daarna: **SQL Editor** → `supabase/014-tweestaps.sql` → **Run**. Vanaf nu geeft de database alleen toegang na wachtwoord én code.
 7. **Testen:** reservekopie nu meteen: `select net.http_post(url := 'https://iemduldvpylppckpttja.supabase.co/functions/v1/bestelmail', body := '{"reservekopie": true}'::jsonb, timeout_milliseconds := 60000);` en een proefmail vanuit **Nieuwsmail**.
+
+## Update 26 okt: prijslijst en particuliere prijzen
+
+**SQL Editor → New query** → plak `supabase/017-particuliere-prijzen.sql` → **Run**. Daarna kan de site live; het tabblad **Prijslijst** werkt ook zonder particuliere prijzen (dan alleen de horecalijst).

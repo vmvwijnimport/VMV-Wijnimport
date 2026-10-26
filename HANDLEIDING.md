@@ -211,7 +211,7 @@ De horecaprijzen staan **alleen** in Supabase, nooit op GitHub of in de broncode
 
 ### De backoffice
 
-Bovenaan staan de tabbladen **Bestellingen**, **Klanten**, **Wijnen**, **Hedonist**, **Overzicht** en **Nieuwsmail**. Erachter zie je hoeveel nieuwe bestellingen en aanvragen er zijn. Met de knoppen eronder kies je wat je ziet, bijvoorbeeld alleen nieuwe bestellingen of alles. Klik op een regel om hem te openen.
+Bovenaan staan de tabbladen **Bestellingen**, **Klanten**, **Wijnen**, **Hedonist**, **Overzicht**, **Nieuwsmail** en **Prijslijst**. Erachter zie je hoeveel nieuwe bestellingen en aanvragen er zijn. Met de knoppen eronder kies je wat je ziet, bijvoorbeeld alleen nieuwe bestellingen of alles. Klik op een regel om hem te openen.
 
 **Een beheerder toevoegen** (bijvoorbeeld voor Tim):
 1. Supabase → **Authentication → Users → Add user → Create new user**. Vul het e-mailadres en een wachtwoord in en zet **Auto Confirm User** aan.
@@ -258,6 +258,16 @@ Onderaan het tabblad **Wijnen** staat **Instellingen**:
 - **Betaaltermijn**: in dagen, staat in de mails en de bevestiging.
 
 Klik op **Instellingen opslaan**. Het geldt voor nieuwe bestellingen.
+
+### Prijslijst afdrukken
+
+Onder **Prijslijst** maak je een prijslijst in de huisstijl, met de actuele prijzen uit de backoffice:
+- **Horeca (excl. btw):** alle zichtbare wijnen met de horecaprijs, de labels allocatie en binnenkort, en onderaan de voorwaarden uit de instellingen (schenkkorting, allocatie, staffelprijs glazen, betaaltermijn).
+- **Particulier (incl. btw):** alleen wijnen met een **particuliere prijs**. Die vul je per wijn in onder **Wijnen** (veld "Prijs particulier (incl. btw)"). Leeg = niet op de particuliere lijst.
+
+Uitverkochte wijnen staan er standaard niet op; met het vinkje toon je ze wel. Klik op **Afdrukken of bewaren als PDF** en kies in het venster **Bewaar als PDF** om hem te mailen.
+
+**Nieuwe particuliere prijslijst?** Zet hem in de map `prijslijst/` en vraag Claude om er een importbestand van te maken. Dat bestand komt nooit op GitHub.
 
 ### Hedonist-bestellingen
 

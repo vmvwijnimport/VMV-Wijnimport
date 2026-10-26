@@ -123,9 +123,11 @@
     melding(veld("lijstmelding"));
     var h = location.hash.slice(1) || "bestellingen";
     var m = /^(bestelling|klant|wijn)-(.+)$/.exec(h);
-    var scherm = m ? m[1] : (["klanten", "wijnen", "overzicht", "hedonist", "nieuwsmail"].indexOf(h) >= 0 ? h : "bestellingen");
+    var scherm = m ? m[1] : (["klanten", "wijnen", "overzicht", "hedonist", "nieuwsmail", "prijslijst"].indexOf(h) >= 0 ? h : "bestellingen");
     schermen.forEach(function (s) { s.hidden = s.dataset.scherm !== scherm; });
-    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : scherm === "wijn" || scherm === "wijnen" ? "wijnen" : ["overzicht", "hedonist", "nieuwsmail"].indexOf(scherm) >= 0 ? scherm : "bestellingen";
+    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : scherm === "wijn" || scherm === "wijnen" ? "wijnen" : ["overzicht", "hedonist", "nieuwsmail", "prijslijst"].indexOf(scherm) >= 0 ? scherm : "bestellingen";
+    // Bij afdrukken alleen de prijslijst (zie stijl.css, @media print)
+    document.body.classList.toggle("drukt-prijslijst", scherm === "prijslijst");
     pagina.querySelectorAll("[data-tab]").forEach(function (a) {
       if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
@@ -137,6 +139,7 @@
     if (scherm === "overzicht") toonOverzicht();
     if (scherm === "hedonist") toonHedonist();
     if (scherm === "nieuwsmail") toonNieuws();
+    if (scherm === "prijslijst") toonPrijslijst();
   };
   window.addEventListener("hashchange", function () { route(); window.scrollTo(0, 0); });
 
@@ -886,6 +889,112 @@
       .finally(function () { vak.disabled = false; });
   });
 
+  // ---------- Prijslijst: afdrukken of als PDF bewaren ----------
+  // Horeca: prijzen excl. btw, met de voorwaarden uit de instellingen. Particulier: de particuliere
+  // prijs incl. btw (supabase/017); wijnen zonder particuliere prijs staan er niet op.
+  var lijstsoort = "horeca";
+  var REGIONAAM = { Franken: "Duitsland", "Piëmont": "Italië" };
+  var REGIOVOLGORDE = ["Champagne", "Bourgogne", "Duitsland", "Italië", "Glaswerk"];
+  pagina.querySelectorAll("[data-lijstsoort]").forEach(function (k) {
+    k.addEventListener("click", function () { lijstsoort = k.dataset.lijstsoort; toonPrijslijst(); });
+  });
+  veld("metuitverkocht").addEventListener("change", function () { toonPrijslijst(); });
+  pagina.querySelector("[data-actie=afdrukken]").addEventListener("click", function () {
+    var oud = document.title;
+    // De titel wordt de bestandsnaam van de PDF
+    document.title = "VMV Wijnimport prijslijst " + (lijstsoort === "horeca" ? "horeca " : "") + new Date().toISOString().slice(0, 10);
+    window.print();
+    document.title = oud;
+  });
+  var procent = function (n) { return String(Number(n)).replace(".", ",") + "%"; };
+  var toonPrijslijst = function () {
+    pagina.querySelectorAll("[data-lijstsoort]").forEach(function (k) { k.setAttribute("aria-pressed", k.dataset.lijstsoort === lijstsoort ? "true" : "false"); });
+    var horeca = lijstsoort === "horeca";
+    var metUit = veld("metuitverkocht").checked;
+    var inst = data.inst || {};
+    var wijnen = data.producten.filter(function (p) {
+      if (p.actief === false) return false;
+      if (!metUit && p.beschikbaarheid === "uitverkocht") return false;
+      return horeca || p.prijs_particulier != null;
+    });
+    var doel = veld("prijslijst");
+    doel.textContent = "";
+
+    var kop = el("header", "prijslijst__kop");
+    var logo = el("img", "prijslijst__logo");
+    logo.src = pagina.dataset.logo; logo.alt = "VMV Wijnimport"; logo.width = 200;
+    kop.appendChild(logo);
+    var titel = el("div", "prijslijst__titel");
+    titel.appendChild(el("h2", null, horeca ? "Prijslijst horeca" : "Prijslijst"));
+    titel.appendChild(el("p", null, (horeca ? "Prijzen per fles, excl. btw" : "Prijzen per fles, incl. btw") + ". Geldig vanaf " + datum(new Date()) + "."));
+    kop.appendChild(titel);
+    doel.appendChild(kop);
+
+    // Per regio, dan per producent, in de volgorde van het portaal
+    var regios = [], perRegio = {};
+    wijnen.forEach(function (p) {
+      var regio = p.soort === "glas" ? "Glaswerk" : REGIONAAM[p.regio] || p.regio || "Overig";
+      if (!perRegio[regio]) { perRegio[regio] = { naam: regio, producenten: [], index: {} }; regios.push(regio); }
+      var r = perRegio[regio];
+      var sleutel = p.soort === "glas" ? "Hedonist" : p.producent;
+      if (!r.index[sleutel]) { r.index[sleutel] = { naam: sleutel, p: p, items: [] }; r.producenten.push(r.index[sleutel]); }
+      r.index[sleutel].items.push(p);
+    });
+    var plek = function (r) { var i = REGIOVOLGORDE.indexOf(r); return i < 0 ? 50 : i; };
+    regios.sort(function (a, b) { return plek(a) - plek(b); });
+    regios.forEach(function (rnaam) {
+      var sectie = el("section", "prijslijst__regio");
+      sectie.appendChild(el("h3", "prijslijst__regionaam", rnaam));
+      perRegio[rnaam].producenten.forEach(function (g) {
+        var blok = el("div", "prijslijst__producent");
+        var h = el("h4", null, g.naam);
+        var sp = siteProducenten.filter(function (x) { return x.slug && x.slug === g.p.producent_slug; })[0];
+        var waar = g.p.soort === "glas" ? "handgeblazen, loodvrij" : [sp && sp.plaats, g.p.regio].filter(Boolean).join(", ");
+        if (waar) h.appendChild(el("small", null, waar));
+        blok.appendChild(h);
+        var ul = el("ul", "prijslijst__wijnen");
+        g.items.forEach(function (p) {
+          var li = el("li");
+          li.appendChild(el("span", "stip stip--" + (p.kleur || "leeg")));
+          var t = el("span", "prijslijst__wijn");
+          t.appendChild(el("span", "prijslijst__naam", wijnNaam(p)));
+          var meer = [p.druif, p.formaat && p.formaat !== "75 cl" ? p.formaat : null, p.soort === "glas" ? "per glas" : null].filter(Boolean).join(", ");
+          if (meer) t.appendChild(el("small", null, meer));
+          li.appendChild(t);
+          var lab = [];
+          if (horeca && p.allocatie) lab.push("allocatie");
+          if (p.beschikbaarheid === "binnenkort") lab.push("binnenkort");
+          if (p.beschikbaarheid === "uitverkocht") lab.push("uitverkocht");
+          li.appendChild(el("span", "prijslijst__label", lab.join(", ")));
+          li.appendChild(el("span", "prijslijst__prijs", euro(horeca ? p.prijs_ex : p.prijs_particulier)));
+          ul.appendChild(li);
+        });
+        blok.appendChild(ul);
+        sectie.appendChild(blok);
+      });
+      doel.appendChild(sectie);
+    });
+    if (!wijnen.length) doel.appendChild(el("p", "beheer__leeg", horeca ? "Er staan geen wijnen op deze lijst." : "Nog geen wijnen met een particuliere prijs. Vul die in bij Wijnen."));
+
+    var voet = el("footer", "prijslijst__voet");
+    if (horeca) {
+      var regels = [];
+      if (inst.schenk_vanaf) regels.push("Schenkkorting: " + procent(inst.schenk_korting_pct) + " vanaf " + inst.schenk_vanaf + " flessen van dezelfde wijn, niet voor wijnen op allocatie.");
+      if (wijnen.some(function (p) { return p.allocatie; })) regels.push("Allocatie: je vraagt een aantal aan, wij bevestigen wat we kunnen leveren.");
+      if (inst.glas_staffel_vanaf && wijnen.some(function (p) { return p.soort === "glas"; })) regels.push("Hedonist-glazen: " + euro(inst.glas_staffel_prijs_ex) + " per glas vanaf " + inst.glas_staffel_vanaf + " glazen (modellen gemengd).");
+      if (inst.minimale_bestelling_ex) regels.push("Minimale bestelling: " + euro(inst.minimale_bestelling_ex) + " excl. btw.");
+      regels.push("Bestellen via het horecaportaal op vmvwijnimport.com/horeca. Elke bestelling bevestigen we eerst. Betaling op factuur binnen " + (inst.betaaltermijn_dagen || 14) + " dagen.");
+      var ul2 = el("ul", "prijslijst__voorwaarden");
+      regels.forEach(function (r) { ul2.appendChild(el("li", null, r)); });
+      voet.appendChild(ul2);
+    }
+    var contact = el("p", "prijslijst__contact");
+    ["VMV Wijnimport B.V.", "info@vmvwijnimport.com", "WhatsApp 06 15 74 23 32", "vmvwijnimport.com"].forEach(function (t) { contact.appendChild(el("span", null, t)); });
+    voet.appendChild(contact);
+    voet.appendChild(el("p", "prijslijst__klein", "KvK 99082918, btw NL868786901B01"));
+    doel.appendChild(voet);
+  };
+
   // ---------- Overzicht: best bestellende klanten en meest bestelde wijnen ----------
   // Alleen bevestigde en geleverde bestellingen, met het aantal dat VMV levert. Geen omzet:
   // het portaal ziet alleen de horecabestellingen, dus een omzetcijfer zou een vertekend beeld geven.
@@ -994,7 +1103,8 @@
       id: p.id || null, soort: p.soort, producent: p.producent, producent_slug: p.producent_slug || "",
       regio: p.regio || "", naam: p.naam, druif: p.druif || "", jaargang: p.jaargang || "", formaat: p.formaat || "",
       kleur: p.kleur || "", prijs_ex: String(p.prijs_ex), beschikbaarheid: p.beschikbaarheid, allocatie: !!p.allocatie,
-      max_per_bestelling: p.max_per_bestelling == null ? "" : String(p.max_per_bestelling), actief: p.actief !== false
+      max_per_bestelling: p.max_per_bestelling == null ? "" : String(p.max_per_bestelling), actief: p.actief !== false,
+      prijs_particulier: p.prijs_particulier == null ? "" : String(p.prijs_particulier)
     };
   };
 
@@ -1033,6 +1143,7 @@
     if (p.max_per_bestelling) labels.appendChild(el("span", "label", "max. " + p.max_per_bestelling));
     if (p.actief === false) labels.appendChild(el("span", "label label--geannuleerd", "Niet zichtbaar"));
     var prijs = el("span", "beheer__cel beheer__bedrag", euro(p.prijs_ex));
+    if (p.prijs_particulier != null) prijs.appendChild(el("small", null, "part. " + euro(p.prijs_particulier)));
     var vak = el("span", "beheer__cel");
     var label = el("label", "visueel-verborgen", "Beschikbaarheid van " + p.producent + ", " + wijnNaam(p));
     label.htmlFor = "wb-" + p.id;
@@ -1127,7 +1238,7 @@
   var toonWijn = function (id) {
     vulProducenten();
     melding(wijnForm.querySelector(".formulier__status"));
-    ["producent", "naam", "prijs_ex", "max_per_bestelling"].forEach(function (n) { wijnFout(n); });
+    ["producent", "naam", "prijs_ex", "prijs_particulier", "max_per_bestelling"].forEach(function (n) { wijnFout(n); });
     var nieuw = id === "nieuw";
     wijn = nieuw ? null : data.producten.filter(function (p) { return String(p.id) === id; })[0];
     if (!nieuw && !wijn) {
@@ -1147,6 +1258,7 @@
     wijnForm.kleur.value = p.kleur || "";
     wijnForm.soort.value = p.soort || "wijn";
     wijnForm.prijs_ex.value = p.prijs_ex != null ? kaal(p.prijs_ex) : "";
+    wijnForm.prijs_particulier.value = p.prijs_particulier != null ? kaal(p.prijs_particulier) : "";
     wijnForm.beschikbaarheid.value = p.beschikbaarheid || "op_voorraad";
     wijnForm.max_per_bestelling.value = p.max_per_bestelling || "";
     wijnForm.allocatie.checked = !!p.allocatie;
@@ -1166,11 +1278,13 @@
     e.preventDefault();
     var status = wijnForm.querySelector(".formulier__status");
     var prijs = getal(wijnForm.prijs_ex.value);
+    var part = wijnForm.prijs_particulier.value.trim() ? getal(wijnForm.prijs_particulier.value) : null;
     var max = wijnForm.max_per_bestelling.value.trim();
     var goed = [
       wijnFout("producent", wijnForm.producent.value.trim() ? "" : "Vul de producent in"),
       wijnFout("naam", wijnForm.naam.value.trim() ? "" : "Vul de naam van de wijn in"),
       wijnFout("prijs_ex", isNaN(prijs) ? "Vul een prijs in, bijvoorbeeld 12,50" : ""),
+      wijnFout("prijs_particulier", part !== null && isNaN(part) ? "Vul een prijs in, bijvoorbeeld 24,95, of laat het leeg" : ""),
       wijnFout("max_per_bestelling", max && !(/^\d+$/.test(max) && Number(max) > 0) ? "Vul een heel getal in, of laat het leeg" : "")
     ].every(Boolean);
     if (!goed) { wijnForm.querySelector("[aria-invalid=true]").focus(); return; }
@@ -1191,7 +1305,8 @@
       beschikbaarheid: wijnForm.beschikbaarheid.value,
       allocatie: wijnForm.allocatie.checked,
       max_per_bestelling: max ? Number(max) : null,
-      actief: wijnForm.actief.checked
+      actief: wijnForm.actief.checked,
+      prijs_particulier: part
     };
     var knop = veld("wijnknop");
     melding(status);
