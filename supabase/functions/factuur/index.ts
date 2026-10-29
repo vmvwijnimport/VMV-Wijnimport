@@ -11,7 +11,7 @@
 // Bedragen komen uit de bestelling zoals VMV hem heeft bevestigd (prijs per stuk na korting).
 //
 // Instellingen in Supabase → Edge Functions → Secrets (niets hiervan staat in de repository):
-//   EBOEKHOUDEN_TOKEN  het API-token uit e-Boekhouden (Beheer → API-tokens)
+//   EBOEKHOUDEN_TOKEN  het API-token uit e-Boekhouden (Beheer → Inrichting → Koppelingen → e-Boekhouden API)
 
 const EB = "https://api.e-boekhouden.nl";
 const BRON = "VMVportaal";   // naam van deze koppeling bij e-Boekhouden (max. 10 tekens)

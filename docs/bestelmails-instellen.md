@@ -107,7 +107,7 @@ De volgorde is belangrijk:
 
 ## Update 29 okt: factuurkoppeling met e-Boekhouden
 
-1. **e-Boekhouden:** **Beheer → API-tokens** → **Nieuw API-token toevoegen**, naam bijvoorbeeld "Horecaportaal". Kopieer het token. Plak het **nergens anders** dan in stap 3, ook niet in de chat.
+1. **e-Boekhouden:** **Beheer** (bovenin) → links onder **Inrichting** → **Koppelingen** → bij **API** de regel **e-Boekhouden API** → **Verder** → **Toevoegen**, naam bijvoorbeeld "Horecaportaal". Kopieer het token. Plak het **nergens anders** dan in stap 3, ook niet in de chat.
 2. **Supabase → SQL Editor:** voer `supabase/018-eboekhouden.sql` uit.
 3. **Supabase → Edge Functions → Secrets:** voeg `EBOEKHOUDEN_TOKEN` toe met het token uit stap 1.
 4. **Supabase → Edge Functions → Deploy a new function → Via Editor:** naam **`factuur`** (precies zo), plak de hele inhoud van `supabase/functions/factuur/index.ts` en klik op **Deploy function**. **Verify JWT blijft aan** (anders dan bij bestelmail): alleen de backoffice roept deze functie aan, met je inlog.
