@@ -635,7 +635,7 @@
   // Het product met de meeste woorden gemeen (minstens twee, getallen als jaargang tellen alleen
   // mee om te kiezen tussen gelijke); alleen als het duidelijk de beste is
   var voorstelVoor = function (p) {
-    var eigen = woorden(koppelNaam(p));
+    var eigen = woorden(koppelNaam(p) + " " + (p.druif || ""));
     var beste = null, score = 0, gelijk = false;
     ebProducten.forEach(function (e) {
       if (!e.actief) return;
@@ -674,7 +674,9 @@
           var tr = el("tr");
           var th = el("th", null, koppelNaam(p));
           th.scope = "row";
-          if (!p.actief) { th.appendChild(el("br")); th.appendChild(el("span", "beheer__klein", "Niet zichtbaar in het portaal")); }
+          // Druif en kleur erbij: dezelfde wijn bestaat soms als pinot noir én als chardonnay
+          var extra = [p.druif, { wit: "wit", rood: "rood", rose: "rosé" }[p.kleur], p.actief ? null : "niet zichtbaar in het portaal"].filter(Boolean).join(", ");
+          if (extra) { th.appendChild(el("br")); th.appendChild(el("span", "beheer__klein", extra.charAt(0).toUpperCase() + extra.slice(1))); }
           tr.appendChild(th);
           var td = el("td");
           var s = el("select", "beheer__keuzelijst");
