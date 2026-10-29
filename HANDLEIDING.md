@@ -306,7 +306,7 @@ Open de bestelling via een van de drie knoppen in de mail, of via de backoffice 
 De klant krijgt daarna automatisch een mail: een bevestiging met de aantallen die je levert en je bericht, of een mail dat de bestelling niet doorgaat. In het portaal ziet de klant de nieuwe status. Een bestelling die al is afgehandeld, kun je niet nog een keer bevestigen of afkeuren.
 
 Daarna:
-1. **Maak de factuur in e-Boekhouden**, zoals altijd. De site maakt geen facturen, zodat je nummering klopt.
+1. **Maak de factuur**: klik onderaan de bestelling op **Factuur voorbereiden** (zie hieronder).
 2. Is de bestelling bezorgd, open hem dan in de backoffice (onder **Bevestigd**) en klik op **Op geleverd zetten**. De klant krijgt daarvan geen mail; in zijn overzicht staat dan "geleverd".
 
 **Een bestelling verwijderen.** Een testbestelling of een dubbele bestelling haal je weg met **Bestelling verwijderen**, onderaan een geopende bestelling. Klik twee keer (ter controle). De klant krijgt geen mail en de bestelling verdwijnt ook uit zijn overzicht. Dit kun je niet ongedaan maken. Een echte bestelling die niet doorgaat, kun je beter **afkeuren**: dan krijgt de klant bericht.
@@ -316,6 +316,21 @@ Daarna:
 De bedragen berekent de database zelf. Wat een klant in zijn browser doet, kan de prijs niet veranderen. Lever je minder, dan geldt een korting alleen nog als het geleverde aantal er recht op geeft: de schenkkorting vanaf 24 flessen van dezelfde wijn, de staffelprijs voor Hedonist vanaf 12 glazen. Op de pagina zie je dat meteen ("geen schenkkorting meer"), en de bevestiging aan de klant heeft de juiste bedragen.
 
 **Via Supabase kan het ook nog.** Vul in **bestelregels** bij `toegewezen` het aantal in dat je levert en in **bestellingen** eventueel `bericht_klant`, en zet daarna de status op `bevestigd`, `geannuleerd` of `geleverd`. De mails gaan dan ook automatisch.
+
+### Factuur maken in e-Boekhouden
+
+Bij een bevestigde of geleverde bestelling staat onderaan **Factuur in e-Boekhouden**.
+
+1. Klik op **Factuur voorbereiden**. Je ziet een voorbeeld: bij welke klant in e-Boekhouden de factuur komt, welke producten erop staan (met het product uit e-Boekhouden eronder), de aantallen, prijzen en totalen. Er is dan nog niets gemaakt.
+2. Kies bij **Klant in e-Boekhouden** de juiste klant. Staat de zaak er nog niet in, kies dan **Nieuwe klant aanmaken**: de gegevens uit het portaal (naam, adres, KvK, btw, e-mail) gaan mee. Daarna onthoudt de backoffice welke klant het is.
+3. Klopt alles, klik dan op **Maak factuur in e-Boekhouden**. Je ziet het factuurnummer.
+4. Open de factuur in e-Boekhouden, controleer hem en **verstuur hem daar**. De klant krijgt van de site zelf niets.
+
+Een bestelling krijgt maar één factuur. Gaat er iets mis, dan zie je de melding van e-Boekhouden en kun je het opnieuw proberen. Staat er een rode melding in het voorbeeld (bijvoorbeeld een wijn die nog niet gekoppeld is), los die dan eerst op.
+
+**Wijnen koppelen.** Onder **Prijslijst → Koppelen met e-Boekhouden** kies je per wijn en glas het product uit e-Boekhouden, zodat de voorraad daar meeloopt. **Voorstel op naam** vult lege keuzes in; kijk die na en klik op **Koppelingen opslaan**. Voeg je een nieuwe wijn toe, koppel hem dan hier. Hier kies je ook het factuursjabloon en of de factuur meteen wordt verwerkt in de boekhouding.
+
+De korting staat op de factuur in de prijs per fles, met "(incl. 5% schenkkorting)" erbij. Zo zijn de bedragen precies gelijk aan de bevestiging die de klant kreeg.
 
 ### Een klant verwijderen
 

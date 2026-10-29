@@ -104,3 +104,14 @@ De volgorde is belangrijk:
 ## Update 26 okt: prijslijst en particuliere prijzen
 
 **SQL Editor → New query** → plak `supabase/017-particuliere-prijzen.sql` → **Run**. Daarna kan de site live; het tabblad **Prijslijst** werkt ook zonder particuliere prijzen (dan alleen de horecalijst).
+
+## Update 29 okt: factuurkoppeling met e-Boekhouden
+
+1. **e-Boekhouden:** **Beheer → API-tokens** → **Nieuw API-token toevoegen**, naam bijvoorbeeld "Horecaportaal". Kopieer het token. Plak het **nergens anders** dan in stap 3, ook niet in de chat.
+2. **Supabase → SQL Editor:** voer `supabase/018-eboekhouden.sql` uit.
+3. **Supabase → Edge Functions → Secrets:** voeg `EBOEKHOUDEN_TOKEN` toe met het token uit stap 1.
+4. **Supabase → Edge Functions → Deploy a new function → Via Editor:** naam **`factuur`** (precies zo), plak de hele inhoud van `supabase/functions/factuur/index.ts` en klik op **Deploy function**. **Verify JWT blijft aan** (anders dan bij bestelmail): alleen de backoffice roept deze functie aan, met je inlog.
+5. De site live zetten.
+6. **Backoffice → Prijslijst → Koppelen met e-Boekhouden:** kies het factuursjabloon, klik op **Voorstel op naam**, kijk alle keuzes na en klik op **Koppelingen opslaan**.
+7. **Eerste factuur:** open een bevestigde bestelling → **Factuur voorbereiden** → controleer → **Maak factuur in e-Boekhouden**. Kijk daarna in e-Boekhouden of de factuur, de klant en de voorraad kloppen, en verstuur hem vanuit e-Boekhouden.
+

@@ -928,6 +928,27 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .beheer__klein { margin: 0; font-size: var(--fs-klein); color: var(--tekst-zacht); }
 .beheer__verwijderen { margin-top: var(--s-6); padding-top: var(--s-3); border-top: 1px solid var(--lijn); }
 .beheer__verwijderen .knop { margin-top: var(--s-2); }
+/* Factuur in e-Boekhouden (bij een bevestigde bestelling) */
+.beheer__factuur { margin-top: var(--s-6); padding-top: var(--s-3); border-top: 1px solid var(--lijn); }
+.beheer__factuur .beheer__tussenkop { margin-top: 0; }
+.beheer__factuur > .knop, .beheer__factuur [data-veld=factuurvoorbeeld] { margin-top: var(--s-2); }
+.beheer__factuur .beheer__tabel { margin-bottom: var(--s-2); }
+.beheer__factuur .beheer__totalen { margin-bottom: var(--s-2); }
+.beheer__factuur [data-veld=factuurinfo] { margin-bottom: var(--s-3); }
+.beheer__problemen { margin: 0 0 var(--s-3); padding: var(--s-2) var(--s-2) var(--s-2) var(--s-4); background: var(--rose-licht); color: var(--rood); font-size: var(--fs-klein); }
+/* Wijnen koppelen aan producten in e-Boekhouden */
+.beheer__koppel { max-width: 960px; }
+.beheer__koppel .beheer__wijnbalk { margin: var(--s-2) 0 var(--s-1); }
+.beheer__koppel .beheer__tabel { margin: var(--s-3) 0; }
+.beheer__koppel td { width: 55%; }
+.beheer__koppel select { width: 100%; }
+.beheer__voorstel { display: block; margin-top: 4px; }
+.beheer__voorstel:empty { display: none; }
+@media (max-width: 48rem) {
+  .beheer__koppel table, .beheer__koppel tbody, .beheer__koppel tr, .beheer__koppel th, .beheer__koppel td { display: block; width: auto; }
+  .beheer__koppel thead { display: none; }
+  .beheer__koppel tbody th { border-bottom: 0; padding-bottom: 0; }
+}
 .beheer__klant { padding: var(--s-3); border: 1px solid var(--lijn); }
 .beheer__klantkop { font-size: var(--fs-h3); margin-bottom: var(--s-2); }
 .beheer__gegevens { margin: 0; }
@@ -938,7 +959,7 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .beheer__klaar:focus { outline: none; }
 .beheer__klaar h2 { margin-bottom: var(--s-2); }
 @media (max-width: 56rem) {
-  .beheer__raster { grid-template-columns: 1fr; }
+  .beheer__raster { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 36rem) {
   .beheer__regel { grid-template-columns: minmax(0, 1fr) auto; }

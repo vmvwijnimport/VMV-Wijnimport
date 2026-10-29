@@ -118,6 +118,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
         <a class="knop knop--secundair" href="#wijn-nieuw">Nieuwe wijn toevoegen</a>
         <a class="knop knop--secundair" href="#lijst-horeca">Horecalijst afdrukken</a>
         <a class="knop knop--secundair" href="#lijst-particulier">Particuliere lijst afdrukken</a>
+        <a class="knop knop--secundair" href="#koppelen">Koppelen met e-Boekhouden</a>
       </div>
       <div class="beheer__wijnbalk">
         <div class="regiokeuze beheer__filter" role="group" aria-label="Toon wijnen">
@@ -175,6 +176,35 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
           </div>
         </div>
         <button class="knop knop--primair" type="submit">Instellingen opslaan</button>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+
+    {%- comment -%} Wijnen koppelen aan de producten in e-Boekhouden (supabase/018) {%- endcomment -%}
+    <div data-scherm="koppelen" hidden>
+      <p class="beheer__terug"><a href="#prijslijst">Terug naar de prijslijst</a></p>
+      <h2 class="beheer__nummer" data-veld="koppelkop" tabindex="-1">Koppelen met e-Boekhouden</h2>
+      <p class="beheer__uitleg">Kies per wijn en glas het product uit e-Boekhouden. Op de factuur komt dan dat product, zodat de voorraad in e-Boekhouden meeloopt. Voeg je een nieuwe wijn toe, koppel hem dan hier.</p>
+      <p class="formulier__status" data-veld="koppelmelding" role="status" aria-live="polite"></p>
+      <form class="formulier beheer__koppel" id="koppelformulier" novalidate hidden>
+        <div class="beheer__velden">
+          <div class="veld">
+            <label for="kp-sjabloon">Factuursjabloon</label>
+            <select id="kp-sjabloon" name="sjabloon"></select>
+          </div>
+        </div>
+        <label class="akkoord"><input type="checkbox" name="verwerken"> Factuur meteen verwerken in de boekhouding (zoals wanneer je hem in e-Boekhouden zelf maakt)</label>
+        <div class="beheer__wijnbalk">
+          <button class="knop knop--secundair" type="button" data-actie="voorstel">Voorstel op naam</button>
+        </div>
+        <p class="beheer__klein">"Voorstel op naam" vult alleen lege keuzes in, op basis van de naam. Kijk ze na voordat je opslaat.</p>
+        <div class="beheer__tabel">
+          <table>
+            <thead><tr><th scope="col">Wijn of glas</th><th scope="col">Product in e-Boekhouden</th></tr></thead>
+            <tbody data-veld="koppelrijen"></tbody>
+          </table>
+        </div>
+        <button class="knop knop--primair" type="submit">Koppelingen opslaan</button>
         <p class="formulier__status" role="status" aria-live="polite"></p>
       </form>
     </div>
@@ -397,6 +427,32 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
             <button class="knop knop--primair" type="submit">Op geleverd zetten</button>
             <p class="formulier__status" role="status" aria-live="polite"></p>
           </form>
+          <div class="beheer__formulier beheer__factuur" id="factuurblok" hidden>
+            <h3 class="beheer__tussenkop">Factuur in e-Boekhouden</h3>
+            <p class="beheer__klein" data-veld="factuurtekst"></p>
+            <button class="knop knop--secundair" type="button" data-actie="factuur-voorbereiden">Factuur voorbereiden</button>
+            <div data-veld="factuurvoorbeeld" hidden>
+              <div class="veld">
+                <label for="fa-relatie">Klant in e-Boekhouden</label>
+                <select id="fa-relatie" name="relatie"></select>
+              </div>
+              <div class="beheer__tabel">
+                <table>
+                  <thead><tr><th scope="col">Product</th><th scope="col" class="beheer__getal">Aantal</th><th scope="col" class="beheer__getal">Prijs</th><th scope="col" class="beheer__getal">Bedrag</th></tr></thead>
+                  <tbody data-veld="factuurregels"></tbody>
+                </table>
+              </div>
+              <dl class="mandje__totalen beheer__totalen">
+                <div><dt>Totaal excl. btw</dt><dd data-factuur="ex"></dd></div>
+                <div><dt>Btw</dt><dd data-factuur="btw"></dd></div>
+                <div class="mandje__totaal"><dt>Totaal incl. btw</dt><dd data-factuur="incl"></dd></div>
+              </dl>
+              <p class="beheer__klein" data-veld="factuurinfo"></p>
+              <ul class="beheer__problemen" data-veld="factuurproblemen" hidden></ul>
+              <button class="knop knop--primair" type="button" data-actie="factuur-maken">Maak factuur in e-Boekhouden</button>
+            </div>
+            <p class="formulier__status" role="status" aria-live="polite"></p>
+          </div>
           <form class="beheer__formulier beheer__verwijderen" id="verwijderformulier" novalidate>
             <p class="beheer__klein">Een testbestelling of een dubbele bestelling? Verwijder hem dan. De klant krijgt geen mail. Dit kun je niet ongedaan maken.</p>
             <button class="knop knop--secundair" type="submit">Bestelling verwijderen</button>

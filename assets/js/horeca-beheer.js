@@ -1,6 +1,7 @@
 // Backoffice, alleen voor VMV: bestellingen bevestigen (eventueel met andere aantallen), afkeuren
 // en op geleverd zetten, aanvragen van horecazaken goedkeuren of afwijzen, en wijnen, prijzen,
-// voorraad en instellingen beheren (supabase/012-wijnen-beheren.sql).
+// voorraad en instellingen beheren (supabase/012-wijnen-beheren.sql), en facturen maken in
+// e-Boekhouden (supabase/018-eboekhouden.sql en de functie factuur).
 // Je logt in met een beheerdersaccount. De database controleert bij alles of je beheerder bent
 // (supabase/008-backoffice.sql); deze code toont alleen wat de database teruggeeft.
 // Na bevestigen of afkeuren krijgt de klant automatisch een mail (supabase/006 en de functie bestelmail),
@@ -124,9 +125,9 @@
     var h = location.hash.slice(1) || "bestellingen";
     var m = /^(bestelling|klant|wijn|lijst)-(.+)$/.exec(h);
     // #prijslijst (en het oude #wijnen) is het overzicht van de wijnen met hun prijzen
-    var scherm = m ? m[1] : h === "prijslijst" || h === "wijnen" ? "wijnen" : (["klanten", "overzicht", "hedonist", "nieuwsmail"].indexOf(h) >= 0 ? h : "bestellingen");
+    var scherm = m ? m[1] : h === "prijslijst" || h === "wijnen" ? "wijnen" : (["klanten", "overzicht", "hedonist", "nieuwsmail", "koppelen"].indexOf(h) >= 0 ? h : "bestellingen");
     schermen.forEach(function (s) { s.hidden = s.dataset.scherm !== scherm; });
-    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : ["wijn", "wijnen", "lijst"].indexOf(scherm) >= 0 ? "prijslijst" : ["overzicht", "hedonist", "nieuwsmail"].indexOf(scherm) >= 0 ? scherm : "bestellingen";
+    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : ["wijn", "wijnen", "lijst", "koppelen"].indexOf(scherm) >= 0 ? "prijslijst" : ["overzicht", "hedonist", "nieuwsmail"].indexOf(scherm) >= 0 ? scherm : "bestellingen";
     // Bij afdrukken alleen de prijslijst (zie stijl.css, @media print)
     document.body.classList.toggle("drukt-prijslijst", scherm === "lijst");
     pagina.querySelectorAll("[data-tab]").forEach(function (a) {
@@ -140,6 +141,7 @@
     if (scherm === "overzicht") toonOverzicht();
     if (scherm === "hedonist") toonHedonist();
     if (scherm === "nieuwsmail") toonNieuws();
+    if (scherm === "koppelen") toonKoppelen();
     if (scherm === "lijst") { lijstsoort = m[2] === "particulier" ? "particulier" : "horeca"; toonPrijslijst(); }
   };
   window.addEventListener("hashchange", function () { route(); window.scrollTo(0, 0); });
@@ -378,7 +380,7 @@
     bestelling = data.bestellingen.filter(function (b) { return b.id === id; })[0];
     if (!bestelling) {
       veld("nummer").textContent = "Deze bestelling bestaat niet (meer).";
-      [keuze, form, geleverdForm, veld("uitleg"), veld("status")].forEach(function (x) { x.hidden = true; });
+      [keuze, form, geleverdForm, factuurBlok, veld("uitleg"), veld("status")].forEach(function (x) { x.hidden = true; });
       lijstRegels.textContent = "";
       return;
     }
@@ -411,6 +413,7 @@
     geleverdForm.hidden = b.status !== "bevestigd";
     melding(geleverdForm.querySelector(".formulier__status"));
     melding(verwijderForm.querySelector(".formulier__status"));
+    toonFactuur(b);
     var vk = verwijderForm.querySelector("button[type=submit]");
     vk.textContent = "Bestelling verwijderen";
     delete vk.dataset.zeker;
@@ -464,7 +467,7 @@
         bezig(knop);
         return vernieuw(afkeuren
           ? "Afgekeurd. " + naam + " krijgt automatisch een mail dat de bestelling niet doorgaat."
-          : "Bevestigd. " + naam + " krijgt automatisch een bevestigingsmail. Vergeet niet de factuur te maken in e-Boekhouden.");
+          : "Bevestigd. " + naam + " krijgt automatisch een bevestigingsmail. De factuur maak je hieronder.");
       })
       .catch(function (err) { bezig(knop); melding(status, vertaal(err), "fout"); });
   });
@@ -505,6 +508,238 @@
         });
       })
       .catch(function (err) { bezig(knop); melding(status, vertaal(err), "fout"); });
+  });
+
+  // ---------- Factuur in e-Boekhouden (supabase/018 en de functie factuur) ----------
+  // Een foutmelding van de functie zelf tonen we zoals hij is
+  var factuurFunctie = function (body) {
+    return db.functions.invoke("factuur", { body: body }).then(function (r) {
+      if (!r.error) return r.data;
+      var ctx = r.error.context;
+      return (ctx && ctx.json ? ctx.json() : Promise.reject(r.error)).catch(function () { return null; }).then(function (j) {
+        throw new Error((j && j.fout) || "De koppeling met e-Boekhouden is nu niet bereikbaar. Probeer het later opnieuw.");
+      });
+    });
+  };
+  var foutTekst = function (err) { return (err && err.message) || "Er ging iets mis. Probeer het opnieuw."; };
+
+  var factuurBlok = document.getElementById("factuurblok");
+  var factuurStatus = factuurBlok.querySelector(".formulier__status");
+  var voorbereidKnop = factuurBlok.querySelector("[data-actie=factuur-voorbereiden]");
+  var maakKnop = factuurBlok.querySelector("[data-actie=factuur-maken]");
+  var relatieKeuze = document.getElementById("fa-relatie");
+  var factuurVan = null;   // id van de bestelling waarvan het voorbeeld getoond wordt
+
+  var toonFactuur = function (b) {
+    factuurVan = null;
+    factuurBlok.hidden = b.status !== "bevestigd" && b.status !== "geleverd";
+    veld("factuurvoorbeeld").hidden = true;
+    melding(factuurStatus);
+    bezig(voorbereidKnop); bezig(maakKnop);
+    if (b.eb_factuur_id) {
+      veld("factuurtekst").textContent = "Factuur " + (b.eb_factuurnummer || "") + " is gemaakt in e-Boekhouden" +
+        (b.eb_factuur_op ? " op " + datum(b.eb_factuur_op) : "") + ". Controleer hem daar en verstuur hem vanuit e-Boekhouden.";
+      voorbereidKnop.hidden = true;
+    } else if (b.eb_factuur_op) {
+      veld("factuurtekst").textContent = "Er is op " + datum(b.eb_factuur_op) + " een factuur gestart, maar het nummer is niet teruggekomen. Kijk in e-Boekhouden of de factuur er staat.";
+      voorbereidKnop.hidden = true;
+    } else {
+      veld("factuurtekst").textContent = "Bekijk eerst een voorbeeld. Pas als jij op “Maak factuur” klikt, komt de factuur in e-Boekhouden. De klant krijgt niets: je verstuurt de factuur zelf vanuit e-Boekhouden.";
+      voorbereidKnop.hidden = false;
+    }
+  };
+
+  voorbereidKnop.addEventListener("click", function () {
+    var b = bestelling;
+    melding(factuurStatus);
+    bezig(voorbereidKnop, "Ophalen uit e-Boekhouden…");
+    factuurFunctie({ opdracht: "voorbereiden", bestelling: b.id })
+      .then(function (v) {
+        bezig(voorbereidKnop);
+        if (bestelling !== b) return;
+        factuurVan = b.id;
+        // Klant in e-Boekhouden: een gevonden relatie, of een nieuwe aanmaken
+        relatieKeuze.textContent = "";
+        v.relaties.forEach(function (r) {
+          var o = el("option", null, r.naam + (r.plaats ? ", " + r.plaats : "") + (r.kvk ? " (KvK " + r.kvk + ")" : "") + (r.code ? " – " + r.code : "") + (r.gekoppeld ? " – gekoppeld" : ""));
+          o.value = String(r.id);
+          relatieKeuze.appendChild(o);
+        });
+        var nieuw = el("option", null, "Nieuwe klant aanmaken: " + v.klant.naam + (v.klant.plaats ? ", " + v.klant.plaats : ""));
+        nieuw.value = "nieuw";
+        relatieKeuze.appendChild(nieuw);
+        relatieKeuze.value = v.relaties.length ? String(v.relaties[0].id) : "nieuw";
+
+        var tbody = veld("factuurregels");
+        tbody.textContent = "";
+        v.regels.forEach(function (r) {
+          var tr = el("tr");
+          var th = el("th", null, r.omschrijving);
+          th.scope = "row";
+          if (r.product) { th.appendChild(el("br")); th.appendChild(el("span", "beheer__klein", "e-Boekhouden: " + r.product)); }
+          tr.appendChild(th);
+          tr.appendChild(el("td", "beheer__getal", String(r.aantal)));
+          tr.appendChild(el("td", "beheer__getal", euro(r.prijs)));
+          tr.appendChild(el("td", "beheer__getal", euro(centen(r.prijs) * r.aantal / 100)));
+          tbody.appendChild(tr);
+        });
+        factuurBlok.querySelector("[data-factuur=ex]").textContent = euro(v.totaal.ex);
+        factuurBlok.querySelector("[data-factuur=btw]").textContent = euro(v.totaal.btw);
+        factuurBlok.querySelector("[data-factuur=incl]").textContent = euro(v.totaal.incl);
+        veld("factuurinfo").textContent = "Factuurdatum vandaag, betaaltermijn " + v.termijn + " dagen" +
+          (v.sjabloon ? ", sjabloon “" + v.sjabloon + "”" : "") + ". " +
+          (v.verwerken ? "De factuur wordt meteen verwerkt in de boekhouding." : "De factuur wordt niet meteen verwerkt in de boekhouding.") +
+          " De btw rekent e-Boekhouden zelf uit.";
+        var lijst = veld("factuurproblemen");
+        lijst.textContent = "";
+        v.problemen.forEach(function (t) { lijst.appendChild(el("li", null, t)); });
+        lijst.hidden = !v.problemen.length;
+        maakKnop.hidden = v.problemen.length > 0;
+        veld("factuurvoorbeeld").hidden = false;
+      })
+      .catch(function (err) { bezig(voorbereidKnop); melding(factuurStatus, foutTekst(err), "fout"); });
+  });
+
+  maakKnop.addEventListener("click", function () {
+    var b = bestelling;
+    if (factuurVan !== b.id) return;
+    var keuze = relatieKeuze.value === "nieuw" ? "nieuw" : Number(relatieKeuze.value);
+    melding(factuurStatus);
+    bezig(maakKnop, "Factuur maken…");
+    factuurFunctie({ opdracht: "maken", bestelling: b.id, relatie: keuze })
+      .then(function (r) {
+        bezig(maakKnop);
+        return vernieuw("Factuur " + (r.nummer || "") + " staat in e-Boekhouden. Controleer hem daar en verstuur hem vanuit e-Boekhouden.");
+      })
+      .catch(function (err) {
+        bezig(maakKnop);
+        melding(factuurStatus, foutTekst(err), "fout");
+        // Misschien is de factuur toch (half) gemaakt: de stand opnieuw ophalen
+        laadAlles().then(function () {
+          var nu = data.bestellingen.filter(function (x) { return x.id === b.id; })[0];
+          if (nu && nu.eb_factuur_op && bestelling && bestelling.id === b.id) { bestelling = nu; toonFactuur(nu); melding(factuurStatus, foutTekst(err), "fout"); }
+        });
+      });
+  });
+
+  // ---------- Wijnen koppelen aan producten in e-Boekhouden ----------
+  var koppelForm = document.getElementById("koppelformulier");
+  var ebProducten = [];
+  var koppelNaam = function (p) {
+    return [p.producent, p.naam, p.jaargang, p.formaat && p.formaat !== "75 cl" ? p.formaat : null].filter(Boolean).join(" ");
+  };
+  var woorden = function (t) {
+    return String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").split(/[^a-z0-9]+/)
+      .filter(function (w) { return w.length > 1 && ["de", "le", "la", "les", "et", "cl", "champagne", "domaine", "maison"].indexOf(w) < 0; });
+  };
+  // Het product met de meeste woorden gemeen (minstens twee, getallen als jaargang tellen alleen
+  // mee om te kiezen tussen gelijke); alleen als het duidelijk de beste is
+  var voorstelVoor = function (p) {
+    var eigen = woorden(koppelNaam(p));
+    var beste = null, score = 0, gelijk = false;
+    ebProducten.forEach(function (e) {
+      if (!e.actief) return;
+      var hun = woorden(e.code + " " + e.omschrijving);
+      var gedeeld = eigen.filter(function (w) { return hun.indexOf(w) >= 0; });
+      var tekst = gedeeld.filter(function (w) { return !/^\d+$/.test(w); }).length;
+      if (tekst < 2) return;
+      var s = tekst * 10 + gedeeld.length - tekst;
+      if (s > score) { beste = e; score = s; gelijk = false; } else if (s === score) gelijk = true;
+    });
+    return gelijk ? null : beste;
+  };
+
+  var toonKoppelen = function () {
+    var plek = veld("koppelmelding");
+    koppelForm.hidden = true;
+    melding(koppelForm.querySelector(".formulier__status"));
+    melding(plek, "Producten ophalen uit e-Boekhouden…");
+    veld("koppelkop").focus({ preventScroll: true });
+    factuurFunctie({ opdracht: "gegevens" })
+      .then(function (g) {
+        ebProducten = g.producten;
+        var sj = koppelForm.sjabloon;
+        sj.textContent = "";
+        var leeg = el("option", null, "Kies een sjabloon");
+        leeg.value = "";
+        sj.appendChild(leeg);
+        g.sjablonen.forEach(function (s) { var o = el("option", null, s.naam); o.value = String(s.id); sj.appendChild(o); });
+        sj.value = g.sjabloon != null ? String(g.sjabloon) : (g.sjablonen.length === 1 ? String(g.sjablonen[0].id) : "");
+        koppelForm.verwerken.checked = g.verwerken;
+
+        var opties = ebProducten.slice().sort(function (a, b) { return (a.code + a.omschrijving).localeCompare(b.code + b.omschrijving, "nl"); });
+        var tbody = veld("koppelrijen");
+        tbody.textContent = "";
+        data.producten.forEach(function (p) {
+          var tr = el("tr");
+          var th = el("th", null, koppelNaam(p));
+          th.scope = "row";
+          if (!p.actief) { th.appendChild(el("br")); th.appendChild(el("span", "beheer__klein", "Niet zichtbaar in het portaal")); }
+          tr.appendChild(th);
+          var td = el("td");
+          var s = el("select", "beheer__keuzelijst");
+          s.dataset.product = String(p.id);
+          s.setAttribute("aria-label", "Product in e-Boekhouden voor " + koppelNaam(p));
+          var geen = el("option", null, "Niet gekoppeld");
+          geen.value = "";
+          s.appendChild(geen);
+          opties.forEach(function (e) {
+            var o = el("option", null, (e.code ? e.code + " – " : "") + e.omschrijving + (e.actief ? "" : " (niet actief)"));
+            o.value = String(e.id);
+            s.appendChild(o);
+          });
+          s.value = p.eb_product_id != null && ebProducten.some(function (e) { return e.id === p.eb_product_id; }) ? String(p.eb_product_id) : "";
+          td.appendChild(s);
+          td.appendChild(el("span", "beheer__klein beheer__voorstel"));
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+        });
+        var los = data.producten.filter(function (p) { return p.eb_product_id == null; }).length;
+        melding(plek, los ? los + " van de " + data.producten.length + " wijnen en glazen zijn nog niet gekoppeld." : "Alle wijnen en glazen zijn gekoppeld.");
+        koppelForm.hidden = false;
+      })
+      .catch(function (err) { melding(plek, foutTekst(err), "fout"); });
+  };
+
+  koppelForm.querySelector("[data-actie=voorstel]").addEventListener("click", function () {
+    var n = 0;
+    koppelForm.querySelectorAll("select[data-product]").forEach(function (s) {
+      if (s.value) return;
+      var p = data.producten.filter(function (x) { return String(x.id) === s.dataset.product; })[0];
+      var e = p && voorstelVoor(p);
+      if (!e) return;
+      s.value = String(e.id);
+      s.parentNode.querySelector(".beheer__voorstel").textContent = "Voorstel, nog niet opgeslagen";
+      n++;
+    });
+    melding(koppelForm.querySelector(".formulier__status"), n ? n + " voorstellen ingevuld. Kijk ze na en sla op." : "Geen nieuwe voorstellen gevonden. Kies de rest zelf.", n ? "goed" : "");
+  });
+
+  koppelForm.addEventListener("change", function (e) {
+    if (e.target.dataset && e.target.dataset.product) e.target.parentNode.querySelector(".beheer__voorstel").textContent = "";
+  });
+
+  koppelForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var status = koppelForm.querySelector(".formulier__status");
+    var knop = koppelForm.querySelector("button[type=submit]");
+    var koppelingen = [];
+    koppelForm.querySelectorAll("select[data-product]").forEach(function (s) {
+      koppelingen.push({ id: Number(s.dataset.product), eb: s.value ? Number(s.value) : null });
+    });
+    var sjabloon = koppelForm.sjabloon.value ? Number(koppelForm.sjabloon.value) : null;
+    melding(status);
+    bezig(knop, "Opslaan…");
+    factuurFunctie({ opdracht: "koppelen", koppelingen: koppelingen, sjabloon: sjabloon, verwerken: koppelForm.verwerken.checked })
+      .then(function () {
+        bezig(knop);
+        koppelForm.querySelectorAll(".beheer__voorstel").forEach(function (x) { x.textContent = ""; });
+        return laadAlles().then(function () {
+          var los = koppelingen.filter(function (k) { return k.eb == null; }).length;
+          melding(status, "Opgeslagen." + (los ? " Nog " + los + " niet gekoppeld." : "") + (sjabloon ? "" : " Kies nog een factuursjabloon."), "goed");
+        });
+      })
+      .catch(function (err) { bezig(knop); melding(status, foutTekst(err), "fout"); });
   });
 
   // ---------- Eén klant ----------
