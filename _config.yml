@@ -28,11 +28,12 @@ zoekmachines: false
 # behalve de pagina's in de lijst hieronder. Zet op false om de volledige site te tonen.
 wachtpagina: true
 # Deze pagina's blijven werken zolang de wachtpagina aan staat: het horecaportaal,
-# de backoffice, de pagina's waar de mails naar linken, en de pagina waar je na
-# het betalen terugkomt.
+# de backoffice, de Hedonist-pre-order, de pagina's waar de mails naar linken, en de
+# pagina waar je na het betalen terugkomt.
 wachtpagina_open:
   - /horeca/
   - /horeca/beheer/
+  - /hedonist/
   - /algemene-voorwaarden/
   - /privacy/
   - /bestelling/
