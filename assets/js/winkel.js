@@ -122,6 +122,13 @@ document.addEventListener("DOMContentLoaded", function () {
     return cijfers >= 1011 && cijfers <= 1109;
   };
 
+  // De melding over de postcode weghalen zodra je de postcode of de bezorging aanpast;
+  // anders blijft de browser het formulier tegenhouden, ook met een goede postcode
+  var postcodeInvoer = form.querySelector("input[name=postcode]");
+  var postcodeOpnieuw = function () { postcodeInvoer.setCustomValidity(""); };
+  postcodeInvoer.addEventListener("input", postcodeOpnieuw);
+  winkel.querySelectorAll("input[name=bezorging]").forEach(function (r) { r.addEventListener("change", postcodeOpnieuw); });
+
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var status = form.querySelector(".formulier__status");
