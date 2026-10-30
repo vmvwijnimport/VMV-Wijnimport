@@ -7,7 +7,7 @@ foto:
 foto_positie: center
 foto_alt: 
 lijst_foto: /assets/img/producenten/lijst/champagne-petit-collino.jpg
-samenvatting: Jonas Collino maakt champagnes per plot van oude chardonnaystokken in het grand cru-dorp Avize.
+samenvatting: Jonas Collino maakt single-plot champagnes van oude chardonnaystokken in het grand cru-dorp Avize.
 druiven:
 hectare:
 werkwijze: Biologisch gecertificeerd sinds 2025
