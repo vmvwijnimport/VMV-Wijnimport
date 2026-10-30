@@ -245,6 +245,10 @@ a:hover { color: var(--rood); }
 
 /* ---------- Wachtpagina (tot de lancering, _config.yml: wachtpagina) ---------- */
 
+/* Geheime voorbeeldlink: de echte pagina staat erachter en verschijnt alleen met het voorbeeldcookie */
+html:not(.voorbeeld) .voorbeeld__site,
+html.voorbeeld .voorbeeld__wacht { display: none; }
+
 .wacht__vlak {
   position: relative;
   display: flex;

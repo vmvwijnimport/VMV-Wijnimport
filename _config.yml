@@ -31,6 +31,10 @@ wachtpagina: true
 # de backoffice, de Hedonist-pre-order, de pagina's waar de mails naar linken, en de
 # pagina waar je na het betalen terugkomt. Zet je /producenten/ erbij, dan gaan ook
 # de pagina's van alle wijnmakers open.
+# Geheime voorbeeldlink: wie /?voorbeeld=<code> opent, ziet 30 dagen de hele site,
+# ook achter de wachtpagina. Verander de code om alle links en cookies ongeldig te maken.
+# Leeg laten = uit. De inhoud staat dan wel in de broncode van de wachtpagina.
+voorbeeld_code: "g2ujm0mtyu"
 wachtpagina_open:
   - /horeca/
   - /horeca/beheer/

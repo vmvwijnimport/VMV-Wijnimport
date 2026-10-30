@@ -2,8 +2,8 @@
 <html lang="nl">
 {%- comment -%}
   Wachtpagina: zolang die aan staat, tonen alle pagina's alleen "Binnenkort online",
-  behalve de pagina's in wachtpagina_open (_config.yml). De inhoud van de andere
-  pagina's komt dan ook niet in de broncode.
+  behalve de pagina's in wachtpagina_open (_config.yml). Met een voorbeeld_code staat
+  de echte pagina er verborgen achter, voor wie de geheime voorbeeldlink heeft.
 {%- endcomment -%}
 {%- assign wacht = false -%}
 {%- comment -%} Staat /producenten/ open, dan ook de pagina van elke wijnmaker. {%- endcomment -%}
@@ -14,7 +14,24 @@
 <head>
 {% include head.html %}
 </head>
-{%- if wacht %}
+{%- if wacht and site.voorbeeld_code != "" and site.voorbeeld_code %}
+{%- comment -%} Wachtpagina met daarachter de echte pagina, zichtbaar met de geheime voorbeeldlink {%- endcomment -%}
+<body class="wacht">
+  <script>if(document.documentElement.classList.contains("voorbeeld"))document.body.className={{ page.body_class | default: "" | jsonify }}</script>
+  <div class="voorbeeld__wacht">
+  {% include wachtpagina.html %}
+  </div>
+  <div class="voorbeeld__site">
+  <a class="naar-inhoud" href="#inhoud">Naar de inhoud</a>
+  {% include header.html %}
+  <main id="inhoud">
+    {{ content }}
+  </main>
+  {% include footer.html %}
+  {% include leeftijdscheck.html %}
+  </div>
+</body>
+{%- elsif wacht %}
 <body class="wacht">
   {% include wachtpagina.html %}
 </body>

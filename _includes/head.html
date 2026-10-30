@@ -24,6 +24,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 {%- if wacht %}
 <script>document.documentElement.classList.add("js")</script>
+{%- if site.voorbeeld_code and site.voorbeeld_code != "" %}
+<script>(function(){var h=document.documentElement,c={{ site.voorbeeld_code | jsonify }},q=location.search.match(/[?&]voorbeeld=([^&]+)/);
+if(q&&q[1]===c)document.cookie="vmvvoorbeeld="+c+";path=/;max-age=2592000;samesite=lax";
+if(document.cookie.indexOf("vmvvoorbeeld="+c)>-1){h.classList.add("voorbeeld");if(document.cookie.indexOf("vmv18=ja")<0)h.classList.add("leeftijd-open")}})()</script>
+{%- endif %}
 {%- else %}
 <script>document.documentElement.classList.add("js");if(document.cookie.indexOf("vmv18=ja")<0)document.documentElement.classList.add("leeftijd-open")</script>
 {%- endif %}
