@@ -23,6 +23,24 @@ cuvees:
   - naam: "Coteaux Rouge Aÿ ‘Brise-Pot’"
     druif: Pinot Noir
     type: rood
+  - naam: Éole
+    druif: Chardonnay, Pinot Noir
+    type: wit
+  - naam: Autochtone
+    druif: Pinot Noir
+    type: wit
+  - naam: Albane
+    druif: Chardonnay
+    type: wit
+  - naam: Lieu-dit Aÿ
+    type: wit
+    binnenkort: true
+  - naam: Lieu-dit Taissy
+    type: wit
+    binnenkort: true
+  - naam: Lieu-dit Mailly
+    type: wit
+    binnenkort: true
 ---
 
 Pierric Brochet komt uit een familie van wijnboeren in Taissy, net ten zuiden van Reims. Hij noemde zijn domein naar zijn overgrootvader Jules, omdat hij te bescheiden was om zijn eigen naam op het etiket te zetten. Hij studeerde aan de Viti Campus in Avize en liep stage bij Anselme Selosse. Daarna ging hij terug naar het familiebedrijf. Al snel merkte hij dat hij meer gemeen had met de manier van werken van Anselme dan met die van zijn vader, en hij besloot zijn eigen weg te gaan.
