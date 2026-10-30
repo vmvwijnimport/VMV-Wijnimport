@@ -22,11 +22,11 @@ logo: /brand/logo/png/vmv-logo-1024.png
 # Zichtbaar in Google en andere zoekmachines?
 # false = de site wordt niet opgenomen in zoekresultaten (voor de lancering).
 # Zet op true als de site officieel live mag.
-zoekmachines: false
+zoekmachines: true
 
 # Wachtpagina: zolang dit op true staat, tonen alle pagina's alleen "Binnenkort online",
 # behalve de pagina's in de lijst hieronder. Zet op false om de volledige site te tonen.
-wachtpagina: true
+wachtpagina: false
 # Deze pagina's blijven werken zolang de wachtpagina aan staat: het horecaportaal,
 # de backoffice, de Hedonist-pre-order, de pagina's waar de mails naar linken, en de
 # pagina waar je na het betalen terugkomt. Zet je /producenten/ erbij, dan gaan ook
@@ -34,7 +34,7 @@ wachtpagina: true
 # Geheime voorbeeldlink: wie /?voorbeeld=<code> opent, ziet 30 dagen de hele site,
 # ook achter de wachtpagina. Verander de code om alle links en cookies ongeldig te maken.
 # Leeg laten = uit. De inhoud staat dan wel in de broncode van de wachtpagina.
-voorbeeld_code: "g2ujm0mtyu"
+voorbeeld_code: ""
 wachtpagina_open:
   - /horeca/
   - /horeca/beheer/
