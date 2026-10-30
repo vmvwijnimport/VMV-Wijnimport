@@ -32,7 +32,7 @@ cuvees:
   - naam: Albane
     druif: Chardonnay
     type: wit
-  - naam: Drie lieux-dits uit Aÿ, Taissy en Mailly
+  - naam: Lieux-Dits Collection
     type: wit
     binnenkort: true
 ---
