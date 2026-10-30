@@ -402,8 +402,11 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 @media (max-width: 36rem) {
   .producentregel__link { grid-template-columns: 72px minmax(0, 1fr); column-gap: var(--s-2); align-items: start; }
   .producentregel__meer { grid-column: 2; margin-top: var(--s-1); }
+  /* Telefoon: de flesfoto over de volle breedte, de tekst eronder */
   .producentlijst--groot .producentregel__link,
-  .producentlijst--middel .producentregel__link { grid-template-columns: 8.75rem minmax(0, 1fr); }
+  .producentlijst--middel .producentregel__link { grid-template-columns: minmax(0, 1fr); row-gap: var(--s-2); }
+  .producentlijst--groot .producentregel__meer,
+  .producentlijst--middel .producentregel__meer { grid-column: 1; margin-top: 0; }
 }
 
 /* ---------- Hedonist-blok op de homepage ---------- */
