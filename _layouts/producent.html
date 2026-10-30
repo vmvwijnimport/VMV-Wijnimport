@@ -17,9 +17,28 @@ layout: default
     <p class="producent__nl">In Nederland verkrijgbaar via {{ site.title }}</p>
   </header>
 
-  {%- if page.foto %}
-  <figure class="producent__foto">
-    <img src="{{ page.foto | relative_url }}" alt="{{ page.foto_alt | default: page.naam }}" style="object-position: {{ page.foto_positie | default: 'center' }}">
+  {%- comment -%} Eerst de eigen foto, daarna de fles op het bankje; met twee foto's kun je doorklikken {%- endcomment -%}
+  {%- assign aantal = 0 -%}
+  {%- if page.foto %}{% assign aantal = aantal | plus: 1 %}{% endif -%}
+  {%- if page.lijst_foto contains "/lijst/" %}{% assign aantal = aantal | plus: 1 %}{% endif -%}
+  {%- if aantal > 0 %}
+  <figure class="producent__foto{% if aantal > 1 %} fotoreeks{% endif %}"{% if aantal > 1 %} data-fotoreeks{% endif %}>
+    <div class="fotoreeks__baan">
+      {%- if page.foto %}
+      <img src="{{ page.foto | relative_url }}" alt="{{ page.foto_alt | default: page.naam }}" style="object-position: {{ page.foto_positie | default: 'center' }}">
+      {%- endif %}
+      {%- if page.lijst_foto contains "/lijst/" %}
+      {%- assign kleinefoto = page.lijst_foto | replace: ".jpg", "-klein.jpg" %}
+      <img src="{{ page.lijst_foto | relative_url }}" srcset="{{ kleinefoto | relative_url }} 1200w, {{ page.lijst_foto | relative_url }} 2400w" sizes="(min-width: 80rem) 1200px, 100vw" alt="Een fles van {{ page.naam }} op een bankje in het park"{% if aantal > 1 %} loading="lazy"{% endif %}>
+      {%- endif %}
+    </div>
+    {%- if aantal > 1 %}
+    <div class="fotoreeks__knoppen">
+      <button class="fotoreeks__knop" type="button" data-stap="-1" aria-label="Vorige foto"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+      <span class="fotoreeks__teller" aria-live="polite">1 / {{ aantal }}</span>
+      <button class="fotoreeks__knop" type="button" data-stap="1" aria-label="Volgende foto"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+    </div>
+    {%- endif %}
   </figure>
   {%- endif %}
 

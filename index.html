@@ -56,10 +56,10 @@ titel_seo: VMV Wijnimport | Wijnen van de nieuwe generatie
   {%- assign meer = regio.items.size | minus: 3 %}
   <div class="regio{% if meer > 0 %} regio--inklapbaar{% endif %}">
     <h3 class="regio__naam">{{ regio.name }}<span>{{ regio.items.first.land }}</span></h3>
-    <ul class="producentlijst" id="lijst-{{ regio.name | slugify }}">
+    <ul class="producentlijst producentlijst--middel" id="lijst-{{ regio.name | slugify }}">
       {%- for p in regio.items %}
       {%- if forloop.index > 3 %}{% assign extra = true %}{% else %}{% assign extra = false %}{% endif %}
-      {% include producent-regel.html p=p extra=extra %}
+      {% include producent-regel.html p=p extra=extra maat="middel" %}
       {%- endfor %}
     </ul>
     {%- if meer > 0 %}

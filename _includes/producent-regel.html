@@ -3,12 +3,12 @@
 {%- comment -%} Foto's in /lijst/ (fles op een bankje) bestaan ook in een kleine versie, met -klein erachter {%- endcomment -%}
 {%- assign flesfoto = false -%}
 {%- if lijstfoto contains "/lijst/" -%}{%- assign flesfoto = true -%}{%- endif -%}
-<li class="producentregel{% if include.extra %} producentregel--extra{% endif %}{% if include.breed %} producentregel--breed{% endif %}">
+<li class="producentregel{% if include.extra %} producentregel--extra{% endif %}">
   <a class="producentregel__link" href="{{ p.url | relative_url }}">
     {%- if lijstfoto %}
     {%- if flesfoto %}
     {%- assign kleinefoto = lijstfoto | replace: ".jpg", "-klein.jpg" %}
-    <span class="producentregel__foto producentregel__foto--fles"><img src="{{ kleinefoto | relative_url }}" srcset="{{ kleinefoto | relative_url }} 1200w, {{ lijstfoto | relative_url }} 2400w" sizes="{% if include.breed %}(min-width: 80rem) 1200px, 100vw{% else %}96px{% endif %}" alt="" loading="lazy"></span>
+    <span class="producentregel__foto producentregel__foto--fles"><img src="{{ kleinefoto | relative_url }}" srcset="{{ kleinefoto | relative_url }} 1200w, {{ lijstfoto | relative_url }} 2400w" sizes="{% if include.maat == "groot" %}360px{% else %}200px{% endif %}" alt="" loading="lazy"></span>
     {%- else %}
     <span class="producentregel__foto{% if p.lijst_passend %} producentregel__foto--passend{% endif %}"><img src="{{ lijstfoto | relative_url }}" alt="" loading="lazy" style="object-position: {{ p.foto_positie | default: 'center' }}"></span>
     {%- endif %}

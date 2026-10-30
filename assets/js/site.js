@@ -66,6 +66,26 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // ---- Producentpagina: door de foto's klikken ----
+  document.querySelectorAll("[data-fotoreeks]").forEach(function (reeks) {
+    var baan = reeks.querySelector(".fotoreeks__baan");
+    var fotos = baan.querySelectorAll("img");
+    var teller = reeks.querySelector(".fotoreeks__teller");
+    var huidige = function () { return Math.round(baan.scrollLeft / baan.clientWidth); };
+    var ga = function (stap) {
+      var n = (huidige() + stap + fotos.length) % fotos.length;
+      baan.scrollTo({ left: n * baan.clientWidth });
+      teller.textContent = (n + 1) + " / " + fotos.length;
+    };
+    reeks.querySelectorAll("[data-stap]").forEach(function (knop) {
+      knop.addEventListener("click", function () { ga(parseInt(knop.getAttribute("data-stap"), 10)); });
+    });
+    fotos.forEach(function (foto) { foto.addEventListener("click", function () { ga(1); }); });
+    baan.addEventListener("scroll", function () {
+      teller.textContent = (huidige() + 1) + " / " + fotos.length;
+    });
+  });
+
   // ---- Contactformulier ----
 
   var form = document.getElementById("contactformulier");

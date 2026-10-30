@@ -361,12 +361,13 @@ a:hover { color: var(--rood); }
 /* Foto van de fles op het bankje: de fles staat in elke foto op dezelfde plek, in het midden */
 .producentregel__foto--fles img { object-position: center; }
 
-/* Producentenpagina: de foto over de volle breedte, de tekst eronder */
-.producentregel--breed .producentregel__link {
-  grid-template-columns: minmax(0, 1fr) auto; align-items: end; row-gap: var(--s-3);
-  padding-top: var(--s-4); padding-bottom: var(--s-4);
+/* Flesfoto liggend naast de tekst: groot op de producentenpagina, middel op de homepage */
+.producentregel__foto--fles { aspect-ratio: 3 / 2; }
+.producentlijst--groot .producentregel__link { grid-template-columns: 22.5rem minmax(0, 1fr) auto; }
+.producentlijst--middel .producentregel__link { grid-template-columns: 12.5rem minmax(0, 1fr) auto; }
+@media (max-width: 56rem) {
+  .producentlijst--groot .producentregel__link { grid-template-columns: 15rem minmax(0, 1fr) auto; }
 }
-.producentregel--breed .producentregel__foto { grid-column: 1 / -1; aspect-ratio: 3 / 2; }
 .producentregel__tekst { display: grid; gap: 2px; }
 .producentregel__naam { font-size: var(--fs-h3); font-weight: 400; line-height: 1.2; }
 .producentregel__plek { font-size: var(--fs-klein); color: var(--tekst-zacht); }
@@ -397,8 +398,8 @@ a:hover { color: var(--rood); }
 @media (max-width: 36rem) {
   .producentregel__link { grid-template-columns: 72px minmax(0, 1fr); column-gap: var(--s-2); align-items: start; }
   .producentregel__meer { grid-column: 2; margin-top: var(--s-1); }
-  .producentregel--breed .producentregel__link { grid-template-columns: minmax(0, 1fr); }
-  .producentregel--breed .producentregel__meer { grid-column: 1; margin-top: 0; }
+  .producentlijst--groot .producentregel__link,
+  .producentlijst--middel .producentregel__link { grid-template-columns: 8.75rem minmax(0, 1fr); }
 }
 
 /* ---------- Hedonist-blok op de homepage ---------- */
@@ -475,6 +476,24 @@ a:hover { color: var(--rood); }
 .producent__foto { margin: 0 calc(var(--rand) * -1); }
 .producent__foto img { width: 100%; height: clamp(18rem, 55vw, 40rem); object-fit: cover; }
 @media (min-width: 80rem) { .producent__foto { margin: 0; } }
+
+/* Meerdere foto's: vegen of klikken naar de volgende */
+.fotoreeks { position: relative; }
+.fotoreeks__baan { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; }
+.fotoreeks__baan::-webkit-scrollbar { display: none; }
+.fotoreeks__baan img { flex: 0 0 100%; scroll-snap-align: start; cursor: pointer; }
+.fotoreeks__knoppen {
+  position: absolute; right: var(--s-3); bottom: var(--s-3);
+  display: flex; align-items: center; background: var(--wit);
+}
+.fotoreeks__knop {
+  display: grid; place-items: center; width: 44px; height: 44px;
+  border: 0; background: none; color: var(--zwart); cursor: pointer;
+}
+.fotoreeks__knop:hover { background: var(--rood); color: var(--wit); }
+.fotoreeks__knop:focus-visible { outline: 2px solid var(--rood); outline-offset: -2px; }
+.fotoreeks__teller { min-width: 3.5em; text-align: center; font-size: var(--fs-klein); color: var(--tekst); }
+@media (prefers-reduced-motion: reduce) { .fotoreeks__baan { scroll-behavior: auto; } }
 
 .producent__inhoud {
   display: grid; grid-template-columns: minmax(0, var(--kolom)) minmax(0, 18rem);
