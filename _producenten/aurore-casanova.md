@@ -6,6 +6,7 @@ plaats: Mardeuil
 foto: 
 foto_positie: center
 foto_alt: 
+lijst_foto: /assets/img/producenten/lijst/aurore-casanova.jpg
 samenvatting: Aurore Casanova en Jean-Baptiste Robinet maken biodynamische champagne in Mardeuil, met grand cru-percelen in Puisieulx, Le Mesnil-sur-Oger en Oger.
 druiven:
 hectare: "4,8"

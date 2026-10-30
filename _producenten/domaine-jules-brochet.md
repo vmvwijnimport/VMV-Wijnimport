@@ -6,6 +6,7 @@ plaats: Taissy
 foto: /assets/img/producenten/domaine-jules-brochet.jpg
 foto_positie: center 30%
 foto_alt: Pierric Brochet met een glas in zijn kelder
+lijst_foto: /assets/img/producenten/lijst/domaine-jules-brochet.jpg
 samenvatting: Pierric Brochet, die stage liep bij Anselme Selosse, maakt champagne vanuit het terroir in Taissy, net ten zuiden van Reims.
 druiven:
 hectare:

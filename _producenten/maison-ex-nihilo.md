@@ -6,6 +6,7 @@ plaats: Auxey-Duresses
 foto: /assets/img/producenten/maison-ex-nihilo.jpg
 foto_positie: "center 78%"
 foto_alt: Morgane en Alban Desazars tussen de wijngaarden van de Bourgogne
+lijst_foto: /assets/img/producenten/lijst/maison-ex-nihilo.jpg
 samenvatting: Morgane en Alban Desazars maken sinds 2023 frisse, minerale wijnen per perceel in Auxey-Duresses, vooral uit de Hautes-Côtes.
 druiven:
 hectare:

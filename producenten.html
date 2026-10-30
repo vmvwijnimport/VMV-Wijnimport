@@ -27,7 +27,7 @@ description: Alle wijnmakers die VMV Wijnimport naar Nederland haalt, per regio.
     <h2 class="regio__naam">{{ regio.name }}<span>{{ regio.items.first.land }}</span></h2>
     <ul class="producentlijst">
       {%- for p in regio.items %}
-      {% include producent-regel.html p=p %}
+      {% include producent-regel.html p=p breed=true %}
       {%- endfor %}
     </ul>
   </section>

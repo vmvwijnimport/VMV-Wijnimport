@@ -6,6 +6,7 @@ plaats: Meloisey
 foto: 
 foto_positie: center
 foto_alt: 
+lijst_foto: /assets/img/producenten/lijst/vins-saisons.jpg
 samenvatting: Loïc Lamy maakt als kleine négoce in Meloisey lichte, goed verteerbare Bourgogne met druiven van biologische en biodynamische wijnboeren.
 druiven:
 hectare:

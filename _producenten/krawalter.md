@@ -6,6 +6,7 @@ plaats: Bürgstadt
 foto: /assets/img/producenten/krawalter.jpg
 foto_positie: center 30%
 foto_alt: Felix Walter tussen zijn wijnstokken in Bürgstadt
+lijst_foto: /assets/img/producenten/lijst/krawalter.jpg
 samenvatting: Felix Walter maakt onder de naam Krawalter Bourgondisch geïnspireerde chardonnay en spätburgunder in Bürgstadt, in Franken.
 druiven:
 hectare:

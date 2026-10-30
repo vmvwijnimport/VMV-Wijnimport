@@ -6,6 +6,7 @@ plaats: Aÿ-Champagne
 foto: /assets/img/producenten/helene-charbaut.jpg
 foto_positie: "center 40%"
 foto_alt: Hélène Charbaut proeft druiven in de wijngaard
+lijst_foto: /assets/img/producenten/lijst/helene-charbaut.jpg
 samenvatting: Hélène Charbaut maakt sinds 2020 champagne per perceel op vat, met wat ze in de Bourgogne leerde.
 druiven:
 hectare:

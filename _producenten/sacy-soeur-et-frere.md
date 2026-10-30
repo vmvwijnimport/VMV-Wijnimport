@@ -6,6 +6,7 @@ plaats: Verzy
 foto: /assets/img/producenten/sacy-soeur-et-frere.jpg
 foto_positie: "center 45%"
 foto_alt: Yaël en Jonathan Sacy met hun hond in de wijngaard
+lijst_foto: /assets/img/producenten/lijst/sacy-soeur-et-frere.jpg
 samenvatting: Zus en broer Yaël en Jonathan Sacy, de dertiende generatie in het grand cru-dorp Verzy, maken champagnes van één dorp of één perceel.
 druiven:
 hectare:

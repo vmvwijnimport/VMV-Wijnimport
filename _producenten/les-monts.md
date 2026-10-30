@@ -6,6 +6,7 @@ plaats: Savigny-lès-Beaune
 foto: /assets/img/producenten/les-monts.jpg
 foto_positie: "center 60%"
 foto_alt: Nina Saulnier loopt tussen de wijnstokken
+lijst_foto: /assets/img/producenten/lijst/les-monts.jpg
 samenvatting: Nina Saulnier en Lucas Mouchonnat maken frisse, precieze wijnen van hun monopole Les Crucibées, hoog in de Hautes-Côtes de Beaune.
 druiven:
 hectare: "5,5"

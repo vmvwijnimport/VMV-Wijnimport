@@ -6,6 +6,7 @@ plaats: Treiso
 foto: /assets/img/producenten/rosanna-sandri.jpg
 foto_positie: center 45%
 foto_alt: Wijnmaker van Rosanna Sandri tussen de wijnstokken in Treiso
+lijst_foto: /assets/img/producenten/lijst/rosanna-sandri.jpg
 samenvatting: Familiedomein in Treiso, vlak bij Barbaresco, met elegante nebbiolo, dolcetto en barbera van ongeveer 4 hectare.
 druiven:
 hectare: ongeveer 4

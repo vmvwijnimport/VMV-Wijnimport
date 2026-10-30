@@ -6,6 +6,7 @@ plaats: Chamery
 foto: /assets/img/producenten/thomas-perseval.jpg
 foto_positie: center 30%
 foto_alt: Thomas Perseval met een baal stro tussen de wijnstokken, een schaap op de voorgrond
+lijst_foto: /assets/img/producenten/lijst/thomas-perseval.jpg
 samenvatting: Thomas Perseval maakt champagnes per perceel in het premier cru-dorp Chamery, biologisch gecertificeerd sinds 2012.
 druiven:
 hectare: "2,5"

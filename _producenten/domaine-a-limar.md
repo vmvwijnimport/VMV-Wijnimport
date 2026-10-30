@@ -6,6 +6,7 @@ plaats: La Neuville-aux-Larris
 foto: /assets/img/producenten/alexis-limar.jpg
 foto_positie: center
 foto_alt: Alexis en Jeanne Limar aan het werk in de wijngaard
+lijst_foto: /assets/img/producenten/lijst/domaine-a-limar.jpg
 samenvatting: Alexis en Jeanne Limar maken slanke, fijne champagnes van 3 hectare in de Vallée de la Marne en Mailly-Champagne.
 druiven:
 hectare: "3"

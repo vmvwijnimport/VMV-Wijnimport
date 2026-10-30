@@ -6,6 +6,7 @@ plaats: Aÿ-Champagne
 foto: /assets/img/producenten/julien-henin.jpg
 foto_positie: center 60%
 foto_alt: Julien Hénin loopt tussen zijn wijnstokken
+lijst_foto: /assets/img/producenten/lijst/julien-henin.jpg
 samenvatting: Julien Hénin maakt chardonnay-champagnes op vat van de kleigrond van Cerseuil, in de Vallée de la Marne.
 druiven:
 hectare: ruim 1,5

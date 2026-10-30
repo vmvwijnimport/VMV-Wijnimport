@@ -6,6 +6,7 @@ plaats: Hautvillers
 foto: /assets/img/producenten/champagne-insu.jpg
 foto_positie: center 30%
 foto_alt: De makers van Champagne INSU in hun wijngaard
+lijst_foto: /assets/img/producenten/lijst/champagne-insu.jpg
 samenvatting: "Pierre-Gabriel Diarra maakt sinds 2021 champagne in Hautvillers: elke cuvée van één perceel, één druif en één jaar."
 druiven:
 hectare:
