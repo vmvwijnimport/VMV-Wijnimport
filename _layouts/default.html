@@ -6,7 +6,11 @@
   pagina's komt dan ook niet in de broncode.
 {%- endcomment -%}
 {%- assign wacht = false -%}
-{%- if site.wachtpagina -%}{%- unless site.wachtpagina_open contains page.url -%}{%- assign wacht = true -%}{%- endunless -%}{%- endif %}
+{%- comment -%} Staat /producenten/ open, dan ook de pagina van elke wijnmaker. {%- endcomment -%}
+{%- if site.wachtpagina -%}{%- assign wacht = true -%}
+  {%- if site.wachtpagina_open contains page.url -%}{%- assign wacht = false -%}
+  {%- elsif page.collection == "producenten" and site.wachtpagina_open contains "/producenten/" -%}{%- assign wacht = false -%}{%- endif -%}
+{%- endif %}
 <head>
 {% include head.html %}
 </head>
