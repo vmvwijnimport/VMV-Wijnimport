@@ -15,7 +15,7 @@ sitemap: false
   </header>
   <div class="tekst">
     <p id="bestelling-nummer"></p>
-    <p><a href="{{ '/hedonist/' | relative_url }}">Terug naar Hedonist</a></p>
+    <p><a id="bestelling-terug" href="{{ '/hedonist/' | relative_url }}">Terug naar Hedonist</a></p>
     <p class="contactregel">Vragen over je bestelling? <a href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">Stuur ons een WhatsApp</a> of mail naar <a href="mailto:{{ site.email }}">{{ site.email }}</a>.</p>
   </div>
 </section>
@@ -35,18 +35,27 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
   nummer.textContent = "Bestelnummer: " + betaling.bestelnummer;
+  // Kerstpakket (assets/js/kerst.js): eigen mandje, levering en terug-link
+  var kerst = betaling.soort === "kerst";
+  var mandje = kerst ? "vmv-kerst-mandje" : "vmv-hedonist-mandje";
+  if (kerst) {
+    levering = betaling.levering || "";
+    var terug = document.getElementById("bestelling-terug");
+    terug.href = {{ '/kerst/' | relative_url | jsonify }};
+    terug.textContent = "Terug naar het kerstpakket";
+  }
 
   fetch(koppeling.replace(/\/$/, "") + "/status?id=" + encodeURIComponent(betaling.id))
     .then(function (r) { return r.json(); })
     .then(function (s) {
       if (s.status === "paid") {
         kop.textContent = "Bedankt voor je bestelling";
-        tekst.textContent = "Je betaling is gelukt. Je ontvangt een factuur per mail. De verwachte levering is in " + levering + ".";
-        try { localStorage.removeItem("vmv-hedonist-mandje"); sessionStorage.removeItem("vmv-betaling"); } catch (e) {}
+        tekst.textContent = "Je betaling is gelukt. Je ontvangt een factuur per mail." + (!levering ? "" : kerst ? " Levering " + levering + "." : " De verwachte levering is in " + levering + ".");
+        try { localStorage.removeItem(mandje); sessionStorage.removeItem("vmv-betaling"); } catch (e) {}
       } else if (s.status === "open" || s.status === "pending") {
         kop.textContent = "Bedankt, je betaling is nog niet binnen";
         tekst.textContent = "Betaal je via een bankoverschrijving? Dan verwerken we je bestelling zodra het bedrag op onze rekening staat. De betaalgegevens staan in de mail van Mollie.";
-        try { localStorage.removeItem("vmv-hedonist-mandje"); } catch (e) {}
+        try { localStorage.removeItem(mandje); } catch (e) {}
       } else {
         kop.textContent = "Je betaling is niet gelukt";
         tekst.textContent = "Er is niets afgeschreven. Je winkelmandje staat nog klaar, dus je kunt het opnieuw proberen.";

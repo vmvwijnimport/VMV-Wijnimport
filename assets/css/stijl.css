@@ -1134,6 +1134,74 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   body.drukt-prijslijst .prijslijst__wijnen li { font-size: 10.5pt; padding: 5px 0; }
   body.drukt-prijslijst * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+/* ---------- Kerstpakketten (/kerst/) ---------- */
+.kerst .mandje { background: var(--champagne-licht); }
+.kerst__gesloten { max-width: var(--kolom); }
+.kerst__knoppen { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-3); }
+.kerst__pakket { margin-bottom: var(--s-8); }
+.kerst__pakketkop, .kerst__extra { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--s-4); }
+.kerst__pakketkop { margin-bottom: var(--s-3); }
+.kerst__pakketkop h2 { margin: 0 0 var(--s-1); }
+.kerst__omschrijving { margin: 0; max-width: 34rem; }
+.kerst__koop { display: flex; flex-direction: column; align-items: flex-end; gap: var(--s-1); flex: none; }
+.kerst__prijs { margin: 0; font-size: var(--fs-h3); font-weight: 300; color: var(--zwart); white-space: nowrap; }
+.kerst__nog { margin: 0; font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.kerst__wijnen { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--zwart); }
+.kerst__producent { color: var(--zwart); font-weight: 500; }
+.kerst__extras h2 { margin: 0 0 var(--s-3); }
+.kerst__extra { padding: var(--s-3) 0; border-top: 1px solid var(--zwart); }
+.kerst__extra h3 { display: flex; align-items: center; gap: var(--s-1); margin: 0 0 var(--s-1); font-size: var(--fs-h3); font-weight: 300; }
+@media (max-width: 36rem) {
+  .kerst__pakketkop, .kerst__extra { flex-direction: column; gap: var(--s-2); }
+  .kerst__koop { flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+}
+/* Backoffice: kerstpakketten */
+.beheer__kerst { margin: var(--sectie) 0 var(--s-6); }
+.beheer__kerst .knop { margin-top: var(--s-2); }
+.beheer__pakketwijnen { margin: 0 0 var(--s-2); padding: 0; list-style: none; counter-reset: pakketwijn; }
+.beheer__pakketwijn {
+  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr) minmax(0, 0.8fr) auto; gap: var(--s-2);
+  align-items: end; padding: var(--s-2) 0; border-bottom: 1px solid var(--lijn);
+}
+.beheer__pakketwijn .veld { margin: 0; }
+.beheer__pakketwijn .bestel__terug { justify-self: start; margin: 0 0 14px; }
+@media (max-width: 56rem) { .beheer__pakketwijn { grid-template-columns: 1fr; align-items: start; } }
+
+/* Kaartje bij een kerstpakket: A5 (148 × 210 mm), op het scherm op ware grootte.
+   Past de tekst niet, dan maakt horeca-beheer.js de letters kleiner (--schaal). */
+.kaartjes { display: grid; gap: var(--s-4); margin-top: var(--s-3); }
+.kaartje {
+  --schaal: 1;
+  display: flex; flex-direction: column; box-sizing: border-box; width: 148mm; height: 210mm; overflow: hidden;
+  padding: 11mm 12mm 9mm; border: 1px solid var(--lijn); background: var(--wit); color: var(--tekst);
+  font-size: calc(10pt * var(--schaal));
+}
+.kaartje__kop { padding-bottom: 4mm; border-bottom: 1px solid var(--zwart); }
+.kaartje__logo { display: block; width: 38mm; height: auto; }
+.kaartje__boodschap { margin: 1.4em 0 0; font-family: var(--font-tekst); font-style: italic; font-size: 1.15em; line-height: 1.4; color: var(--zwart); white-space: pre-line; }
+.kaartje__titel { margin: 1em 0 0; font-size: 1.8em; font-weight: 300; line-height: 1.15; color: var(--zwart); }
+.kaartje__intro { margin: 0.3em 0 0; font-family: var(--font-tekst); font-size: 1em; line-height: 1.4; }
+.kaartje__wijnen { flex: 1; margin: 0.8em 0 0; padding: 0; list-style: none; }
+.kaartje__wijn { display: grid; grid-template-columns: 0.8em minmax(0, 1fr); gap: 0.9em; padding: 0.6em 0; border-bottom: 1px solid var(--lijn); }
+.kaartje__wijn .stip { --stip: 0.8em; margin-top: 0.35em; }
+.kaartje__naam { margin: 0; font-size: 1em; font-weight: 400; line-height: 1.35; color: var(--zwart); }
+.kaartje__naam strong { font-weight: 500; }
+.kaartje__meta { margin-left: 0.5em; font-size: 0.85em; color: var(--tekst-zacht); }
+.kaartje__tekst { margin: 0.15em 0 0; font-family: var(--font-tekst); font-size: 0.95em; line-height: 1.38; }
+.kaartje__bij { margin: 0.15em 0 0; font-size: 0.85em; color: var(--tekst); }
+.kaartje__voet { margin: 0.8em 0 0; font-size: 0.85em; color: var(--tekst-zacht); }
+@media print {
+  body.drukt-kaartje { background: var(--wit); }
+  body.drukt-kaartje .naar-inhoud, body.drukt-kaartje .kop, body.drukt-kaartje .voet, body.drukt-kaartje .leeftijd,
+  body.drukt-kaartje .pagina__kop, body.drukt-kaartje .horeca__balk, body.drukt-kaartje .tabbladen,
+  body.drukt-kaartje .beheer__prijsbalk, body.drukt-kaartje .beheer__lijstuitleg,
+  body.drukt-kaartje .beheer__terug { display: none !important; }
+  body.drukt-kaartje .pagina { padding: 0; margin: 0; max-width: none; }
+  body.drukt-kaartje .kaartjes { display: block; margin: 0; }
+  body.drukt-kaartje .kaartje { border: 0; break-after: page; page-break-after: always; }
+  body.drukt-kaartje .kaartje:last-child { break-after: auto; page-break-after: auto; }
+  body.drukt-kaartje * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
 /* Backoffice: overzicht */
 .beheer__overzicht { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-6); align-items: start; }
 .beheer__overzicht .beheer__producent { margin-top: 0; }

@@ -64,6 +64,17 @@ Zodra Mollie je account heeft goedgekeurd, vervang je bij Cloudflare `MOLLIE_API
 - **Maak de factuur in e-Boekhouden.** Zo blijft je nummering kloppen. De website en Mollie maken geen facturen.
 - Bij een bankoverschrijving staat de betaling in Mollie op **open** tot het geld binnen is.
 
+## Kerstpakketten
+
+De kerstpagina (/kerst/) rekent af via dezelfde Worker. Eenmalig instellen:
+
+1. **Supabase → SQL Editor**: plak de volledige inhoud van `supabase/019-kerstpakketten.sql` en klik op **Run**.
+2. **Cloudflare → vmv-betalen → Edit code**: vervang alle code door de nieuwe inhoud van `betalen/worker.js` en klik op **Deploy**. De Worker gebruikt de geheimen die er al staan; `HEDONIST_SLEUTEL` is nu verplicht.
+3. **Backoffice → Kerst**: maak een pakket (kies de wijnen, vul de prijs in), voeg eventueel een extra toe (zoals de ratafia), vul bij **Instellingen kerst** de verzend- en bezorgkosten in en zet **Bestellen staat open** aan.
+4. Doe een testbestelling met een klein bedrag, of tijdelijk met de testsleutel van Mollie.
+
+Na een betaling krijgen de klant en info@ een mail, en staat de bestelling in de backoffice onder **Kerst**. Daar druk je per bestelling het kaartje af (A5, met de boodschap van de klant) en zet je de bestelling op geleverd. Zet **Bestellen staat open** na de feestdagen weer uit.
+
 ## Adres op de website
 
 Voor verkoop aan consumenten op afstand moet je volgens de wet je bezoekadres vermelden. Wil je je thuisadres niet tonen, dan zijn er twee gebruikelijke oplossingen:

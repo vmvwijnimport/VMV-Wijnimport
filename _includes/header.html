@@ -66,6 +66,9 @@
             <p class="menu__voet"><a class="knop knop--secundair" href="{{ '/producenten/' | relative_url }}">Alle producenten bekijken</a></p>
           </div>
         </li>
+        {%- if site.kerst_in_menu %}
+        <li><a href="{{ '/kerst/' | relative_url }}"{% if page.url == '/kerst/' %} aria-current="page"{% endif %}>Kerstpakket</a></li>
+        {%- endif %}
         <li><a href="{{ '/hedonist/' | relative_url }}"{% if page.url == '/hedonist/' %} aria-current="page"{% endif %}>Hedonist glas</a></li>
         <li><a href="{{ '/contact/' | relative_url }}"{% if page.url == '/contact/' %} aria-current="page"{% endif %}>Contact</a></li>
         <li><a href="{{ '/horeca/' | relative_url }}"{% if page.url == '/horeca/' %} aria-current="page"{% endif %}>Horeca login</a></li>

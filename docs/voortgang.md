@@ -101,6 +101,15 @@ Bijgewerkt: 19 oktober 2026
 
 De livegang voorbereiden met de eigenaar: Resend, Confirm email aan, FormSubmit activeren, samen een echte bestelling met mail testen, de testaccounts en testbestellingen verwijderen, de reservebranch wissen. Daarna mergen naar main, alleen met uitdrukkelijk akkoord.
 
+## Kerstpakketten (31 okt), wens van de eigenaar, op de branch `kerst` (nog niet live)
+
+- **Keuzes eigenaar:** één doos van 6 flessen (3 champagnes, 1 wit, 2 rood); direct online betalen via Mollie; de klant kiest zelf: verzenden, bezorgen in Amsterdam of ophalen bij Oocker; een kaartje met informatie over elke wijn, af te drukken uit de backoffice. De ratafia van Sacy als extra erbij.
+- **Pagina /kerst/** (`kerst.html`, `assets/js/kerst.js`): het aanbod, de prijzen (incl. btw) en de kosten komen uit de database via `kerst_aanbod()`; geen bedragen in de repo. Winkelmandje, keuze levering, boodschap voor op het kaartje, vinkje 18+ en akkoord met de voorwaarden. "Kerstpakket" in het menu met `kerst_in_menu` in `_config.yml`. Staat bestellen dicht, dan toont de pagina "binnenkort".
+- **Database** (`supabase/019-kerstpakketten.sql`): pakketten, wijnen per pakket (met tekst en "past bij" voor het kaartje), extra's, instellingen en bestellingen. Alleen beheerders lezen; schrijven via functies. Voorraad per pakket telt betaalde bestellingen.
+- **Betaal-Worker:** `/kerst/betaling` rekent alles opnieuw uit uit de database, legt de bestelling vast (`kerst_vastleggen`, met de Hedonist-sleutel) en maakt de Mollie-betaling. Na betaling (`kerst_betaald`) een mail naar de klant en naar info@.
+- **Backoffice, tabblad Kerst:** bestellingen (te leveren, geleverd), pakketten samenstellen, extra's, instellingen (open/dicht, tekst, levering, verzendkosten per pakket, bezorgkosten Amsterdam, welke leveringen) en kaartjes afdrukken op A5. Is de tekst van een wijn leeg, dan komt de korte tekst over de producent van de site op het kaartje. De letters worden vanzelf kleiner als het niet past.
+- Getest met nepgegevens (pagina, backoffice, kaartje als PDF, prijsberekening van de Worker). ✔ **Nog door de eigenaar:** script 019 uitvoeren, de Worker opnieuw plakken, pakket en kosten invullen (zie `betalen/INSTELLEN.md`, Kerstpakketten), de teksten voor de kaartjes nalopen, en de algemene voorwaarden laten aanvullen voor de verkoop van wijn (18+, verzendkosten).
+
 ## Zo kun je terug
 
 - **Site van vóór het horecaportaal:** de tag `voor-horeca-portaal`.

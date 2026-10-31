@@ -81,6 +81,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
       <a href="#klanten" data-tab="klanten">Klanten <span data-teller="klanten"></span></a>
       <a href="#prijslijst" data-tab="prijslijst">Prijslijst</a>
       <a href="#hedonist" data-tab="hedonist">Hedonist <span data-teller="hedonist"></span></a>
+      <a href="#kerst" data-tab="kerst">Kerst <span data-teller="kerst"></span></a>
       <a href="#overzicht" data-tab="overzicht">Overzicht</a>
       <a href="#nieuwsmail" data-tab="nieuwsmail">Nieuwsmail</a>
     </nav>
@@ -220,6 +221,187 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
       <p class="formulier__status" data-veld="hedonistmelding" role="status" aria-live="polite"></p>
       <div class="beheer__hedonist" data-veld="hedonistlijst"></div>
       <p class="beheer__leeg" data-veld="hedonistleeg" hidden></p>
+    </div>
+
+    {%- comment -%} Kerstpakketten (supabase/019): bestellingen, pakketten, extra's en instellingen {%- endcomment -%}
+    <div data-scherm="kerst" hidden>
+      <div class="regiokeuze beheer__filter" role="group" aria-label="Toon kerstbestellingen">
+        <button type="button" data-kfilter="te_leveren" aria-pressed="true">Te leveren</button>
+        <button type="button" data-kfilter="geleverd" aria-pressed="false">Geleverd</button>
+        <button type="button" data-kfilter="" aria-pressed="false">Alle</button>
+      </div>
+      <p class="beheer__klein beheer__lijstuitleg">Betaalde bestellingen van de kerstpagina. Klik op een bestelling voor de gegevens en het kaartje. Facturen maak je zoals altijd in e-Boekhouden.</p>
+      <p class="formulier__status" data-veld="kerstmelding" role="status" aria-live="polite"></p>
+      <div class="beheer__hedonist" data-veld="kerstlijst"></div>
+      <p class="beheer__leeg" data-veld="kerstleeg" hidden></p>
+
+      <div class="beheer__overzicht beheer__kerst">
+        <section>
+          <h2 class="beheer__producent">Pakketten</h2>
+          <ul class="beheer__mini" data-veld="kerstpakketten"></ul>
+          <a class="knop knop--secundair" href="#pakket-nieuw">Nieuw pakket</a>
+        </section>
+        <section>
+          <h2 class="beheer__producent">Extra's</h2>
+          <p class="beheer__klein">Iets wat klanten bij een pakket kunnen bestellen, zoals een ratafia.</p>
+          <ul class="beheer__mini" data-veld="kerstextras"></ul>
+          <a class="knop knop--secundair" href="#extra-nieuw">Nieuwe extra</a>
+        </section>
+      </div>
+
+      <form class="formulier beheer__instellingen" id="kerstinstellingen" novalidate>
+        <h2>Instellingen kerst</h2>
+        <label class="akkoord"><input type="checkbox" name="open"> Bestellen staat open op de <a href="{{ '/kerst/' | relative_url }}" target="_blank" rel="noopener">kerstpagina</a></label>
+        <div class="veld">
+          <label for="ki-intro">Tekst bovenaan de kerstpagina <span class="veld__optioneel">(leeg = de standaardtekst)</span></label>
+          <textarea id="ki-intro" name="intro" rows="3" maxlength="1000"></textarea>
+        </div>
+        <div class="beheer__velden">
+          <div class="veld">
+            <label for="ki-levering">Levering <span class="veld__optioneel">(bijv. "vanaf 15 december")</span></label>
+            <input id="ki-levering" name="levering" maxlength="200" autocomplete="off">
+          </div>
+          <div class="veld">
+            <label for="ki-verzend">Verzendkosten per pakket <span class="veld__optioneel">(incl. btw, 0 = gratis)</span></label>
+            <input id="ki-verzend" name="verzendkosten" type="text" inputmode="decimal" autocomplete="off" required>
+          </div>
+          <div class="veld">
+            <label for="ki-ams">Bezorgen in Amsterdam, per bestelling <span class="veld__optioneel">(incl. btw, 0 = gratis)</span></label>
+            <input id="ki-ams" name="bezorgen_amsterdam" type="text" inputmode="decimal" autocomplete="off" required>
+          </div>
+        </div>
+        <fieldset class="beheer__ontvangers">
+          <legend>Klanten kunnen kiezen uit</legend>
+          <label class="akkoord"><input type="checkbox" name="verzenden"> Verzenden in Nederland</label>
+          <label class="akkoord"><input type="checkbox" name="amsterdam"> Bezorgen in Amsterdam</label>
+          <label class="akkoord"><input type="checkbox" name="ophalen"> Ophalen bij Oocker (gratis)</label>
+        </fieldset>
+        <button class="knop knop--primair" type="submit">Instellingen opslaan</button>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+
+    {%- comment -%} Eén kerstpakket samenstellen {%- endcomment -%}
+    <div data-scherm="pakket" hidden>
+      <p class="beheer__terug"><a href="#kerst">Terug naar kerst</a></p>
+      <h2 class="beheer__nummer" data-veld="pakketkop" tabindex="-1"></h2>
+      <form class="formulier beheer__wijnform" id="pakketformulier" novalidate>
+        <div class="beheer__velden">
+          <div class="veld">
+            <label for="pk-naam">Naam</label>
+            <input id="pk-naam" name="naam" maxlength="200" autocomplete="off" required aria-describedby="pk-naam-fout">
+            <p class="veld__fout" id="pk-naam-fout" hidden></p>
+          </div>
+          <div class="veld">
+            <label for="pk-prijs">Prijs per pakket (incl. btw)</label>
+            <input id="pk-prijs" name="prijs" type="text" inputmode="decimal" autocomplete="off" required aria-describedby="pk-prijs-fout">
+            <p class="veld__fout" id="pk-prijs-fout" hidden></p>
+          </div>
+          <div class="veld">
+            <label for="pk-voorraad">Aantal pakketten <span class="veld__optioneel">(leeg = geen maximum)</span></label>
+            <input id="pk-voorraad" name="voorraad" type="number" min="0" step="1" inputmode="numeric" aria-describedby="pk-voorraad-uitleg">
+            <p class="beheer__klein" id="pk-voorraad-uitleg" data-veld="pakketverkocht"></p>
+          </div>
+          <div class="veld">
+            <label for="pk-volgorde">Volgorde op de pagina <span class="veld__optioneel">(laag = boven)</span></label>
+            <input id="pk-volgorde" name="volgorde" type="number" step="1" inputmode="numeric">
+          </div>
+        </div>
+        <div class="veld">
+          <label for="pk-omschrijving">Omschrijving op de kerstpagina</label>
+          <textarea id="pk-omschrijving" name="omschrijving" rows="2" maxlength="1000"></textarea>
+        </div>
+        <label class="akkoord"><input type="checkbox" name="actief"> Zichtbaar op de kerstpagina</label>
+
+        <h3 class="beheer__tussenkop">Wijnen in het pakket</h3>
+        <p class="beheer__klein">Kies de wijnen uit de prijslijst. De tekst voor het kaartje mag je leeg laten; dan komt de korte tekst over de producent van de site erop.</p>
+        <ol class="beheer__pakketwijnen" data-veld="pakketwijnen"></ol>
+        <button class="knop knop--secundair" type="button" data-actie="wijn-erbij">Wijn toevoegen</button>
+
+        <h3 class="beheer__tussenkop">Kaartje</h3>
+        <div class="beheer__velden">
+          <div class="veld">
+            <label for="pk-kaartkop">Kop op het kaartje <span class="veld__optioneel">(leeg = de naam)</span></label>
+            <input id="pk-kaartkop" name="kaart_kop" maxlength="200" autocomplete="off">
+          </div>
+        </div>
+        <div class="veld">
+          <label for="pk-kaarttekst">Inleiding op het kaartje <span class="veld__optioneel">(niet verplicht)</span></label>
+          <textarea id="pk-kaarttekst" name="kaart_tekst" rows="2" maxlength="1000"></textarea>
+        </div>
+        <div class="beheer__knoppen">
+          <button class="knop knop--primair" type="submit" data-veld="pakketknop">Opslaan</button>
+          <a class="knop knop--secundair" data-veld="pakketkaart" href="#kerst">Kaartje bekijken</a>
+        </div>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+      </form>
+      <form class="beheer__formulier beheer__verwijderen" data-verwijder="pakket" novalidate>
+        <p class="beheer__klein">Pakket verwijderen? Bestellingen die al betaald zijn, blijven bewaard. Dit kun je niet ongedaan maken.</p>
+        <button class="knop knop--secundair" type="submit">Pakket verwijderen</button>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+
+    {%- comment -%} Eén extra (bijv. een ratafia) {%- endcomment -%}
+    <div data-scherm="extra" hidden>
+      <p class="beheer__terug"><a href="#kerst">Terug naar kerst</a></p>
+      <h2 class="beheer__nummer" data-veld="extrakop" tabindex="-1"></h2>
+      <form class="formulier beheer__wijnform" id="extraformulier" novalidate>
+        <div class="beheer__velden">
+          <div class="veld">
+            <label for="ex-naam">Naam</label>
+            <input id="ex-naam" name="naam" maxlength="200" autocomplete="off" required aria-describedby="ex-naam-fout">
+            <p class="veld__fout" id="ex-naam-fout" hidden></p>
+          </div>
+          <div class="veld">
+            <label for="ex-prijs">Prijs per stuk (incl. btw)</label>
+            <input id="ex-prijs" name="prijs" type="text" inputmode="decimal" autocomplete="off" required aria-describedby="ex-prijs-fout">
+            <p class="veld__fout" id="ex-prijs-fout" hidden></p>
+          </div>
+          <div class="veld">
+            <label for="ex-product">Wijn uit de prijslijst <span class="veld__optioneel">(voor het kaartje)</span></label>
+            <select id="ex-product" name="product_id"></select>
+          </div>
+          <div class="veld">
+            <label for="ex-max">Maximum per bestelling <span class="veld__optioneel">(leeg = geen)</span></label>
+            <input id="ex-max" name="max_per_bestelling" type="number" min="1" step="1" inputmode="numeric">
+          </div>
+          <div class="veld">
+            <label for="ex-volgorde">Volgorde op de pagina <span class="veld__optioneel">(laag = boven)</span></label>
+            <input id="ex-volgorde" name="volgorde" type="number" step="1" inputmode="numeric">
+          </div>
+        </div>
+        <div class="veld">
+          <label for="ex-omschrijving">Omschrijving op de kerstpagina</label>
+          <textarea id="ex-omschrijving" name="omschrijving" rows="2" maxlength="1000"></textarea>
+        </div>
+        <div class="veld">
+          <label for="ex-kaarttekst">Tekst op het kaartje <span class="veld__optioneel">(leeg = de korte tekst over de producent)</span></label>
+          <textarea id="ex-kaarttekst" name="kaart_tekst" rows="2" maxlength="1000"></textarea>
+        </div>
+        <div class="veld">
+          <label for="ex-pastbij">Past bij <span class="veld__optioneel">(niet verplicht)</span></label>
+          <input id="ex-pastbij" name="past_bij" maxlength="200" autocomplete="off" placeholder="Bijv. kaas">
+        </div>
+        <label class="akkoord"><input type="checkbox" name="actief"> Zichtbaar op de kerstpagina</label>
+        <button class="knop knop--primair" type="submit" data-veld="extraknop">Opslaan</button>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+      </form>
+      <form class="beheer__formulier beheer__verwijderen" data-verwijder="extra" novalidate>
+        <p class="beheer__klein">Extra verwijderen? Bestellingen die al betaald zijn, blijven bewaard. Dit kun je niet ongedaan maken.</p>
+        <button class="knop knop--secundair" type="submit">Extra verwijderen</button>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+
+    {%- comment -%} Kaartjes afdrukken: van een pakket, of van een bestelling (met de boodschap van de klant) {%- endcomment -%}
+    <div data-scherm="kaartje" hidden>
+      <p class="beheer__terug"><a href="#kerst">Terug naar kerst</a></p>
+      <div class="beheer__prijsbalk">
+        <button class="knop knop--primair" type="button" data-actie="kaart-afdrukken">Afdrukken</button>
+      </div>
+      <p class="beheer__klein beheer__lijstuitleg">Eén kaartje per pakket, op A5. Kies bij afdrukken het papierformaat A5 (of A4 en knip het bij).</p>
+      <div class="kaartjes" data-veld="kaartjes"></div>
     </div>
 
     {%- comment -%} Nieuwsmail aan horecaklanten: alleen versturen na twee keer klikken {%- endcomment -%}
@@ -498,6 +680,6 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
 </section>
 
 {%- comment -%} Producenten van de site: om bij een nieuwe wijn de regio en de link naar de producentpagina in te vullen {%- endcomment -%}
-<script type="application/json" id="beheer-producenten">[{%- for p in site.producenten -%}{"naam": {{ p.naam | jsonify }}, "regio": {{ p.regio | jsonify }}, "plaats": {{ p.plaats | jsonify }}, "slug": {{ p.slug | jsonify }}}{% unless forloop.last %},{% endunless %}{%- endfor -%}]</script>
+<script type="application/json" id="beheer-producenten">[{%- for p in site.producenten -%}{"naam": {{ p.naam | jsonify }}, "regio": {{ p.regio | jsonify }}, "plaats": {{ p.plaats | jsonify }}, "slug": {{ p.slug | jsonify }}, "samenvatting": {{ p.samenvatting | jsonify }}}{% unless forloop.last %},{% endunless %}{%- endfor -%}]</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="{{ '/assets/js/horeca-beheer.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

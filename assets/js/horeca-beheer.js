@@ -58,7 +58,8 @@
   var TYPE_ZAAK = { restaurant: "Restaurant", bar: "Bar", wijnbar: "Wijnbar", slijterij: "Slijterij", overig: "Overig" };
 
   // ---------- Gegevens ----------
-  var data = { bestellingen: [], klanten: [], inst: null, producten: [], hedonist: [], nieuws: [] };
+  var data = { bestellingen: [], klanten: [], inst: null, producten: [], hedonist: [], nieuws: [],
+               kerst: { inst: null, pakketten: [], wijnen: [], extras: [], bestellingen: [] } };
   var laadAlles = function () {
     return Promise.all([
       db.from("bestellingen")
@@ -68,8 +69,18 @@
       db.from("instellingen").select("*").maybeSingle(),
       db.from("producten").select("*").order("volgorde").order("id"),
       db.from("hedonist_bestellingen").select("*").order("betaald_op", { ascending: false }),
-      db.from("nieuwsbrieven").select("id, verstuurd_op, door, onderwerp, aantal").order("verstuurd_op", { ascending: false })
+      db.from("nieuwsbrieven").select("id, verstuurd_op, door, onderwerp, aantal").order("verstuurd_op", { ascending: false }),
+      // Kerstpakketten (supabase/019); zonder die tabellen werkt de rest gewoon
+      db.from("kerst_instellingen").select("*").maybeSingle(),
+      db.from("kerst_pakketten").select("*").order("volgorde").order("id"),
+      db.from("kerst_pakket_wijnen").select("*").order("volgorde").order("id"),
+      db.from("kerst_extras").select("*").order("volgorde").order("id"),
+      db.from("kerst_bestellingen").select("*").neq("status", "onbetaald").order("betaald_op", { ascending: false })
     ]).then(function (r) {
+      data.kerst = {
+        inst: r[6].error ? null : r[6].data, pakketten: r[7].error ? [] : r[7].data, wijnen: r[8].error ? [] : r[8].data,
+        extras: r[9].error ? [] : r[9].data, bestellingen: r[10].error ? [] : r[10].data, klaar: !r[6].error
+      };
       // De Hedonist-tabel bestaat pas na supabase/015; zonder die tabel werkt de rest gewoon
       r.slice(0, 4).forEach(function (x) { if (x.error) throw x.error; });
       data.hedonist = r[4].error ? [] : r[4].data;
@@ -123,13 +134,15 @@
   var route = function () {
     melding(veld("lijstmelding"));
     var h = location.hash.slice(1) || "bestellingen";
-    var m = /^(bestelling|klant|wijn|lijst)-(.+)$/.exec(h);
+    var m = /^(bestelling|klant|wijn|lijst|pakket|extra|kaartje)-(.+)$/.exec(h);
     // #prijslijst (en het oude #wijnen) is het overzicht van de wijnen met hun prijzen
-    var scherm = m ? m[1] : h === "prijslijst" || h === "wijnen" ? "wijnen" : (["klanten", "overzicht", "hedonist", "nieuwsmail", "koppelen"].indexOf(h) >= 0 ? h : "bestellingen");
+    var scherm = m ? m[1] : h === "prijslijst" || h === "wijnen" ? "wijnen" : (["klanten", "overzicht", "hedonist", "kerst", "nieuwsmail", "koppelen"].indexOf(h) >= 0 ? h : "bestellingen");
     schermen.forEach(function (s) { s.hidden = s.dataset.scherm !== scherm; });
-    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : ["wijn", "wijnen", "lijst", "koppelen"].indexOf(scherm) >= 0 ? "prijslijst" : ["overzicht", "hedonist", "nieuwsmail"].indexOf(scherm) >= 0 ? scherm : "bestellingen";
+    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : ["wijn", "wijnen", "lijst", "koppelen"].indexOf(scherm) >= 0 ? "prijslijst" : ["overzicht", "hedonist", "nieuwsmail"].indexOf(scherm) >= 0 ? scherm : ["kerst", "pakket", "extra", "kaartje"].indexOf(scherm) >= 0 ? "kerst" : "bestellingen";
     // Bij afdrukken alleen de prijslijst (zie stijl.css, @media print)
     document.body.classList.toggle("drukt-prijslijst", scherm === "lijst");
+    document.body.classList.toggle("drukt-kaartje", scherm === "kaartje");
+    kaartPapier(scherm === "kaartje");
     pagina.querySelectorAll("[data-tab]").forEach(function (a) {
       if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
@@ -140,6 +153,10 @@
     if (scherm === "wijn") toonWijn(m[2]);
     if (scherm === "overzicht") toonOverzicht();
     if (scherm === "hedonist") toonHedonist();
+    if (scherm === "kerst") toonKerst();
+    if (scherm === "pakket") toonPakket(m[2]);
+    if (scherm === "extra") toonExtra(m[2]);
+    if (scherm === "kaartje") toonKaartjes(m[2]);
     if (scherm === "nieuwsmail") toonNieuws();
     if (scherm === "koppelen") toonKoppelen();
     if (scherm === "lijst") { lijstsoort = m[2] === "particulier" ? "particulier" : "horeca"; toonPrijslijst(); }
@@ -153,6 +170,8 @@
     pagina.querySelector("[data-teller=klanten]").textContent = aanvragen ? "(" + aanvragen + (aanvragen === 1 ? " aanvraag)" : " aanvragen)") : "";
     var teLeveren = data.hedonist.filter(function (h) { return h.status === "te_leveren"; }).length;
     pagina.querySelector("[data-teller=hedonist]").textContent = teLeveren ? "(" + teLeveren + " te leveren)" : "";
+    var kerstLeveren = data.kerst.bestellingen.filter(function (k) { return k.status === "te_leveren"; }).length;
+    pagina.querySelector("[data-teller=kerst]").textContent = kerstLeveren ? "(" + kerstLeveren + " te leveren)" : "";
   };
 
   // ---------- Lijsten ----------
@@ -1752,6 +1771,483 @@
         codeForm.code.select();
       });
   });
+
+  // ---------- Kerstpakketten (supabase/019-kerstpakketten.sql) ----------
+  // Pakketten samenstellen uit de wijnen in de database, extra's (zoals een ratafia), instellingen,
+  // betaalde bestellingen op geleverd zetten en kaartjes afdrukken. Opslaan gaat via de functies
+  // beheer_kerst_*, die zelf controleren of je beheerder bent.
+  var K = function () { return data.kerst; };
+  var kfilter = "te_leveren";
+  var kerstForm = document.getElementById("kerstinstellingen");
+  var pakketForm = document.getElementById("pakketformulier");
+  var extraForm = document.getElementById("extraformulier");
+  var pakket = null, extra = null;   // wat open staat; null = nieuw
+  var kerstMelding = "";             // melding na opslaan, getoond op het kerstscherm
+
+  var nietKlaar = function () {
+    if (K().klaar) return false;
+    melding(veld("kerstmelding"), "Voer eerst supabase/019-kerstpakketten.sql uit in Supabase.", "fout");
+    return true;
+  };
+  var product = function (id) { return data.producten.filter(function (p) { return p.id === Number(id); })[0]; };
+  var productNaam = function (p) { return p ? p.producent + ", " + wijnNaam(p) : "Wijn bestaat niet meer"; };
+  var siteProducent = function (p) {
+    return p && siteProducenten.filter(function (s) { return s.slug && s.slug === p.producent_slug; })[0];
+  };
+  // Keuzelijst met de wijnen uit de prijslijst, per producent
+  var wijnKeuze = function (keuze, gekozen, leegTekst) {
+    keuze.textContent = "";
+    var leeg = el("option", null, leegTekst);
+    leeg.value = "";
+    keuze.appendChild(leeg);
+    var groepen = {};
+    data.producten.filter(function (p) { return p.soort === "wijn"; })
+      .slice().sort(function (a, b) { return a.producent.localeCompare(b.producent, "nl") || a.naam.localeCompare(b.naam, "nl"); })
+      .forEach(function (p) {
+        if (!groepen[p.producent]) { groepen[p.producent] = el("optgroup"); groepen[p.producent].label = p.producent; keuze.appendChild(groepen[p.producent]); }
+        var o = el("option", null, p.producent + ", " + wijnNaam(p) + (p.actief === false ? " (niet zichtbaar)" : p.beschikbaarheid === "uitverkocht" ? " (uitverkocht)" : ""));
+        o.value = p.id;
+        groepen[p.producent].appendChild(o);
+      });
+    keuze.value = gekozen != null ? String(gekozen) : "";
+  };
+  var verkocht = function (soort, id) {
+    return K().bestellingen.reduce(function (som, b) {
+      return som + (b.regels || []).filter(function (r) { return r.soort === soort && r.id === id; })
+        .reduce(function (s, r) { return s + r.aantal; }, 0);
+    }, 0);
+  };
+
+  // ---------- Kerst: overzicht ----------
+  pagina.querySelectorAll("[data-kfilter]").forEach(function (k) {
+    k.addEventListener("click", function () { kfilter = k.dataset.kfilter; toonKerst(); });
+  });
+  var kerstActie = function (b, status, knop) {
+    var plek = veld("kerstmelding");
+    melding(plek);
+    bezig(knop, "Bezig…");
+    db.rpc("beheer_kerst_bestelling", { bestelling: b.id, status: status })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        b.status = status;
+        b.geleverd_op = status === "geleverd" ? new Date().toISOString() : null;
+        tellers();
+        toonKerst();
+        melding(veld("kerstmelding"), b.bestelnummer + (status === "geleverd" ? " staat op geleverd." : " staat weer op te leveren."), "goed");
+      })
+      .catch(function (err) { bezig(knop); melding(plek, vertaal(err), "fout"); });
+  };
+
+  var toonKerst = function () {
+    if (kerstMelding) { melding(veld("kerstmelding"), kerstMelding, "goed"); kerstMelding = ""; }
+    else melding(veld("kerstmelding"));
+    if (nietKlaar()) return;
+    var namen = { te_leveren: "Te leveren", geleverd: "Geleverd" };
+    pagina.querySelectorAll("[data-kfilter]").forEach(function (k) {
+      var f = k.dataset.kfilter;
+      var n = K().bestellingen.filter(function (b) { return !f || b.status === f; }).length;
+      k.textContent = (f ? namen[f] : "Alle") + " (" + n + ")";
+      k.setAttribute("aria-pressed", f === kfilter ? "true" : "false");
+    });
+
+    var doel = veld("kerstlijst");
+    doel.textContent = "";
+    var gekozen = K().bestellingen.filter(function (b) { return !kfilter || b.status === kfilter; });
+    gekozen.forEach(function (b) {
+      var d = el("details", "bestelling");
+      var s = el("summary", "bestelling__kop beheer__hkop");
+      var c1 = el("span", "beheer__cel");
+      c1.appendChild(el("strong", null, b.bestelnummer));
+      c1.appendChild(el("small", null, datum(b.betaald_op, true)));
+      var c2 = el("span", "beheer__cel");
+      c2.appendChild(el("span", null, b.naam));
+      c2.appendChild(el("small", null, b.bestelling));
+      var c3 = el("span", "beheer__cel beheer__labels");
+      if (b.status === "te_leveren") c3.appendChild(el("span", "label", b.bezorging || "Te leveren"));
+      c3.appendChild(el("span", "label label--" + (b.status === "geleverd" ? "geleverd" : "ontvangen"), namen[b.status]));
+      s.appendChild(c1); s.appendChild(c2); s.appendChild(c3);
+      s.appendChild(el("span", "beheer__cel beheer__bedrag", euro(b.totaal)));
+      d.appendChild(s);
+      var dl = el("dl", "beheer__gegevens beheer__gegevens--breed");
+      var adres = el("a", null, b.adres);
+      adres.href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(b.adres);
+      adres.target = "_blank"; adres.rel = "noopener";
+      var mail = el("a", null, b.email); mail.href = "mailto:" + b.email;
+      var tel = el("a", null, b.telefoon); tel.href = "tel:" + String(b.telefoon || "").replace(/[^\d+]/g, "");
+      [
+        ["Bestelling", b.bestelling], ["Bezorging", b.bezorging],
+        ["Adres", b.adres && b.adres !== "Ophalen" ? adres : ""],
+        ["E-mail", b.email ? mail : ""], ["Telefoon", b.telefoon ? tel : ""],
+        ["Op het kaartje", b.boodschap || ""], ["Opmerking", b.opmerking || ""],
+        ["Bezorgkosten", b.verzending != null ? euro(b.verzending) : ""],
+        ["Totaal incl. btw", euro(b.totaal)],
+        ["Betaald", datum(b.betaald_op) + ({ ideal: ", iDEAL", banktransfer: ", overschrijving" }[b.methode] || "")],
+        ["Geleverd", b.geleverd_op ? datum(b.geleverd_op) : ""],
+        ["Mollie", b.mollie_id]
+      ].forEach(function (p) {
+        if (!p[1]) return;
+        var rij = el("div");
+        rij.appendChild(el("dt", null, p[0]));
+        var dd = el("dd");
+        if (typeof p[1] === "string") dd.textContent = p[1]; else dd.appendChild(p[1]);
+        rij.appendChild(dd);
+        dl.appendChild(rij);
+      });
+      d.appendChild(dl);
+      var vak = el("div", "beheer__hknop beheer__knoppen");
+      var kaart = el("a", "knop knop--secundair", "Kaartje afdrukken");
+      kaart.href = "#kaartje-b" + b.id;
+      var knop = el("button", "knop " + (b.status === "te_leveren" ? "knop--primair" : "knop--secundair"),
+        b.status === "te_leveren" ? (b.adres === "Ophalen" ? "Opgehaald" : "Op geleverd zetten") : "Terug naar te leveren");
+      knop.type = "button";
+      knop.addEventListener("click", function () { kerstActie(b, b.status === "te_leveren" ? "geleverd" : "te_leveren", knop); });
+      vak.appendChild(knop);
+      vak.appendChild(kaart);
+      d.appendChild(vak);
+      doel.appendChild(d);
+    });
+    var leeg = veld("kerstleeg");
+    leeg.hidden = gekozen.length > 0;
+    leeg.textContent = kfilter === "te_leveren" ? "Er zijn geen kerstbestellingen om te leveren." : "Geen kerstbestellingen.";
+
+    // Pakketten en extra's
+    var lijst = function (doelVeld, items, soort, leegTekst) {
+      var ul = veld(doelVeld);
+      ul.textContent = "";
+      if (!items.length) { ul.appendChild(el("li", null, leegTekst)); return; }
+      items.forEach(function (x) {
+        var li = el("li");
+        var a = el("a", null, x.naam);
+        a.href = "#" + soort + "-" + x.id;
+        li.appendChild(a);
+        var info = [euro(x.prijs)];
+        if (soort === "pakket") {
+          var n = K().wijnen.filter(function (w) { return w.pakket_id === x.id; }).length;
+          info.push(n + (n === 1 ? " wijn" : " wijnen"));
+          info.push(verkocht("pakket", x.id) + (x.voorraad != null ? " van " + x.voorraad : "") + " verkocht");
+        } else info.push(verkocht("extra", x.id) + " verkocht");
+        if (!x.actief) info.push("niet zichtbaar");
+        li.appendChild(el("span", null, info.join(", ")));
+        ul.appendChild(li);
+      });
+    };
+    lijst("kerstpakketten", K().pakketten, "pakket", "Nog geen pakketten.");
+    lijst("kerstextras", K().extras, "extra", "Nog geen extra's.");
+
+    var i = K().inst || {};
+    kerstForm.open.checked = !!i.open;
+    kerstForm.intro.value = i.intro || "";
+    kerstForm.levering.value = i.levering || "";
+    kerstForm.verzendkosten.value = kaal(i.verzendkosten || 0);
+    kerstForm.bezorgen_amsterdam.value = kaal(i.bezorgen_amsterdam || 0);
+    ["verzenden", "amsterdam", "ophalen"].forEach(function (n) { kerstForm[n].checked = i[n] !== false; });
+    melding(kerstForm.querySelector(".formulier__status"));
+  };
+
+  kerstForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var status = kerstForm.querySelector(".formulier__status");
+    var verzend = getal(kerstForm.verzendkosten.value), ams = getal(kerstForm.bezorgen_amsterdam.value);
+    if (isNaN(verzend) || isNaN(ams)) { melding(status, "Vul bij verzenden en bezorgen een bedrag in (0 = gratis).", "fout"); return; }
+    var knop = kerstForm.querySelector("button[type=submit]");
+    bezig(knop, "Opslaan…");
+    db.rpc("beheer_kerst_instellingen", { inst: {
+      open: kerstForm.open.checked, intro: kerstForm.intro.value, levering: kerstForm.levering.value,
+      verzenden: kerstForm.verzenden.checked, amsterdam: kerstForm.amsterdam.checked, ophalen: kerstForm.ophalen.checked,
+      verzendkosten: String(verzend), bezorgen_amsterdam: String(ams)
+    } })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        return laadAlles();
+      })
+      .then(function () { tellers(); toonKerst(); melding(kerstForm.querySelector(".formulier__status"), "Opgeslagen.", "goed"); })
+      .catch(function (err) { melding(status, vertaal(err), "fout"); })
+      .finally(function () { bezig(knop); });
+  });
+
+  // ---------- Kerst: één pakket ----------
+  var veldFout = function (form, naam, tekst) {
+    var invoer = form.elements[naam];
+    var f = document.getElementById(invoer.id + "-fout");
+    f.textContent = tekst || "";
+    f.hidden = !tekst;
+    if (tekst) invoer.setAttribute("aria-invalid", "true"); else invoer.removeAttribute("aria-invalid");
+    return !tekst;
+  };
+  var pakketRij = function (w) {
+    var li = el("li", "beheer__pakketwijn");
+    var nr = pakketForm.querySelectorAll(".beheer__pakketwijn").length + 1;
+    var keuzeVeld = el("div", "veld");
+    var label = el("label", null, "Wijn");
+    var keuze = el("select");
+    keuze.id = "pw-" + nr + "-" + Date.now();
+    label.htmlFor = keuze.id;
+    wijnKeuze(keuze, w.product_id, "Kies een wijn");
+    keuzeVeld.appendChild(label); keuzeVeld.appendChild(keuze);
+    var tekstVeld = el("div", "veld");
+    var tLabel = el("label", null, "Tekst op het kaartje");
+    var tekst = el("textarea");
+    tekst.rows = 2; tekst.maxLength = 1000; tekst.id = keuze.id + "-t";
+    tLabel.htmlFor = tekst.id;
+    tekst.value = w.kaart_tekst || "";
+    var voorbeeld = function () {
+      var s = siteProducent(product(keuze.value));
+      tekst.placeholder = s && s.samenvatting ? s.samenvatting : "";
+    };
+    keuze.addEventListener("change", voorbeeld);
+    voorbeeld();
+    tekstVeld.appendChild(tLabel); tekstVeld.appendChild(tekst);
+    var bijVeld = el("div", "veld");
+    var bLabel = el("label", null, "Past bij");
+    var bij = el("input");
+    bij.maxLength = 200; bij.id = keuze.id + "-b"; bij.autocomplete = "off"; bij.placeholder = "Bijv. oesters, gevogelte";
+    bLabel.htmlFor = bij.id;
+    bij.value = w.past_bij || "";
+    bijVeld.appendChild(bLabel); bijVeld.appendChild(bij);
+    var weg = el("button", "bestel__terug", "Weghalen");
+    weg.type = "button";
+    weg.addEventListener("click", function () { li.remove(); });
+    li.appendChild(keuzeVeld); li.appendChild(tekstVeld); li.appendChild(bijVeld); li.appendChild(weg);
+    li.lees = function () { return { product_id: keuze.value, kaart_tekst: tekst.value, past_bij: bij.value }; };
+    return li;
+  };
+  pakketForm.querySelector("[data-actie=wijn-erbij]").addEventListener("click", function () {
+    var li = pakketRij({});
+    veld("pakketwijnen").appendChild(li);
+    li.querySelector("select").focus();
+  });
+
+  var toonPakket = function (id) {
+    if (nietKlaar()) return;
+    var nieuw = id === "nieuw";
+    pakket = nieuw ? null : K().pakketten.filter(function (p) { return String(p.id) === id; })[0];
+    melding(pakketForm.querySelector(".formulier__status"));
+    ["naam", "prijs"].forEach(function (n) { veldFout(pakketForm, n); });
+    if (!nieuw && !pakket) { veld("pakketkop").textContent = "Dit pakket bestaat niet (meer)."; pakketForm.hidden = true; return; }
+    pakketForm.hidden = false;
+    pagina.querySelector("[data-verwijder=pakket]").hidden = nieuw;
+    var p = pakket || { actief: false, volgorde: K().pakketten.length };
+    veld("pakketkop").textContent = pakket ? pakket.naam : "Nieuw pakket";
+    pakketForm.naam.value = p.naam || "";
+    pakketForm.prijs.value = p.prijs != null ? kaal(p.prijs) : "";
+    pakketForm.voorraad.value = p.voorraad != null ? p.voorraad : "";
+    pakketForm.volgorde.value = p.volgorde || 0;
+    pakketForm.omschrijving.value = p.omschrijving || "";
+    pakketForm.actief.checked = !!p.actief;
+    pakketForm.kaart_kop.value = p.kaart_kop || "";
+    pakketForm.kaart_tekst.value = p.kaart_tekst || "";
+    veld("pakketverkocht").textContent = pakket ? verkocht("pakket", pakket.id) + " verkocht" : "";
+    var ol = veld("pakketwijnen");
+    ol.textContent = "";
+    var wijnen = pakket ? K().wijnen.filter(function (w) { return w.pakket_id === pakket.id; }) : [];
+    if (!wijnen.length) wijnen = [{}, {}, {}, {}, {}, {}];
+    wijnen.forEach(function (w) { ol.appendChild(pakketRij(w)); });
+    veld("pakketknop").textContent = pakket ? "Wijzigingen opslaan" : "Pakket toevoegen";
+    var kaart = veld("pakketkaart");
+    kaart.hidden = !pakket;
+    if (pakket) kaart.href = "#kaartje-p" + pakket.id;
+    veld("pakketkop").focus({ preventScroll: true });
+  };
+
+  pakketForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var status = pakketForm.querySelector(".formulier__status");
+    var prijs = getal(pakketForm.prijs.value);
+    var goed = veldFout(pakketForm, "naam", pakketForm.naam.value.trim() ? "" : "Vul de naam in") &
+      veldFout(pakketForm, "prijs", isNaN(prijs) ? "Vul de prijs in, alleen in cijfers" : "");
+    if (!goed) { pakketForm.querySelector("[aria-invalid=true]").focus(); return; }
+    var wijnen = [].map.call(veld("pakketwijnen").children, function (li) { return li.lees(); })
+      .filter(function (w) { return w.product_id; });
+    var knop = veld("pakketknop");
+    bezig(knop, "Opslaan…");
+    db.rpc("beheer_kerst_pakket", { pakket: {
+      id: pakket ? pakket.id : "", naam: pakketForm.naam.value, prijs: String(prijs), voorraad: pakketForm.voorraad.value,
+      volgorde: pakketForm.volgorde.value, omschrijving: pakketForm.omschrijving.value, actief: pakketForm.actief.checked,
+      kaart_kop: pakketForm.kaart_kop.value, kaart_tekst: pakketForm.kaart_tekst.value, wijnen: wijnen
+    } })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        return laadAlles().then(function () {
+          kerstMelding = pakketForm.naam.value.trim() + " is opgeslagen" + (wijnen.length ? ", met " + wijnen.length + (wijnen.length === 1 ? " wijn." : " wijnen.") : ".");
+          tellers();
+          location.hash = "kerst";
+        });
+      })
+      .catch(function (err) { melding(status, vertaal(err), "fout"); })
+      .finally(function () { bezig(knop); });
+  });
+
+  // ---------- Kerst: één extra ----------
+  var toonExtra = function (id) {
+    if (nietKlaar()) return;
+    var nieuw = id === "nieuw";
+    extra = nieuw ? null : K().extras.filter(function (x) { return String(x.id) === id; })[0];
+    melding(extraForm.querySelector(".formulier__status"));
+    ["naam", "prijs"].forEach(function (n) { veldFout(extraForm, n); });
+    if (!nieuw && !extra) { veld("extrakop").textContent = "Deze extra bestaat niet (meer)."; extraForm.hidden = true; return; }
+    extraForm.hidden = false;
+    pagina.querySelector("[data-verwijder=extra]").hidden = nieuw;
+    var x = extra || { actief: false, volgorde: K().extras.length };
+    veld("extrakop").textContent = extra ? extra.naam : "Nieuwe extra";
+    extraForm.naam.value = x.naam || "";
+    extraForm.prijs.value = x.prijs != null ? kaal(x.prijs) : "";
+    wijnKeuze(extraForm.product_id, x.product_id, "Geen");
+    extraForm.max_per_bestelling.value = x.max_per_bestelling || "";
+    extraForm.volgorde.value = x.volgorde || 0;
+    extraForm.omschrijving.value = x.omschrijving || "";
+    extraForm.kaart_tekst.value = x.kaart_tekst || "";
+    extraForm.past_bij.value = x.past_bij || "";
+    extraForm.actief.checked = !!x.actief;
+    veld("extraknop").textContent = extra ? "Wijzigingen opslaan" : "Extra toevoegen";
+    veld("extrakop").focus({ preventScroll: true });
+  };
+
+  extraForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var status = extraForm.querySelector(".formulier__status");
+    var prijs = getal(extraForm.prijs.value);
+    var goed = veldFout(extraForm, "naam", extraForm.naam.value.trim() ? "" : "Vul de naam in") &
+      veldFout(extraForm, "prijs", isNaN(prijs) ? "Vul de prijs in, alleen in cijfers" : "");
+    if (!goed) { extraForm.querySelector("[aria-invalid=true]").focus(); return; }
+    var knop = veld("extraknop");
+    bezig(knop, "Opslaan…");
+    db.rpc("beheer_kerst_extra", { extra: {
+      id: extra ? extra.id : "", naam: extraForm.naam.value, prijs: String(prijs), product_id: extraForm.product_id.value,
+      max_per_bestelling: extraForm.max_per_bestelling.value, volgorde: extraForm.volgorde.value,
+      omschrijving: extraForm.omschrijving.value, kaart_tekst: extraForm.kaart_tekst.value, past_bij: extraForm.past_bij.value,
+      actief: extraForm.actief.checked
+    } })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        return laadAlles().then(function () {
+          kerstMelding = extraForm.naam.value.trim() + " is opgeslagen.";
+          tellers();
+          location.hash = "kerst";
+        });
+      })
+      .catch(function (err) { melding(status, vertaal(err), "fout"); })
+      .finally(function () { bezig(knop); });
+  });
+
+  // Verwijderen: eerst vragen, bij de tweede klik echt
+  pagina.querySelectorAll("[data-verwijder]").forEach(function (form) {
+    var soort = form.dataset.verwijder;
+    var knop = form.querySelector("button");
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var item = soort === "pakket" ? pakket : extra;
+      var status = form.querySelector(".formulier__status");
+      if (!item) return;
+      if (!knop.dataset.zeker) {
+        knop.dataset.zeker = "1";
+        knop.textContent = "Ja, " + item.naam + " verwijderen";
+        melding(status, "Klik nog een keer om het te verwijderen.");
+        return;
+      }
+      bezig(knop, "Verwijderen…");
+      db.rpc("beheer_kerst_verwijderen", { soort: soort, item: item.id })
+        .then(function (r) {
+          if (r.error) throw r.error;
+          return laadAlles().then(function () { kerstMelding = item.naam + " is verwijderd."; tellers(); location.hash = "kerst"; });
+        })
+        .catch(function (err) { melding(status, vertaal(err), "fout"); })
+        .finally(function () {
+          bezig(knop);
+          delete knop.dataset.zeker;
+          knop.textContent = soort === "pakket" ? "Pakket verwijderen" : "Extra verwijderen";
+        });
+    });
+  });
+
+  // ---------- Kerst: kaartjes ----------
+  // A5 alleen tijdens het afdrukken van kaartjes; de prijslijst blijft A4
+  var papier = null;
+  var kaartPapier = function (aan) {
+    if (aan && !papier) {
+      papier = el("style", null, "@media print { @page { size: A5; margin: 0; } }");
+      document.head.appendChild(papier);
+    } else if (!aan && papier) { papier.remove(); papier = null; }
+  };
+  pagina.querySelector("[data-actie=kaart-afdrukken]").addEventListener("click", function () { window.print(); });
+
+  var kaartRegel = function (p, tekst, bij, naamExtra) {
+    var li = el("li", "kaartje__wijn");
+    var stip = el("span", "stip stip--" + ((p && p.kleur) || "wit"));
+    stip.setAttribute("aria-hidden", "true");
+    li.appendChild(stip);
+    var vak = el("div");
+    var h = el("h3", "kaartje__naam");
+    if (p) {
+      h.appendChild(el("strong", null, p.producent));
+      h.appendChild(document.createTextNode(" " + p.naam));
+    } else h.textContent = naamExtra || "";
+    vak.appendChild(h);
+    var s = siteProducent(p);
+    var meta = p ? [p.druif, p.jaargang && /^\d{4}$/.test(p.jaargang) ? p.jaargang : "", p.regio || (s && s.regio)].filter(Boolean).join(" · ") : "";
+    if (meta) h.appendChild(el("span", "kaartje__meta", meta));
+    var t = tekst || (s && s.samenvatting) || "";
+    if (t) vak.appendChild(el("p", "kaartje__tekst", t));
+    if (bij) vak.appendChild(el("p", "kaartje__bij", "Past bij " + bij.replace(/^past bij /i, "")));
+    li.appendChild(vak);
+    return li;
+  };
+  var kaartje = function (pk, extras, boodschap) {
+    var a = el("article", "kaartje");
+    var kop = el("header", "kaartje__kop");
+    var logo = el("img", "kaartje__logo");
+    logo.src = pagina.dataset.logo; logo.alt = "VMV wijnimport";
+    kop.appendChild(logo);
+    a.appendChild(kop);
+    if (boodschap) a.appendChild(el("p", "kaartje__boodschap", boodschap));
+    a.appendChild(el("h2", "kaartje__titel", pk.kaart_kop || pk.naam));
+    if (pk.kaart_tekst) a.appendChild(el("p", "kaartje__intro", pk.kaart_tekst));
+    var ol = el("ol", "kaartje__wijnen");
+    K().wijnen.filter(function (w) { return w.pakket_id === pk.id; }).forEach(function (w) {
+      ol.appendChild(kaartRegel(product(w.product_id), w.kaart_tekst, w.past_bij));
+    });
+    (extras || []).forEach(function (x) {
+      ol.appendChild(kaartRegel(product(x.product_id), x.kaart_tekst, x.past_bij, x.naam));
+    });
+    a.appendChild(ol);
+    a.appendChild(el("p", "kaartje__voet", "vmvwijnimport.com"));
+    return a;
+  };
+  var toonKaartjes = function (sleutel) {
+    var doel = veld("kaartjes");
+    doel.textContent = "";
+    if (nietKlaar()) return;
+    var soort = sleutel.charAt(0), id = Number(sleutel.slice(1));
+    if (soort === "p") {
+      var pk = K().pakketten.filter(function (p) { return p.id === id; })[0];
+      if (pk) doel.appendChild(kaartje(pk));
+    } else {
+      // Bij een bestelling: één kaartje per pakket, met de boodschap; de extra's op het eerste kaartje
+      var b = K().bestellingen.filter(function (x) { return x.id === id; })[0];
+      if (b) {
+        var extras = (b.regels || []).filter(function (r) { return r.soort === "extra"; }).map(function (r) {
+          return K().extras.filter(function (x) { return x.id === r.id; })[0] || { naam: r.naam };
+        });
+        (b.regels || []).filter(function (r) { return r.soort === "pakket"; }).forEach(function (r) {
+          var pk = K().pakketten.filter(function (p) { return p.id === r.id; })[0] || { id: r.id, naam: r.naam };
+          for (var n = 0; n < r.aantal; n++) { doel.appendChild(kaartje(pk, extras, b.boodschap)); extras = []; }
+        });
+      }
+    }
+    if (!doel.children.length) doel.appendChild(el("p", "beheer__leeg", "Dit pakket of deze bestelling bestaat niet (meer)."));
+    // Past alles niet op A5, dan de letters stapje voor stapje kleiner maken
+    var passen = function () {
+      doel.querySelectorAll(".kaartje").forEach(function (k) {
+        var schaal = 1;
+        k.style.setProperty("--schaal", schaal);
+        while (k.scrollHeight > k.clientHeight + 1 && schaal > 0.62) {
+          schaal = Math.round((schaal - 0.03) * 100) / 100;
+          k.style.setProperty("--schaal", schaal);
+        }
+      });
+    };
+    passen();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(passen);
+  };
 
   var start = function () {
     return db.auth.getSession().then(function (r) {
