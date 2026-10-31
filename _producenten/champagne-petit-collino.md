@@ -18,6 +18,7 @@ cuvees:
     druif: Chardonnay
     type: wit
   - naam: "Avize “Champ Bouton”"
+    druif: Chardonnay
     type: wit
     binnenkort: true
 ---

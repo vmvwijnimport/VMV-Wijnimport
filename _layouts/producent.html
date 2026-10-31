@@ -77,8 +77,8 @@ layout: default
           <li>
             <span class="stip stip--{{ c.type | default: 'wit' }}" aria-hidden="true"></span>
             <span class="cuvees__naam">{{ c.naam }}</span>
-            {%- if c.druif %}<span class="cuvees__druif">{{ t.namen[c.druif] | default: c.druif }}</span>{% endif %}
             {%- if c.binnenkort %}<span class="label label--binnenkort">{{ t.binnenkort }}</span>{% endif %}
+            {%- if c.druif %}<span class="cuvees__druif">{{ t.namen[c.druif] | default: c.druif }}</span>{% endif %}
           </li>
           {%- endfor %}
         </ul>
