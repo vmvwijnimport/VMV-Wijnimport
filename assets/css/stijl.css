@@ -557,6 +557,7 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 .cuvees__lijst .stip { align-self: center; }
 .cuvees__naam { color: var(--zwart); flex: 1 1 auto; }
 .cuvees__druif { color: var(--tekst-zacht); font-size: var(--fs-klein); }
+.cuvees__extra { display: flex; align-items: baseline; gap: var(--s-1) var(--s-2); margin-left: auto; }
 
 /* ---------- Hedonist-pagina ---------- */
 
