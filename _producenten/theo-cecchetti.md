@@ -4,7 +4,7 @@ land: Frankrijk
 regio: Champagne
 plaats: Taissy
 foto: /assets/img/producenten/theo-cecchetti.jpg
-foto_positie: center 4%
+foto_positie: center 78%
 foto_alt: Théo Cecchetti bij een kist vers geplukte druiven
 lijst_foto: /assets/img/producenten/lijst/theo-cecchetti.jpg
 samenvatting: Théo Cecchetti maakt één champagne, van één plot pinot noir in Barzy-sur-Marne.
