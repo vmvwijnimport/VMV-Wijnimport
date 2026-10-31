@@ -99,7 +99,7 @@ layout: default
       <p class="producent__vraag"><a href="{{ t.url.contact | relative_url }}?producent={{ p.naam | url_encode }}">{{ t.beschikbaarheid }}</a></p>
       {%- if p.website or p.instagram %}
       <p class="producent__links">
-        {%- if p.website %}<a href="{{ p.website }}" target="_blank" rel="noopener">{{ t.website_van }} {{ p.naam }}</a>{% endif %}
+        {%- if p.website %}<a href="{{ p.website }}" target="_blank" rel="noopener">{{ t.website_van | replace: "%naam%", p.naam }}</a>{% endif %}
         {%- if p.instagram %}<a href="{{ p.instagram }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
       </p>
       {%- endif %}

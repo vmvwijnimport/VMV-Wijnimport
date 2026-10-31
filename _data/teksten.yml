@@ -71,7 +71,7 @@ nl:
   hectare: hectare
   werkwijze: Werkwijze
   beschikbaarheid: Vraag naar beschikbaarheid
-  website_van: Website van
+  website_van: "Website van %naam%"
   meer_uit: Meer uit
   producent_kop: Interesse in de wijnen van %naam%?
   producent_tekst: Stuur ons een bericht via WhatsApp of mail. Dan laten we weten wat er beschikbaar is en wanneer de nieuwe jaargang binnenkomt.
@@ -118,12 +118,12 @@ nl:
     bedankt: Bedankt voor je pre-order
     ontvangen: We hebben je bestelling ontvangen.
     betaallink: Je krijgt van ons per mail een iDEAL-betaallink.
-    levering_in: De verwachte levering is in
+    levering_in: De verwachte levering is
 
 en:
   locale: en_GB
   tagline: Wines from a new generation
-  omschrijving: We import Champagne and wine from a new generation of winemakers. They work without pesticides or herbicides and add as little as possible in the cellar.
+  omschrijving: We import wine from a new generation of winemakers. They farm without pesticides or herbicides and intervene as little as possible in the cellar.
   url:
     home: /en/
     over: /en/about-us/
@@ -140,7 +140,7 @@ en:
   alle_producenten: View all producers
   over: About us
   producenten: Producers
-  hedonist_glas: Hedonist glass
+  hedonist_glas: Hedonist glasses
   hedonist: Hedonist
   contact: Contact
   horeca_login: Trade login
@@ -149,7 +149,7 @@ en:
   whatsapp_updates: WhatsApp updates
   website: Website
   nix18: "NIX18: we do not sell alcohol to anyone under 18."
-  kvk: Chamber of Commerce
+  kvk: KvK no.
   btw: VAT
   voorwaarden: Terms and conditions (Dutch)
   herroepingsrecht: Right of withdrawal (Dutch)
@@ -159,16 +159,16 @@ en:
   mail_ons: Email us
   mail_ons_klein: email us
   contactblok_kop: Be the first to hear when new vintages arrive
-  contactblok_tekst: We use WhatsApp to let you know when new vintages from our producers come in, and you can order them there straight away.
+  contactblok_tekst: We announce new vintages from our producers on WhatsApp, and you can order them there right away.
   lees_meer: Read more
   leeftijd_kop: Are you 18 or older?
-  leeftijd_tekst: This website is about wine, so we first need to ask your age.
-  leeftijd_ja: Yes, I am 18 or older
+  leeftijd_tekst: This website is about wine, so we need to check your age first.
+  leeftijd_ja: Yes, I’m 18 or older
   leeftijd_nee: "No"
-  leeftijd_nee_kop: Come back when you are 18
+  leeftijd_nee_kop: Please come back when you’re 18
   leeftijd_nee_tekst: You must be 18 or older to view this website.
   kruimelpad: Breadcrumb
-  verkrijgbaar: Available in the Netherlands through
+  verkrijgbaar: Imported into the Netherlands by
   fles_alt: A bottle from %naam% on a park bench
   vorige_foto: Previous photo
   volgende_foto: Next photo
@@ -181,55 +181,55 @@ en:
   druiven: Grapes
   wijngaard: Vineyard
   hectare: hectares
-  werkwijze: Approach
+  werkwijze: How they work
   beschikbaarheid: Ask about availability
-  website_van: Website of
+  website_van: "%naam% website"
   meer_uit: More from
   producent_kop: Interested in the wines of %naam%?
-  producent_tekst: Send us a message on WhatsApp or by email. We will let you know what is available and when the new vintage arrives.
+  producent_tekst: Send us a message on WhatsApp or by email. We’ll let you know what’s available and when the new vintage arrives.
   seo_importeur: importer in the Netherlands
-  seo_verkrijgbaar: "The wines of %naam% from %regio% are available in the Netherlands through importer VMV Wijnimport."
+  seo_verkrijgbaar: "The wines of %naam% from %regio% are imported into the Netherlands by VMV Wijnimport."
   winkel:
     per_glas: per glass
-    voor_zes: for 6 glasses of the same model
+    voor_zes: for a set of 6 of the same model
     levering: Expected delivery
-    veilig: You pay securely with iDEAL or by bank transfer.
+    veilig: Pay securely by iDEAL or bank transfer.
     aantal: Quantity
     aantal_glazen: Number of glasses
     minder: One less
     meer: One more
     mandje: Basket
-    leeg: Your basket is empty. Choose how many glasses you would like.
+    leeg: Your basket is empty. Choose how many glasses you’d like.
     bezorging: Delivery
     verzenden: Shipping within the Netherlands
     amsterdam: Delivery in Amsterdam
-    ophalen: Collect at
+    ophalen: Pick up at
     gratis: free
     glazen: Glasses
     verzending: Shipping
     totaal: Total
-    verder: Continue to order
+    verder: Continue to checkout
     gegevens: Your details
     naam: Name
     email: Email address
     telefoon: Phone number
-    ophalen_tekst: "You collect your order at restaurant %naam%, %adres%. We will let you know when your order is ready."
+    ophalen_tekst: "You can pick up your order at %naam% restaurant, %adres%. We’ll let you know when it’s ready."
     adres: Street and house number
     postcode: Postcode
     plaats: Town or city
     betalen: Payment
     betalen_tekst: iDEAL or bank transfer, via Mollie
-    opmerking: Note
+    opmerking: Comments
     optioneel: (optional)
     akkoord: I agree to the
     voorwaarden: terms and conditions (in Dutch)
     bestellen: Order and pay
-    btw: Prices include VAT. You have a 14-day cooling-off period after receipt.
+    btw: Prices include VAT. You can cancel within 14 days of receiving your order.
     terug: Back to basket
     bedankt: Thank you for your pre-order
-    ontvangen: We have received your order.
-    betaallink: We will email you an iDEAL payment link.
-    levering_in: Expected delivery is in
+    ontvangen: We’ve received your order.
+    betaallink: We’ll email you an iDEAL payment link.
+    levering_in: "Expected delivery:"
   # Namen van landen, regio's en druiven in het Engels
   namen:
     Frankrijk: France

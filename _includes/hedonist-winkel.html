@@ -82,7 +82,7 @@
 
         <div class="bestel__klaar" hidden>
           <h3>{{ wt.bedankt }}</h3>
-          <p>{{ wt.ontvangen }}{% unless w.betalen.actief %} {{ wt.betaallink }}{% endunless %} {{ wt.levering_in }} {{ levering }}.</p>
+          <p>{{ wt.ontvangen }}{% unless w.betalen.actief %} {{ wt.betaallink }}{% endunless %} {{ wt.levering_in }}{% unless en %} in{% endunless %} {{ levering }}.</p>
         </div>
       </aside>
     </div>

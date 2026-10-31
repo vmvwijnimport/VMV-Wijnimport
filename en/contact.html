@@ -4,7 +4,7 @@ taal: en
 vertaling: /contact/
 title: Contact
 permalink: /en/contact/
-description: Get in touch with VMV Wijnimport via WhatsApp or email. On WhatsApp we share new vintages from our producers and you can order straight away.
+description: Get in touch with VMV Wijnimport via WhatsApp or email. We announce new vintages from our producers on WhatsApp, and you can order right away.
 ---
 {%- assign t = site.data.teksten.en -%}
 {%- assign producenten = site.producenten | sort: "naam" -%}
@@ -12,7 +12,7 @@ description: Get in touch with VMV Wijnimport via WhatsApp or email. On WhatsApp
 <section class="pagina pagina--breed contact">
   <header class="pagina__kop">
     <h1>Contact</h1>
-    <p class="pagina__intro">We share our updates on WhatsApp. When new vintages from our producers arrive, we post them there and you can order straight away.</p>
+    <p class="pagina__intro">We share our news on WhatsApp. When new vintages from our producers arrive, we post them there and you can order right away.</p>
   </header>
 
   <div class="contact__raster">
@@ -20,7 +20,7 @@ description: Get in touch with VMV Wijnimport via WhatsApp or email. On WhatsApp
       <a class="kanaal kanaal--wa" href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">
         {% include whatsapp-icoon.html %}
         <span class="kanaal__titel">WhatsApp</span>
-        <span class="kanaal__tekst">Get our updates on new vintages, or send us a message directly. You can also call: <span class="geen-afbreking">+31 6 15 74 23 32</span>.</span>
+        <span class="kanaal__tekst">Get updates on new vintages, or send us a message. Or give us a call: <span class="geen-afbreking">+31 6 15 74 23 32</span>.</span>
         <span class="kanaal__actie">Open WhatsApp</span>
       </a>
 
@@ -87,8 +87,8 @@ description: Get in touch with VMV Wijnimport via WhatsApp or email. On WhatsApp
       <p class="formulier__status" role="status" aria-live="polite"></p>
     </form>
     <div class="formulier formulier--klaar" id="contact-bedankt" hidden tabindex="-1">
-      <h2>Thank you, we will be in touch soon.</h2>
-      <p>Your message has been sent to {{ site.email }}. Prefer to talk directly? <a href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">Send us a WhatsApp</a>.</p>
+      <h2>Thanks, we’ll be in touch soon.</h2>
+      <p>Your message has been sent to {{ site.email }}. Prefer to chat? <a href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">Send us a WhatsApp</a>.</p>
     </div>
   </div>
 </section>

@@ -40,18 +40,18 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   var tip = function (b) {
-    if (bezorging() === "ophalen") return EN ? "You collect your order for free at " + W.ophalenBij + " in Amsterdam." : "Je haalt je bestelling gratis op bij " + W.ophalenBij + " in Amsterdam.";
+    if (bezorging() === "ophalen") return EN ? "Pick-up at " + W.ophalenBij + " in Amsterdam is free." : "Je haalt je bestelling gratis op bij " + W.ophalenBij + " in Amsterdam.";
     var amsterdam = bezorging() === "amsterdam";
     if (b.n >= W.gratisVanaf || (amsterdam && b.n >= W.gratisAmsterdamVanaf)) {
-      if (EN) return "Your order will be " + (amsterdam ? "delivered" : "shipped") + " for free.";
+      if (EN) return "Your order " + (amsterdam ? "will be delivered" : "ships") + " for free.";
       return "Je bestelling wordt gratis " + (amsterdam ? "bezorgd." : "verzonden.");
     }
     if (amsterdam) {
       var nogA = W.gratisAmsterdamVanaf - b.n;
-      return EN ? nogA + " more" + glas(nogA) + " for free delivery in Amsterdam." : "Nog " + nogA + glas(nogA) + " voor gratis bezorging in Amsterdam.";
+      return EN ? "Add " + nogA + " more" + glas(nogA) + " for free delivery in Amsterdam." : "Nog " + nogA + glas(nogA) + " voor gratis bezorging in Amsterdam.";
     }
     var nog = W.gratisVanaf - b.n;
-    if (EN) return nog + " more" + glas(nog) + " for free shipping. In Amsterdam we deliver for free from " + W.gratisAmsterdamVanaf + " glasses.";
+    if (EN) return "Add " + nog + " more" + glas(nog) + " for free shipping. In Amsterdam, delivery is free from " + W.gratisAmsterdamVanaf + " glasses.";
     return "Nog " + nog + glas(nog) + " voor gratis verzending. In Amsterdam bezorgen we al gratis vanaf " + W.gratisAmsterdamVanaf + " glazen.";
   };
 
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .filter(function (id) { return mandje[id] > 0; })
       .map(function (id) {
         var a = mandje[id], sets = Math.floor(a / 6);
-        var uitleg = sets > 0 ? "<small>" + sets + " × 6 " + (EN ? "for " : "voor ") + euro(W.prijsZes) + (a % 6 ? " + " + (a % 6) + (EN ? " single" : " los") : "") + "</small>" : "";
+        var uitleg = sets > 0 ? "<small>" + sets + " × 6 " + (EN ? "for " : "voor ") + euro(W.prijsZes) + (a % 6 ? " + " + (a % 6) + (EN ? " single" + glas(a % 6) : " los") : "") + "</small>" : "";
         return "<li><span>" + a + " × " + W.modellen[id] + uitleg + "</span><span>" + euro(prijsModel(a)) + "</span></li>";
       })
       .join("");
@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
     data._captcha = "false";
     data._replyto = data.email;
     data._autoresponse = EN
-      ? "Thank you for your pre-order of Hedonist glasses from VMV Wijnimport. We have received your order and will send you an iDEAL payment link. Expected delivery: " + W.levering + "."
+      ? "Thank you for pre-ordering Hedonist glasses from VMV Wijnimport. We’ve received your order and will send you an iDEAL payment link. Expected delivery: " + W.levering + "."
       : "Bedankt voor je pre-order van Hedonist glazen bij VMV Wijnimport. We hebben je bestelling ontvangen en sturen je een iDEAL-betaallink. Verwachte levering: " + W.levering + ".";
     data.betalen = W.idealActief ? "iDEAL (online)" : "iDEAL-betaallink sturen";
     data.bestelling = regels.join(", ");
@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", function () {
           knop.disabled = false;
           status.classList.add("fout");
           status.textContent = EN
-            ? "Payment is not possible right now. Please try again or email us at info@vmvwijnimport.com."
+            ? "Payment isn’t working right now. Please try again or email us at info@vmvwijnimport.com."
             : fout.message + ". Probeer het opnieuw of mail ons op info@vmvwijnimport.com.";
         });
       return;

@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
     naam: function (v) { return v ? "" : EN ? "Please enter your name" : "Vul je naam in"; },
     email: function (v) {
       if (!v) return EN ? "Please enter your email address" : "Vul je e-mailadres in";
-      return EMAIL.test(v) ? "" : EN ? "This email address is not valid. For example: name@example.com" : "Dit e-mailadres klopt niet. Bijvoorbeeld: naam@voorbeeld.nl";
+      return EMAIL.test(v) ? "" : EN ? "This email address doesn’t look right. For example: name@example.com" : "Dit e-mailadres klopt niet. Bijvoorbeeld: naam@voorbeeld.nl";
     },
     onderwerp: function (v) { return v ? "" : EN ? "Choose what your question is about" : "Kies waar je vraag over gaat"; },
     bericht: function (v) { return v ? "" : EN ? "Please write a short message" : "Schrijf een kort bericht"; }

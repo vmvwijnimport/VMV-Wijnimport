@@ -6,7 +6,7 @@ Lees dit bestand en `docs/voortgang.md` aan het begin van elke sessie. Daar staa
 
 ## 1. Over het bedrijf
 
-**VMV Wijnimport B.V.** in Amsterdam, opgericht in november 2024 door Tim Meyer Viol en Stijn Vrolijk. Ze leerden elkaar kennen bij Oocker, het restaurant van Tim aan het Frederiksplein. VMV importeert champagne en wijn van een **nieuwe generatie wijnmakers**: veelal biologisch of biodynamisch, zonder pesticiden of herbiciden, met zo weinig mogelijk ingrijpen in de kelder. Van sommige wijnmakers is de productie klein en de vraag groot; die wijnen gaan vooral naar de Nederlandse horeca.
+**VMV Wijnimport B.V.** in Amsterdam, opgericht in november 2024 door Tim Meyer Viol en Stijn Vrolijk. Ze leerden elkaar kennen bij Oocker, het restaurant van Tim aan het Frederiksplein. VMV importeert wijn van een **nieuwe generatie wijnmakers**: veelal biologisch of biodynamisch, zonder pesticiden of herbiciden, met zo weinig mogelijk ingrijpen in de kelder. Van sommige wijnmakers is de productie klein en de vraag groot; die wijnen gaan vooral naar de Nederlandse horeca.
 
 - **Producenten** (`_producenten/`, 16 stuks):
   - Champagne: Aurore Casanova, Champagne INSU, Champagne Petit-Collino, Domaine A. Limar, Domaine Jules Brochet, Hélène Charbaut, Julien Hénin, Maison Raday, Sacy Soeur & Frère, Théo Cecchetti, Thomas Perseval.
@@ -112,7 +112,7 @@ Nederlands, informeel ("je", "we"), kort, nuchter en persoonlijk. Geen superlati
 
 Voorbeeldzinnen van de site:
 - "Wijn die in de wijngaard begint."
-- "We importeren champagne en wijn van een nieuwe generatie wijnmakers. Ze werken zonder pesticiden of herbiciden en voegen in de kelder zo weinig mogelijk toe."
+- "We importeren wijn van een nieuwe generatie wijnmakers. Ze werken zonder pesticiden of herbiciden en voegen in de kelder zo weinig mogelijk toe."
 - "In de kelder doen onze wijnmakers zo min mogelijk. Zo kan de wijngaard zelf spreken."
 - "We kopen alleen wijnen die we zelf ook graag drinken."
 - Foutmelding: "Vul je e-mailadres in". Bevestiging: "Bedankt, we nemen snel contact met je op."

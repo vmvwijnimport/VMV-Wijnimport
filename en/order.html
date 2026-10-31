@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
   try { betaling = JSON.parse(sessionStorage.getItem("vmv-betaling")); } catch (e) {}
 
   if (!betaling || !koppeling) {
-    tekst.textContent = "We cannot find an order in this browser. Did you just pay? Then you will receive a confirmation by email.";
+    tekst.textContent = "We can’t find an order in this browser. If you’ve just paid, you’ll receive a confirmation by email.";
     return;
   }
   nummer.textContent = "Order number: " + betaling.bestelnummer;
@@ -43,19 +43,19 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(function (s) {
       if (s.status === "paid") {
         kop.textContent = "Thank you for your order";
-        tekst.textContent = "Your payment was successful. You will receive an invoice by email. Expected delivery is in " + levering + ".";
+        tekst.textContent = "Your payment was successful. You’ll receive an invoice by email. Expected delivery is in " + levering + ".";
         try { localStorage.removeItem("vmv-hedonist-mandje"); sessionStorage.removeItem("vmv-betaling"); } catch (e) {}
       } else if (s.status === "open" || s.status === "pending") {
-        kop.textContent = "Thank you, your payment has not come in yet";
+        kop.textContent = "Thank you, your payment hasn’t come in yet";
         tekst.textContent = "Paying by bank transfer? We will process your order as soon as the amount is in our account. The payment details are in the email from Mollie.";
         try { localStorage.removeItem("vmv-hedonist-mandje"); } catch (e) {}
       } else {
-        kop.textContent = "Your payment did not go through";
-        tekst.textContent = "Nothing has been charged. Your basket is still waiting, so you can try again.";
+        kop.textContent = "Your payment didn’t go through";
+        tekst.textContent = "You haven’t been charged. Your basket is still there, so you can try again.";
       }
     })
     .catch(function () {
-      tekst.textContent = "We could not check the status of your payment right now. You will receive a confirmation by email once the payment is in.";
+      tekst.textContent = "We couldn’t check the status of your payment just now. You’ll receive a confirmation by email once the payment has come in.";
     });
 });
 </script>
