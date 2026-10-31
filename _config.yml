@@ -35,6 +35,9 @@ wachtpagina: false
 # ook achter de wachtpagina. Verander de code om alle links en cookies ongeldig te maken.
 # Leeg laten = uit. De inhoud staat dan wel in de broncode van de wachtpagina.
 voorbeeld_code: ""
+# Kerstpakketten (/kerst/): true = "Kerstpakket" staat in het menu. Het aanbod en de prijzen
+# stel je in de backoffice in, onder Kerst; daar zet je bestellen ook open of dicht.
+kerst_in_menu: true
 wachtpagina_open:
   - /horeca/
   - /horeca/beheer/
