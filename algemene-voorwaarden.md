@@ -15,7 +15,7 @@ intro: Algemene voorwaarden van VMV Wijnimport B.V. voor de verkoop van producte
 3. [Toepasselijkheid](#artikel-3)
 4. [Het aanbod](#artikel-4)
 5. [De overeenkomst](#artikel-5)
-6. [Pre-orders en levertijd](#artikel-6)
+6. [Levertijd en pre-orders](#artikel-6)
 7. [De prijs](#artikel-7)
 8. [Betaling](#artikel-8)
 9. [Levering en uitvoering](#artikel-9)
@@ -77,6 +77,8 @@ KvK-nummer: {{ b.kvk }}<br>
 2. Afbeeldingen van producten zijn een waarheidsgetrouwe weergave. Kleine afwijkingen in kleur, maat of uitvoering, bijvoorbeeld als gevolg van het handmatige productieproces van mondgeblazen glas, geven geen recht op schadevergoeding of ontbinding.
 3. Kennelijke vergissingen of kennelijke fouten in het aanbod binden de ondernemer niet.
 4. Het aanbod is geldig zolang de voorraad of de pre-orderperiode strekt.
+5. Wijn is een natuurproduct. Smaak, kleur en ontwikkeling kunnen per fles en per jaargang iets verschillen. Een natuurlijk bezinksel (depot) of wijnsteen in de fles is geen gebrek.
+6. Bij een wijnpakket staat in het aanbod welke wijnen erin zitten. Is een wijn bij de levering niet meer beschikbaar, dan neemt de ondernemer contact op met de klant. De ondernemer kan dan een vergelijkbare wijn van minstens dezelfde waarde voorstellen, of een andere jaargang van dezelfde wijn. Gaat de klant daar niet mee akkoord, dan kan hij de overeenkomst voor dat pakket kosteloos ontbinden en betaalt de ondernemer het betaalde bedrag voor dat pakket binnen 14 dagen terug.
 
 ## Artikel 5. De overeenkomst {#artikel-5}
 
@@ -85,9 +87,9 @@ KvK-nummer: {{ b.kvk }}<br>
 3. De ondernemer kan zich binnen wettelijke kaders op de hoogte stellen of de klant aan zijn betalingsverplichtingen kan voldoen. Als de ondernemer op grond van dit onderzoek goede gronden heeft om de overeenkomst niet aan te gaan, is hij gerechtigd een bestelling gemotiveerd te weigeren.
 4. Kan de ondernemer een bestelling niet uitvoeren, bijvoorbeeld omdat de producten niet meer beschikbaar zijn, dan stelt hij de klant hiervan zo spoedig mogelijk op de hoogte en betaalt hij het reeds betaalde bedrag binnen 14 dagen terug.
 
-## Artikel 6. Pre-orders en levertijd {#artikel-6}
+## Artikel 6. Levertijd en pre-orders {#artikel-6}
 
-1. Bij een pre-order vermeldt de ondernemer op de website een verwachte leveringsperiode. Voor de huidige pre-order is dat {{ w.levering }}.
+1. De ondernemer vermeldt op de bestelpagina een verwachte leveringsperiode. Voor de huidige pre-order van Hedonist-glazen is dat {{ w.levering }}. Voor wijnpakketten staat de leveringsperiode op de bestelpagina van het pakket en in de bevestigingsmail.
 2. De vermelde leveringsperiode is een verwachting en geen fatale termijn. De ondernemer is afhankelijk van de levering door de producent en spant zich in om binnen de vermelde periode te leveren.
 3. Als de verwachte leveringsperiode met meer dan 30 dagen wordt overschreden, stelt de ondernemer de klant hiervan op de hoogte. De klant heeft in dat geval het recht de overeenkomst kosteloos te ontbinden. De ondernemer betaalt het betaalde bedrag dan binnen 14 dagen na ontbinding terug.
 4. Een pre-order is een gewone bestelling. Voor consumenten geldt het herroepingsrecht uit artikel 11. Een zakelijke klant kan een pre-order na het sluiten van de overeenkomst niet annuleren, behoudens het bepaalde in lid 3.
@@ -95,7 +97,7 @@ KvK-nummer: {{ b.kvk }}<br>
 ## Artikel 7. De prijs {#artikel-7}
 
 1. Alle prijzen op de website zijn in euro's en inclusief btw.
-2. De verzendkosten worden vóór het sluiten van de overeenkomst afzonderlijk vermeld in het winkelmandje. Op dit moment gelden de volgende tarieven:
+2. De verzend- en bezorgkosten worden vóór het sluiten van de overeenkomst afzonderlijk vermeld op de bestelpagina en in het winkelmandje. Voor wijnpakketten gelden de kosten die daar staan. Voor Hedonist-glazen gelden op dit moment de volgende tarieven:
    - verzending binnen Nederland: {% include euro.html bedrag=w.verzendkosten %} per bestelling, inclusief verzekering;
    - bij een bestelling van {{ w.gratis_verzenden_vanaf }} glazen of meer: gratis;
    - bezorging door de ondernemer in Amsterdam: gratis bij een bestelling van {{ w.gratis_amsterdam_vanaf }} glazen of meer;
@@ -117,6 +119,7 @@ KvK-nummer: {{ b.kvk }}<br>
 3. Bezorging door de ondernemer zelf is alleen mogelijk binnen de gemeente Amsterdam. De ondernemer stemt het moment van bezorging vooraf met de klant af.
 4. De klant kan ervoor kiezen de bestelling op te halen bij restaurant {{ w.ophalen.naam }}, {{ w.ophalen.adres }}. De ondernemer laat de klant weten wanneer de bestelling klaarligt. Haalt de klant de bestelling niet binnen 30 dagen daarna op, dan neemt de ondernemer contact op om de bestelling alsnog te verzenden; de verzendkosten komen dan voor rekening van de klant.
 5. Is bezorging na twee pogingen niet mogelijk door afwezigheid van de klant, dan neemt de ondernemer contact op om een andere afspraak te maken. Eventuele extra verzendkosten komen in dat geval voor rekening van de klant.
+6. De klant kan een ander afleveradres opgeven dan zijn eigen adres, bijvoorbeeld als de bestelling een cadeau is. Voor de ontvanger geldt dan ook artikel 19: alcoholhoudende dranken worden alleen afgeleverd aan iemand van 18 jaar of ouder.
 
 ## Artikel 10. Risico en transportschade {#artikel-10}
 
@@ -135,6 +138,7 @@ KvK-nummer: {{ b.kvk }}<br>
 
 1. Tijdens de bedenktijd gaat de consument zorgvuldig om met het product en de verpakking. Hij pakt het product slechts uit of gebruikt het slechts voor zover dat nodig is om de aard, de kenmerken en de werking van het product vast te stellen, op dezelfde wijze als hij dat in een winkel zou mogen doen.
 2. De consument is aansprakelijk voor waardevermindering van het product die het gevolg is van een manier van omgaan met het product die verder gaat dan toegestaan in lid 1.
+3. Een fles wijn waarvan de sluiting is geopend of beschadigd, kan de ondernemer niet opnieuw verkopen. Voor zo'n fles is de waardevermindering in de zin van lid 2 gelijk aan de prijs van die fles. Het herroepingsrecht voor de ongeopende flessen blijft bestaan.
 
 ## Artikel 13. Uitoefening van het herroepingsrecht en kosten daarvan {#artikel-13}
 
@@ -156,6 +160,8 @@ KvK-nummer: {{ b.kvk }}<br>
 1. De ondernemer staat ervoor in dat de producten voldoen aan de overeenkomst, aan de in het aanbod vermelde specificaties en aan de redelijke eisen van deugdelijkheid en bruikbaarheid.
 2. Een door de ondernemer, de producent of de importeur verstrekte extra garantie beperkt nooit de wettelijke rechten en vorderingen die de consument op grond van de overeenkomst tegenover de ondernemer kan doen gelden.
 3. Glas is breekbaar. Schade die is ontstaan door onoordeelkundig gebruik, door vallen of stoten na levering, of door reiniging in strijd met de aanwijzingen van de producent, valt niet onder de garantie.
+4. Heeft een fles wijn een gebrek, zoals een kurkfout, dan meldt de klant dit zo snel mogelijk aan de ondernemer en bewaart hij de fles met de resterende inhoud. De ondernemer vervangt de fles of betaalt de prijs van die fles terug.
+5. De klant bewaart wijn op een koele, donkere plek. Schade die is ontstaan doordat de wijn na levering verkeerd is bewaard, valt niet onder de garantie.
 
 ## Artikel 16. Klachtenregeling {#artikel-16}
 
@@ -178,7 +184,9 @@ KvK-nummer: {{ b.kvk }}<br>
 ## Artikel 19. Alcohol en leeftijd {#artikel-19}
 
 1. De ondernemer verkoopt en levert geen alcoholhoudende dranken aan personen jonger dan 18 jaar.
-2. Bij de verkoop en aflevering van alcoholhoudende dranken kan de ondernemer of de bezorger vragen om een geldig legitimatiebewijs. Kan de ontvanger niet aantonen dat hij 18 jaar of ouder is, dan wordt de levering geweigerd.
+2. Bij het bestellen van alcoholhoudende dranken verklaart de klant dat hij 18 jaar of ouder is.
+3. Bij de verkoop en aflevering van alcoholhoudende dranken kan de ondernemer of de bezorger vragen om een geldig legitimatiebewijs. Dat geldt ook bij het ophalen. Kan de ontvanger niet aantonen dat hij 18 jaar of ouder is, dan wordt de levering geweigerd.
+4. Wordt de levering om die reden geweigerd, dan neemt de ondernemer contact op met de klant om een nieuwe afspraak te maken. Lukt dat niet, dan wordt de overeenkomst ontbonden en betaalt de ondernemer het betaalde bedrag binnen 14 dagen terug, verminderd met de gemaakte verzend- of bezorgkosten.
 
 ## Artikel 20. Persoonsgegevens {#artikel-20}
 

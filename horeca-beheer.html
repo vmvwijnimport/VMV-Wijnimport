@@ -256,10 +256,18 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
           <label for="ki-intro">Tekst bovenaan de kerstpagina <span class="veld__optioneel">(leeg = de standaardtekst)</span></label>
           <textarea id="ki-intro" name="intro" rows="3" maxlength="1000"></textarea>
         </div>
+        <div class="veld">
+          <label for="ki-intro-en">Engels: tekst bovenaan <span class="veld__optioneel">(leeg = de standaardtekst)</span></label>
+          <textarea id="ki-intro-en" name="intro_en" rows="3" maxlength="1000"></textarea>
+        </div>
         <div class="beheer__velden">
           <div class="veld">
             <label for="ki-levering">Levering <span class="veld__optioneel">(bijv. "vanaf 15 december")</span></label>
             <input id="ki-levering" name="levering" maxlength="200" autocomplete="off">
+          </div>
+          <div class="veld">
+            <label for="ki-levering-en">Engels: levering <span class="veld__optioneel">(bijv. "from 15 December")</span></label>
+            <input id="ki-levering-en" name="levering_en" maxlength="200" autocomplete="off">
           </div>
           <div class="veld">
             <label for="ki-verzend">Verzendkosten per pakket <span class="veld__optioneel">(incl. btw, 0 = gratis)</span></label>
@@ -310,6 +318,10 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
         <div class="veld">
           <label for="pk-omschrijving">Omschrijving op de kerstpagina</label>
           <textarea id="pk-omschrijving" name="omschrijving" rows="2" maxlength="1000"></textarea>
+        </div>
+        <div class="veld">
+          <label for="pk-omschrijving-en">Engels: omschrijving <span class="veld__optioneel">(leeg = de Nederlandse)</span></label>
+          <textarea id="pk-omschrijving-en" name="omschrijving_en" rows="2" maxlength="1000"></textarea>
         </div>
         <label class="akkoord"><input type="checkbox" name="actief"> Zichtbaar op de kerstpagina</label>
 
@@ -374,6 +386,10 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
         <div class="veld">
           <label for="ex-omschrijving">Omschrijving op de kerstpagina</label>
           <textarea id="ex-omschrijving" name="omschrijving" rows="2" maxlength="1000"></textarea>
+        </div>
+        <div class="veld">
+          <label for="ex-omschrijving-en">Engels: omschrijving <span class="veld__optioneel">(leeg = de Nederlandse)</span></label>
+          <textarea id="ex-omschrijving-en" name="omschrijving_en" rows="2" maxlength="1000"></textarea>
         </div>
         <div class="veld">
           <label for="ex-kaarttekst">Tekst op het kaartje <span class="veld__optioneel">(leeg = de korte tekst over de producent)</span></label>

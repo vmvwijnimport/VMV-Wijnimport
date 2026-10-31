@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var pagina = document.getElementById("kerst");
   if (!pagina) return;
 
+  var EN = document.documentElement.lang === "en";
   var OPSLAG = "vmv-kerst-mandje";
   var A = null;   // het aanbod
   var mandje = { pakketten: {}, extras: {} };
@@ -14,7 +15,26 @@ document.addEventListener("DOMContentLoaded", function () {
   } catch (e) {}
   var bewaar = function () { try { localStorage.setItem(OPSLAG, JSON.stringify(mandje)); } catch (e) {} };
 
-  var euro = function (n) { return "€" + Number(n).toFixed(2).replace(".", ",").replace(",00", ""); };
+  var euro = function (n) {
+    var t = Number(n).toFixed(2).replace(".00", "");
+    return "€" + (EN ? t : t.replace(".", ","));
+  };
+  // Meldingen van de betaal-Worker zijn Nederlands; op de Engelse pagina vertalen we de bekende
+  var vertaal = function (m) {
+    if (!EN) return m;
+    var r;
+    if ((r = /^(.*) is uitverkocht$/.exec(m))) return r[1] + " is sold out";
+    if ((r = /^Er zijn nog (\d+) van (.*)$/.exec(m))) return "Only " + r[1] + " left of " + r[2];
+    if ((r = /^Je kunt maximaal (\d+) × (.*) bestellen$/.exec(m))) return "You can order up to " + r[1] + " × " + r[2];
+    return {
+      "Kies minstens één kerstpakket": "Please choose at least one Christmas box",
+      "Bestellen is gesloten": "Ordering is closed",
+      "Vul alle verplichte velden in": "Please fill in all required fields",
+      "Vul een geldig e-mailadres in": "Please enter a valid email address",
+      "Bezorgen in Amsterdam kan alleen bij een Amsterdamse postcode": "Delivery in Amsterdam is only possible with an Amsterdam postcode",
+      "Je moet 18 jaar of ouder zijn": "You must be 18 or older"
+    }[m] || "Ordering didn’t work just now";
+  };
   var el = function (tag, klasse, tekst) {
     var e = document.createElement(tag);
     if (klasse) e.className = klasse;
@@ -29,14 +49,14 @@ document.addEventListener("DOMContentLoaded", function () {
   var aantalKiezer = function (soort, item, max) {
     var groep = el("div", "aantal aantal--licht");
     groep.setAttribute("role", "group");
-    groep.setAttribute("aria-label", "Aantal " + item.naam);
-    var min = el("button", "aantal__knop", "−"); min.type = "button"; min.setAttribute("aria-label", "Eén minder");
+    groep.setAttribute("aria-label", (EN ? "Quantity " : "Aantal ") + item.naam);
+    var min = el("button", "aantal__knop", "−"); min.type = "button"; min.setAttribute("aria-label", EN ? "One fewer" : "Eén minder");
     var invoer = el("input", "aantal__veld");
     invoer.type = "number"; invoer.min = "0"; invoer.inputMode = "numeric";
     if (max != null) invoer.max = String(max);
-    invoer.setAttribute("aria-label", "Aantal " + item.naam);
+    invoer.setAttribute("aria-label", (EN ? "Quantity " : "Aantal ") + item.naam);
     invoer.dataset.soort = soort; invoer.dataset.id = item.id;
-    var plus = el("button", "aantal__knop", "+"); plus.type = "button"; plus.setAttribute("aria-label", "Eén meer");
+    var plus = el("button", "aantal__knop", "+"); plus.type = "button"; plus.setAttribute("aria-label", EN ? "One more" : "Eén meer");
     var zet = function (n) {
       n = Math.max(0, Math.min(max != null ? max : 50, parseInt(n, 10) || 0));
       mandje[soort][item.id] = n;
@@ -57,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
     li.firstChild.setAttribute("aria-hidden", "true");
     var naam = el("span", "cuvees__naam");
     var producent = w.slug ? el("a", "kerst__producent", w.producent) : el("span", "kerst__producent", w.producent);
-    if (w.slug) producent.href = pagina.dataset.basis + "producenten/" + w.slug + "/";
+    if (w.slug) producent.href = pagina.dataset.basis + (EN ? "en/producers/" : "producenten/") + w.slug + "/";
     naam.appendChild(producent);
     naam.appendChild(document.createTextNode(" " + w.naam));
     li.appendChild(naam);
@@ -71,7 +91,9 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   var bouw = function () {
-    if (A.intro) veld("intro").textContent = A.intro;
+    var intro = EN ? A.intro_en : A.intro;
+    if (intro) veld("intro").textContent = intro;
+    var omschrijving = function (x) { return (EN && x.omschrijving_en) || x.omschrijving; };
     var doel = veld("pakketten");
     doel.textContent = "";
     A.pakketten.forEach(function (p) {
@@ -79,14 +101,14 @@ document.addEventListener("DOMContentLoaded", function () {
       var kop = el("div", "kerst__pakketkop");
       var tekst = el("div");
       tekst.appendChild(el("h2", null, p.naam));
-      if (p.omschrijving) tekst.appendChild(el("p", "kerst__omschrijving", p.omschrijving));
+      if (omschrijving(p)) tekst.appendChild(el("p", "kerst__omschrijving", omschrijving(p)));
       kop.appendChild(tekst);
       var koop = el("div", "kerst__koop");
       koop.appendChild(el("p", "kerst__prijs", euro(p.prijs)));
-      if (p.beschikbaar === 0) koop.appendChild(el("span", "label label--uitverkocht", "Uitverkocht"));
+      if (p.beschikbaar === 0) koop.appendChild(el("span", "label label--uitverkocht", EN ? "Sold out" : "Uitverkocht"));
       else {
         koop.appendChild(aantalKiezer("pakketten", p, p.beschikbaar));
-        if (p.beschikbaar != null && p.beschikbaar <= 10) koop.appendChild(el("p", "kerst__nog", "Nog " + p.beschikbaar + " beschikbaar"));
+        if (p.beschikbaar != null && p.beschikbaar <= 10) koop.appendChild(el("p", "kerst__nog", EN ? p.beschikbaar + " left" : "Nog " + p.beschikbaar + " beschikbaar"));
       }
       kop.appendChild(koop);
       s.appendChild(kop);
@@ -108,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (x.kleur) { var stip = el("span", "stip stip--" + x.kleur); stip.setAttribute("aria-hidden", "true"); h.appendChild(stip); }
       h.appendChild(document.createTextNode(x.naam));
       tekst.appendChild(h);
-      if (x.omschrijving) tekst.appendChild(el("p", "kerst__omschrijving", x.omschrijving));
+      if (omschrijving(x)) tekst.appendChild(el("p", "kerst__omschrijving", omschrijving(x)));
       r.appendChild(tekst);
       var koop = el("div", "kerst__koop");
       koop.appendChild(el("p", "kerst__prijs", euro(x.prijs)));
@@ -118,9 +140,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Bezorgopties die in de backoffice aan staan
+    var gratis = EN ? " (free)" : " (gratis)";
     var namen = {
-      verzenden: "Verzenden in Nederland" + (Number(A.verzendkosten) ? " (" + euro(A.verzendkosten) + " per pakket)" : " (gratis)"),
-      amsterdam: "Bezorgen in Amsterdam" + (Number(A.bezorgenAmsterdam) ? " (" + euro(A.bezorgenAmsterdam) + ")" : " (gratis)")
+      verzenden: (EN ? "Shipping in the Netherlands" : "Verzenden in Nederland") + (Number(A.verzendkosten) ? " (" + euro(A.verzendkosten) + (EN ? " per box)" : " per pakket)") : gratis),
+      amsterdam: (EN ? "Delivery in Amsterdam" : "Bezorgen in Amsterdam") + (Number(A.bezorgenAmsterdam) ? " (" + euro(A.bezorgenAmsterdam) + ")" : gratis)
     };
     var eerste = null;
     pagina.querySelectorAll("[data-bezorging]").forEach(function (l) {
@@ -130,7 +153,8 @@ document.addEventListener("DOMContentLoaded", function () {
       if (A.bezorging[soort] && !eerste) eerste = l.querySelector("input");
     });
     if (eerste) eerste.checked = true;
-    veld("levering").textContent = A.levering ? "Levering " + A.levering + "." : "";
+    var levering = EN ? A.levering_en : A.levering;
+    veld("levering").textContent = levering ? (EN ? "Delivery " : "Levering ") + levering + "." : "";
 
     // Wat niet meer in het aanbod zit, uit het mandje halen
     ["pakketten", "extras"].forEach(function (soort) {
@@ -173,8 +197,8 @@ document.addEventListener("DOMContentLoaded", function () {
     var b = berekening();
     var iets = b.regels.length > 0;
     leeg.hidden = iets;
-    leeg.textContent = "Je winkelmandje is leeg. Kies hoeveel pakketten je wilt.";
-    if (iets && !b.pakketten) { leeg.hidden = false; leeg.textContent = "Kies ook minstens één kerstpakket."; }
+    leeg.textContent = EN ? "Your basket is empty. Choose how many boxes you’d like." : "Je winkelmandje is leeg. Kies hoeveel pakketten je wilt.";
+    if (iets && !b.pakketten) { leeg.hidden = false; leeg.textContent = EN ? "Please also choose at least one Christmas box." : "Kies ook minstens één kerstpakket."; }
     inhoud.hidden = !b.pakketten || !form.hidden;
     if (!b.pakketten) form.hidden = true;
     pagina.querySelector(".mandje__regels").innerHTML = "";
@@ -185,10 +209,11 @@ document.addEventListener("DOMContentLoaded", function () {
       pagina.querySelector(".mandje__regels").appendChild(li);
     });
     var soort = bezorging();
-    veld("verzendlabel").textContent = soort === "ophalen" ? "Ophalen" : soort === "amsterdam" ? "Bezorgen" : "Verzending";
-    pagina.querySelector(".mandje__verzending").textContent = b.verzending ? euro(b.verzending) : "Gratis";
+    veld("verzendlabel").textContent = EN ? (soort === "ophalen" ? "Pick-up" : soort === "amsterdam" ? "Delivery" : "Shipping")
+      : (soort === "ophalen" ? "Ophalen" : soort === "amsterdam" ? "Bezorgen" : "Verzending");
+    pagina.querySelector(".mandje__verzending").textContent = b.verzending ? euro(b.verzending) : (EN ? "Free" : "Gratis");
     pagina.querySelector(".mandje__som").textContent = euro(b.totaal);
-    form.querySelector(".bestel__betaal").textContent = "Bestellen en betalen · " + euro(b.totaal);
+    form.querySelector(".bestel__betaal").textContent = (EN ? "Order and pay · " : "Bestellen en betalen · ") + euro(b.totaal);
   };
 
   var adresVelden = function () {
@@ -206,12 +231,12 @@ document.addEventListener("DOMContentLoaded", function () {
   pagina.querySelector(".mandje__verder").addEventListener("click", function () {
     inhoud.hidden = true;
     form.hidden = false;
-    document.getElementById("mandje-kop").textContent = "Afrekenen";
+    document.getElementById("mandje-kop").textContent = EN ? "Checkout" : "Afrekenen";
     form.elements.naam.focus();
   });
   form.querySelector(".bestel__terug").addEventListener("click", function () {
     form.hidden = true;
-    document.getElementById("mandje-kop").textContent = "Winkelmandje";
+    document.getElementById("mandje-kop").textContent = EN ? "Basket" : "Winkelmandje";
     werkBij();
   });
 
@@ -227,7 +252,8 @@ document.addEventListener("DOMContentLoaded", function () {
     var status = form.querySelector(".formulier__status");
     form.elements.postcode.setCustomValidity(
       bezorging() === "amsterdam" && !isAmsterdam(form.elements.postcode.value)
-        ? "Bezorgen in Amsterdam kan alleen bij een Amsterdamse postcode (1011 tot en met 1109). Kies anders voor verzenden."
+        ? (EN ? "Delivery in Amsterdam is only possible with an Amsterdam postcode (1011 to 1109). Otherwise, choose shipping."
+              : "Bezorgen in Amsterdam kan alleen bij een Amsterdamse postcode (1011 tot en met 1109). Kies anders voor verzenden.")
         : ""
     );
     if (!form.reportValidity()) return;
@@ -236,7 +262,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var knop = form.querySelector("button[type=submit]");
     knop.disabled = true;
     status.className = "formulier__status";
-    status.textContent = "Je bestelling wordt verstuurd...";
+    status.textContent = EN ? "Sending your order..." : "Je bestelling wordt verstuurd...";
     fetch(pagina.dataset.koppeling.replace(/\/$/, "") + "/kerst/betaling", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -244,6 +270,7 @@ document.addEventListener("DOMContentLoaded", function () {
         pakketten: mandje.pakketten,
         extras: mandje.extras,
         bezorging: bezorging(),
+        taal: EN ? "en" : "nl",
         achttien: f.achttien.checked,
         boodschap: f.boodschap.value,
         klant: {
@@ -255,15 +282,19 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.fout || "Betalen lukt nu niet"); return j; }); })
       .then(function (betaling) {
         try {
-          sessionStorage.setItem("vmv-betaling", JSON.stringify({ id: betaling.id, bestelnummer: betaling.bestelnummer, soort: "kerst", levering: A.levering || "" }));
+          sessionStorage.setItem("vmv-betaling", JSON.stringify({
+            id: betaling.id, bestelnummer: betaling.bestelnummer, soort: "kerst", taal: EN ? "en" : "nl",
+            levering: (EN ? A.levering_en : A.levering) || ""
+          }));
         } catch (e) {}
-        status.textContent = "Je gaat nu naar de betaalpagina...";
+        status.textContent = EN ? "Taking you to the payment page..." : "Je gaat nu naar de betaalpagina...";
         location.href = betaling.betaallink;
       })
       .catch(function (fout) {
         knop.disabled = false;
         status.classList.add("fout");
-        status.textContent = fout.message + ". Probeer het opnieuw of mail ons op info@vmvwijnimport.com.";
+        status.textContent = EN ? vertaal(fout.message) + ". Please try again or email us at info@vmvwijnimport.com."
+          : fout.message + ". Probeer het opnieuw of mail ons op info@vmvwijnimport.com.";
       });
   });
 

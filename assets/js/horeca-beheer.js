@@ -1938,6 +1938,8 @@
     kerstForm.open.checked = !!i.open;
     kerstForm.intro.value = i.intro || "";
     kerstForm.levering.value = i.levering || "";
+    kerstForm.intro_en.value = i.intro_en || "";
+    kerstForm.levering_en.value = i.levering_en || "";
     kerstForm.verzendkosten.value = kaal(i.verzendkosten || 0);
     kerstForm.bezorgen_amsterdam.value = kaal(i.bezorgen_amsterdam || 0);
     ["verzenden", "amsterdam", "ophalen"].forEach(function (n) { kerstForm[n].checked = i[n] !== false; });
@@ -1953,6 +1955,7 @@
     bezig(knop, "Opslaan…");
     db.rpc("beheer_kerst_instellingen", { inst: {
       open: kerstForm.open.checked, intro: kerstForm.intro.value, levering: kerstForm.levering.value,
+      intro_en: kerstForm.intro_en.value, levering_en: kerstForm.levering_en.value,
       verzenden: kerstForm.verzenden.checked, amsterdam: kerstForm.amsterdam.checked, ophalen: kerstForm.ophalen.checked,
       verzendkosten: String(verzend), bezorgen_amsterdam: String(ams)
     } })
@@ -2033,6 +2036,7 @@
     pakketForm.voorraad.value = p.voorraad != null ? p.voorraad : "";
     pakketForm.volgorde.value = p.volgorde || 0;
     pakketForm.omschrijving.value = p.omschrijving || "";
+    pakketForm.omschrijving_en.value = p.omschrijving_en || "";
     pakketForm.actief.checked = !!p.actief;
     pakketForm.kaart_kop.value = p.kaart_kop || "";
     pakketForm.kaart_tekst.value = p.kaart_tekst || "";
@@ -2062,7 +2066,8 @@
     bezig(knop, "Opslaan…");
     db.rpc("beheer_kerst_pakket", { pakket: {
       id: pakket ? pakket.id : "", naam: pakketForm.naam.value, prijs: String(prijs), voorraad: pakketForm.voorraad.value,
-      volgorde: pakketForm.volgorde.value, omschrijving: pakketForm.omschrijving.value, actief: pakketForm.actief.checked,
+      volgorde: pakketForm.volgorde.value, omschrijving: pakketForm.omschrijving.value,
+      omschrijving_en: pakketForm.omschrijving_en.value, actief: pakketForm.actief.checked,
       kaart_kop: pakketForm.kaart_kop.value, kaart_tekst: pakketForm.kaart_tekst.value, wijnen: wijnen
     } })
       .then(function (r) {
@@ -2095,6 +2100,7 @@
     extraForm.max_per_bestelling.value = x.max_per_bestelling || "";
     extraForm.volgorde.value = x.volgorde || 0;
     extraForm.omschrijving.value = x.omschrijving || "";
+    extraForm.omschrijving_en.value = x.omschrijving_en || "";
     extraForm.kaart_tekst.value = x.kaart_tekst || "";
     extraForm.past_bij.value = x.past_bij || "";
     extraForm.actief.checked = !!x.actief;
@@ -2114,7 +2120,7 @@
     db.rpc("beheer_kerst_extra", { extra: {
       id: extra ? extra.id : "", naam: extraForm.naam.value, prijs: String(prijs), product_id: extraForm.product_id.value,
       max_per_bestelling: extraForm.max_per_bestelling.value, volgorde: extraForm.volgorde.value,
-      omschrijving: extraForm.omschrijving.value, kaart_tekst: extraForm.kaart_tekst.value, past_bij: extraForm.past_bij.value,
+      omschrijving: extraForm.omschrijving.value, omschrijving_en: extraForm.omschrijving_en.value, kaart_tekst: extraForm.kaart_tekst.value, past_bij: extraForm.past_bij.value,
       actief: extraForm.actief.checked
     } })
       .then(function (r) {
