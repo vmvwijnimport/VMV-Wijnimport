@@ -12,7 +12,7 @@ Les Mocque-Souris is 100 percent Pinot Noir. The wine ages in oak barrels and th
 
 Because there are only very few bottles, we only offer this Champagne to restaurants and bars in the Netherlands. That way as many people as possible can taste it.
 
-You can (soon) find the wine at:
+You can soon find Théo’s wine at:
 
 - De Librije \*\*\*
 - Gebr. Hartering
