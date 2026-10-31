@@ -383,16 +383,17 @@ async function maakKerstBetaling(invoer, env, site, webhook) {
   if (!invoer.achttien) throw new Fout("Je moet 18 jaar of ouder zijn");
 
   const b = berekenKerst(aanbod, invoer, bezorging);
+  const taal = invoer.taal === "en" ? "en" : "nl";
   const nu = new Date();
   const bestelnummer = `VMV-K${nu.toISOString().slice(2, 10).replace(/-/g, "")}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
   const kort = (s, max = 200) => String(s || "").trim().slice(0, max);
 
   const betaling = await mollie("/payments", env, {
     amount: { currency: "EUR", value: b.totaal.toFixed(2) },
-    description: `Kerstpakket ${bestelnummer}`,
+    description: `${taal === "en" ? "Christmas box" : "Kerstpakket"} ${bestelnummer}`,
     redirectUrl: `${site}/bestelling/`,
     webhookUrl: webhook,
-    locale: "nl_NL",
+    locale: taal === "en" ? "en_US" : "nl_NL",
     method: ["ideal", "banktransfer"],
     billingEmail: kort(k.email),
     metadata: { soort: "kerst", bestelnummer }
@@ -405,7 +406,7 @@ async function maakKerstBetaling(invoer, env, site, webhook) {
       naam: kort(k.naam), email: kort(k.email), telefoon: kort(k.telefoon, 40),
       bezorging: { verzenden: "Verzenden", amsterdam: "Bezorgen in Amsterdam", ophalen: "Ophalen bij Oocker" }[bezorging],
       adres: bezorging === "ophalen" ? "Ophalen" : `${kort(k.adres)}, ${kort(k.postcode, 12)} ${kort(k.plaats, 80)}`,
-      opmerking: kort(k.opmerking, 500), boodschap: kort(invoer.boodschap, 500),
+      opmerking: kort(k.opmerking, 500), boodschap: kort(invoer.boodschap, 500), taal,
       bestelling: b.regels.map((r) => `${r.aantal} × ${r.naam}`).join(", "),
       regels: b.regels,
       bedrag: b.bedrag.toFixed(2), verzending: b.verzending.toFixed(2), totaal: b.totaal.toFixed(2)
@@ -415,7 +416,7 @@ async function maakKerstBetaling(invoer, env, site, webhook) {
   return { id: betaling.id, betaallink: betaling._links.checkout.href, bestelnummer, totaal: b.totaal };
 }
 
-const kerstTabel = (k) => {
+const kerstTabel = (k, en) => {
   const cel = `font-family:${LETTER};font-size:15px;color:${KLEUR.zwart};border-bottom:1px solid ${KLEUR.lijn};`;
   const rijen = (k.regels || []).map((r) => `<tr><td style="${cel}padding:12px 12px 12px 0;line-height:1.45;">${r.aantal} × ${html(r.naam)}</td>
     <td align="right" style="${cel}padding:12px 0;white-space:nowrap;">${euro(r.prijs * r.aantal)}</td></tr>`).join("");
@@ -424,13 +425,14 @@ const kerstTabel = (k) => {
     return `<tr><td style="${st}padding:8px 12px 8px 0;">${label}</td><td align="right" style="${st}padding:8px 0;white-space:nowrap;">${bedrag}</td></tr>`;
   };
   const verzending = Number(k.verzending || 0);
-  const label = k.adres === "Ophalen" ? "Ophalen" : k.bezorging === "Bezorgen in Amsterdam" ? "Bezorgen" : "Verzending";
+  const label = k.adres === "Ophalen" ? (en ? "Pick-up" : "Ophalen") : k.bezorging === "Bezorgen in Amsterdam" ? (en ? "Delivery" : "Bezorgen") : (en ? "Shipping" : "Verzending");
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;border-top:1px solid ${KLEUR.zwart};">
-    ${rijen}${regel(label, verzending ? euro(verzending) : "Gratis")}${regel("Totaal incl. btw", euro(k.totaal), true)}
+    ${rijen}${regel(label, verzending ? euro(verzending) : (en ? "Free" : "Gratis"))}${regel(en ? "Total incl. VAT" : "Totaal incl. btw", euro(k.totaal), true)}
   </table>`;
 };
 
 export const kerstMailKlant = (k, site) => {
+  if (k.taal === "en") return kerstMailKlantEn(k, site);
   const inhoud =
     alinea(`Beste ${html(k.naam)},`) +
     alinea("Bedankt voor je bestelling. Je betaling is binnen. Hieronder staat wat je hebt besteld.") +
@@ -452,6 +454,30 @@ export const kerstMailKlant = (k, site) => {
   };
 };
 
+const kerstMailKlantEn = (k, site) => {
+  const bezorging = isOphalen(k) ? "Pick-up at Oocker, Frederiksplein 29h, Amsterdam"
+    : `${k.bezorging === "Bezorgen in Amsterdam" ? "Delivery in Amsterdam" : "Shipping"}<br>${html(k.adres)}`;
+  const inhoud =
+    alinea(`Dear ${html(k.naam)},`) +
+    alinea("Thank you for your order. Your payment has come in. Below is what you ordered.") +
+    kerstTabel(k, true) +
+    gegevens([
+      ["Order number", html(k.bestelnummer)],
+      ["Delivery", k.levering ? html(k.levering) : ""],
+      [isOphalen(k) ? "Pick-up" : "Address", bezorging],
+      ["On the card", k.boodschap ? html(k.boodschap) : ""],
+      ["Note", k.opmerking ? html(k.opmerking) : ""]
+    ]) +
+    alinea(isOphalen(k) ? "We’ll let you know when your box is ready for pick-up. We’ll send you the invoice separately by email." : "We’ll let you know when we deliver or ship your box. We’ll send you the invoice separately by email.") +
+    alinea("We may ask for ID on delivery or pick-up: we only deliver to people aged 18 or over.") +
+    alinea(`You have a 14-day cooling-off period. Read more in our <a href="${site}/algemene-voorwaarden/" style="color:${KLEUR.rood};">terms and conditions</a> (in Dutch).`) +
+    alinea(`Any questions? Email us at <a href="mailto:info@vmvwijnimport.com" style="color:${KLEUR.rood};">info@vmvwijnimport.com</a> or send a WhatsApp to +31 6 15 74 23 32.`);
+  return {
+    onderwerp: `Thank you for your order ${k.bestelnummer}`,
+    html: omhulsel("Thank you for your order", "Your payment has come in.", inhoud).replace('<html lang="nl">', '<html lang="en">')
+  };
+};
+
 export const kerstMailVmv = (k, methode, mollieId) => {
   const naam = { ideal: "iDEAL", banktransfer: "Bankoverschrijving" }[methode] || methode || "";
   const inhoud =
@@ -469,7 +495,7 @@ export const kerstMailVmv = (k, methode, mollieId) => {
     ]) +
     alinea("De klant heeft een bevestiging gekregen. Antwoorden op deze mail gaan naar de klant.");
   return {
-    onderwerp: `Betaald: kerstpakket ${k.bestelnummer}, ${k.naam}`,
+    onderwerp: `Betaald: kerstpakket ${k.bestelnummer}, ${k.naam}${k.taal === "en" ? " (Engelse site)" : ""}`,
     html: omhulsel("Nieuwe bestelling kerstpakket", `Betaald, ${k.bestelling || ""}`, inhoud)
   };
 };
@@ -479,7 +505,10 @@ async function naKerstBetaling(betaling, env, site) {
   if (!env.HEDONIST_SLEUTEL) throw new Fout("HEDONIST_SLEUTEL ontbreekt", 500);
   const k = await rpc("kerst_betaald", { mollie: betaling.id, methode: betaling.method || "", sleutel: env.HEDONIST_SLEUTEL });
   if (!k) throw new Fout("Bestelling niet gevonden", 404);
-  try { k.levering = (await rpc("kerst_aanbod")).levering || ""; } catch (e) {}
+  try {
+    const aanbod = await rpc("kerst_aanbod");
+    k.levering = (k.taal === "en" ? aanbod.levering_en : aanbod.levering) || "";
+  } catch (e) {}
   const vmv = env.VMV_MAIL || "info@vmvwijnimport.com";
   await verstuur(env, `kerst-vmv-${betaling.id}`, vmv, k.email, kerstMailVmv(k, betaling.method, betaling.id));
   await verstuur(env, `kerst-klant-${betaling.id}`, k.email, vmv, kerstMailKlant(k, site));

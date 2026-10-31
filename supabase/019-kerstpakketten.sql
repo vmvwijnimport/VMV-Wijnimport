@@ -16,6 +16,8 @@ create table if not exists public.kerst_instellingen (
   open               boolean not null default false,       -- false = op /kerst/ staat "binnenkort"
   intro              text,                                  -- tekst bovenaan de pagina
   levering           text,                                  -- bijv. "vanaf 15 december"
+  intro_en           text,                                  -- hetzelfde voor de Engelse pagina
+  levering_en        text,                                  -- bijv. "from 15 December"
   verzenden          boolean not null default true,
   amsterdam          boolean not null default true,
   ophalen            boolean not null default true,
@@ -29,6 +31,7 @@ create table if not exists public.kerst_pakketten (
   id           bigint generated always as identity primary key,
   naam         text not null,
   omschrijving text,
+  omschrijving_en text,                                       -- voor de Engelse pagina
   prijs        numeric(10, 2) not null check (prijs >= 0),   -- incl. btw
   voorraad     int check (voorraad >= 0),                     -- leeg = geen maximum
   actief       boolean not null default false,
@@ -50,6 +53,7 @@ create table if not exists public.kerst_extras (
   id           bigint generated always as identity primary key,
   naam         text not null,
   omschrijving text,
+  omschrijving_en text,
   prijs        numeric(10, 2) not null check (prijs >= 0),   -- incl. btw
   product_id   bigint references public.producten (id) on delete set null,
   max_per_bestelling int check (max_per_bestelling > 0),
@@ -74,6 +78,7 @@ create table if not exists public.kerst_bestellingen (
   adres        text not null default '',
   opmerking    text,
   boodschap    text,                              -- persoonlijke boodschap op het kaartje
+  taal         text not null default 'nl' check (taal in ('nl', 'en')),   -- taal van de mail aan de klant
   bestelling   text not null default '',          -- bijv. "2 × Kerstpakket, 1 × Ratafia"
   regels       jsonb not null default '[]',       -- [{"soort": "pakket"|"extra", "id", "naam", "aantal", "prijs"}]
   bedrag       numeric(10, 2),
@@ -126,12 +131,14 @@ begin
     'open', true,
     'intro', i.intro,
     'levering', i.levering,
+    'intro_en', i.intro_en,
+    'levering_en', i.levering_en,
     'bezorging', jsonb_build_object('verzenden', i.verzenden, 'amsterdam', i.amsterdam, 'ophalen', i.ophalen),
     'verzendkosten', i.verzendkosten,
     'bezorgenAmsterdam', i.bezorgen_amsterdam,
     'pakketten', coalesce((
       select jsonb_agg(jsonb_build_object(
-        'id', p.id, 'naam', p.naam, 'omschrijving', p.omschrijving, 'prijs', p.prijs,
+        'id', p.id, 'naam', p.naam, 'omschrijving', p.omschrijving, 'omschrijving_en', p.omschrijving_en, 'prijs', p.prijs,
         'beschikbaar', case when p.voorraad is null then null
                             else greatest(p.voorraad - public.kerst_verkocht('pakket', p.id), 0) end,
         'wijnen', coalesce((
@@ -145,7 +152,7 @@ begin
       from public.kerst_pakketten p where p.actief), '[]'::jsonb),
     'extras', coalesce((
       select jsonb_agg(jsonb_build_object(
-        'id', e.id, 'naam', e.naam, 'omschrijving', e.omschrijving, 'prijs', e.prijs,
+        'id', e.id, 'naam', e.naam, 'omschrijving', e.omschrijving, 'omschrijving_en', e.omschrijving_en, 'prijs', e.prijs,
         'max', e.max_per_bestelling, 'slug', w.producent_slug, 'kleur', w.kleur
       ) order by e.volgorde, e.id)
       from public.kerst_extras e left join public.producten w on w.id = e.product_id
@@ -165,13 +172,14 @@ begin
     raise exception 'Geen toegang' using errcode = '42501';
   end if;
   insert into public.kerst_bestellingen (mollie_id, bestelnummer, naam, email, telefoon, bezorging, adres,
-                                         opmerking, boodschap, bestelling, regels, bedrag, verzending, totaal)
+                                         opmerking, boodschap, bestelling, regels, bedrag, verzending, totaal, taal)
   values (left(g ->> 'mollie_id', 40), left(coalesce(g ->> 'bestelnummer', ''), 40),
           left(coalesce(g ->> 'naam', ''), 200), left(coalesce(g ->> 'email', ''), 200), left(coalesce(g ->> 'telefoon', ''), 40),
           left(coalesce(g ->> 'bezorging', ''), 100), left(coalesce(g ->> 'adres', ''), 300),
           left(g ->> 'opmerking', 500), left(g ->> 'boodschap', 500), left(coalesce(g ->> 'bestelling', ''), 500),
           coalesce(g -> 'regels', '[]'::jsonb),
-          nullif(g ->> 'bedrag', '')::numeric, nullif(g ->> 'verzending', '')::numeric, nullif(g ->> 'totaal', '')::numeric)
+          nullif(g ->> 'bedrag', '')::numeric, nullif(g ->> 'verzending', '')::numeric, nullif(g ->> 'totaal', '')::numeric,
+          case when g ->> 'taal' = 'en' then 'en' else 'nl' end)
   on conflict (mollie_id) do nothing;
 end $$;
 revoke all on function public.kerst_vastleggen(jsonb, text) from public;
@@ -196,7 +204,7 @@ revoke all on function public.kerst_betaald(text, text, text) from public;
 grant execute on function public.kerst_betaald(text, text, text) to anon;
 
 -- ---------- Backoffice ----------
--- pakket: {"id" (leeg = nieuw), "naam", "omschrijving", "prijs", "voorraad", "actief", "volgorde",
+-- pakket: {"id" (leeg = nieuw), "naam", "omschrijving", "omschrijving_en", "prijs", "voorraad", "actief", "volgorde",
 --          "kaart_kop", "kaart_tekst", "wijnen": [{"product_id", "kaart_tekst", "past_bij"}]}
 create or replace function public.beheer_kerst_pakket(pakket jsonb)
 returns bigint
@@ -227,6 +235,7 @@ begin
   update public.kerst_pakketten set
     naam = v_naam, prijs = v_prijs, voorraad = v_voorraad,
     omschrijving = nullif(left(trim(coalesce(p ->> 'omschrijving', '')), 1000), ''),
+    omschrijving_en = nullif(left(trim(coalesce(p ->> 'omschrijving_en', '')), 1000), ''),
     actief = coalesce((p ->> 'actief')::boolean, false),
     volgorde = coalesce(nullif(p ->> 'volgorde', '')::int, 0),
     kaart_kop = nullif(left(trim(coalesce(p ->> 'kaart_kop', '')), 200), ''),
@@ -248,7 +257,7 @@ end $$;
 revoke all on function public.beheer_kerst_pakket(jsonb) from public, anon;
 grant execute on function public.beheer_kerst_pakket(jsonb) to authenticated;
 
--- extra: {"id" (leeg = nieuw), "naam", "omschrijving", "prijs", "product_id", "max_per_bestelling",
+-- extra: {"id" (leeg = nieuw), "naam", "omschrijving", "omschrijving_en", "prijs", "product_id", "max_per_bestelling",
 --         "actief", "volgorde", "kaart_tekst", "past_bij"}
 create or replace function public.beheer_kerst_extra(extra jsonb)
 returns bigint
@@ -277,6 +286,7 @@ begin
   update public.kerst_extras set
     naam = v_naam, prijs = v_prijs, max_per_bestelling = v_max,
     omschrijving = nullif(left(trim(coalesce(e ->> 'omschrijving', '')), 1000), ''),
+    omschrijving_en = nullif(left(trim(coalesce(e ->> 'omschrijving_en', '')), 1000), ''),
     product_id = nullif(e ->> 'product_id', '')::bigint,
     actief = coalesce((e ->> 'actief')::boolean, false),
     volgorde = coalesce(nullif(e ->> 'volgorde', '')::int, 0),
@@ -302,7 +312,7 @@ end $$;
 revoke all on function public.beheer_kerst_verwijderen(text, bigint) from public, anon;
 grant execute on function public.beheer_kerst_verwijderen(text, bigint) to authenticated;
 
--- inst: {"open", "intro", "levering", "verzenden", "amsterdam", "ophalen", "verzendkosten", "bezorgen_amsterdam"}
+-- inst: {"open", "intro", "levering", "intro_en", "levering_en", "verzenden", "amsterdam", "ophalen", "verzendkosten", "bezorgen_amsterdam"}
 create or replace function public.beheer_kerst_instellingen(inst jsonb)
 returns void
 language plpgsql security definer set search_path = public as $$
@@ -324,6 +334,8 @@ begin
     open = coalesce((inst ->> 'open')::boolean, false),
     intro = nullif(left(trim(coalesce(inst ->> 'intro', '')), 1000), ''),
     levering = nullif(left(trim(coalesce(inst ->> 'levering', '')), 200), ''),
+    intro_en = nullif(left(trim(coalesce(inst ->> 'intro_en', '')), 1000), ''),
+    levering_en = nullif(left(trim(coalesce(inst ->> 'levering_en', '')), 200), ''),
     verzenden = coalesce((inst ->> 'verzenden')::boolean, false),
     amsterdam = coalesce((inst ->> 'amsterdam')::boolean, false),
     ophalen = coalesce((inst ->> 'ophalen')::boolean, false),
