@@ -1,0 +1,242 @@
+# ------------------------------------------------------------
+#  Vaste teksten van de site in het Nederlands (nl) en Engels (en).
+#  Een pagina is Engels als in de front matter "taal: en" staat.
+#  De Engelse pagina's staan onder /en/, de producenten in _producers/.
+# ------------------------------------------------------------
+
+nl:
+  locale: nl_NL
+  # Leeg = de tagline en description uit _config.yml
+  tagline:
+  omschrijving:
+  # Adressen van de hoofdpagina's in deze taal
+  url:
+    home: /
+    over: /over-ons/
+    producenten: /producenten/
+    hedonist: /hedonist/
+    contact: /contact/
+    horeca: /horeca/
+  naar_inhoud: Naar de inhoud
+  naar_home: naar de homepage
+  menu: Menu
+  sluiten: Sluiten
+  hoofdmenu: Hoofdmenu
+  regios_tonen: Toon producenten per regio
+  alle_producenten: Alle producenten bekijken
+  over: Over ons
+  producenten: Producenten
+  hedonist_glas: Hedonist glas
+  hedonist: Hedonist
+  contact: Contact
+  horeca_login: Horeca login
+  horeca: Horeca
+  taalkeuze: Taal
+  whatsapp_updates: WhatsApp-updates
+  website: Website
+  nix18: "NIX18: wij verkopen geen alcohol aan jongeren onder de 18 jaar."
+  kvk: KvK
+  btw: btw
+  voorwaarden: Algemene voorwaarden
+  herroepingsrecht: Herroepingsrecht
+  privacy: Privacy
+  stuur_whatsapp: Stuur ons een WhatsApp
+  of: of
+  mail_ons: Mail ons
+  mail_ons_klein: mail ons
+  contactblok_kop: Als eerste horen wanneer de nieuwe jaargangen binnenkomen
+  contactblok_tekst: Via WhatsApp laten we weten wanneer er nieuwe jaargangen van onze producenten binnenkomen, en je kunt ze daar direct bestellen.
+  lees_meer: Lees meer
+  # Leeftijdscheck
+  leeftijd_kop: Ben je 18 jaar of ouder?
+  leeftijd_tekst: Op deze website lees je over wijn. Daarom vragen we je eerst om je leeftijd.
+  leeftijd_ja: Ja, ik ben 18 of ouder
+  leeftijd_nee: Nee
+  leeftijd_nee_kop: Kom terug als je 18 bent
+  leeftijd_nee_tekst: Je moet 18 jaar of ouder zijn om deze website te bekijken.
+  # Pagina van een producent
+  kruimelpad: Kruimelpad
+  verkrijgbaar: In Nederland verkrijgbaar via
+  fles_alt: Een fles van %naam% op een bankje in het park
+  vorige_foto: Vorige foto
+  volgende_foto: Volgende foto
+  binnenkort: Binnenkort
+  interesse_wijnen: Interesse in een van deze wijnen?
+  over_naam: Over
+  land: Land
+  regio: Regio
+  plaats: Plaats
+  druiven: Druiven
+  wijngaard: Wijngaard
+  hectare: hectare
+  werkwijze: Werkwijze
+  beschikbaarheid: Vraag naar beschikbaarheid
+  website_van: Website van
+  meer_uit: Meer uit
+  producent_kop: Interesse in de wijnen van %naam%?
+  producent_tekst: Stuur ons een bericht via WhatsApp of mail. Dan laten we weten wat er beschikbaar is en wanneer de nieuwe jaargang binnenkomt.
+  seo_importeur: importeur in Nederland
+  seo_verkrijgbaar: "De wijnen van %naam% uit %regio% zijn in Nederland verkrijgbaar via importeur VMV Wijnimport."
+  # Hedonist-pre-order (_includes/hedonist-winkel.html)
+  winkel:
+    per_glas: per glas
+    voor_zes: voor 6 glazen van hetzelfde model
+    levering: Verwachte levering
+    veilig: Je betaalt veilig met iDEAL of via een bankoverschrijving.
+    aantal: Aantal
+    aantal_glazen: Aantal glazen
+    minder: Eén minder
+    meer: Eén meer
+    mandje: Winkelmandje
+    leeg: Je winkelmandje is leeg. Kies hiernaast hoeveel glazen je wilt.
+    bezorging: Bezorging
+    verzenden: Verzenden in Nederland
+    amsterdam: Bezorgen in Amsterdam
+    ophalen: Ophalen bij
+    gratis: gratis
+    glazen: Glazen
+    verzending: Verzending
+    totaal: Totaal
+    verder: Verder naar bestellen
+    gegevens: Je gegevens
+    naam: Naam
+    email: E-mailadres
+    telefoon: Telefoonnummer
+    ophalen_tekst: "Je haalt je bestelling op bij restaurant %naam%, %adres%. We laten je weten wanneer je bestelling klaarligt."
+    adres: Straat en huisnummer
+    postcode: Postcode
+    plaats: Plaats
+    betalen: Betalen
+    betalen_tekst: iDEAL of bankoverschrijving, via Mollie
+    opmerking: Opmerking
+    optioneel: (niet verplicht)
+    akkoord: Ik ga akkoord met de
+    voorwaarden: algemene voorwaarden
+    bestellen: Bestellen en betalen
+    btw: Prijzen zijn inclusief btw. Je hebt 14 dagen bedenktijd na ontvangst.
+    terug: Terug naar winkelmandje
+    bedankt: Bedankt voor je pre-order
+    ontvangen: We hebben je bestelling ontvangen.
+    betaallink: Je krijgt van ons per mail een iDEAL-betaallink.
+    levering_in: De verwachte levering is in
+
+en:
+  locale: en_GB
+  tagline: Wines from a new generation
+  omschrijving: We import Champagne and wine from a new generation of winemakers. They work without pesticides or herbicides and add as little as possible in the cellar.
+  url:
+    home: /en/
+    over: /en/about-us/
+    producenten: /en/producers/
+    hedonist: /en/hedonist/
+    contact: /en/contact/
+    horeca: /horeca/
+  naar_inhoud: Skip to content
+  naar_home: to the homepage
+  menu: Menu
+  sluiten: Close
+  hoofdmenu: Main menu
+  regios_tonen: Show producers by region
+  alle_producenten: View all producers
+  over: About us
+  producenten: Producers
+  hedonist_glas: Hedonist glass
+  hedonist: Hedonist
+  contact: Contact
+  horeca_login: Trade login
+  horeca: Trade
+  taalkeuze: Language
+  whatsapp_updates: WhatsApp updates
+  website: Website
+  nix18: "NIX18: we do not sell alcohol to anyone under 18."
+  kvk: Chamber of Commerce
+  btw: VAT
+  voorwaarden: Terms and conditions (Dutch)
+  herroepingsrecht: Right of withdrawal (Dutch)
+  privacy: Privacy (Dutch)
+  stuur_whatsapp: Send us a WhatsApp
+  of: or
+  mail_ons: Email us
+  mail_ons_klein: email us
+  contactblok_kop: Be the first to hear when new vintages arrive
+  contactblok_tekst: We use WhatsApp to let you know when new vintages from our producers come in, and you can order them there straight away.
+  lees_meer: Read more
+  leeftijd_kop: Are you 18 or older?
+  leeftijd_tekst: This website is about wine, so we first need to ask your age.
+  leeftijd_ja: Yes, I am 18 or older
+  leeftijd_nee: "No"
+  leeftijd_nee_kop: Come back when you are 18
+  leeftijd_nee_tekst: You must be 18 or older to view this website.
+  kruimelpad: Breadcrumb
+  verkrijgbaar: Available in the Netherlands through
+  fles_alt: A bottle from %naam% on a park bench
+  vorige_foto: Previous photo
+  volgende_foto: Next photo
+  binnenkort: Coming soon
+  interesse_wijnen: Interested in one of these wines?
+  over_naam: About
+  land: Country
+  regio: Region
+  plaats: Village
+  druiven: Grapes
+  wijngaard: Vineyard
+  hectare: hectares
+  werkwijze: Approach
+  beschikbaarheid: Ask about availability
+  website_van: Website of
+  meer_uit: More from
+  producent_kop: Interested in the wines of %naam%?
+  producent_tekst: Send us a message on WhatsApp or by email. We will let you know what is available and when the new vintage arrives.
+  seo_importeur: importer in the Netherlands
+  seo_verkrijgbaar: "The wines of %naam% from %regio% are available in the Netherlands through importer VMV Wijnimport."
+  winkel:
+    per_glas: per glass
+    voor_zes: for 6 glasses of the same model
+    levering: Expected delivery
+    veilig: You pay securely with iDEAL or by bank transfer.
+    aantal: Quantity
+    aantal_glazen: Number of glasses
+    minder: One less
+    meer: One more
+    mandje: Basket
+    leeg: Your basket is empty. Choose how many glasses you would like.
+    bezorging: Delivery
+    verzenden: Shipping within the Netherlands
+    amsterdam: Delivery in Amsterdam
+    ophalen: Collect at
+    gratis: free
+    glazen: Glasses
+    verzending: Shipping
+    totaal: Total
+    verder: Continue to order
+    gegevens: Your details
+    naam: Name
+    email: Email address
+    telefoon: Phone number
+    ophalen_tekst: "You collect your order at restaurant %naam%, %adres%. We will let you know when your order is ready."
+    adres: Street and house number
+    postcode: Postcode
+    plaats: Town or city
+    betalen: Payment
+    betalen_tekst: iDEAL or bank transfer, via Mollie
+    opmerking: Note
+    optioneel: (optional)
+    akkoord: I agree to the
+    voorwaarden: terms and conditions (in Dutch)
+    bestellen: Order and pay
+    btw: Prices include VAT. You have a 14-day cooling-off period after receipt.
+    terug: Back to basket
+    bedankt: Thank you for your pre-order
+    ontvangen: We have received your order.
+    betaallink: We will email you an iDEAL payment link.
+    levering_in: Expected delivery is in
+  # Namen van landen, regio's en druiven in het Engels
+  namen:
+    Frankrijk: France
+    Duitsland: Germany
+    Italië: Italy
+    Bourgogne: Burgundy
+    Piëmont: Piedmont
+    Franken: Franconia
+    Champagne: Champagne
+    Assemblage: Blend

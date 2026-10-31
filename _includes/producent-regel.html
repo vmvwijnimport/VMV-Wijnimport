@@ -1,10 +1,19 @@
 {%- assign p = include.p -%}
+{%- comment -%} Op een Engelse pagina: de link en de samenvatting van de Engelse versie (_producers/) {%- endcomment -%}
+{%- assign url = p.url -%}
+{%- assign samenvatting = p.samenvatting -%}
+{%- if page.taal == "en" -%}
+  {%- assign en = site.producers | where: "slug", p.slug | first -%}
+  {%- capture url %}/en/producers/{{ p.slug }}/{% endcapture -%}
+  {%- assign samenvatting = en.samenvatting | default: p.samenvatting -%}
+{%- endif -%}
+{%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
 {%- assign lijstfoto = p.lijst_foto | default: p.foto -%}
 {%- comment -%} Foto's in /lijst/ (fles op een bankje) bestaan ook in een kleine versie, met -klein erachter {%- endcomment -%}
 {%- assign flesfoto = false -%}
 {%- if lijstfoto contains "/lijst/" -%}{%- assign flesfoto = true -%}{%- endif -%}
 <li class="producentregel{% if include.extra %} producentregel--extra{% endif %}">
-  <a class="producentregel__link" href="{{ p.url | relative_url }}">
+  <a class="producentregel__link" href="{{ url | relative_url }}">
     {%- if lijstfoto %}
     {%- if flesfoto %}
     {%- assign kleinefoto = lijstfoto | replace: ".jpg", "-klein.jpg" %}
@@ -18,8 +27,8 @@
     <span class="producentregel__tekst">
       <span class="producentregel__naam">{{ p.naam }}</span>
       {%- if p.plaats %}<span class="producentregel__plek">{{ p.plaats }}</span>{% endif %}
-      {%- if p.samenvatting %}<span class="producentregel__samenvatting">{{ p.samenvatting }}</span>{% elsif p.cuvees.size > 0 %}<span class="producentregel__samenvatting">{{ p.cuvees.size }} {% if p.cuvees.size == 1 %}cuvée{% else %}cuvées{% endif %}</span>{% endif %}
+      {%- if samenvatting %}<span class="producentregel__samenvatting">{{ samenvatting }}</span>{% elsif p.cuvees.size > 0 %}<span class="producentregel__samenvatting">{{ p.cuvees.size }} {% if p.cuvees.size == 1 %}cuvée{% else %}cuvées{% endif %}</span>{% endif %}
     </span>
-    <span class="producentregel__meer" aria-hidden="true">Lees meer</span>
+    <span class="producentregel__meer" aria-hidden="true">{{ t.lees_meer }}</span>
   </a>
 </li>

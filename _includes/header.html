@@ -1,21 +1,37 @@
+{%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
 {%- assign producenten = site.producenten | sort: "naam" -%}
 {%- assign regios = producenten | group_by: "regio" | sort: "name" -%}
 <header class="kop">
   <div class="kop__binnen">
-    <a class="kop__logo" href="{{ '/' | relative_url }}" aria-label="{{ site.title }}, naar de homepage">
+    <a class="kop__logo" href="{{ t.url.home | relative_url }}" aria-label="{{ site.title }}, {{ t.naar_home }}">
       <img src="{{ '/brand/logo/svg/vmv-logo-horizontaal.svg' | relative_url }}" alt="VMV Wijnimport" width="1106" height="427">
     </a>
 
+    {%- comment -%} Taalkeuze: de link naar dezelfde pagina in de andere taal (vertaling in de front matter) {%- endcomment -%}
+    {%- if page.taal == "en" -%}
+      {%- assign url_nl = page.vertaling | default: "/" -%}
+      {%- if page.collection == "producers" %}{% capture url_nl %}/producenten/{{ page.slug }}/{% endcapture %}{% endif -%}
+      {%- assign url_en = page.url -%}
+    {%- else -%}
+      {%- assign url_en = page.vertaling | default: "/en/" -%}
+      {%- if page.collection == "producenten" %}{% capture url_en %}/en/producers/{{ page.slug }}/{% endcapture %}{% endif -%}
+      {%- assign url_nl = page.url -%}
+    {%- endif %}
+    <nav class="taalkeuze" aria-label="{{ t.taalkeuze }}">
+      <a href="{{ url_nl | relative_url }}" hreflang="nl" lang="nl"{% if page.taal != "en" %} aria-current="true"{% endif %}>NL</a>
+      <a href="{{ url_en | relative_url }}" hreflang="en" lang="en"{% if page.taal == "en" %} aria-current="true"{% endif %}>EN</a>
+    </nav>
+
     <button class="kop__menuknop" type="button" aria-expanded="false" aria-controls="hoofdmenu">
-      <span class="kop__menuknop-tekst">Menu</span>
+      <span class="kop__menuknop-tekst">{{ t.menu }}</span>
     </button>
 
-    <nav class="menu" id="hoofdmenu" aria-label="Hoofdmenu">
+    <nav class="menu" id="hoofdmenu" aria-label="{{ t.hoofdmenu }}">
       <ul class="menu__lijst">
-        <li><a href="{{ '/over-ons/' | relative_url }}"{% if page.url == '/over-ons/' %} aria-current="page"{% endif %}>Over ons</a></li>
+        <li><a href="{{ t.url.over | relative_url }}"{% if page.url == t.url.over %} aria-current="page"{% endif %}>{{ t.over }}</a></li>
         <li class="menu__uitklap">
-          <a href="{{ '/producenten/' | relative_url }}"{% if page.url contains '/producenten/' %} aria-current="page"{% endif %}>Producenten</a>
-          <button class="menu__uitklapknop" type="button" aria-expanded="false" aria-controls="menu-regios" aria-label="Toon producenten per regio">
+          <a href="{{ t.url.producenten | relative_url }}"{% if page.url contains t.url.producenten %} aria-current="page"{% endif %}>{{ t.producenten }}</a>
+          <button class="menu__uitklapknop" type="button" aria-expanded="false" aria-controls="menu-regios" aria-label="{{ t.regios_tonen }}">
             <svg viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
           </button>
           {%- comment -%}
@@ -29,20 +45,20 @@
           <div class="menu__paneel" id="menu-regios">
             <div class="menu__regios">
               <div class="menu__regio menu__regio--breed">
-                <p class="menu__regionaam">{{ grootste.name }} <span>{{ grootste.items.first.land }}</span></p>
+                <p class="menu__regionaam">{{ t.namen[grootste.name] | default: grootste.name }} <span>{{ t.namen[grootste.items.first.land] | default: grootste.items.first.land }}</span></p>
                 <ul>
                   {%- for p in grootste.items %}
-                  <li><a href="{{ p.url | relative_url }}">{{ p.naam }}</a></li>
+                  <li><a href="{% if page.taal == "en" %}{{ '/en/producers/' | append: p.slug | append: '/' | relative_url }}{% else %}{{ p.url | relative_url }}{% endif %}">{{ p.naam }}</a></li>
                   {%- endfor %}
                 </ul>
               </div>
               {%- for regio in overige limit: 1 %}
               <div class="menu__kolom">
                 <div class="menu__regio">
-                  <p class="menu__regionaam">{{ regio.name }} <span>{{ regio.items.first.land }}</span></p>
+                  <p class="menu__regionaam">{{ t.namen[regio.name] | default: regio.name }} <span>{{ t.namen[regio.items.first.land] | default: regio.items.first.land }}</span></p>
                   <ul>
                     {%- for p in regio.items %}
-                    <li><a href="{{ p.url | relative_url }}">{{ p.naam }}</a></li>
+                    <li><a href="{% if page.taal == "en" %}{{ '/en/producers/' | append: p.slug | append: '/' | relative_url }}{% else %}{{ p.url | relative_url }}{% endif %}">{{ p.naam }}</a></li>
                     {%- endfor %}
                   </ul>
                 </div>
@@ -52,10 +68,10 @@
               <div class="menu__kolom">
                 {%- for regio in overige offset: 1 %}
                 <div class="menu__regio">
-                  <p class="menu__regionaam">{{ regio.name }} <span>{{ regio.items.first.land }}</span></p>
+                  <p class="menu__regionaam">{{ t.namen[regio.name] | default: regio.name }} <span>{{ t.namen[regio.items.first.land] | default: regio.items.first.land }}</span></p>
                   <ul>
                     {%- for p in regio.items %}
-                    <li><a href="{{ p.url | relative_url }}">{{ p.naam }}</a></li>
+                    <li><a href="{% if page.taal == "en" %}{{ '/en/producers/' | append: p.slug | append: '/' | relative_url }}{% else %}{{ p.url | relative_url }}{% endif %}">{{ p.naam }}</a></li>
                     {%- endfor %}
                   </ul>
                 </div>
@@ -63,12 +79,12 @@
               </div>
               {%- endif %}
             </div>
-            <p class="menu__voet"><a class="knop knop--secundair" href="{{ '/producenten/' | relative_url }}">Alle producenten bekijken</a></p>
+            <p class="menu__voet"><a class="knop knop--secundair" href="{{ t.url.producenten | relative_url }}">{{ t.alle_producenten }}</a></p>
           </div>
         </li>
-        <li><a href="{{ '/hedonist/' | relative_url }}"{% if page.url == '/hedonist/' %} aria-current="page"{% endif %}>Hedonist glas</a></li>
-        <li><a href="{{ '/contact/' | relative_url }}"{% if page.url == '/contact/' %} aria-current="page"{% endif %}>Contact</a></li>
-        <li><a href="{{ '/horeca/' | relative_url }}"{% if page.url == '/horeca/' %} aria-current="page"{% endif %}>Horeca login</a></li>
+        <li><a href="{{ t.url.hedonist | relative_url }}"{% if page.url == t.url.hedonist %} aria-current="page"{% endif %}>{{ t.hedonist_glas }}</a></li>
+        <li><a href="{{ t.url.contact | relative_url }}"{% if page.url == t.url.contact %} aria-current="page"{% endif %}>{{ t.contact }}</a></li>
+        <li><a href="{{ t.url.horeca | relative_url }}"{% if page.url == '/horeca/' %} aria-current="page"{% endif %}>{{ t.horeca_login }}</a></li>
       </ul>
     </nav>
   </div>

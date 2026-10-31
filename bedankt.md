@@ -1,4 +1,5 @@
 ---
+vertaling: /en/thank-you/
 layout: pagina
 title: Bericht verstuurd
 permalink: /bedankt/

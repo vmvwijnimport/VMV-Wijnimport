@@ -4,16 +4,19 @@
   betalen gebeurt daarna via een betaalverzoek.
 {%- endcomment -%}
 {%- assign w = site.data.winkel -%}
+{%- assign wt = site.data.teksten[page.taal].winkel | default: site.data.teksten.nl.winkel -%}
+{%- assign en = false %}{% if page.taal == "en" %}{% assign en = true %}{% endif -%}
+{%- assign levering = w.levering -%}{%- if en %}{% assign levering = w.levering_en | default: w.levering %}{% endif -%}
 {%- if w.open -%}
 <section class="winkel" id="bestellen" aria-labelledby="winkel-kop">
   <div class="winkel__binnen">
     <header class="winkel__kop">
-      <h2 id="winkel-kop">{{ w.kop }}</h2>
+      <h2 id="winkel-kop">{% if en %}{{ w.kop_en | default: w.kop }}{% else %}{{ w.kop }}{% endif %}</h2>
       <p class="winkel__prijzen">
-        <span><strong>{% include euro.html bedrag=w.prijs_glas %}</strong> per glas <s>{% include euro.html bedrag=w.prijs_glas_normaal %}</s></span>
-        <span><strong>{% include euro.html bedrag=w.prijs_zes %}</strong> voor 6 glazen van hetzelfde model <s>{% include euro.html bedrag=w.prijs_zes_normaal %}</s></span>
+        <span><strong>{% include euro.html bedrag=w.prijs_glas %}</strong> {{ wt.per_glas }} <s>{% include euro.html bedrag=w.prijs_glas_normaal %}</s></span>
+        <span><strong>{% include euro.html bedrag=w.prijs_zes %}</strong> {{ wt.voor_zes }} <s>{% include euro.html bedrag=w.prijs_zes_normaal %}</s></span>
       </p>
-      <p class="winkel__levering">Verwachte levering: {{ w.levering }}. Je betaalt veilig met iDEAL of via een bankoverschrijving.</p>
+      <p class="winkel__levering">{{ wt.levering }}: {{ levering }}. {{ wt.veilig }}</p>
     </header>
 
     <div class="winkel__raster">
@@ -23,11 +26,11 @@
           <img class="product__foto" src="{{ m.foto | relative_url }}" alt="{{ m.naam | escape }}" loading="lazy">
           <div class="product__info">
             <h3>{{ m.naam }}</h3>
-            <p>{{ m.omschrijving }}</p>
-            <div class="aantal" role="group" aria-label="Aantal {{ m.naam | escape }}">
-              <button type="button" class="aantal__knop" data-stap="-1" aria-label="Eén minder">−</button>
-              <input class="aantal__veld" type="number" min="0" max="120" value="0" inputmode="numeric" aria-label="Aantal glazen {{ m.naam | escape }}">
-              <button type="button" class="aantal__knop" data-stap="1" aria-label="Eén meer">+</button>
+            <p>{% if en %}{{ m.omschrijving_en | default: m.omschrijving }}{% else %}{{ m.omschrijving }}{% endif %}</p>
+            <div class="aantal" role="group" aria-label="{{ wt.aantal }} {{ m.naam | escape }}">
+              <button type="button" class="aantal__knop" data-stap="-1" aria-label="{{ wt.minder }}">−</button>
+              <input class="aantal__veld" type="number" min="0" max="120" value="0" inputmode="numeric" aria-label="{{ wt.aantal_glazen }} {{ m.naam | escape }}">
+              <button type="button" class="aantal__knop" data-stap="1" aria-label="{{ wt.meer }}">+</button>
             </div>
           </div>
         </li>
@@ -35,51 +38,51 @@
       </ul>
 
       <aside class="mandje" aria-labelledby="mandje-kop">
-        <h3 id="mandje-kop">Winkelmandje</h3>
-        <p class="mandje__leeg">Je winkelmandje is leeg. Kies hiernaast hoeveel glazen je wilt.</p>
+        <h3 id="mandje-kop">{{ wt.mandje }}</h3>
+        <p class="mandje__leeg">{{ wt.leeg }}</p>
         <div class="mandje__inhoud" hidden>
           <ul class="mandje__regels"></ul>
-          <div class="bezorging" role="radiogroup" aria-label="Bezorging">
-            <label><input type="radio" name="bezorging" value="verzenden" checked> Verzenden in Nederland</label>
-            <label><input type="radio" name="bezorging" value="amsterdam"> Bezorgen in Amsterdam</label>
-            <label><input type="radio" name="bezorging" value="ophalen"> Ophalen bij {{ w.ophalen.naam }}, Amsterdam (gratis)</label>
+          <div class="bezorging" role="radiogroup" aria-label="{{ wt.bezorging }}">
+            <label><input type="radio" name="bezorging" value="verzenden" checked> {{ wt.verzenden }}</label>
+            <label><input type="radio" name="bezorging" value="amsterdam"> {{ wt.amsterdam }}</label>
+            <label><input type="radio" name="bezorging" value="ophalen"> {{ wt.ophalen }} {{ w.ophalen.naam }}, Amsterdam ({{ wt.gratis }})</label>
           </div>
           <dl class="mandje__totalen">
-            <div><dt>Glazen</dt><dd class="mandje__subtotaal"></dd></div>
-            <div><dt>Verzending</dt><dd class="mandje__verzending"></dd></div>
-            <div class="mandje__totaal"><dt>Totaal</dt><dd class="mandje__som"></dd></div>
+            <div><dt>{{ wt.glazen }}</dt><dd class="mandje__subtotaal"></dd></div>
+            <div><dt>{{ wt.verzending }}</dt><dd class="mandje__verzending"></dd></div>
+            <div class="mandje__totaal"><dt>{{ wt.totaal }}</dt><dd class="mandje__som"></dd></div>
           </dl>
           <p class="mandje__tip" aria-live="polite"></p>
-          <button class="knop knop--licht mandje__verder" type="button">Verder naar bestellen</button>
+          <button class="knop knop--licht mandje__verder" type="button">{{ wt.verder }}</button>
         </div>
 
         <form class="bestel" id="bestelformulier" hidden data-ajax="{{ site.formulier_endpoint }}">
-          <h4 class="bestel__kop">Je gegevens</h4>
+          <h4 class="bestel__kop">{{ wt.gegevens }}</h4>
           <input type="text" name="_honey" class="formulier__honing" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <div class="veld"><label for="b-naam">Naam</label><input id="b-naam" name="naam" autocomplete="name" required></div>
-          <div class="veld"><label for="b-email">E-mailadres</label><input id="b-email" name="email" type="email" autocomplete="email" required></div>
-          <div class="veld"><label for="b-tel">Telefoonnummer</label><input id="b-tel" name="telefoon" type="tel" autocomplete="tel" required></div>
-          <p class="bestel__ophalen" hidden>Je haalt je bestelling op bij restaurant {{ w.ophalen.naam }}, {{ w.ophalen.adres }}. We laten je weten wanneer je bestelling klaarligt.</p>
-          <div class="veld" data-adres><label for="b-adres">Straat en huisnummer</label><input id="b-adres" name="adres" autocomplete="street-address" required></div>
+          <div class="veld"><label for="b-naam">{{ wt.naam }}</label><input id="b-naam" name="naam" autocomplete="name" required></div>
+          <div class="veld"><label for="b-email">{{ wt.email }}</label><input id="b-email" name="email" type="email" autocomplete="email" required></div>
+          <div class="veld"><label for="b-tel">{{ wt.telefoon }}</label><input id="b-tel" name="telefoon" type="tel" autocomplete="tel" required></div>
+          <p class="bestel__ophalen" hidden>{{ wt.ophalen_tekst | replace: "%naam%", w.ophalen.naam | replace: "%adres%", w.ophalen.adres }}</p>
+          <div class="veld" data-adres><label for="b-adres">{{ wt.adres }}</label><input id="b-adres" name="adres" autocomplete="street-address" required></div>
           <div class="veld veld--rij" data-adres>
-            <div><label for="b-postcode">Postcode</label><input id="b-postcode" name="postcode" autocomplete="postal-code" required></div>
-            <div><label for="b-plaats">Plaats</label><input id="b-plaats" name="plaats" autocomplete="address-level2" required></div>
+            <div><label for="b-postcode">{{ wt.postcode }}</label><input id="b-postcode" name="postcode" autocomplete="postal-code" required></div>
+            <div><label for="b-plaats">{{ wt.plaats }}</label><input id="b-plaats" name="plaats" autocomplete="address-level2" required></div>
           </div>
           <div class="betaalwijze">
-            <p class="betaalwijze__kop">Betalen</p>
-            <div class="betaalwijze__optie"><span class="ideal" aria-hidden="true">iDEAL</span> iDEAL of bankoverschrijving, via Mollie</div>
+            <p class="betaalwijze__kop">{{ wt.betalen }}</p>
+            <div class="betaalwijze__optie"><span class="ideal" aria-hidden="true">iDEAL</span> {{ wt.betalen_tekst }}</div>
           </div>
-          <div class="veld"><label for="b-opmerking">Opmerking <span class="veld__optioneel">(niet verplicht)</span></label><textarea id="b-opmerking" name="opmerking" rows="3"></textarea></div>
-          <label class="akkoord"><input type="checkbox" name="akkoord" required> Ik ga akkoord met de <a href="{{ '/algemene-voorwaarden/' | relative_url }}" target="_blank" rel="noopener">algemene voorwaarden</a></label>
-          <button class="knop knop--licht bestel__betaal" type="submit">Bestellen en betalen</button>
-          <p class="bestel__klein">Prijzen zijn inclusief btw. Je hebt 14 dagen bedenktijd na ontvangst.</p>
-          <button class="bestel__terug" type="button">Terug naar winkelmandje</button>
+          <div class="veld"><label for="b-opmerking">{{ wt.opmerking }} <span class="veld__optioneel">{{ wt.optioneel }}</span></label><textarea id="b-opmerking" name="opmerking" rows="3"></textarea></div>
+          <label class="akkoord"><input type="checkbox" name="akkoord" required> {{ wt.akkoord }} <a href="{{ '/algemene-voorwaarden/' | relative_url }}" target="_blank" rel="noopener">{{ wt.voorwaarden }}</a></label>
+          <button class="knop knop--licht bestel__betaal" type="submit">{{ wt.bestellen }}</button>
+          <p class="bestel__klein">{{ wt.btw }}</p>
+          <button class="bestel__terug" type="button">{{ wt.terug }}</button>
           <p class="formulier__status" role="status" aria-live="polite"></p>
         </form>
 
         <div class="bestel__klaar" hidden>
-          <h3>Bedankt voor je pre-order</h3>
-          <p>We hebben je bestelling ontvangen.{% unless w.betalen.actief %} Je krijgt van ons per mail een iDEAL-betaallink.{% endunless %} De verwachte levering is in {{ w.levering }}.</p>
+          <h3>{{ wt.bedankt }}</h3>
+          <p>{{ wt.ontvangen }}{% unless w.betalen.actief %} {{ wt.betaallink }}{% endunless %} {{ wt.levering_in }} {{ levering }}.</p>
         </div>
       </aside>
     </div>
@@ -93,7 +96,7 @@
   "verzendkosten": {{ w.verzendkosten }},
   "gratisVanaf": {{ w.gratis_verzenden_vanaf }},
   "gratisAmsterdamVanaf": {{ w.gratis_amsterdam_vanaf }},
-  "levering": {{ w.levering | jsonify }},
+  "levering": {{ levering | jsonify }},
   "idealActief": {{ w.betalen.actief | default: false }},
   "ophalenBij": {{ w.ophalen.naam | jsonify }},
   "koppeling": {{ w.betalen.koppeling | default: "" | jsonify }},

@@ -2,24 +2,25 @@
   Leeftijdscheck bij het eerste bezoek. Het antwoord wordt 30 dagen onthouden
   in een cookie (vmv18). Zonder JavaScript wordt de check niet getoond.
 {%- endcomment -%}
+{%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
 <div class="leeftijd" id="leeftijdscheck" role="dialog" aria-modal="true" aria-labelledby="leeftijd-kop" aria-describedby="leeftijd-tekst">
   <div class="leeftijd__binnen">
     <img class="leeftijd__logo" src="{{ '/brand/logo/svg/vmv-logo.svg' | relative_url }}" alt="VMV Wijnimport" width="602" height="573">
 
     <div class="leeftijd__vraag">
-      <h2 id="leeftijd-kop">Ben je 18 jaar of ouder?</h2>
-      <p id="leeftijd-tekst">Op deze website lees je over wijn. Daarom vragen we je eerst om je leeftijd.</p>
+      <h2 id="leeftijd-kop">{{ t.leeftijd_kop }}</h2>
+      <p id="leeftijd-tekst">{{ t.leeftijd_tekst }}</p>
       <div class="knoppen">
-        <button class="knop knop--primair" type="button" data-leeftijd="ja">Ja, ik ben 18 of ouder</button>
-        <button class="knop knop--secundair" type="button" data-leeftijd="nee">Nee</button>
+        <button class="knop knop--primair" type="button" data-leeftijd="ja">{{ t.leeftijd_ja }}</button>
+        <button class="knop knop--secundair" type="button" data-leeftijd="nee">{{ t.leeftijd_nee }}</button>
       </div>
     </div>
 
     <div class="leeftijd__nee" hidden>
-      <h2>Kom terug als je 18 bent</h2>
-      <p>Je moet 18 jaar of ouder zijn om deze website te bekijken.</p>
+      <h2>{{ t.leeftijd_nee_kop }}</h2>
+      <p>{{ t.leeftijd_nee_tekst }}</p>
     </div>
 
-    <p class="leeftijd__klein">NIX18: wij verkopen geen alcohol aan jongeren onder de 18 jaar.</p>
+    <p class="leeftijd__klein">{{ t.nix18 }}</p>
   </div>
 </div>

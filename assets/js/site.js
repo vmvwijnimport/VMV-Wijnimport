@@ -1,5 +1,8 @@
 // Menu (mobiel), uitklapmenu producenten en het contactformulier.
 document.addEventListener("DOMContentLoaded", function () {
+  // Engelse pagina's (onder /en/) krijgen Engelse meldingen
+  var EN = document.documentElement.lang === "en";
+
   // ---- Leeftijdscheck ----
   var check = document.getElementById("leeftijdscheck");
   if (check && document.documentElement.classList.contains("leeftijd-open")) {
@@ -30,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
     menuknop.addEventListener("click", function () {
       var open = menu.classList.toggle("open");
       menuknop.setAttribute("aria-expanded", open);
-      menuknop.querySelector(".kop__menuknop-tekst").textContent = open ? "Sluiten" : "Menu";
+      menuknop.querySelector(".kop__menuknop-tekst").textContent = open ? (EN ? "Close" : "Sluiten") : "Menu";
       document.body.classList.toggle("menu-open", open);
     });
   }
@@ -110,13 +113,16 @@ document.addEventListener("DOMContentLoaded", function () {
   onderwerp.addEventListener("change", toonProducent);
   toonProducent();
 
-  // Eigen validatie in het Nederlands: bij verlaten van een veld en bij versturen
+  // Eigen validatie in het Nederlands (of Engels): bij verlaten van een veld en bij versturen
   var EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
   var regels = {
-    naam: function (v) { return v ? "" : "Vul je naam in"; },
-    email: function (v) { return !v ? "Vul je e-mailadres in" : EMAIL.test(v) ? "" : "Dit e-mailadres klopt niet. Bijvoorbeeld: naam@voorbeeld.nl"; },
-    onderwerp: function (v) { return v ? "" : "Kies waar je vraag over gaat"; },
-    bericht: function (v) { return v ? "" : "Schrijf een kort bericht"; }
+    naam: function (v) { return v ? "" : EN ? "Please enter your name" : "Vul je naam in"; },
+    email: function (v) {
+      if (!v) return EN ? "Please enter your email address" : "Vul je e-mailadres in";
+      return EMAIL.test(v) ? "" : EN ? "This email address is not valid. For example: name@example.com" : "Dit e-mailadres klopt niet. Bijvoorbeeld: naam@voorbeeld.nl";
+    },
+    onderwerp: function (v) { return v ? "" : EN ? "Choose what your question is about" : "Kies waar je vraag over gaat"; },
+    bericht: function (v) { return v ? "" : EN ? "Please write a short message" : "Schrijf een kort bericht"; }
   };
   var controleer = function (veld) {
     var melding = regels[veld.name](veld.value.trim());
@@ -153,7 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
     status.className = "formulier__status";
     status.textContent = "";
     knop.disabled = true;
-    knop.textContent = "Versturen…";
+    knop.textContent = EN ? "Sending…" : "Versturen…";
 
     var data = Object.fromEntries(new FormData(form).entries());
     data._replyto = data.email;
@@ -176,11 +182,13 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch(function () {
         status.classList.add("fout");
-        status.innerHTML = 'Het bericht is niet verstuurd. Probeer het opnieuw, of mail ons direct op <a href="mailto:info@vmvwijnimport.com">info@vmvwijnimport.com</a>.';
+        status.innerHTML = EN
+          ? 'Your message was not sent. Please try again, or email us directly at <a href="mailto:info@vmvwijnimport.com">info@vmvwijnimport.com</a>.'
+          : 'Het bericht is niet verstuurd. Probeer het opnieuw, of mail ons direct op <a href="mailto:info@vmvwijnimport.com">info@vmvwijnimport.com</a>.';
       })
       .finally(function () {
         knop.disabled = false;
-        knop.textContent = "Verstuur bericht";
+        knop.textContent = EN ? "Send message" : "Verstuur bericht";
       });
   });
 });

@@ -136,12 +136,25 @@ a:hover { color: var(--rood); }
 }
 .menu__voet { margin: var(--s-4) 0 0; padding-top: var(--s-3); border-top: 1px solid var(--lijn); }
 
+/* Taalkeuze NL / EN: rechts naast het menu, op mobiel naast de menuknop */
+.taalkeuze { order: 3; display: flex; align-items: center; margin: 0; font-size: var(--fs-klein); }
+.taalkeuze a {
+  display: inline-grid; place-items: center; min-width: 32px; min-height: 44px;
+  color: var(--tekst-zacht); text-decoration: none; letter-spacing: .02em;
+}
+.taalkeuze a + a { border-left: 1px solid var(--lijn); }
+.taalkeuze a:hover { color: var(--rood); }
+.taalkeuze a[aria-current] { color: var(--zwart); font-weight: 500; }
+.taalkeuze a:focus-visible { outline: 2px solid var(--rood); outline-offset: 2px; }
+.menu { margin-left: auto; }
+
 .kop__menuknop { display: none; }
 
 @media (max-width: 56rem) {
   :root { --kopgrootte: calc(60px + 2 * var(--s-1)); }
   .kop__logo img { height: 60px; }
 
+  .taalkeuze { order: 0; margin-left: auto; }
   .kop__menuknop {
     display: inline-flex; align-items: center; gap: var(--s-1);
     padding: var(--s-1) 0; border: 0; background: none;

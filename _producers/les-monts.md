@@ -1,0 +1,11 @@
+---
+foto_alt: Nina Saulnier walking between the vines
+samenvatting: Nina Saulnier and Lucas Mouchonnat make fresh, precise wines from their monopole Les Crucibées, high up in the Hautes-Côtes de Beaune.
+werkwijze: Organic
+---
+
+Nina Saulnier makes wine together with Lucas Mouchonnat in Fussey, in the Hautes-Côtes de Beaune. It is the last village of the appellation, right on the border between the Côte de Nuits and the Côte de Beaune, a few minutes' drive from Pernand-Vergelesses. Nina planted Pinot Noir and Chardonnay there on Les Crucibées, a 5.5-hectare plot that had been pasture for more than a hundred years. The plot is a monopole: it belongs entirely to her. It lies at 415 to 470 metres above sea level. The subsoil consists of marl, limestone and dolomite, with a thin layer of clay on top. They work organically and do a lot for biodiversity in and around the vineyard.
+
+The grapes from Les Crucibées are used for Jérémy Carteret's cuvée Euphoria. When Nina tasted what could be made from the grapes of this young vineyard, she decided to make wine from them herself as well. 2023 is the first vintage, with a white and a red Les Crucibées. In the cellar they add nothing. The wines are lightly filtered and only get a little sulphite when needed. Thanks to the altitude and the cool location, these are fresh, precise wines.
+
+Nina and Lucas are also working on a new vineyard: Sous Châtelet, planted with Aligoté. You may already know the name: Lalou Bize-Leroy makes the Aligoté of Domaine d'Auvenay from this vineyard. In the cellar Nina and Lucas are experimenting a lot too, with clay, steel and wooden barrels of different sizes.

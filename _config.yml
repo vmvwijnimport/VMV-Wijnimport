@@ -82,6 +82,10 @@ collections:
   producenten:
     output: true
     permalink: /producenten/:name/
+  # Engelse teksten van dezelfde producenten; de rest komt uit _producenten/
+  producers:
+    output: true
+    permalink: /en/producers/:name/
 
 defaults:
   - scope:
@@ -89,6 +93,16 @@ defaults:
       type: producenten
     values:
       layout: producent
+  - scope:
+      path: ""
+      type: producers
+    values:
+      layout: producent
+      taal: en
+  - scope:
+      path: "en"
+    values:
+      taal: en
   - scope:
       path: ""
     values:

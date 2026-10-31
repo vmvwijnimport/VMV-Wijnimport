@@ -6,12 +6,16 @@ document.addEventListener("DOMContentLoaded", function () {
   if (!bron || !winkel) return;
 
   var W = JSON.parse(bron.textContent);
+  // Op de Engelse pagina (/en/hedonist/) Engelse teksten; de mail aan VMV blijft Nederlands
+  var EN = document.documentElement.lang === "en";
+  var glas = function (n) { return EN ? (n === 1 ? " glass" : " glasses") : (n === 1 ? " glas" : " glazen"); };
   var OPSLAG = "vmv-hedonist-mandje";
   var mandje = {};
   try { mandje = JSON.parse(localStorage.getItem(OPSLAG)) || {}; } catch (e) { mandje = {}; }
 
   var euro = function (bedrag) {
-    return "€" + bedrag.toFixed(2).replace(".", ",").replace(",00", "");
+    var tekst = bedrag.toFixed(2).replace(".00", "");
+    return "€" + (EN ? tekst : tekst.replace(".", ","));
   };
   var bewaar = function () {
     try { localStorage.setItem(OPSLAG, JSON.stringify(mandje)); } catch (e) {}
@@ -36,15 +40,19 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   var tip = function (b) {
-    if (bezorging() === "ophalen") return "Je haalt je bestelling gratis op bij " + W.ophalenBij + " in Amsterdam.";
+    if (bezorging() === "ophalen") return EN ? "You collect your order for free at " + W.ophalenBij + " in Amsterdam." : "Je haalt je bestelling gratis op bij " + W.ophalenBij + " in Amsterdam.";
     var amsterdam = bezorging() === "amsterdam";
-    if (b.n >= W.gratisVanaf || (amsterdam && b.n >= W.gratisAmsterdamVanaf)) return "Je bestelling wordt gratis " + (amsterdam ? "bezorgd." : "verzonden.");
+    if (b.n >= W.gratisVanaf || (amsterdam && b.n >= W.gratisAmsterdamVanaf)) {
+      if (EN) return "Your order will be " + (amsterdam ? "delivered" : "shipped") + " for free.";
+      return "Je bestelling wordt gratis " + (amsterdam ? "bezorgd." : "verzonden.");
+    }
     if (amsterdam) {
       var nogA = W.gratisAmsterdamVanaf - b.n;
-      return "Nog " + nogA + (nogA === 1 ? " glas" : " glazen") + " voor gratis bezorging in Amsterdam.";
+      return EN ? nogA + " more" + glas(nogA) + " for free delivery in Amsterdam." : "Nog " + nogA + glas(nogA) + " voor gratis bezorging in Amsterdam.";
     }
     var nog = W.gratisVanaf - b.n;
-    return "Nog " + nog + (nog === 1 ? " glas" : " glazen") + " voor gratis verzending. In Amsterdam bezorgen we al gratis vanaf " + W.gratisAmsterdamVanaf + " glazen.";
+    if (EN) return nog + " more" + glas(nog) + " for free shipping. In Amsterdam we deliver for free from " + W.gratisAmsterdamVanaf + " glasses.";
+    return "Nog " + nog + glas(nog) + " voor gratis verzending. In Amsterdam bezorgen we al gratis vanaf " + W.gratisAmsterdamVanaf + " glazen.";
   };
 
   var leeg = winkel.querySelector(".mandje__leeg");
@@ -65,14 +73,14 @@ document.addEventListener("DOMContentLoaded", function () {
       .filter(function (id) { return mandje[id] > 0; })
       .map(function (id) {
         var a = mandje[id], sets = Math.floor(a / 6);
-        var uitleg = sets > 0 ? "<small>" + sets + " × 6 voor " + euro(W.prijsZes) + (a % 6 ? " + " + (a % 6) + " los" : "") + "</small>" : "";
+        var uitleg = sets > 0 ? "<small>" + sets + " × 6 " + (EN ? "for " : "voor ") + euro(W.prijsZes) + (a % 6 ? " + " + (a % 6) + (EN ? " single" : " los") : "") + "</small>" : "";
         return "<li><span>" + a + " × " + W.modellen[id] + uitleg + "</span><span>" + euro(prijsModel(a)) + "</span></li>";
       })
       .join("");
 
     winkel.querySelector(".mandje__subtotaal").textContent = euro(b.glazen);
-    form.querySelector(".bestel__betaal").textContent = "Bestellen en betalen · " + euro(b.totaal);
-    winkel.querySelector(".mandje__verzending").textContent = b.verzending === 0 ? "Gratis" : euro(b.verzending) + " (incl. verzekering)";
+    form.querySelector(".bestel__betaal").textContent = (EN ? "Order and pay · " : "Bestellen en betalen · ") + euro(b.totaal);
+    winkel.querySelector(".mandje__verzending").textContent = b.verzending === 0 ? (EN ? "Free" : "Gratis") : euro(b.verzending) + (EN ? " (incl. insurance)" : " (incl. verzekering)");
     winkel.querySelector(".mandje__som").textContent = euro(b.totaal);
     winkel.querySelector(".mandje__tip").textContent = b.n > 0 ? tip(b) : "";
   };
@@ -107,12 +115,12 @@ document.addEventListener("DOMContentLoaded", function () {
   winkel.querySelector(".mandje__verder").addEventListener("click", function () {
     inhoud.hidden = true;
     form.hidden = false;
-    winkel.querySelector("#mandje-kop").textContent = "Afrekenen";
+    winkel.querySelector("#mandje-kop").textContent = EN ? "Checkout" : "Afrekenen";
     form.querySelector("input[name=naam]").focus();
   });
   form.querySelector(".bestel__terug").addEventListener("click", function () {
     form.hidden = true;
-    winkel.querySelector("#mandje-kop").textContent = "Winkelmandje";
+    winkel.querySelector("#mandje-kop").textContent = EN ? "Basket" : "Winkelmandje";
     toon();
   });
 
@@ -135,7 +143,8 @@ document.addEventListener("DOMContentLoaded", function () {
     var postcodeVeld = form.querySelector("input[name=postcode]");
     postcodeVeld.setCustomValidity(
       bezorging() === "amsterdam" && !isAmsterdam(postcodeVeld.value)
-        ? "Bezorgen in Amsterdam kan alleen bij een Amsterdamse postcode (1011 tot en met 1109). Kies anders voor verzenden."
+        ? (EN ? "Delivery in Amsterdam is only possible with an Amsterdam postcode (1011 to 1109). Otherwise, choose shipping."
+              : "Bezorgen in Amsterdam kan alleen bij een Amsterdamse postcode (1011 tot en met 1109). Kies anders voor verzenden.")
         : ""
     );
     if (!form.reportValidity()) return;
@@ -145,23 +154,26 @@ document.addEventListener("DOMContentLoaded", function () {
       .filter(function (id) { return mandje[id] > 0; })
       .map(function (id) { return mandje[id] + " × " + W.modellen[id]; });
     var data = Object.fromEntries(new FormData(form).entries());
-    data._subject = "Pre-order Hedonist: " + b.n + " glazen, " + data.naam;
+    data._subject = "Pre-order Hedonist: " + b.n + " glazen, " + data.naam + (EN ? " (Engelse site)" : "");
     data._template = "table";
     data._captcha = "false";
     data._replyto = data.email;
-    data._autoresponse = "Bedankt voor je pre-order van Hedonist glazen bij VMV Wijnimport. We hebben je bestelling ontvangen en sturen je een iDEAL-betaallink. Verwachte levering: " + W.levering + ".";
+    data._autoresponse = EN
+      ? "Thank you for your pre-order of Hedonist glasses from VMV Wijnimport. We have received your order and will send you an iDEAL payment link. Expected delivery: " + W.levering + "."
+      : "Bedankt voor je pre-order van Hedonist glazen bij VMV Wijnimport. We hebben je bestelling ontvangen en sturen je een iDEAL-betaallink. Verwachte levering: " + W.levering + ".";
     data.betalen = W.idealActief ? "iDEAL (online)" : "iDEAL-betaallink sturen";
     data.bestelling = regels.join(", ");
     data.bezorging = { amsterdam: "Bezorgen in Amsterdam", ophalen: "Ophalen bij " + W.ophalenBij }[bezorging()] || "Verzenden";
     if (bezorging() === "ophalen") { delete data.adres; delete data.postcode; delete data.plaats; }
     data.glazen = euro(b.glazen);
     data.verzending = b.verzending === 0 ? "Gratis" : euro(b.verzending);
+    if (EN) data.taal = "Engels";
     data.totaal = euro(b.totaal);
 
     var knop = form.querySelector("button[type=submit]");
     knop.disabled = true;
     status.className = "formulier__status";
-    status.textContent = "Je bestelling wordt verstuurd...";
+    status.textContent = EN ? "Sending your order..." : "Je bestelling wordt verstuurd...";
 
     if (W.idealActief && W.koppeling) {
       fetch(W.koppeling.replace(/\/$/, "") + "/betaling", {
@@ -175,15 +187,18 @@ document.addEventListener("DOMContentLoaded", function () {
       })
         .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.fout || "Betalen lukt nu niet"); return j; }); })
         .then(function (betaling) {
-          try { sessionStorage.setItem("vmv-betaling", JSON.stringify({ id: betaling.id, bestelnummer: betaling.bestelnummer })); } catch (e) {}
-          status.textContent = "Je gaat nu naar de betaalpagina...";
+          // taal: na het betalen stuurt /bestelling/ Engelse klanten door naar /en/order/
+          try { sessionStorage.setItem("vmv-betaling", JSON.stringify({ id: betaling.id, bestelnummer: betaling.bestelnummer, taal: EN ? "en" : "nl" })); } catch (e) {}
+          status.textContent = EN ? "Taking you to the payment page..." : "Je gaat nu naar de betaalpagina...";
           // De mails naar de klant en naar VMV gaan pas als de betaling binnen is (betalen/worker.js)
           location.href = betaling.betaallink;
         })
         .catch(function (fout) {
           knop.disabled = false;
           status.classList.add("fout");
-          status.textContent = fout.message + ". Probeer het opnieuw of mail ons op info@vmvwijnimport.com.";
+          status.textContent = EN
+            ? "Payment is not possible right now. Please try again or email us at info@vmvwijnimport.com."
+            : fout.message + ". Probeer het opnieuw of mail ons op info@vmvwijnimport.com.";
         });
       return;
     }
@@ -203,7 +218,7 @@ document.addEventListener("DOMContentLoaded", function () {
         bewaar();
         form.reset();
         form.hidden = true;
-        winkel.querySelector("#mandje-kop").textContent = "Winkelmandje";
+        winkel.querySelector("#mandje-kop").textContent = EN ? "Basket" : "Winkelmandje";
         status.textContent = "";
         toon();
         leeg.hidden = true;
@@ -212,7 +227,9 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch(function () {
         status.classList.add("fout");
-        status.innerHTML = 'Je pre-order is niet verstuurd. Probeer het opnieuw, of mail ons op <a href="mailto:info@vmvwijnimport.com">info@vmvwijnimport.com</a>.';
+        status.innerHTML = EN
+          ? 'Your pre-order was not sent. Please try again, or email us at <a href="mailto:info@vmvwijnimport.com">info@vmvwijnimport.com</a>.'
+          : 'Je pre-order is niet verstuurd. Probeer het opnieuw, of mail ons op <a href="mailto:info@vmvwijnimport.com">info@vmvwijnimport.com</a>.';
       })
       .finally(function () { knop.disabled = false; });
   });

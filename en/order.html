@@ -1,0 +1,61 @@
+---
+layout: default
+taal: en
+vertaling: /bestelling/
+title: Your order
+permalink: /en/order/
+sitemap: false
+---
+{%- comment -%}
+  Engelse versie van /bestelling/. Mollie stuurt iedereen naar /bestelling/; wie op
+  /en/hedonist/ heeft besteld, wordt daar hierheen doorgestuurd.
+{%- endcomment -%}
+<section class="pagina">
+  <header class="pagina__kop">
+    <h1 id="bestelling-kop">Your order</h1>
+    <p class="pagina__intro" id="bestelling-tekst">We are checking your payment...</p>
+  </header>
+  <div class="tekst">
+    <p id="bestelling-nummer"></p>
+    <p><a href="{{ '/en/hedonist/' | relative_url }}">Back to Hedonist</a></p>
+    <p class="contactregel">Questions about your order? <a href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">Send us a WhatsApp</a> or email <a href="mailto:{{ site.email }}">{{ site.email }}</a>.</p>
+  </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var koppeling = {{ site.data.winkel.betalen.koppeling | default: "" | jsonify }};
+  var levering = {{ site.data.winkel.levering_en | default: site.data.winkel.levering | jsonify }};
+  var kop = document.getElementById("bestelling-kop");
+  var tekst = document.getElementById("bestelling-tekst");
+  var nummer = document.getElementById("bestelling-nummer");
+  var betaling = null;
+  try { betaling = JSON.parse(sessionStorage.getItem("vmv-betaling")); } catch (e) {}
+
+  if (!betaling || !koppeling) {
+    tekst.textContent = "We cannot find an order in this browser. Did you just pay? Then you will receive a confirmation by email.";
+    return;
+  }
+  nummer.textContent = "Order number: " + betaling.bestelnummer;
+
+  fetch(koppeling.replace(/\/$/, "") + "/status?id=" + encodeURIComponent(betaling.id))
+    .then(function (r) { return r.json(); })
+    .then(function (s) {
+      if (s.status === "paid") {
+        kop.textContent = "Thank you for your order";
+        tekst.textContent = "Your payment was successful. You will receive an invoice by email. Expected delivery is in " + levering + ".";
+        try { localStorage.removeItem("vmv-hedonist-mandje"); sessionStorage.removeItem("vmv-betaling"); } catch (e) {}
+      } else if (s.status === "open" || s.status === "pending") {
+        kop.textContent = "Thank you, your payment has not come in yet";
+        tekst.textContent = "Paying by bank transfer? We will process your order as soon as the amount is in our account. The payment details are in the email from Mollie.";
+        try { localStorage.removeItem("vmv-hedonist-mandje"); } catch (e) {}
+      } else {
+        kop.textContent = "Your payment did not go through";
+        tekst.textContent = "Nothing has been charged. Your basket is still waiting, so you can try again.";
+      }
+    })
+    .catch(function () {
+      tekst.textContent = "We could not check the status of your payment right now. You will receive a confirmation by email once the payment is in.";
+    });
+});
+</script>
