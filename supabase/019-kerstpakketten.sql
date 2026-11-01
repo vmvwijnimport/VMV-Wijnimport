@@ -30,8 +30,9 @@ insert into public.kerst_instellingen (id) values (1) on conflict (id) do nothin
 create table if not exists public.kerst_pakketten (
   id           bigint generated always as identity primary key,
   naam         text not null,
+  naam_en      text,                                          -- voor de Engelse pagina (leeg = de naam)
   omschrijving text,
-  omschrijving_en text,                                       -- voor de Engelse pagina
+  omschrijving_en text,
   prijs        numeric(10, 2) not null check (prijs >= 0),   -- incl. btw
   voorraad     int check (voorraad >= 0),                     -- leeg = geen maximum
   actief       boolean not null default false,
@@ -138,7 +139,7 @@ begin
     'bezorgenAmsterdam', i.bezorgen_amsterdam,
     'pakketten', coalesce((
       select jsonb_agg(jsonb_build_object(
-        'id', p.id, 'naam', p.naam, 'omschrijving', p.omschrijving, 'omschrijving_en', p.omschrijving_en, 'prijs', p.prijs,
+        'id', p.id, 'naam', p.naam, 'naam_en', p.naam_en, 'omschrijving', p.omschrijving, 'omschrijving_en', p.omschrijving_en, 'prijs', p.prijs,
         'beschikbaar', case when p.voorraad is null then null
                             else greatest(p.voorraad - public.kerst_verkocht('pakket', p.id), 0) end,
         'wijnen', coalesce((
@@ -204,7 +205,7 @@ revoke all on function public.kerst_betaald(text, text, text) from public;
 grant execute on function public.kerst_betaald(text, text, text) to anon;
 
 -- ---------- Backoffice ----------
--- pakket: {"id" (leeg = nieuw), "naam", "omschrijving", "omschrijving_en", "prijs", "voorraad", "actief", "volgorde",
+-- pakket: {"id" (leeg = nieuw), "naam", "naam_en", "omschrijving", "omschrijving_en", "prijs", "voorraad", "actief", "volgorde",
 --          "kaart_kop", "kaart_tekst", "wijnen": [{"product_id", "kaart_tekst", "past_bij"}]}
 create or replace function public.beheer_kerst_pakket(pakket jsonb)
 returns bigint
@@ -236,6 +237,7 @@ begin
     naam = v_naam, prijs = v_prijs, voorraad = v_voorraad,
     omschrijving = nullif(left(trim(coalesce(p ->> 'omschrijving', '')), 1000), ''),
     omschrijving_en = nullif(left(trim(coalesce(p ->> 'omschrijving_en', '')), 1000), ''),
+    naam_en = nullif(left(trim(coalesce(p ->> 'naam_en', '')), 200), ''),
     actief = coalesce((p ->> 'actief')::boolean, false),
     volgorde = coalesce(nullif(p ->> 'volgorde', '')::int, 0),
     kaart_kop = nullif(left(trim(coalesce(p ->> 'kaart_kop', '')), 200), ''),

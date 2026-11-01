@@ -301,6 +301,10 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
             <p class="veld__fout" id="pk-naam-fout" hidden></p>
           </div>
           <div class="veld">
+            <label for="pk-naam-en">Engels: naam <span class="veld__optioneel">(leeg = de Nederlandse)</span></label>
+            <input id="pk-naam-en" name="naam_en" maxlength="200" autocomplete="off" placeholder="Christmas box">
+          </div>
+          <div class="veld">
             <label for="pk-prijs">Prijs per pakket (incl. btw)</label>
             <input id="pk-prijs" name="prijs" type="text" inputmode="decimal" autocomplete="off" required aria-describedby="pk-prijs-fout">
             <p class="veld__fout" id="pk-prijs-fout" hidden></p>

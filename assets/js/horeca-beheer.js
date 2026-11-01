@@ -2032,6 +2032,7 @@
     var p = pakket || { actief: false, volgorde: K().pakketten.length };
     veld("pakketkop").textContent = pakket ? pakket.naam : "Nieuw pakket";
     pakketForm.naam.value = p.naam || "";
+    pakketForm.naam_en.value = p.naam_en || "";
     pakketForm.prijs.value = p.prijs != null ? kaal(p.prijs) : "";
     pakketForm.voorraad.value = p.voorraad != null ? p.voorraad : "";
     pakketForm.volgorde.value = p.volgorde || 0;
@@ -2065,7 +2066,7 @@
     var knop = veld("pakketknop");
     bezig(knop, "Opslaan…");
     db.rpc("beheer_kerst_pakket", { pakket: {
-      id: pakket ? pakket.id : "", naam: pakketForm.naam.value, prijs: String(prijs), voorraad: pakketForm.voorraad.value,
+      id: pakket ? pakket.id : "", naam: pakketForm.naam.value, naam_en: pakketForm.naam_en.value, prijs: String(prijs), voorraad: pakketForm.voorraad.value,
       volgorde: pakketForm.volgorde.value, omschrijving: pakketForm.omschrijving.value,
       omschrijving_en: pakketForm.omschrijving_en.value, actief: pakketForm.actief.checked,
       kaart_kop: pakketForm.kaart_kop.value, kaart_tekst: pakketForm.kaart_tekst.value, wijnen: wijnen
