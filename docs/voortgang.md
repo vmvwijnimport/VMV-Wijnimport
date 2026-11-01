@@ -102,6 +102,8 @@ Bijgewerkt: 19 oktober 2026
 
 De livegang voorbereiden met de eigenaar: Resend, Confirm email aan, FormSubmit activeren, samen een echte bestelling met mail testen, de testaccounts en testbestellingen verwijderen, de reservebranch wissen. Daarna mergen naar main, alleen met uitdrukkelijk akkoord.
 
+- **Automatisch Engels (1 nov), wens van de eigenaar:** staat de browser niet op Nederlands, dan gaat een Nederlandse pagina met een Engelse versie meteen naar die Engelse versie (script in `_includes/head.html`). Klikt de bezoeker rechtsboven op NL of EN, dan wordt die keuze onthouden (`vmv-taal` in de browser, `assets/js/site.js`) en geldt die voortaan. Zoekmachines worden niet doorgestuurd; pagina's zonder vertaling (horeca, backoffice, voorwaarden, privacy) ook niet. Op land kan niet: GitHub Pages weet niet waar een bezoeker zit. Getest met een Engelse, Duitse en Nederlandse browser en met een eerdere keuze voor NL.
+
 ## Kerstpakketten (31 okt), wens van de eigenaar, op de branch `kerst` (nog niet live)
 
 - **Keuzes eigenaar:** één doos van 6 flessen (3 champagnes, 1 wit, 2 rood); direct online betalen via Mollie; de klant kiest zelf: verzenden, bezorgen in Amsterdam of ophalen bij Oocker; een kaartje met informatie over elke wijn, af te drukken uit de backoffice. De ratafia van Sacy als extra erbij.
