@@ -78,7 +78,7 @@ KvK-nummer: {{ b.kvk }}<br>
 3. Kennelijke vergissingen of kennelijke fouten in het aanbod binden de ondernemer niet.
 4. Het aanbod is geldig zolang de voorraad of de pre-orderperiode strekt.
 5. Wijn is een natuurproduct. Smaak, kleur en ontwikkeling kunnen per fles en per jaargang iets verschillen. Een natuurlijk bezinksel (depot) of wijnsteen in de fles is geen gebrek.
-6. Bij een wijnpakket staat in het aanbod welke wijnen erin zitten. Is een wijn bij de levering niet meer beschikbaar, dan neemt de ondernemer contact op met de klant. De ondernemer kan dan een vergelijkbare wijn van minstens dezelfde waarde voorstellen, of een andere jaargang van dezelfde wijn. Gaat de klant daar niet mee akkoord, dan kan hij de overeenkomst voor dat pakket kosteloos ontbinden en betaalt de ondernemer het betaalde bedrag voor dat pakket binnen 14 dagen terug.
+6. Bij een wijnpakket staat in het aanbod welke wijnen erin zitten. Van veel wijnen heeft de ondernemer maar kleine aantallen. Het kan daarom gebeuren dat een wijn na het bestellen niet (meer) op voorraad blijkt te zijn, ook als de bestelling al is bevestigd en betaald. In dat geval neemt de ondernemer zo snel mogelijk contact op met de klant. De ondernemer kan dan een vergelijkbare wijn van minstens dezelfde waarde voorstellen, of een andere jaargang van dezelfde wijn. Gaat de klant daar niet mee akkoord, dan kan hij de overeenkomst voor dat pakket kosteloos ontbinden en betaalt de ondernemer het betaalde bedrag voor dat pakket binnen 14 dagen terug.
 
 ## Artikel 5. De overeenkomst {#artikel-5}
 
