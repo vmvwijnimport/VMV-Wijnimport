@@ -94,6 +94,8 @@ document.addEventListener("DOMContentLoaded", function () {
     var intro = EN ? A.intro_en : A.intro;
     if (intro) veld("intro").textContent = intro;
     var omschrijving = function (x) { return (EN && x.omschrijving_en) || x.omschrijving; };
+    // Op de Engelse pagina de Engelse naam van een pakket (ook in het mandje)
+    if (EN) A.pakketten.forEach(function (p) { if (p.naam_en) p.naam = p.naam_en; });
     var doel = veld("pakketten");
     doel.textContent = "";
     A.pakketten.forEach(function (p) {
