@@ -82,8 +82,8 @@
             <p class="menu__voet"><a class="knop knop--secundair" href="{{ t.url.producenten | relative_url }}">{{ t.alle_producenten }}</a></p>
           </div>
         </li>
-        {%- if site.kerst_in_menu and page.taal != "en" %}
-        <li><a href="{{ '/kerst/' | relative_url }}"{% if page.url == '/kerst/' %} aria-current="page"{% endif %}>Kerstpakket</a></li>
+        {%- if site.kerst_in_menu %}
+        <li><a href="{{ t.url.kerst | relative_url }}"{% if page.url == t.url.kerst %} aria-current="page"{% endif %}>{{ t.kerstpakket }}</a></li>
         {%- endif %}
         <li><a href="{{ t.url.hedonist | relative_url }}"{% if page.url == t.url.hedonist %} aria-current="page"{% endif %}>{{ t.hedonist_glas }}</a></li>
         <li><a href="{{ t.url.contact | relative_url }}"{% if page.url == t.url.contact %} aria-current="page"{% endif %}>{{ t.contact }}</a></li>

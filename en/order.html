@@ -17,7 +17,7 @@ sitemap: false
   </header>
   <div class="tekst">
     <p id="bestelling-nummer"></p>
-    <p><a href="{{ '/en/hedonist/' | relative_url }}">Back to Hedonist</a></p>
+    <p><a id="bestelling-terug" href="{{ '/en/hedonist/' | relative_url }}">Back to Hedonist</a></p>
     <p class="contactregel">Questions about your order? <a href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">Send us a WhatsApp</a> or email <a href="mailto:{{ site.email }}">{{ site.email }}</a>.</p>
   </div>
 </section>
@@ -37,18 +37,27 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
   nummer.textContent = "Order number: " + betaling.bestelnummer;
+  // Christmas box (assets/js/kerst.js): its own basket, delivery and back link
+  var kerst = betaling.soort === "kerst";
+  var mandje = kerst ? "vmv-kerst-mandje" : "vmv-hedonist-mandje";
+  if (kerst) {
+    levering = betaling.levering || "";
+    var terug = document.getElementById("bestelling-terug");
+    terug.href = {{ '/en/christmas/' | relative_url | jsonify }};
+    terug.textContent = "Back to the Christmas box";
+  }
 
   fetch(koppeling.replace(/\/$/, "") + "/status?id=" + encodeURIComponent(betaling.id))
     .then(function (r) { return r.json(); })
     .then(function (s) {
       if (s.status === "paid") {
         kop.textContent = "Thank you for your order";
-        tekst.textContent = "Your payment was successful. You’ll receive an invoice by email. Expected delivery is in " + levering + ".";
-        try { localStorage.removeItem("vmv-hedonist-mandje"); sessionStorage.removeItem("vmv-betaling"); } catch (e) {}
+        tekst.textContent = "Your payment was successful. You’ll receive an invoice by email." + (!levering ? "" : kerst ? " Delivery " + levering + "." : " Expected delivery is in " + levering + ".");
+        try { localStorage.removeItem(mandje); sessionStorage.removeItem("vmv-betaling"); } catch (e) {}
       } else if (s.status === "open" || s.status === "pending") {
         kop.textContent = "Thank you, your payment hasn’t come in yet";
         tekst.textContent = "Paying by bank transfer? We will process your order as soon as the amount is in our account. The payment details are in the email from Mollie.";
-        try { localStorage.removeItem("vmv-hedonist-mandje"); } catch (e) {}
+        try { localStorage.removeItem(mandje); } catch (e) {}
       } else {
         kop.textContent = "Your payment didn’t go through";
         tekst.textContent = "You haven’t been charged. Your basket is still there, so you can try again.";

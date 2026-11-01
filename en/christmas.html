@@ -1,0 +1,94 @@
+---
+layout: default
+taal: en
+title: Christmas box
+permalink: /en/christmas/
+vertaling: /kerst/
+description: A Christmas box of six bottles from our winemakers, with a card about each wine. Order online and pick it up in Amsterdam or have it delivered.
+---
+{%- comment -%}
+  Engelse versie van /kerst/; de teksten uit de database staan in de Engelse velden. Kerstpakketten voor particulieren. Het aanbod, de prijzen (incl. btw) en de verzendkosten
+  staan alleen in de database (supabase/019-kerstpakketten.sql) en worden in de backoffice
+  ingesteld, onder Kerst. Deze pagina haalt ze op via kerst_aanbod(); afrekenen gaat via de
+  betaal-Worker (betalen/worker.js, /kerst/betaling). Logica: assets/js/kerst.js.
+{%- endcomment -%}
+<section class="pagina pagina--breed kerst" id="kerst"
+         data-url="{{ site.horeca.supabase_url }}" data-sleutel="{{ site.horeca.supabase_key }}"
+         data-koppeling="{{ site.data.winkel.betalen.koppeling }}" data-basis="{{ '/' | relative_url }}">
+  <header class="pagina__kop">
+    <h1>Christmas box</h1>
+    <p class="pagina__intro" data-veld="intro">Six bottles from our winemakers for the holidays: three Champagnes that go well with food, one white and two reds. Each box comes with a card telling you a little about every wine.</p>
+  </header>
+
+  <p class="horeca__laden" data-toestand="laden">One moment…</p>
+
+  <div class="kerst__gesloten" data-toestand="gesloten" hidden>
+    <p>The Christmas boxes will be available to order soon. Want us to let you know? Send us a WhatsApp or an email.</p>
+    <p class="kerst__knoppen">
+      <a class="knop knop--primair" href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">Send us a WhatsApp</a>
+      <a class="knop knop--secundair" href="mailto:{{ site.email }}?subject=Christmas%20box">Email us</a>
+    </p>
+  </div>
+
+  <div class="winkel__raster kerst__raster" data-toestand="open" hidden>
+    <div class="kerst__aanbod">
+      <div data-veld="pakketten"></div>
+      <section class="kerst__extras" data-veld="extrablok" hidden aria-labelledby="kerst-extras-kop">
+        <h2 id="kerst-extras-kop">Add to your order</h2>
+        <div data-veld="extras"></div>
+      </section>
+    </div>
+
+    <aside class="mandje" aria-labelledby="mandje-kop">
+      <h3 id="mandje-kop">Basket</h3>
+      <p class="mandje__leeg">Your basket is empty. Choose how many boxes you’d like.</p>
+      <div class="mandje__inhoud" hidden>
+        <ul class="mandje__regels"></ul>
+        <div class="bezorging" role="radiogroup" aria-label="Delivery">
+          <label data-bezorging="verzenden"><input type="radio" name="bezorging" value="verzenden"> <span></span></label>
+          <label data-bezorging="amsterdam"><input type="radio" name="bezorging" value="amsterdam"> <span></span></label>
+          <label data-bezorging="ophalen"><input type="radio" name="bezorging" value="ophalen"> <span>Pick-up at Oocker, Amsterdam (free)</span></label>
+        </div>
+        <dl class="mandje__totalen">
+          <div><dt data-veld="verzendlabel">Shipping</dt><dd class="mandje__verzending"></dd></div>
+          <div class="mandje__totaal"><dt>Total</dt><dd class="mandje__som"></dd></div>
+        </dl>
+        <p class="mandje__tip" data-veld="levering"></p>
+        <button class="knop knop--licht mandje__verder" type="button">Continue to checkout</button>
+      </div>
+
+      <form class="bestel" id="kerstformulier" hidden novalidate>
+        <h4 class="bestel__kop">Your details</h4>
+        <div class="veld"><label for="k-naam">Name</label><input id="k-naam" name="naam" autocomplete="name" required></div>
+        <div class="veld"><label for="k-email">Email address</label><input id="k-email" name="email" type="email" autocomplete="email" required></div>
+        <div class="veld"><label for="k-tel">Phone number</label><input id="k-tel" name="telefoon" type="tel" autocomplete="tel" required></div>
+        <p class="bestel__ophalen" hidden>You’ll pick up your box at restaurant Oocker, Frederiksplein 29h, Amsterdam. We’ll let you know when it’s ready.</p>
+        <div class="veld" data-adres><label for="k-adres">Street and house number</label><input id="k-adres" name="adres" autocomplete="street-address" required></div>
+        <div class="veld veld--rij" data-adres>
+          <div><label for="k-postcode">Postcode</label><input id="k-postcode" name="postcode" autocomplete="postal-code" required></div>
+          <div><label for="k-plaats">Town or city</label><input id="k-plaats" name="plaats" autocomplete="address-level2" required></div>
+        </div>
+        <div class="veld">
+          <label for="k-boodschap">Message on the card <span class="veld__optioneel">(optional)</span></label>
+          <textarea id="k-boodschap" name="boodschap" rows="3" maxlength="300" aria-describedby="k-boodschap-uitleg"></textarea>
+          <p class="bestel__klein" id="k-boodschap-uitleg">Is it a gift? We’ll put your message on the card.</p>
+        </div>
+        <div class="veld"><label for="k-opmerking">Note <span class="veld__optioneel">(optional)</span></label><textarea id="k-opmerking" name="opmerking" rows="2" maxlength="500"></textarea></div>
+        <div class="betaalwijze">
+          <p class="betaalwijze__kop">Payment</p>
+          <div class="betaalwijze__optie"><span class="ideal" aria-hidden="true">iDEAL</span> iDEAL or bank transfer, via Mollie</div>
+        </div>
+        <label class="akkoord"><input type="checkbox" name="achttien" required> I am 18 or older</label>
+        <label class="akkoord"><input type="checkbox" name="akkoord" required> I agree to the <a href="{{ '/algemene-voorwaarden/' | relative_url }}" target="_blank" rel="noopener">terms and conditions</a> (in Dutch)</label>
+        <button class="knop knop--licht bestel__betaal" type="submit">Order and pay</button>
+        <p class="bestel__klein">Prices include VAT. You have a 14-day cooling-off period after delivery. We only deliver to people aged 18 or over.</p>
+        <button class="bestel__terug" type="button">Back to basket</button>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+      </form>
+    </aside>
+  </div>
+</section>
+
+{% include contact-blok.html kop="Questions about the Christmas box?" tekst="Send us a message on WhatsApp or by email." %}
+
+<script src="{{ '/assets/js/kerst.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>

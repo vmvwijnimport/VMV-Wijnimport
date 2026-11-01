@@ -15,6 +15,7 @@ nl:
     over: /over-ons/
     producenten: /producenten/
     hedonist: /hedonist/
+    kerst: /kerst/
     contact: /contact/
     horeca: /horeca/
   naar_inhoud: Naar de inhoud
@@ -27,6 +28,7 @@ nl:
   over: Over ons
   producenten: Producenten
   hedonist_glas: Hedonist glas
+  kerstpakket: Kerstpakket
   hedonist: Hedonist
   contact: Contact
   horeca_login: Horeca login
@@ -129,6 +131,7 @@ en:
     over: /en/about-us/
     producenten: /en/producers/
     hedonist: /en/hedonist/
+    kerst: /en/christmas/
     contact: /en/contact/
     horeca: /horeca/
   naar_inhoud: Skip to content
@@ -141,6 +144,7 @@ en:
   over: About us
   producenten: Producers
   hedonist_glas: Hedonist glasses
+  kerstpakket: Christmas box
   hedonist: Hedonist
   contact: Contact
   horeca_login: Trade login
