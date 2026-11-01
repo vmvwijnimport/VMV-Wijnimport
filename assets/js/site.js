@@ -3,6 +3,13 @@ document.addEventListener("DOMContentLoaded", function () {
   // Engelse pagina's (onder /en/) krijgen Engelse meldingen
   var EN = document.documentElement.lang === "en";
 
+  // ---- Taalkeuze: onthouden, zodat de bezoeker niet meer automatisch wordt doorgestuurd (zie head.html) ----
+  document.querySelectorAll(".taalkeuze a[hreflang]").forEach(function (a) {
+    a.addEventListener("click", function () {
+      try { localStorage.setItem("vmv-taal", a.getAttribute("hreflang")); } catch (e) {}
+    });
+  });
+
   // ---- Leeftijdscheck ----
   var check = document.getElementById("leeftijdscheck");
   if (check && document.documentElement.classList.contains("leeftijd-open")) {
