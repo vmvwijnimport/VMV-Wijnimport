@@ -3,5 +3,6 @@
   {% include contact-regel.html tekst="Interesse?" producent="Naam" %}
   of onderwerp="hedonist" om het formulier vooraf in te vullen.
 {%- endcomment -%}
-{%- capture contact_link -%}{{ '/contact/' | relative_url }}{% if include.producent %}?producent={{ include.producent | url_encode }}{% elsif include.onderwerp %}?onderwerp={{ include.onderwerp }}{% endif %}{%- endcapture -%}
-<p class="contactregel">{{ include.tekst }} <a href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">Stuur ons een WhatsApp</a> of <a href="{{ contact_link }}">mail ons</a>.</p>
+{%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
+{%- capture contact_link -%}{{ t.url.contact | relative_url }}{% if include.producent %}?producent={{ include.producent | url_encode }}{% elsif include.onderwerp %}?onderwerp={{ include.onderwerp }}{% endif %}{%- endcapture -%}
+<p class="contactregel">{{ include.tekst }} <a href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">{{ t.stuur_whatsapp }}</a> {{ t.of }} <a href="{{ contact_link }}">{{ t.mail_ons_klein }}</a>.</p>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="nl">
+<html lang="{{ page.taal | default: 'nl' }}">
 {%- comment -%}
   Wachtpagina: zolang die aan staat, tonen alle pagina's alleen "Binnenkort online",
   behalve de pagina's in wachtpagina_open (_config.yml). Met een voorbeeld_code staat
@@ -22,7 +22,7 @@
   {% include wachtpagina.html %}
   </div>
   <div class="voorbeeld__site">
-  <a class="naar-inhoud" href="#inhoud">Naar de inhoud</a>
+  <a class="naar-inhoud" href="#inhoud">{{ site.data.teksten[page.taal].naar_inhoud | default: "Naar de inhoud" }}</a>
   {% include header.html %}
   <main id="inhoud">
     {{ content }}
@@ -37,7 +37,7 @@
 </body>
 {%- else %}
 <body class="{{ page.body_class }}">
-  <a class="naar-inhoud" href="#inhoud">Naar de inhoud</a>
+  <a class="naar-inhoud" href="#inhoud">{{ site.data.teksten[page.taal].naar_inhoud | default: "Naar de inhoud" }}</a>
   {% include header.html %}
   <main id="inhoud">
     {{ content }}

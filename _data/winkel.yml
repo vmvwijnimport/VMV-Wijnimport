@@ -7,6 +7,9 @@
 open: true
 kop: Hedonist pre-order nu open
 levering: november
+# Op de Engelse pagina (/en/hedonist/)
+kop_en: Hedonist pre-order now open
+levering_en: November
 
 # Prijs per glas, en de prijs voor elke 6 glazen van hetzelfde model (niet mixen)
 prijs_glas: 32.75
@@ -35,8 +38,10 @@ modellen:
   - id: breed
     naam: HEDONIST Glas
     omschrijving: Het brede glas, voor wijnen die ruimte en lucht nodig hebben, zoals bourgogne, nebbiolo en champagne met meer volume.
+    omschrijving_en: The wide glass, for wines that need space and air, such as Burgundy, Nebbiolo and fuller-bodied Champagne.
     foto: /assets/img/hedonist/hedonist-1.jpg
   - id: white
     naam: HEDONIST Glas "White"
     omschrijving: Het smallere glas, voor frisse champagnes en frissere witte wijnen, zoals riesling.
+    omschrijving_en: The narrower glass, for fresh Champagnes and crisper white wines, such as Riesling.
     foto: /assets/img/hedonist/hedonist-8.jpg

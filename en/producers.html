@@ -1,0 +1,40 @@
+---
+layout: default
+taal: en
+vertaling: /producenten/
+title: Producers
+permalink: /en/producers/
+description: All the winemakers VMV Wijnimport brings to the Netherlands, by region. Young producers with a focus on the vineyard and low intervention.
+---
+{%- assign t = site.data.teksten.en -%}
+{%- assign producenten = site.producenten | sort: "naam" -%}
+{%- assign regios = producenten | group_by: "regio" | sort: "name" -%}
+
+<section class="pagina pagina--breed">
+  <header class="pagina__kop">
+    <h1>Producers</h1>
+    <p class="pagina__intro">Young winemakers who put the vineyard first and intervene as little as possible in the cellar. Browse by region or estate.</p>
+    {% include contact-regel.html tekst="Interested in the wines of one of our producers?" %}
+  </header>
+
+  {%- if regios.size > 1 %}
+  <nav class="regiokeuze" aria-label="Regions">
+    {%- for regio in regios %}
+    <a href="#{{ regio.name | slugify }}">{{ t.namen[regio.name] | default: regio.name }}</a>
+    {%- endfor %}
+  </nav>
+  {%- endif %}
+
+  {%- for regio in regios %}
+  <section class="regio" id="{{ regio.name | slugify }}">
+    <h2 class="regio__naam">{{ t.namen[regio.name] | default: regio.name }}<span>{{ t.namen[regio.items.first.land] | default: regio.items.first.land }}</span></h2>
+    <ul class="producentlijst producentlijst--groot">
+      {%- for p in regio.items %}
+      {% include producent-regel.html p=p maat="groot" %}
+      {%- endfor %}
+    </ul>
+  </section>
+  {%- endfor %}
+</section>
+
+{% include contact-blok.html kop="Looking for a specific estate?" tekst="Send us a message on WhatsApp or by email. We’ll let you know what’s available and when the next vintage arrives." %}

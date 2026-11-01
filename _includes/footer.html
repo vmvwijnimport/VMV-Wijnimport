@@ -1,25 +1,26 @@
+{%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
 <footer class="voet">
   <div class="voet__binnen">
     <div class="voet__merk">
       <img class="voet__logo" src="{{ '/brand/logo/svg/vmv-logo-wit.svg' | relative_url }}" alt="VMV Wijnimport" width="602" height="573">
     </div>
     <div class="voet__kolom">
-      <p class="voet__kop">Contact</p>
+      <p class="voet__kop">{{ t.contact }}</p>
       <p><a href="mailto:{{ site.email }}">{{ site.email }}</a></p>
-      <p><a class="voet__wa" href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">{% include whatsapp-icoon.html %}WhatsApp-updates</a></p>
+      <p><a class="voet__wa" href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">{% include whatsapp-icoon.html %}{{ t.whatsapp_updates }}</a></p>
     </div>
     <div class="voet__kolom">
-      <p class="voet__kop">Website</p>
-      <p><a href="{{ '/over-ons/' | relative_url }}">Over ons</a></p>
-      <p><a href="{{ '/producenten/' | relative_url }}">Producenten</a></p>
-      <p><a href="{{ '/hedonist/' | relative_url }}">Hedonist</a></p>
-      <p><a href="{{ '/contact/' | relative_url }}">Contact</a></p>
-      <p><a href="{{ '/horeca/' | relative_url }}">Horeca</a></p>
+      <p class="voet__kop">{{ t.website }}</p>
+      <p><a href="{{ t.url.over | relative_url }}">{{ t.over }}</a></p>
+      <p><a href="{{ t.url.producenten | relative_url }}">{{ t.producenten }}</a></p>
+      <p><a href="{{ t.url.hedonist | relative_url }}">{{ t.hedonist }}</a></p>
+      <p><a href="{{ t.url.contact | relative_url }}">{{ t.contact }}</a></p>
+      <p><a href="{{ t.url.horeca | relative_url }}">{{ t.horeca }}</a></p>
     </div>
   </div>
   <div class="voet__klein">
-    <p>NIX18: wij verkopen geen alcohol aan jongeren onder de 18 jaar.</p>
-    <p>&copy; {{ site.time | date: "%Y" }} {{ site.bedrijf.naam }}, {{ site.bedrijf.plaats }}<br>KvK {{ site.bedrijf.kvk }}{% if site.bedrijf.btw != "" %}, btw {{ site.bedrijf.btw }}{% endif %}</p>
-    <p class="voet__juridisch"><a href="{{ '/algemene-voorwaarden/' | relative_url }}">Algemene voorwaarden</a> <a href="{{ '/algemene-voorwaarden/' | relative_url }}#herroepingsrecht">Herroepingsrecht</a> <a href="{{ '/privacy/' | relative_url }}">Privacy</a></p>
+    <p>{{ t.nix18 }}</p>
+    <p>&copy; {{ site.time | date: "%Y" }} {{ site.bedrijf.naam }}, {{ site.bedrijf.plaats }}<br>{{ t.kvk }} {{ site.bedrijf.kvk }}{% if site.bedrijf.btw != "" %}, {{ t.btw }} {{ site.bedrijf.btw }}{% endif %}</p>
+    <p class="voet__juridisch"><a href="{{ '/algemene-voorwaarden/' | relative_url }}">{{ t.voorwaarden }}</a> <a href="{{ '/algemene-voorwaarden/' | relative_url }}#herroepingsrecht">{{ t.herroepingsrecht }}</a> <a href="{{ '/privacy/' | relative_url }}">{{ t.privacy }}</a></p>
   </div>
 </footer>

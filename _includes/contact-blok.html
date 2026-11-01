@@ -2,13 +2,14 @@
   Afsluitend blok met WhatsApp en contact. Gebruik:
   {% include contact-blok.html kop="..." tekst="..." %}
 {%- endcomment -%}
+{%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
 <section class="contactblok">
   <div class="contactblok__binnen">
-    <h2 class="contactblok__kop">{{ include.kop | default: "Als eerste horen wanneer de nieuwe jaargangen binnenkomen" }}</h2>
-    <p class="contactblok__tekst">{{ include.tekst | default: "Via WhatsApp laten we weten wanneer er nieuwe jaargangen van onze producenten binnenkomen, en je kunt ze daar direct bestellen." }}</p>
+    <h2 class="contactblok__kop">{{ include.kop | default: t.contactblok_kop }}</h2>
+    <p class="contactblok__tekst">{{ include.tekst | default: t.contactblok_tekst }}</p>
     <div class="knoppen">
-      <a class="knop knop--wa" href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">{% include whatsapp-icoon.html %}Stuur ons een WhatsApp</a>
-      <a class="knop knop--secundair" href="{{ '/contact/' | relative_url }}{% if include.producent %}?producent={{ include.producent | url_encode }}{% endif %}">Mail ons</a>
+      <a class="knop knop--wa" href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">{% include whatsapp-icoon.html %}{{ t.stuur_whatsapp }}</a>
+      <a class="knop knop--secundair" href="{{ t.url.contact | relative_url }}{% if include.producent %}?producent={{ include.producent | url_encode }}{% endif %}">{{ t.mail_ons }}</a>
     </div>
   </div>
 </section>

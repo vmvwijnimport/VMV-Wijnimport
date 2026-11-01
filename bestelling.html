@@ -2,6 +2,7 @@
 layout: default
 title: Je bestelling
 permalink: /bestelling/
+vertaling: /en/order/
 sitemap: false
 ---
 {%- comment -%}
@@ -29,6 +30,8 @@ document.addEventListener("DOMContentLoaded", function () {
   var nummer = document.getElementById("bestelling-nummer");
   var betaling = null;
   try { betaling = JSON.parse(sessionStorage.getItem("vmv-betaling")); } catch (e) {}
+  // Besteld op de Engelse pagina: toon deze pagina in het Engels (Mollie stuurt iedereen hierheen)
+  if (betaling && betaling.taal === "en") { location.replace({{ '/en/order/' | relative_url | jsonify }}); return; }
 
   if (!betaling || !koppeling) {
     tekst.textContent = "We vinden geen bestelling in deze browser. Heb je net betaald? Dan krijg je een bevestiging per mail.";

@@ -1,4 +1,5 @@
 ---
+vertaling: /en/about-us/
 layout: pagina
 title: Over ons
 permalink: /over-ons/

@@ -1,23 +1,29 @@
 {%- comment -%}
   Titel, beschrijving en gestructureerde gegevens voor Google.
 {%- endcomment -%}
+{%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
 {%- if wacht -%}
-  {%- capture seo_titel -%}{{ site.title }} | {{ site.tagline }}{%- endcapture -%}
+  {%- capture seo_titel -%}{{ site.title }} | {{ t.tagline | default: site.tagline }}{%- endcapture -%}
   {%- assign seo_omschrijving = site.description -%}
   {%- assign seo_foto = site.data.fotos.hero.foto -%}
-{%- elsif page.collection == "producenten" -%}
-  {%- capture seo_titel -%}{{ page.naam }}, {{ page.regio }} ({{ page.land }}) | importeur in Nederland | {{ site.title }}{%- endcapture -%}
-  {%- capture seo_omschrijving -%}{% if page.samenvatting %}{{ page.samenvatting }} {% endif %}De wijnen van {{ page.naam }} uit {{ page.regio }} zijn in Nederland verkrijgbaar via importeur {{ site.title }}.{%- endcapture -%}
-  {%- assign seo_foto = page.foto | default: site.logo -%}
+{%- elsif page.collection == "producenten" or page.collection == "producers" -%}
+  {%- comment -%} Een Engelse producent haalt naam, regio en foto uit het Nederlandse bestand {%- endcomment -%}
+  {%- if page.collection == "producers" %}{% assign sp = site.producenten | where: "slug", page.slug | first %}{% else %}{% assign sp = page %}{% endif -%}
+  {%- assign sregio = t.namen[sp.regio] | default: sp.regio -%}
+  {%- assign sland = t.namen[sp.land] | default: sp.land -%}
+  {%- capture seo_titel -%}{{ sp.naam }}, {{ sregio }} ({{ sland }}) | {{ t.seo_importeur }} | {{ site.title }}{%- endcapture -%}
+  {%- assign ssamen = page.samenvatting | default: sp.samenvatting -%}
+  {%- capture seo_omschrijving -%}{% if ssamen %}{{ ssamen }} {% endif %}{{ t.seo_verkrijgbaar | replace: "%naam%", sp.naam | replace: "%regio%", sregio }}{%- endcapture -%}
+  {%- assign seo_foto = sp.foto | default: site.logo -%}
 {%- else -%}
   {%- if page.titel_seo -%}
     {%- assign seo_titel = page.titel_seo -%}
   {%- elsif page.title -%}
     {%- capture seo_titel -%}{{ page.title }} | {{ site.title }}{%- endcapture -%}
   {%- else -%}
-    {%- capture seo_titel -%}{{ site.title }} | {{ site.tagline }}{%- endcapture -%}
+    {%- capture seo_titel -%}{{ site.title }} | {{ t.tagline | default: site.tagline }}{%- endcapture -%}
   {%- endif -%}
-  {%- assign seo_omschrijving = page.description | default: site.description -%}
+  {%- assign seo_omschrijving = page.description | default: t.omschrijving | default: site.description -%}
   {%- assign seo_foto = page.foto | default: site.data.fotos.hero.foto -%}
 {%- endif -%}
 <meta charset="utf-8">
@@ -38,8 +44,19 @@ if(document.cookie.indexOf("vmvvoorbeeld="+c)>-1){h.classList.add("voorbeeld");i
 <meta name="robots" content="noindex, nofollow">
 {%- endif %}
 <link rel="canonical" href="{{ page.url | absolute_url }}">
+{%- if page.taal == "en" -%}
+  {%- assign hl_nl = page.vertaling -%}{%- assign hl_en = page.url -%}
+  {%- if page.collection == "producers" %}{% capture hl_nl %}/producenten/{{ page.slug }}/{% endcapture %}{% endif -%}
+{%- else -%}
+  {%- assign hl_nl = page.url -%}{%- assign hl_en = page.vertaling -%}
+  {%- if page.collection == "producenten" %}{% capture hl_en %}/en/producers/{{ page.slug }}/{% endcapture %}{% endif -%}
+{%- endif -%}
+{%- if hl_nl and hl_en %}
+<link rel="alternate" hreflang="nl" href="{{ hl_nl | absolute_url }}">
+<link rel="alternate" hreflang="en" href="{{ hl_en | absolute_url }}">
+{%- endif %}
 <meta property="og:type" content="website">
-<meta property="og:locale" content="nl_NL">
+<meta property="og:locale" content="{{ t.locale }}">
 <meta property="og:site_name" content="{{ site.title }}">
 <meta property="og:title" content="{{ seo_titel | strip | escape }}">
 <meta property="og:description" content="{{ seo_omschrijving | strip_html | strip_newlines | strip | escape }}">
@@ -52,13 +69,13 @@ if(document.cookie.indexOf("vmvvoorbeeld="+c)>-1){h.classList.add("voorbeeld");i
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap" rel="stylesheet">
-{%- if page.url == "/hedonist/" and wacht != true %}
+{%- if page.url contains "/hedonist/" and wacht != true %}
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,200&display=swap" rel="stylesheet">
 {%- endif %}
 <link rel="stylesheet" href="{{ '/brand/tokens.css' | relative_url }}?v={{ site.time | date: '%s' }}">
 <link rel="stylesheet" href="{{ '/assets/css/stijl.css' | relative_url }}?v={{ site.time | date: '%s' }}">
 <script src="{{ '/assets/js/site.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
-{%- if page.url == "/hedonist/" and site.data.winkel.open and wacht != true %}
+{%- if page.url contains "/hedonist/" and site.data.winkel.open and wacht != true %}
 <script src="{{ '/assets/js/winkel.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
 {%- endif %}
 

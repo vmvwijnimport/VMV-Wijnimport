@@ -1,0 +1,89 @@
+---
+layout: default
+taal: en
+vertaling: /
+permalink: /en/
+body_class: home
+titel_seo: VMV Wijnimport | Wines from a new generation
+description: We import wine from a new generation of winemakers. They farm without pesticides or herbicides and intervene as little as possible in the cellar.
+---
+{%- assign t = site.data.teksten.en -%}
+{%- assign fotos = site.data.fotos -%}
+{%- assign producenten = site.producenten | sort: "naam" -%}
+{%- assign regios = producenten | group_by: "regio" | sort: "name" -%}
+
+<section class="hero">
+  <img class="hero__foto" src="{{ fotos.hero.foto | relative_url }}" alt="Picking crates between the rows of vines during harvest" style="object-position: {{ fotos.hero.positie }}">
+  <div class="hero__tekst">
+    <h1>Wine that is made in the vineyard</h1>
+    <p>We import wine from a new generation of winemakers. They farm without pesticides or herbicides and intervene as little as possible in the cellar.</p>
+    <p class="hero__actie"><a class="knop knop--op-foto" href="{{ '/en/producers/' | relative_url }}">Meet our producers</a></p>
+  </div>
+</section>
+
+<section class="pijlers" aria-label="What we look for">
+  <div class="pijler">
+    <span class="stip stip--rood" aria-hidden="true"></span>
+    <h2>Young winemakers</h2>
+    <p>Our winemakers are part of a new generation. Some have taken over the family estate, others have started from scratch, and they all do things their own way.</p>
+  </div>
+  <div class="pijler">
+    <span class="stip stip--champagne" aria-hidden="true"></span>
+    <h2>The vineyard first</h2>
+    <p>Our winemakers don’t use pesticides or herbicides, and they work with respect for nature, because good wine starts with a healthy vineyard.</p>
+  </div>
+  <div class="pijler">
+    <span class="stip stip--rose" aria-hidden="true"></span>
+    <h2>Low intervention</h2>
+    <p>In the cellar, our winemakers intervene as little as possible, so the vineyard can speak for itself.</p>
+  </div>
+</section>
+
+<section class="scene">
+  <div class="scene__beeld">
+    <img src="{{ fotos.verhaal.foto | relative_url }}" alt="A winemaker walking through a young vineyard under a cloudy sky" style="object-position: {{ fotos.verhaal.positie }}" loading="lazy">
+  </div>
+  <div class="scene__panelen">
+    <div class="scene__paneel">
+      <h2>Founded in November 2024</h2>
+      <p>VMV Wijnimport is young, just like the winemakers we work with. We visit them in their vineyards, taste from barrel and only pick wines we fully stand behind.</p>
+      <a class="knop knop--secundair" href="{{ '/en/about-us/' | relative_url }}">Read our story</a>
+    </div>
+  </div>
+</section>
+
+<section class="sectie regio-overzicht">
+  <div class="sectie__kop">
+    <h2>Our producers</h2>
+    <a class="tekstlink" href="{{ '/en/producers/' | relative_url }}">All producers</a>
+  </div>
+  {%- for regio in regios %}
+  {%- assign meer = regio.items.size | minus: 3 %}
+  {%- assign regionaam = t.namen[regio.name] | default: regio.name %}
+  <div class="regio{% if meer > 0 %} regio--inklapbaar{% endif %}">
+    <h3 class="regio__naam">{{ regionaam }}<span>{{ t.namen[regio.items.first.land] | default: regio.items.first.land }}</span></h3>
+    <ul class="producentlijst producentlijst--middel" id="lijst-{{ regio.name | slugify }}">
+      {%- for p in regio.items %}
+      {%- if forloop.index > 3 %}{% assign extra = true %}{% else %}{% assign extra = false %}{% endif %}
+      {% include producent-regel.html p=p extra=extra maat="middel" %}
+      {%- endfor %}
+    </ul>
+    {%- if meer > 0 %}
+    <button class="knop knop--secundair regio__meer" type="button" aria-expanded="false" aria-controls="lijst-{{ regio.name | slugify }}"
+            data-meer="See all {{ regio.items.size }} producers from {{ regionaam }}" data-minder="Show less">See all {{ regio.items.size }} producers from {{ regionaam }}</button>
+    {%- endif %}
+  </div>
+  {%- endfor %}
+  {% include contact-regel.html tekst="Interested in one of these estates?" %}
+</section>
+
+<section class="hedonist-teaser">
+  <img class="hedonist-teaser__foto" src="{{ fotos.hedonist.foto | relative_url }}" alt="A line of light along the bowl of a Hedonist glass" style="object-position: {{ fotos.hedonist.positie }}" loading="lazy">
+  <div class="hedonist-teaser__tekst">
+    <h2>Official distributor of Hedonist</h2>
+    <p>Hand-blown, lead-free glass, made to let the wine speak. We’re the official Hedonist distributor in the Netherlands.</p>
+    <a class="knop knop--licht" href="{{ '/en/hedonist/' | relative_url }}">See the glasses</a>
+  </div>
+</section>
+
+{% include contact-blok.html %}

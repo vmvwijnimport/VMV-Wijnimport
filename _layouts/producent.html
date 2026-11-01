@@ -1,42 +1,60 @@
 ---
 layout: default
 ---
-{%- assign buren = site.producenten | where: "regio", page.regio | sort: "naam" -%}
+{%- comment -%}
+  Nederlands: alle gegevens staan in _producenten/. Engels (_producers/, taal: en): de
+  vertaalde teksten staan in het Engelse bestand, de rest (foto's, cuvées, plaats, links)
+  komt uit het Nederlandse bestand met dezelfde naam.
+{%- endcomment -%}
+{%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
+{%- if page.taal == "en" -%}
+  {%- assign p = site.producenten | where: "slug", page.slug | first -%}
+{%- else -%}
+  {%- assign p = page -%}
+{%- endif -%}
+{%- assign samenvatting = page.samenvatting | default: p.samenvatting -%}
+{%- assign werkwijze = page.werkwijze | default: p.werkwijze -%}
+{%- assign foto_alt = page.foto_alt | default: p.foto_alt | default: p.naam -%}
+{%- assign hectare = page.hectare | default: p.hectare -%}
+{%- if page.taal == "en" and page.hectare == nil %}{% assign hectare = hectare | replace: ",", "." %}{% endif -%}
+{%- assign regio = t.namen[p.regio] | default: p.regio -%}
+{%- assign land = t.namen[p.land] | default: p.land -%}
+{%- assign buren = site.producenten | where: "regio", p.regio | sort: "naam" -%}
 <article class="producent">
-  <nav class="kruimel" aria-label="Kruimelpad">
-    <a href="{{ '/producenten/' | relative_url }}">Producenten</a>
+  <nav class="kruimel" aria-label="{{ t.kruimelpad }}">
+    <a href="{{ t.url.producenten | relative_url }}">{{ t.producenten }}</a>
     <span aria-hidden="true">/</span>
-    <a href="{{ '/producenten/' | relative_url }}#{{ page.regio | slugify }}">{{ page.regio }}</a>
+    <a href="{{ t.url.producenten | relative_url }}#{{ p.regio | slugify }}">{{ regio }}</a>
   </nav>
 
   <header class="producent__kop">
-    <h1 class="producent__naam">{{ page.naam }}</h1>
+    <h1 class="producent__naam">{{ p.naam }}</h1>
     <p class="producent__herkomst">
-      {% if page.plaats %}{{ page.plaats }}, {% endif %}{{ page.regio }}, {{ page.land }}
+      {% if p.plaats %}{{ p.plaats }}, {% endif %}{{ regio }}, {{ land }}
     </p>
-    <p class="producent__nl">In Nederland verkrijgbaar via {{ site.title }}</p>
+    <p class="producent__nl">{{ t.verkrijgbaar }} {{ site.title }}</p>
   </header>
 
   {%- comment -%} Eerst de eigen foto, daarna de fles op het bankje; met twee foto's kun je doorklikken {%- endcomment -%}
   {%- assign aantal = 0 -%}
-  {%- if page.foto %}{% assign aantal = aantal | plus: 1 %}{% endif -%}
-  {%- if page.lijst_foto contains "/lijst/" %}{% assign aantal = aantal | plus: 1 %}{% endif -%}
+  {%- if p.foto %}{% assign aantal = aantal | plus: 1 %}{% endif -%}
+  {%- if p.lijst_foto contains "/lijst/" %}{% assign aantal = aantal | plus: 1 %}{% endif -%}
   {%- if aantal > 0 %}
   <figure class="producent__foto{% if aantal > 1 %} fotoreeks{% endif %}"{% if aantal > 1 %} data-fotoreeks{% endif %}>
     <div class="fotoreeks__baan">
-      {%- if page.foto %}
-      <img src="{{ page.foto | relative_url }}" alt="{{ page.foto_alt | default: page.naam }}" style="object-position: {{ page.foto_positie | default: 'center' }}">
+      {%- if p.foto %}
+      <img src="{{ p.foto | relative_url }}" alt="{{ foto_alt }}" style="object-position: {{ p.foto_positie | default: 'center' }}">
       {%- endif %}
-      {%- if page.lijst_foto contains "/lijst/" %}
-      {%- assign kleinefoto = page.lijst_foto | replace: ".jpg", "-klein.jpg" %}
-      <img src="{{ page.lijst_foto | relative_url }}" srcset="{{ kleinefoto | relative_url }} 1200w, {{ page.lijst_foto | relative_url }} 2400w" sizes="(min-width: 80rem) 1200px, 100vw" alt="Een fles van {{ page.naam }} op een bankje in het park"{% if aantal > 1 %} loading="lazy"{% endif %}>
+      {%- if p.lijst_foto contains "/lijst/" %}
+      {%- assign kleinefoto = p.lijst_foto | replace: ".jpg", "-klein.jpg" %}
+      <img src="{{ p.lijst_foto | relative_url }}" srcset="{{ kleinefoto | relative_url }} 1200w, {{ p.lijst_foto | relative_url }} 2400w" sizes="(min-width: 80rem) 1200px, 100vw" alt="{{ t.fles_alt | replace: '%naam%', p.naam }}"{% if aantal > 1 %} loading="lazy"{% endif %}>
       {%- endif %}
     </div>
     {%- if aantal > 1 %}
     <div class="fotoreeks__knoppen">
-      <button class="fotoreeks__knop" type="button" data-stap="-1" aria-label="Vorige foto"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+      <button class="fotoreeks__knop" type="button" data-stap="-1" aria-label="{{ t.vorige_foto }}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
       <span class="fotoreeks__teller" aria-live="polite">1 / {{ aantal }}</span>
-      <button class="fotoreeks__knop" type="button" data-stap="1" aria-label="Volgende foto"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+      <button class="fotoreeks__knop" type="button" data-stap="1" aria-label="{{ t.volgende_foto }}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     </div>
     {%- endif %}
   </figure>
@@ -44,49 +62,49 @@ layout: default
 
   <div class="producent__inhoud">
     <div class="tekst producent__tekst">
-      {%- if page.samenvatting %}
-      <p class="producent__samenvatting">{{ page.samenvatting }}</p>
+      {%- if samenvatting %}
+      <p class="producent__samenvatting">{{ samenvatting }}</p>
       {%- endif %}
       <div class="verhaal">
         {{ content }}
       </div>
 
-      {%- if page.cuvees and page.cuvees.size > 0 %}
+      {%- if p.cuvees and p.cuvees.size > 0 %}
       <section class="cuvees" aria-labelledby="cuvees-kop">
         <h2 id="cuvees-kop">Cuvées</h2>
         <ul class="cuvees__lijst">
-          {%- for c in page.cuvees %}
+          {%- for c in p.cuvees %}
           <li>
             <span class="stip stip--{{ c.type | default: 'wit' }}" aria-hidden="true"></span>
             <span class="cuvees__naam">{{ c.naam }}</span>
             {%- if c.binnenkort or c.druif %}
             <span class="cuvees__extra">
-              {% if c.binnenkort %}<span class="label label--binnenkort">Binnenkort</span>{% endif %}
-              {% if c.druif %}<span class="cuvees__druif">{{ c.druif }}</span>{% endif %}
+              {% if c.binnenkort %}<span class="label label--binnenkort">{{ t.binnenkort }}</span>{% endif %}
+              {% if c.druif %}<span class="cuvees__druif">{{ t.namen[c.druif] | default: c.druif }}</span>{% endif %}
             </span>
             {%- endif %}
           </li>
           {%- endfor %}
         </ul>
-        {% include contact-regel.html tekst="Interesse in een van deze wijnen?" producent=page.naam %}
+        {% include contact-regel.html tekst=t.interesse_wijnen producent=p.naam %}
       </section>
       {%- endif %}
     </div>
 
-    <aside class="producent__feiten" aria-label="Over {{ page.naam }}">
+    <aside class="producent__feiten" aria-label="{{ t.over_naam }} {{ p.naam }}">
       <dl>
-        <div><dt>Land</dt><dd>{{ page.land }}</dd></div>
-        <div><dt>Regio</dt><dd>{{ page.regio }}</dd></div>
-        {%- if page.plaats %}<div><dt>Plaats</dt><dd>{{ page.plaats }}</dd></div>{% endif %}
-        {%- if page.druiven %}<div><dt>Druiven</dt><dd>{{ page.druiven }}</dd></div>{% endif %}
-        {%- if page.hectare %}<div><dt>Wijngaard</dt><dd>{{ page.hectare }} hectare</dd></div>{% endif %}
-        {%- if page.werkwijze %}<div><dt>Werkwijze</dt><dd>{{ page.werkwijze }}</dd></div>{% endif %}
+        <div><dt>{{ t.land }}</dt><dd>{{ land }}</dd></div>
+        <div><dt>{{ t.regio }}</dt><dd>{{ regio }}</dd></div>
+        {%- if p.plaats %}<div><dt>{{ t.plaats }}</dt><dd>{{ p.plaats }}</dd></div>{% endif %}
+        {%- if p.druiven %}<div><dt>{{ t.druiven }}</dt><dd>{{ p.druiven }}</dd></div>{% endif %}
+        {%- if hectare %}<div><dt>{{ t.wijngaard }}</dt><dd>{{ hectare }} {{ t.hectare }}</dd></div>{% endif %}
+        {%- if werkwijze %}<div><dt>{{ t.werkwijze }}</dt><dd>{{ werkwijze }}</dd></div>{% endif %}
       </dl>
-      <p class="producent__vraag"><a href="{{ '/contact/' | relative_url }}?producent={{ page.naam | url_encode }}">Vraag naar beschikbaarheid</a></p>
-      {%- if page.website or page.instagram %}
+      <p class="producent__vraag"><a href="{{ t.url.contact | relative_url }}?producent={{ p.naam | url_encode }}">{{ t.beschikbaarheid }}</a></p>
+      {%- if p.website or p.instagram %}
       <p class="producent__links">
-        {%- if page.website %}<a href="{{ page.website }}" target="_blank" rel="noopener">Website van {{ page.naam }}</a>{% endif %}
-        {%- if page.instagram %}<a href="{{ page.instagram }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
+        {%- if p.website %}<a href="{{ p.website }}" target="_blank" rel="noopener">{{ t.website_van | replace: "%naam%", p.naam }}</a>{% endif %}
+        {%- if p.instagram %}<a href="{{ p.instagram }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
       </p>
       {%- endif %}
     </aside>
@@ -94,15 +112,15 @@ layout: default
 
   {%- if buren.size > 1 %}
   <section class="producent__buren">
-    <h2>Meer uit {{ page.regio }}</h2>
+    <h2>{{ t.meer_uit }} {{ regio }}</h2>
     <ul>
-      {%- for p in buren %}{% unless p.url == page.url %}
-      <li><a href="{{ p.url | relative_url }}">{{ p.naam }}</a></li>
+      {%- for b in buren %}{% unless b.slug == p.slug %}
+      <li><a href="{% if page.taal == "en" %}{{ '/en/producers/' | append: b.slug | append: '/' | relative_url }}{% else %}{{ b.url | relative_url }}{% endif %}">{{ b.naam }}</a></li>
       {%- endunless %}{% endfor %}
     </ul>
   </section>
   {%- endif %}
 </article>
 
-{% capture kop %}Interesse in de wijnen van {{ page.naam }}?{% endcapture %}
-{% include contact-blok.html kop=kop producent=page.naam tekst="Stuur ons een bericht via WhatsApp of mail. Dan laten we weten wat er beschikbaar is en wanneer de nieuwe jaargang binnenkomt." %}
+{% assign kop = t.producent_kop | replace: "%naam%", p.naam %}
+{% include contact-blok.html kop=kop producent=p.naam tekst=t.producent_tekst %}
