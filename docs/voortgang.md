@@ -112,6 +112,8 @@ De livegang voorbereiden met de eigenaar: Resend, Confirm email aan, FormSubmit 
 
 - **Herinnering winkelmandje (2 nov), wens van de eigenaar:** zitten er Hedonist-glazen in het mandje, dan staat op andere pagina's rechtsonder (op de telefoon onderaan over de volle breedte) een kaartje met een lijnicoontje van een mandje, "Winkelmandje, 8 glazen · €…" en de knop Afrekenen. Een klik opent het mandje in een lade aan de rechterkant (aantallen aanpassen, levering kiezen, gegevens invullen en betalen), zonder de pagina te verlaten; zonder JavaScript gaat de link naar het mandje op de Hedonist-pagina. Het mandje staat in `_includes/hedonist-mandje.html` en de prijzen in `_includes/hedonist-gegevens.html`, gedeeld door de Hedonist-pagina en de lade; `winkel.js` werkt in beide (`data-lade`). Niet op de Hedonist-pagina, in het horecaportaal, de backoffice en na het betalen; niet als de pre-order dicht is. NL en EN. `_includes/mandje-herinnering.html`, `assets/js/site.js`.
 
+- **Horecaportaal in het Engels (2 nov), wens van de eigenaar:** /en/trade/ ("Trade login" in het Engelse menu), met dezelfde scripts, die op een Engelse pagina Engels tonen (`horeca.js`, `horeca-portaal.js`, `horeca-bestellen.js`). NL/EN wisselt tussen /horeca/ en /en/trade/. De links in de mails van Supabase (bevestigen, wachtwoord herstellen) gaan naar /horeca/; wie Engels heeft gekozen, gaat daar vanzelf door naar /en/trade/. De mails zelf en de meldingen uit de database blijven Nederlands. De backoffice blijft Nederlands.
+
 ## Zo kun je terug
 
 - **Site van vóór het horecaportaal:** de tag `voor-horeca-portaal`.

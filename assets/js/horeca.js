@@ -4,6 +4,9 @@
 (function () {
   var pagina = document.getElementById("horeca");
   if (!pagina) return;
+  // Engelse pagina (/en/trade/): Engelse meldingen
+  var EN = document.documentElement.lang === "en";
+  var t = function (nl, en) { return EN ? en : nl; };
 
   var toestanden = pagina.querySelectorAll("[data-toestand]");
   var toon = function (naam) {
@@ -15,29 +18,31 @@
   };
 
   if (!window.supabase || !pagina.dataset.url || !pagina.dataset.sleutel) {
-    fout("Het horecaportaal is nu niet bereikbaar. Probeer het later opnieuw of mail ons op info@vmvwijnimport.com.");
+    fout(t("Het horecaportaal is nu niet bereikbaar. Probeer het later opnieuw of mail ons op info@vmvwijnimport.com.",
+      "The trade portal is not available right now. Please try again later or email us at info@vmvwijnimport.com."));
     return;
   }
   var db = window.supabase.createClient(pagina.dataset.url, pagina.dataset.sleutel);
-  window.vmvHoreca = { db: db };   // gebruikt door het portaal (assortiment en bestellen)
+  window.vmvHoreca = { db: db };
+  var horecaAdres = location.origin + (pagina.dataset.basis || "/").replace(/\/$/, "") + "/horeca/";   // gebruikt door het portaal (assortiment en bestellen)
 
   // ---------- Validatie, zelfde gedrag als het contactformulier ----------
   var EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
   var verplicht = function (melding) { return function (v) { return v ? "" : melding; }; };
   var REGELS = {
-    email: function (v) { return !v ? "Vul je e-mailadres in" : EMAIL.test(v) ? "" : "Dit e-mailadres klopt niet. Bijvoorbeeld: naam@voorbeeld.nl"; },
-    wachtwoord: verplicht("Vul je wachtwoord in"),
-    bedrijfsnaam: verplicht("Vul de naam van je zaak in"),
-    type_zaak: verplicht("Kies het type zaak"),
-    contactpersoon: verplicht("Vul je naam in"),
-    telefoon: verplicht("Vul je telefoonnummer in"),
-    kvk: function (v) { return !v ? "Vul je KvK-nummer in" : /^\d{8}$/.test(v.replace(/\s/g, "")) ? "" : "Een KvK-nummer heeft 8 cijfers"; },
-    btw: verplicht("Vul je btw-nummer in"),
-    straat: verplicht("Vul straat en huisnummer in"),
-    postcode: verplicht("Vul de postcode in"),
-    plaats: verplicht("Vul de plaats in")
+    email: function (v) { return !v ? t("Vul je e-mailadres in", "Please enter your email address") : EMAIL.test(v) ? "" : t("Dit e-mailadres klopt niet. Bijvoorbeeld: naam@voorbeeld.nl", "This email address doesn’t look right. For example: name@example.com"); },
+    wachtwoord: verplicht(t("Vul je wachtwoord in", "Please enter your password")),
+    bedrijfsnaam: verplicht(t("Vul de naam van je zaak in", "Please enter the name of your business")),
+    type_zaak: verplicht(t("Kies het type zaak", "Please choose the type of business")),
+    contactpersoon: verplicht(t("Vul je naam in", "Please enter your name")),
+    telefoon: verplicht(t("Vul je telefoonnummer in", "Please enter your phone number")),
+    kvk: function (v) { return !v ? t("Vul je KvK-nummer in", "Please enter your KvK number") : /^\d{8}$/.test(v.replace(/\s/g, "")) ? "" : t("Een KvK-nummer heeft 8 cijfers", "A KvK number has 8 digits"); },
+    btw: verplicht(t("Vul je btw-nummer in", "Please enter your VAT number")),
+    straat: verplicht(t("Vul straat en huisnummer in", "Please enter your street and house number")),
+    postcode: verplicht(t("Vul de postcode in", "Please enter the postcode")),
+    plaats: verplicht(t("Vul de plaats in", "Please enter the town or city"))
   };
-  var NIEUW_WACHTWOORD = function (v) { return !v ? "Kies een wachtwoord" : v.length >= 8 ? "" : "Je wachtwoord moet minimaal 8 tekens hebben"; };
+  var NIEUW_WACHTWOORD = function (v) { return !v ? t("Kies een wachtwoord", "Please choose a password") : v.length >= 8 ? "" : t("Je wachtwoord moet minimaal 8 tekens hebben", "Your password must be at least 8 characters"); };
 
   var koppelValidatie = function (form, extra) {
     var regel = function (veld) { return (extra && extra[veld.name]) || REGELS[veld.name]; };
@@ -77,12 +82,12 @@
   };
   var vertaal = function (e) {
     var m = (e && e.message) || "";
-    if (/invalid login credentials/i.test(m)) return "Je e-mailadres of wachtwoord klopt niet.";
-    if (/email not confirmed/i.test(m)) return "Bevestig eerst je e-mailadres via de link in je mail.";
-    if (/already registered|already been registered/i.test(m)) return "Er is al een account met dit e-mailadres. Log in, of kies 'Wachtwoord vergeten'.";
-    if (/rate limit|too many/i.test(m)) return "Te veel pogingen. Probeer het over een paar minuten opnieuw.";
-    if (/password/i.test(m)) return "Kies een sterker wachtwoord van minimaal 8 tekens.";
-    return "Er ging iets mis. Probeer het opnieuw of mail ons op info@vmvwijnimport.com.";
+    if (/invalid login credentials/i.test(m)) return t("Je e-mailadres of wachtwoord klopt niet.", "Your email address or password is incorrect.");
+    if (/email not confirmed/i.test(m)) return t("Bevestig eerst je e-mailadres via de link in je mail.", "Please confirm your email address first, using the link in your email.");
+    if (/already registered|already been registered/i.test(m)) return t("Er is al een account met dit e-mailadres. Log in, of kies 'Wachtwoord vergeten'.", "There’s already an account with this email address. Log in, or choose ‘Forgot your password?’.");
+    if (/rate limit|too many/i.test(m)) return t("Te veel pogingen. Probeer het over een paar minuten opnieuw.", "Too many attempts. Please try again in a few minutes.");
+    if (/password/i.test(m)) return t("Kies een sterker wachtwoord van minimaal 8 tekens.", "Please choose a stronger password of at least 8 characters.");
+    return t("Er ging iets mis. Probeer het opnieuw of mail ons op info@vmvwijnimport.com.", "Something went wrong. Please try again or email us at info@vmvwijnimport.com.");
   };
 
   // ---------- Toestand bepalen ----------
@@ -100,14 +105,14 @@
             // Een VMV-beheerder hoort in de backoffice
             return db.from("beheerders").select("id").eq("id", sessie.user.id).maybeSingle().then(function (be) {
               if (be.data) { location.href = (pagina.dataset.basis || "/").replace(/\/$/, "") + "/horeca/beheer/"; return; }
-              fout("Dit account hoort niet bij het horecaportaal. Neem contact met ons op.");
+              fout(t("Dit account hoort niet bij het horecaportaal. Neem contact met ons op.", "This account doesn’t belong to the trade portal. Please get in touch with us."));
             });
           }
           vulIn(k.data);
           toon(k.data.status);
           if (k.data.status === "goedgekeurd") document.dispatchEvent(new CustomEvent("horeca:goedgekeurd", { detail: { klant: k.data, id: sessie.user.id } }));
         });
-    }).catch(function () { fout("Het horecaportaal is nu niet bereikbaar. Probeer het later opnieuw."); });
+    }).catch(function () { fout(t("Het horecaportaal is nu niet bereikbaar. Probeer het later opnieuw.", "The trade portal is not available right now. Please try again later.")); });
   };
 
   // ---------- Inloggen ----------
@@ -117,7 +122,7 @@
     e.preventDefault();
     if (!inlogGeldig()) return;
     status(inlog);
-    bezig(inlog, "Inloggen…");
+    bezig(inlog, t("Inloggen…", "Logging in…"));
     db.auth.signInWithPassword({ email: inlog.email.value.trim(), password: inlog.wachtwoord.value })
       .then(function (r) {
         if (r.error) throw r.error;
@@ -140,12 +145,14 @@
   vergeten.addEventListener("submit", function (e) {
     e.preventDefault();
     if (!vergetenGeldig()) return;
-    bezig(vergeten, "Versturen…");
-    db.auth.resetPasswordForEmail(vergeten.email.value.trim(), { redirectTo: location.origin + location.pathname })
+    bezig(vergeten, t("Versturen…", "Sending…"));
+    // Altijd terug naar /horeca/ (dat adres staat in Supabase als toegestaan); wie Engels heeft gekozen,
+    // gaat daar vanzelf door naar /en/trade/ (zie head.html)
+    db.auth.resetPasswordForEmail(vergeten.email.value.trim(), { redirectTo: horecaAdres })
       .then(function (r) {
         if (r.error && /rate limit/i.test(r.error.message)) throw r.error;
         // Altijd dezelfde melding, zodat niet te zien is welke adressen bij ons bekend zijn
-        status(vergeten, "Als dit e-mailadres bij ons bekend is, krijg je zo een mail met een link.", "goed");
+        status(vergeten, t("Als dit e-mailadres bij ons bekend is, krijg je zo een mail met een link.", "If we know this email address, you’ll receive an email with a link shortly."), "goed");
       })
       .catch(function (err) { status(vergeten, vertaal(err), "fout"); })
       .finally(function () { bezig(vergeten); });
@@ -160,7 +167,7 @@
   nieuw.addEventListener("submit", function (e) {
     e.preventDefault();
     if (!nieuwGeldig()) return;
-    bezig(nieuw, "Opslaan…");
+    bezig(nieuw, t("Opslaan…", "Saving…"));
     db.auth.updateUser({ password: nieuw.wachtwoord.value })
       .then(function (r) { if (r.error) throw r.error; nieuw.reset(); return laadKlant(); })
       .catch(function (err) { status(nieuw, vertaal(err), "fout"); })
@@ -181,12 +188,12 @@
     g.btw = g.btw.replace(/\s/g, "").toUpperCase();
     var email = aanvraag.email.value.trim();
     status(aanvraag);
-    bezig(aanvraag, "Versturen…");
+    bezig(aanvraag, t("Versturen…", "Sending…"));
 
     db.auth.signUp({
       email: email,
       password: aanvraag.wachtwoord.value,
-      options: { data: Object.assign({ aanvraag: "horeca" }, g), emailRedirectTo: location.origin + location.pathname }
+      options: { data: Object.assign({ aanvraag: "horeca" }, g), emailRedirectTo: horecaAdres }
     })
       .then(function (r) {
         if (r.error) throw r.error;
@@ -197,7 +204,8 @@
         // De mail aan VMV verstuurt de database zelf (supabase/010); de klant krijgt de bevestigingsmail van Supabase
         aanvraag.reset();
         if (r.data.session) return laadKlant();
-        status(aanvraag, "Bedankt voor je aanvraag. Bevestig je e-mailadres via de link in je mail; daarna kijken we je gegevens na.", "goed");
+        status(aanvraag, t("Bedankt voor je aanvraag. Bevestig je e-mailadres via de link in je mail; daarna kijken we je gegevens na.",
+          "Thank you for your request. Please confirm your email address using the link in your email; we’ll then review your details."), "goed");
       })
       .catch(function (err) { status(aanvraag, vertaal(err), "fout"); })
       .finally(function () { bezig(aanvraag); });

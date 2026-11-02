@@ -5,7 +5,7 @@
   Niet op de Hedonist-pagina zelf, in het horecaportaal en na het betalen. Logica: assets/js/winkel.js.
 {%- endcomment -%}
 {%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
-{%- unless page.url contains "/hedonist/" or page.url contains "/horeca/" or page.url == "/bestelling/" or page.url == "/en/order/" -%}
+{%- unless page.url contains "/hedonist/" or page.url contains "/horeca/" or page.url == "/en/trade/" or page.url == "/bestelling/" or page.url == "/en/order/" -%}
 {%- if site.data.winkel.open -%}
 <a class="mandjeherinnering" id="mandjeherinnering" href="{{ t.url.hedonist | append: '#bestellen' | relative_url }}" hidden>
   <svg class="mandjeherinnering__icoon" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">

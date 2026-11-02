@@ -6,8 +6,10 @@
   if (!doel) return;
 
   var basis = (document.getElementById("horeca").dataset.basis || "").replace(/\/$/, "");
+  var EN = document.documentElement.lang === "en";
+  var t = function (nl, en) { return EN ? en : nl; };
   var euro = function (n) {
-    return "€" + Number(n).toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return "€" + Number(n).toLocaleString(EN ? "en-GB" : "nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
   var el = function (tag, klasse, tekst) {
     var e = document.createElement(tag);
@@ -16,25 +18,29 @@
     return e;
   };
   // Naam van de filterknop per groep, en de volgorde van de knoppen
-  var FILTERNAAM = { Franken: "Duitsland", "Piëmont": "Italië" };
-  var VOLGORDE = ["Champagne", "Bourgogne", "Duitsland", "Italië", "Glaswerk"];
-  var filterNaam = function (g) { return g.soort === "glas" ? "Glaswerk" : FILTERNAAM[g.regio] || g.regio || ""; };
-  var STATUS = { op_voorraad: "", binnenkort: "Binnenkort", uitverkocht: "Uitverkocht" };
+  var FILTERNAAM = EN ? { Franken: "Germany", "Piëmont": "Italy", Bourgogne: "Burgundy" } : { Franken: "Duitsland", "Piëmont": "Italië" };
+  var VOLGORDE = EN ? ["Champagne", "Burgundy", "Germany", "Italy", "Glassware"] : ["Champagne", "Bourgogne", "Duitsland", "Italië", "Glaswerk"];
+  var REGIO = EN ? { Bourgogne: "Burgundy", Franken: "Franconia", "Piëmont": "Piedmont" } : {};
+  var filterNaam = function (g) { return g.soort === "glas" ? t("Glaswerk", "Glassware") : FILTERNAAM[g.regio] || g.regio || ""; };
+  var STATUS = { op_voorraad: "", binnenkort: t("Binnenkort", "Coming soon"), uitverkocht: t("Uitverkocht", "Sold out") };
 
   var toonAssortiment = function (producten, inst) {
     doel.textContent = "";
 
     var uitleg = el("div", "assortiment__uitleg");
-    uitleg.appendChild(el("p", null, "Prijzen per fles, excl. btw. Een doos is 6 flessen. Vanaf " + inst.schenk_vanaf +
-      " flessen van dezelfde wijn krijg je " + String(inst.schenk_korting_pct).replace(".", ",").replace(/,00$/, "") + "% korting, behalve op allocatiewijnen."));
-    uitleg.appendChild(el("p", null, "Wijnen op allocatie zijn beperkt beschikbaar: je vraagt een aantal aan en wij bevestigen hoeveel we kunnen leveren."));
+    var pct = String(Number(inst.schenk_korting_pct));
+    uitleg.appendChild(el("p", null, EN
+      ? "Prices per bottle, excl. VAT. A case is 6 bottles. From " + inst.schenk_vanaf + " bottles of the same wine you get " + pct + "% off, except on allocated wines."
+      : "Prijzen per fles, excl. btw. Een doos is 6 flessen. Vanaf " + inst.schenk_vanaf + " flessen van dezelfde wijn krijg je " + pct.replace(".", ",") + "% korting, behalve op allocatiewijnen."));
+    uitleg.appendChild(el("p", null, t("Wijnen op allocatie zijn beperkt beschikbaar: je vraagt een aantal aan en wij bevestigen hoeveel we kunnen leveren.",
+      "Allocated wines are in limited supply: you request a quantity and we confirm how many we can deliver.")));
     doel.appendChild(uitleg);
 
     // Groeperen per producent, in de volgorde van de lijst
     var groepen = [];
     var index = {};
     producten.forEach(function (p) {
-      var sleutel = p.soort === "glas" ? "Hedonist-glazen" : p.producent;
+      var sleutel = p.soort === "glas" ? t("Hedonist-glazen", "Hedonist glasses") : p.producent;
       if (!index[sleutel]) { index[sleutel] = { naam: sleutel, slug: p.producent_slug, regio: p.regio, soort: p.soort, items: [] }; groepen.push(index[sleutel]); }
       index[sleutel].items.push(p);
     });
@@ -44,15 +50,15 @@
       sectie.dataset.regio = filterNaam(g);
       var kop = el("h2", "regio__naam");
       kop.appendChild(document.createTextNode(g.naam));
-      if (g.regio) kop.appendChild(el("span", null, g.regio));
+      if (g.regio) kop.appendChild(el("span", null, REGIO[g.regio] || g.regio));
       sectie.appendChild(kop);
       if (g.soort === "glas") {
-        sectie.appendChild(el("p", "assortiment__noot",
-          euro(g.items[0].prijs_ex) + " excl. btw per glas; vanaf " + inst.glas_staffel_vanaf + " glazen (modellen gemengd) " +
-          euro(inst.glas_staffel_prijs_ex) + " excl. btw per glas."));
+        sectie.appendChild(el("p", "assortiment__noot", EN
+          ? euro(g.items[0].prijs_ex) + " excl. VAT per glass; from " + inst.glas_staffel_vanaf + " glasses (models can be mixed) " + euro(inst.glas_staffel_prijs_ex) + " excl. VAT per glass."
+          : euro(g.items[0].prijs_ex) + " excl. btw per glas; vanaf " + inst.glas_staffel_vanaf + " glazen (modellen gemengd) " + euro(inst.glas_staffel_prijs_ex) + " excl. btw per glas."));
       } else if (g.slug) {
-        var link = el("a", "assortiment__link", "Over " + g.naam);
-        link.href = basis + "/producenten/" + g.slug + "/";
+        var link = el("a", "assortiment__link", t("Over ", "About ") + g.naam);
+        link.href = basis + (EN ? "/en/producers/" : "/producenten/") + g.slug + "/";
         sectie.appendChild(link);
       }
 
@@ -71,7 +77,7 @@
         li.appendChild(tekst);
 
         var labels = el("span", "wijnregel__labels");
-        if (p.allocatie) labels.appendChild(el("span", "label", "Op allocatie"));
+        if (p.allocatie) labels.appendChild(el("span", "label", t("Op allocatie", "Allocated")));
         if (STATUS[p.beschikbaarheid]) labels.appendChild(el("span", "label label--" + p.beschikbaarheid, STATUS[p.beschikbaarheid]));
         if (p.max_per_bestelling) labels.appendChild(el("span", "label", "Max. " + p.max_per_bestelling));
         li.appendChild(labels);
@@ -99,23 +105,24 @@
     regios.sort(function (a, b) { return plek(a) - plek(b); });
 
     var balk = el("div", "assortiment__filter");
-    var label = el("label", "visueel-verborgen", "Zoek een wijn");
+    var label = el("label", "visueel-verborgen", t("Zoek een wijn", "Search for a wine"));
     label.htmlFor = "assortiment-zoek";
     var zoek = el("input", "assortiment__zoek");
     zoek.type = "search"; zoek.id = "assortiment-zoek";
-    zoek.placeholder = "Zoek op wijn, producent of druif";
+    zoek.placeholder = t("Zoek op wijn, producent of druif", "Search by wine, producer or grape");
     balk.appendChild(label);
     balk.appendChild(zoek);
 
     var knoppen = el("div", "regiokeuze assortiment__regios");
     knoppen.setAttribute("role", "group");
-    knoppen.setAttribute("aria-label", "Filter op regio");
+    knoppen.setAttribute("aria-label", t("Filter op regio", "Filter by region"));
     var gekozen = "";
-    ["Alle"].concat(regios).forEach(function (r) {
+    var ALLE = t("Alle", "All");
+    [ALLE].concat(regios).forEach(function (r) {
       var k = el("button", null, r);
       k.type = "button";
-      k.dataset.regio = r === "Alle" ? "" : r;
-      k.setAttribute("aria-pressed", r === "Alle" ? "true" : "false");
+      k.dataset.regio = r === ALLE ? "" : r;
+      k.setAttribute("aria-pressed", r === ALLE ? "true" : "false");
       k.addEventListener("click", function () {
         gekozen = k.dataset.regio;
         knoppen.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-pressed", b === k ? "true" : "false"); });
@@ -125,7 +132,7 @@
     });
     balk.appendChild(knoppen);
 
-    var geen = el("p", "horeca__klein assortiment__geen", "Geen wijnen gevonden. Probeer een andere zoekterm of regio.");
+    var geen = el("p", "horeca__klein assortiment__geen", t("Geen wijnen gevonden. Probeer een andere zoekterm of regio.", "No wines found. Try a different search term or region."));
     geen.hidden = true;
 
     var pas = function () {
@@ -156,16 +163,17 @@
     var db = window.vmvHoreca && window.vmvHoreca.db;
     if (!db) return;
     doel.textContent = "";
-    doel.appendChild(el("p", "horeca__laden", "Het assortiment wordt geladen…"));
+    doel.appendChild(el("p", "horeca__laden", t("Het assortiment wordt geladen…", "Loading the range…")));
     Promise.all([
       db.from("producten").select("id, soort, producent, producent_slug, regio, naam, jaargang, druif, formaat, kleur, prijs_ex, beschikbaarheid, allocatie, max_per_bestelling").order("volgorde").order("id"),
       db.from("instellingen").select("*").maybeSingle()
     ]).then(function (r) {
       if (r[0].error || r[1].error) throw r[0].error || r[1].error;
-      if (!r[0].data.length) { doel.textContent = "Er staan nog geen wijnen in het assortiment."; return; }
+      if (!r[0].data.length) { doel.textContent = t("Er staan nog geen wijnen in het assortiment.", "There are no wines in the range yet."); return; }
       toonAssortiment(r[0].data, r[1].data);
     }).catch(function () {
-      doel.textContent = "Het assortiment kon niet worden geladen. Probeer het opnieuw of mail ons op info@vmvwijnimport.com.";
+      doel.textContent = t("Het assortiment kon niet worden geladen. Probeer het opnieuw of mail ons op info@vmvwijnimport.com.",
+        "The range couldn’t be loaded. Please try again or email us at info@vmvwijnimport.com.");
     });
   });
 })();
