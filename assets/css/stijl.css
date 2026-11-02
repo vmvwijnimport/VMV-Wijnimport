@@ -177,8 +177,10 @@ a:hover { color: var(--rood); }
 
   .menu__lijst { flex-direction: column; align-items: stretch; gap: 0; }
   .menu__lijst > li { border-bottom: 1px solid var(--lijn); }
-  .menu__lijst > li > a { padding: var(--s-2) 0; font-size: var(--fs-h3); font-weight: 300; }
+  /* De hele regel is klikbaar, niet alleen de tekst */
+  .menu__lijst > li > a { display: block; padding: var(--s-2) 0; font-size: var(--fs-h3); font-weight: 300; }
   .menu__uitklap { flex-wrap: wrap; justify-content: space-between; }
+  .menu__uitklap > a { flex: 1 1 auto; }
   .menu__uitklapknop { width: 44px; height: 44px; }
   .menu__paneel {
     position: static; width: 100%;
