@@ -8,8 +8,8 @@
 {%- unless page.url contains "/hedonist/" or page.url contains "/horeca/" or page.url == "/bestelling/" or page.url == "/en/order/" -%}
 {%- if site.data.winkel.open -%}
 <a class="mandjeherinnering" id="mandjeherinnering" href="{{ t.url.hedonist | append: '#bestellen' | relative_url }}" hidden>
-  <svg class="mandjeherinnering__icoon" viewBox="0 0 32 40" width="32" height="40" aria-hidden="true">
-    <path d="M9 3h14c1.2 5.5 1.2 10-1 13.5C20.6 18.8 18.6 20 16 20s-4.6-1.2-6-3.5C7.8 13 7.8 8.5 9 3zM16 20v14M10 37h12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+  <svg class="mandjeherinnering__icoon" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
+    <path d="M3 12h26l-3 15H6L3 12zM10 12l5-8M22 12l-5-8M12 17v5M16 17v5M20 17v5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
   </svg>
   <span class="mandjeherinnering__tekst">
     <span class="mandjeherinnering__kop">{{ t.winkel.mandje }}</span>
