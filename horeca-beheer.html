@@ -419,7 +419,10 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
               <textarea id="beheer-bericht" name="bericht" rows="3" aria-describedby="beheer-bericht-uitleg"></textarea>
               <p class="beheer__klein" id="beheer-bericht-uitleg" data-veld="berichtuitleg"></p>
             </div>
-            <button class="knop knop--primair" type="submit" data-veld="knop">Bestelling bevestigen</button>
+            <div class="beheer__knoppen">
+              <button class="knop knop--primair" type="submit" data-veld="knop">Bestelling bevestigen</button>
+              <button class="knop knop--secundair" type="submit" value="voorstel" data-veld="voorstelknop" hidden>Als voorstel naar de klant</button>
+            </div>
             <p class="formulier__status" role="status" aria-live="polite"></p>
           </form>
           <form class="beheer__formulier" id="geleverdformulier" novalidate hidden>

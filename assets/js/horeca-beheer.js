@@ -53,7 +53,7 @@
     return "Er ging iets mis. Probeer het opnieuw.";
   };
 
-  var STATUS_BESTELLING = { ontvangen: "Nieuw", bevestigd: "Bevestigd", geleverd: "Geleverd", geannuleerd: "Afgekeurd" };
+  var STATUS_BESTELLING = { ontvangen: "Nieuw", voorstel: "Voorstel", bevestigd: "Bevestigd", geleverd: "Geleverd", geannuleerd: "Afgekeurd" };
   var STATUS_KLANT = { in_afwachting: "Aanvraag", goedgekeurd: "Goedgekeurd", afgewezen: "Afgewezen" };
   var TYPE_ZAAK = { restaurant: "Restaurant", bar: "Bar", wijnbar: "Wijnbar", slijterij: "Slijterij", overig: "Overig" };
 
@@ -81,11 +81,12 @@
       data.producten = r[3].data;
     });
   };
-  var afgehandeld = function (b) { return b.status !== "ontvangen"; };
+  // Open = nog te bevestigen: nieuw, of met een voorstel dat bij de klant ligt (supabase/020)
+  var afgehandeld = function (b) { return b.status !== "ontvangen" && b.status !== "voorstel"; };
   // Wat er geleverd wordt (of is), en het bedrag daarvan
   var getoond = function (b, r) { return afgehandeld(b) && r.toegewezen != null ? r.toegewezen : r.aantal; };
   var totaalVan = function (b) {
-    if (b.status === "ontvangen" || b.status === "geannuleerd") return Number(b.totaal_ex);
+    if (!afgehandeld(b) || b.status === "geannuleerd") return Number(b.totaal_ex);
     return b.bestelregels.reduce(function (som, r) { return som + Math.round(r.prijs_ex * 100) * getoond(b, r); }, 0) / 100;
   };
 
@@ -181,6 +182,7 @@
     var c3 = el("span", "beheer__cel beheer__labels");
     if (b.spoed && (b.status === "ontvangen" || b.status === "bevestigd")) c3.appendChild(el("span", "label label--spoed", "Spoed"));
     if (b.bevat_aanvraag && b.status === "ontvangen") c3.appendChild(el("span", "label", "Allocatie"));
+    if (b.status === "ontvangen" && b.voorstel_reactie === "afgewezen") c3.appendChild(el("span", "label label--spoed", "Klant niet akkoord"));
     c3.appendChild(el("span", "label label--" + b.status, STATUS_BESTELLING[b.status] || b.status));
     a.appendChild(c1); a.appendChild(c2); a.appendChild(c3);
     a.appendChild(el("span", "beheer__cel beheer__bedrag", euro(totaalVan(b))));
@@ -205,16 +207,18 @@
     var scherm = pagina.querySelector("[data-scherm=" + soort + "]");
     var alle = data[soort];
     var namen = soort === "bestellingen" ? STATUS_BESTELLING : STATUS_KLANT;
+    // Bij "Nieuw" staan ook de bestellingen met een voorstel dat nog bij de klant ligt
+    var past = function (x, f) { return !f || x.status === f || (f === "ontvangen" && x.status === "voorstel"); };
     scherm.querySelectorAll("[data-filter]").forEach(function (k) {
       var f = k.dataset.filter;
-      var n = f ? alle.filter(function (x) { return x.status === f; }).length : alle.length;
+      var n = alle.filter(function (x) { return past(x, f); }).length;
       var naam = f ? (soort === "klanten" && f === "in_afwachting" ? "Aanvragen" : namen[f]) : "Alle";
       k.textContent = naam + " (" + n + ")";
       k.setAttribute("aria-pressed", f === filter[soort] ? "true" : "false");
     });
     var lijst = scherm.querySelector("[data-lijst]");
     lijst.textContent = "";
-    var gekozen = alle.filter(function (x) { return !filter[soort] || x.status === filter[soort]; });
+    var gekozen = alle.filter(function (x) { return past(x, filter[soort]); });
     // Te leveren bestellingen op postcode, zodat bestellingen in dezelfde buurt bij elkaar staan
     var opPostcode = soort === "bestellingen" && filter.bestellingen === "bevestigd";
     if (opPostcode) {
@@ -251,9 +255,9 @@
       knop: "Bestelling bevestigen"
     },
     wijzigen: {
-      uitleg: "Vul per wijn in hoeveel je levert (0 = niet leverbaar). De klant krijgt een bevestigingsmail met deze aantallen en de nieuwe totalen.",
-      label: "Bericht aan de klant", toelichting: "Komt in de bevestigingsmail, bijvoorbeeld waarom je minder levert of de leverdag.",
-      knop: "Bevestigen met deze aantallen"
+      uitleg: "Vul per wijn in hoeveel je levert (0 = niet leverbaar). Is een wijn op, vervang hem dan door een andere wijn. Al overlegd met de klant? Bevestig dan meteen. Anders stuur je het als voorstel: de klant geeft eerst akkoord in het portaal.",
+      label: "Bericht aan de klant", toelichting: "Komt in de mail, bijvoorbeeld waarom je minder levert of de leverdag.",
+      knop: "Bevestigen met wijziging"
     },
     afkeuren: {
       uitleg: "De bestelling gaat niet door. De klant krijgt een mail dat we de bestelling niet kunnen leveren.",
@@ -297,8 +301,32 @@
     return Math.round((weg ? prijsNormaal(r) : r.prijs_ex) * 100) * n / 100;
   };
 
+  // Vervangende wijnen per regel: {product_id, aantal, prijs: "eigen" | "zelfde"} (supabase/020)
+  var vervang = {};
+  var levWaarde = {};   // ingevulde aantallen, zodat ze blijven staan als de regels opnieuw worden getekend
+  var product = function (id) { return data.producten.filter(function (p) { return p.id === Number(id); })[0]; };
+  var vervangPrijs = function (r, v) {
+    if (v.prijs === "zelfde") return Number(r.prijs_ex);
+    var p = product(v.product_id);
+    return p ? Number(p.prijs_ex) : 0;
+  };
+  var vervangingen = function () {
+    if (modus !== "wijzigen") return [];
+    return Object.keys(vervang).map(function (id) {
+      var v = vervang[id];
+      return v.product_id ? { id: Number(id), product_id: Number(v.product_id), aantal: v.aantal, prijs: v.prijs } : null;
+    }).filter(Boolean);
+  };
+
   var totalen = function () {
     var c = 0;
+    vervangingen().forEach(function (v) {
+      var r = bestelling.bestelregels.filter(function (x) { return x.id === v.id; })[0];
+      var b = Math.round(vervangPrijs(r, v) * 100) * v.aantal;
+      c += b;
+      var cel = lijstRegels.querySelector("[data-vervangbedrag='" + v.id + "']");
+      if (cel) cel.textContent = euro(b / 100);
+    });
     bestelling.bestelregels.forEach(function (r) {
       var n = leveren(r), b = bedrag(r, n);
       c += Math.round(b * 100);
@@ -325,7 +353,11 @@
       var extra = [];
       if (r.korting_pct > 0) extra.push(String(r.korting_pct).replace(".", ",") + "% schenkkorting");
       if (r.allocatie) extra.push("op allocatie");
-      if ((modus === "wijzigen" && !klaar) || (klaar && n !== r.aantal)) extra.push("besteld: " + r.aantal);
+      var origineel = r.vervangt && bestelling.bestelregels.filter(function (x) { return x.id === r.vervangt; })[0];
+      var vervanger = bestelling.bestelregels.filter(function (x) { return x.vervangt === r.id; })[0];
+      if (origineel) extra.push("in plaats van " + origineel.omschrijving);
+      else if ((modus === "wijzigen" && !klaar) || (klaar && n !== r.aantal)) extra.push("besteld: " + r.aantal);
+      if (vervanger) extra.push("vervangen door " + vervanger.omschrijving);
       if (extra.length) tekst.appendChild(el("small", null, extra.join(", ")));
       var noot = el("small", "beheer__vervalt");
       noot.dataset.vervalt = r.id;
@@ -340,8 +372,8 @@
         invoer.type = "number"; invoer.min = "0"; invoer.max = String(r.aantal); invoer.inputMode = "numeric";
         invoer.id = "leveren-" + r.id;
         invoer.dataset.regel = r.id;
-        invoer.value = r.aantal;
-        invoer.addEventListener("input", totalen);
+        invoer.value = levWaarde[r.id] != null ? levWaarde[r.id] : r.aantal;
+        invoer.addEventListener("input", function () { levWaarde[r.id] = invoer.value; totalen(); });
         vak.appendChild(label);
         vak.appendChild(invoer);
         vak.appendChild(el("span", "beheer__van", "van " + r.aantal));
@@ -350,9 +382,83 @@
       var bed = el("span", "beheer__bedrag");
       bed.dataset.bedrag = r.id;
       li.appendChild(bed);
+      if (modus === "wijzigen" && !klaar) li.appendChild(vervangVak(r));
       lijstRegels.appendChild(li);
     });
     totalen();
+  };
+
+  // Een wijn vervangen door een andere wijn: keuze, aantal en welke prijs
+  var vervangVak = function (r) {
+    var vak = el("div", "beheer__vervang");
+    var v = vervang[r.id];
+    var open = el("button", "bestel__terug", v ? "Niet vervangen" : "Vervangen door een andere wijn");
+    open.type = "button";
+    open.addEventListener("click", function () {
+      if (vervang[r.id]) delete vervang[r.id];
+      else {
+        vervang[r.id] = { product_id: "", aantal: r.aantal, prijs: "eigen" };
+        // Meestal is de wijn op: dan niets van de bestelde wijn leveren
+        if (levWaarde[r.id] == null || Number(levWaarde[r.id]) === r.aantal) levWaarde[r.id] = 0;
+      }
+      toonRegels();
+      var keuzeVeld = lijstRegels.querySelector("#vervang-" + r.id);
+      if (keuzeVeld) keuzeVeld.focus();
+    });
+    vak.appendChild(open);
+    if (!v) return vak;
+
+    var rij = el("div", "beheer__vervangrij");
+    var kv = el("div", "veld");
+    var kl = el("label", null, "Vervangen door");
+    var keuzeLijst = el("select");
+    keuzeLijst.id = "vervang-" + r.id;
+    kl.htmlFor = keuzeLijst.id;
+    var leeg = el("option", null, "Kies een wijn");
+    leeg.value = "";
+    keuzeLijst.appendChild(leeg);
+    var groepen = {};
+    data.producten
+      .filter(function (p) { return p.soort === "wijn" && p.id !== r.product_id && p.actief !== false; })
+      .slice().sort(function (a, b) { return a.producent.localeCompare(b.producent, "nl") || a.naam.localeCompare(b.naam, "nl"); })
+      .forEach(function (p) {
+        if (!groepen[p.producent]) { groepen[p.producent] = el("optgroup"); groepen[p.producent].label = p.producent; keuzeLijst.appendChild(groepen[p.producent]); }
+        var o = el("option", null, p.producent + ", " + [p.naam, p.jaargang].filter(Boolean).join(" ") +
+          (p.beschikbaarheid === "uitverkocht" ? " (uitverkocht)" : "") + " · " + euro(p.prijs_ex));
+        o.value = p.id;
+        groepen[p.producent].appendChild(o);
+      });
+    keuzeLijst.value = v.product_id;
+    keuzeLijst.addEventListener("change", function () { v.product_id = keuzeLijst.value; toonRegels(); });
+    kv.appendChild(kl); kv.appendChild(keuzeLijst);
+
+    var av = el("div", "veld");
+    var al = el("label", null, "Aantal");
+    var aantal = el("input", "beheer__invoer");
+    aantal.type = "number"; aantal.min = "1"; aantal.inputMode = "numeric";
+    aantal.id = "vervang-aantal-" + r.id;
+    al.htmlFor = aantal.id;
+    aantal.value = v.aantal;
+    aantal.addEventListener("input", function () { v.aantal = Math.max(1, parseInt(aantal.value, 10) || 1); totalen(); });
+    av.appendChild(al); av.appendChild(aantal);
+
+    var pv = el("fieldset", "beheer__vervangprijs");
+    pv.appendChild(el("legend", null, "Prijs per stuk"));
+    var p = product(v.product_id);
+    [["eigen", "van deze wijn" + (p ? " (" + euro(p.prijs_ex) + ")" : "")], ["zelfde", "van de bestelde wijn (" + euro(r.prijs_ex) + ")"]].forEach(function (o) {
+      var l = el("label", "akkoord");
+      var i = el("input");
+      i.type = "radio"; i.name = "vervang-prijs-" + r.id; i.value = o[0]; i.checked = v.prijs === o[0];
+      i.addEventListener("change", function () { v.prijs = o[0]; totalen(); });
+      l.appendChild(i);
+      l.appendChild(document.createTextNode(" " + o[1]));
+      pv.appendChild(l);
+    });
+    var bed = el("span", "beheer__bedrag");
+    bed.dataset.vervangbedrag = r.id;
+    rij.appendChild(kv); rij.appendChild(av); rij.appendChild(pv); rij.appendChild(bed);
+    vak.appendChild(rij);
+    return vak;
   };
 
   var knoppen = pagina.querySelectorAll("[data-modus]");
@@ -364,6 +470,7 @@
     veld("berichtlabel").firstChild.textContent = t.label + " ";
     veld("berichtuitleg").textContent = t.toelichting;
     veld("knop").textContent = t.knop;
+    veld("voorstelknop").hidden = modus !== "wijzigen";
     melding(form.querySelector(".formulier__status"));
     toonRegels();
   };
@@ -409,7 +516,22 @@
     keuze.hidden = klaar;
     form.hidden = klaar;
     veld("uitleg").hidden = klaar;
-    veld("status").hidden = !klaar;
+    vervang = {};
+    levWaarde = {};
+    // Een voorstel dat bij de klant ligt, of dat de klant heeft afgewezen
+    var voorstelTekst = "";
+    if (b.voorstel && (b.status === "voorstel" || b.voorstel_reactie === "afgewezen")) {
+      var wijz = (b.voorstel.wijzigingen || []).map(function (w) {
+        return w.omschrijving + ": " + (w.leveren === 0 ? "niet leveren" : w.leveren < w.besteld ? w.leveren + " van " + w.besteld : "alles") +
+          (w.vervangen_door ? ", vervangen door " + w.vervangen_aantal + " × " + w.vervangen_door + " (" + euro(w.vervangen_prijs_ex) + ")" : "");
+      }).join("; ");
+      voorstelTekst = (b.status === "voorstel"
+        ? "Voorstel verstuurd op " + datum(b.voorstel_op) + ". Dit wacht op akkoord van de klant. Heb je het al overlegd, dan kun je de bestelling ook zelf bevestigen, wijzigen of afkeuren."
+        : "De klant ging niet akkoord met je voorstel van " + datum(b.voorstel_op) + ". Neem contact op, en bevestig, wijzig of keur de bestelling daarna af.") +
+        (wijz ? " Voorstel: " + wijz + "." : "");
+    }
+    veld("status").hidden = !klaar && !voorstelTekst;
+    if (!klaar) veld("status").textContent = voorstelTekst;
     geleverdForm.hidden = b.status !== "bevestigd";
     melding(geleverdForm.querySelector(".formulier__status"));
     melding(verwijderForm.querySelector(".formulier__status"));
@@ -444,7 +566,8 @@
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var status = form.querySelector(".formulier__status");
-    var knop = veld("knop");
+    var voorstel = !!(e.submitter && e.submitter.value === "voorstel");
+    var knop = voorstel ? veld("voorstelknop") : veld("knop");
     var bericht = form.bericht.value.trim() || null;
     var b = bestelling, naam = (b.klanten || {}).bedrijfsnaam || "De klant";
     var verzoek;
@@ -452,11 +575,16 @@
       verzoek = db.rpc("beheer_afkeur", { bestelling: b.id, bericht: bericht });
     } else {
       var regels = b.bestelregels.map(function (r) { return { id: r.id, leveren: leveren(r) }; });
-      if (regels.every(function (x) { return x.leveren === 0; })) {
+      var verv = vervangingen();
+      if (modus === "wijzigen" && Object.keys(vervang).some(function (id) { return !vervang[id].product_id; })) {
+        melding(status, "Kies bij elke vervanging een wijn, of klik op Niet vervangen.", "fout");
+        return;
+      }
+      if (regels.every(function (x) { return x.leveren === 0; }) && !verv.length) {
         melding(status, "Je levert niets. Kies Afkeuren als de bestelling niet doorgaat.", "fout");
         return;
       }
-      verzoek = db.rpc("beheer_bevestig", { bestelling: b.id, leveren: regels, bericht: bericht });
+      verzoek = db.rpc("beheer_bevestig", { bestelling: b.id, leveren: regels, bericht: bericht, vervangen: verv, voorstel: voorstel });
     }
     var afkeuren = modus === "afkeuren";
     melding(status);
@@ -467,6 +595,7 @@
         bezig(knop);
         return vernieuw(afkeuren
           ? "Afgekeurd. " + naam + " krijgt automatisch een mail dat de bestelling niet doorgaat."
+          : voorstel ? "Voorstel verstuurd. " + naam + " krijgt een mail en geeft akkoord in het portaal. Daarna krijg je een mail."
           : "Bevestigd. " + naam + " krijgt automatisch een bevestigingsmail. De factuur maak je hieronder.");
       })
       .catch(function (err) { bezig(knop); melding(status, vertaal(err), "fout"); });

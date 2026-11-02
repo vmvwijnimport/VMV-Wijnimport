@@ -2,6 +2,7 @@
 //
 // 1. Bestelmails. De database roept deze functie aan (supabase/005 en 006) met alleen het id van een
 //    bestelling: bij een nieuwe bestelling, en wanneer de status "bevestigd" of "geannuleerd" wordt.
+//                Ook bij een voorstel aan de klant ("voorstel"), en als de klant daarop reageert (supabase/020).
 // 2. Welkomstmail. De database roept deze functie aan (supabase/008) met het id van een klant
 //    zodra zijn account is goedgekeurd.
 //    Aanvraagmail. De database roept deze functie aan (supabase/010) met het id van een klant en
@@ -198,19 +199,76 @@ export const mailVmv = (b, k, ctx) => {
 export const mailBevestiging = (b, k, termijn, doorsturen, ctx) => {
   const berekend = reken(b.bestelregels, true);
   const aangepast = berekend.rijen.some((r) => r.getoond !== r.aantal);
+  // Vervangende wijnen (supabase/020): bij welke regel hoort welke vervanging
+  const regel = (id) => b.bestelregels.find((r) => r.id === id);
+  const vervanging = (r) => b.bestelregels.find((x) => x.vervangt === r.id);
   const inhoud =
     alinea(`Beste ${html(k.contactpersoon)},`) +
-    alinea(`We hebben je bestelling ${html(b.bestelnummer)} bevestigd. Hieronder staat wat we leveren.${aangepast ? " Van een of meer wijnen kunnen we minder leveren dan je had besteld; dat staat erbij." : ""}`) +
+    alinea(`We hebben je bestelling ${html(b.bestelnummer)} bevestigd. Hieronder staat wat we leveren.${aangepast ? " Er is iets gewijzigd ten opzichte van je bestelling; dat staat erbij." : ""}`) +
     (b.bericht_klant ? vlak(html(b.bericht_klant).replace(/\n/g, "<br>")) : "") +
-    regelTabel(berekend, (r) =>
-      r.getoond === 0 ? `niet leverbaar (besteld: ${r.aantal})`
-        : r.getoond !== r.aantal ? `besteld: ${r.aantal}, we leveren: ${r.getoond}` : "") +
+    regelTabel(berekend, (r) => {
+      if (r.vervangt) return `in plaats van ${html((regel(r.vervangt) || {}).omschrijving || "een andere wijn")}`;
+      const v = vervanging(r);
+      if (r.getoond === 0) return v ? `vervangen door ${html(v.omschrijving)} (besteld: ${r.aantal})` : `niet leverbaar (besteld: ${r.aantal})`;
+      if (r.getoond !== r.aantal) return `besteld: ${r.aantal}, we leveren: ${r.getoond}` + (v ? `, de rest vervangen door ${html(v.omschrijving)}` : "");
+      return "";
+    }) +
     alinea("Prijzen excl. btw.", `font-size:13px;color:${KLEUR.zacht};margin-top:8px;`) +
     kopje("Levering") + bestelGegevens(b, k) +
     alinea(`Na levering ontvang je een factuur met een betaaltermijn van ${termijn} dagen. ${contactRegel}`, "margin:24px 0 0;");
   return {
     onderwerp: `Je bestelling ${b.bestelnummer} is bevestigd`,
     html: omhulsel({ voorvertoning: "Je bestelling is bevestigd.", kop: "Je bestelling is bevestigd", inhoud, doorsturen }, ctx)
+  };
+};
+
+// De wijzigingen van een voorstel als lijst (supabase/020, kolom voorstel.wijzigingen)
+const wijzigingLijst = (b) => {
+  const cel = `font-family:${LETTER};font-size:15px;line-height:1.5;color:${KLEUR.zwart};border-bottom:1px solid ${KLEUR.lijn};padding:12px 0;`;
+  const zacht = `font-size:13px;color:${KLEUR.zacht};`;
+  const rijen = ((b.voorstel && b.voorstel.wijzigingen) || []).map((w) => {
+    const minder = w.leveren < w.besteld
+      ? (w.leveren === 0 ? "niet leverbaar" : `we leveren ${w.leveren} in plaats van ${w.besteld}`) : "";
+    const vervangen = w.vervangen_door
+      ? `<br>In plaats daarvan: <strong style="font-weight:500;">${w.vervangen_aantal} × ${html(w.vervangen_door)}</strong> <span style="${zacht}">${euro(w.vervangen_prijs_ex)} per stuk excl. btw</span>` : "";
+    return `<tr><td style="${cel}">${html(w.omschrijving)} <span style="${zacht}">(besteld: ${w.besteld})</span>${minder ? `<br>${minder}` : ""}${vervangen}</td></tr>`;
+  }).join("");
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;border-top:1px solid ${KLEUR.zwart};">${rijen}</table>`;
+};
+
+// Naar de klant, wanneer VMV een wijziging voorstelt
+export const mailVoorstel = (b, k, doorsturen, ctx) => {
+  const inhoud =
+    alinea(`Beste ${html(k.contactpersoon)},`) +
+    alinea(`Niet alles uit je bestelling ${html(b.bestelnummer)} is leverbaar zoals besteld. Hieronder staat ons voorstel.`) +
+    (b.bericht_klant ? vlak(html(b.bericht_klant).replace(/\n/g, "<br>")) : "") +
+    wijzigingLijst(b) +
+    alinea("De rest van je bestelling leveren we zoals besteld. Geef in het horecaportaal aan of je akkoord gaat. Daarna sturen we je de bevestiging met de bedragen.") +
+    `<div style="margin:8px 0 24px;">${knop("Voorstel bekijken", `${SITE}/horeca/#je-bestellingen`, true)}</div>` +
+    alinea(contactRegel, "margin:0;");
+  return {
+    onderwerp: `Voorstel voor je bestelling ${b.bestelnummer}`,
+    html: omhulsel({ voorvertoning: "Niet alles is leverbaar zoals besteld. Bekijk ons voorstel.", kop: "Een voorstel voor je bestelling", inhoud, doorsturen }, ctx)
+  };
+};
+
+// Naar VMV, wanneer de klant op een voorstel reageert
+export const mailReactie = (b, k, ctx) => {
+  const akkoord = b.voorstel_reactie === "akkoord";
+  const inhoud =
+    alinea(akkoord
+      ? `${html(k.bedrijfsnaam)} gaat akkoord met je voorstel voor bestelling ${html(b.bestelnummer)}. De bestelling is bevestigd en de klant heeft de bevestiging gekregen.`
+      : `${html(k.bedrijfsnaam)} gaat niet akkoord met je voorstel voor bestelling ${html(b.bestelnummer)}. De bestelling staat weer bij Nieuw in de backoffice. Neem contact op met de klant, en bevestig, wijzig of keur de bestelling daarna af.`) +
+    wijzigingLijst(b) +
+    `<div style="margin:8px 0 24px;">${knop("Bekijken in de backoffice", ctx.beheer("bekijken"), true)}</div>` +
+    gegevens([
+      ["Contact", html(k.contactpersoon)],
+      ["Telefoon", `<a href="tel:${html(k.telefoon.replace(/\s/g, ""))}" style="color:${KLEUR.zwart};">${html(k.telefoon)}</a>`],
+      ["E-mail", `<a href="mailto:${html(k.email)}" style="color:${KLEUR.zwart};">${html(k.email)}</a>`]
+    ]);
+  return {
+    onderwerp: `${akkoord ? "Akkoord" : "Niet akkoord"}: voorstel ${b.bestelnummer} – ${k.bedrijfsnaam}`,
+    html: omhulsel({ voorvertoning: akkoord ? "De klant gaat akkoord." : "De klant gaat niet akkoord.", kop: akkoord ? "Klant gaat akkoord" : "Klant gaat niet akkoord", inhoud }, ctx)
   };
 };
 
@@ -396,6 +454,10 @@ const mailsVoor = async (db, id) => {
   })) verstuurd.push("aanvraag");
   if (b.status === "bevestigd" && await metClaim(db, id, "mail_bevestiging_op",
     () => verstuur(klantAdres, vmv, mailBevestiging(b, k, termijn, doorsturen, ctx)))) verstuurd.push("bevestiging");
+  if (b.status === "voorstel" && await metClaim(db, id, "mail_voorstel_op",
+    () => verstuur(klantAdres, vmv, mailVoorstel(b, k, doorsturen, ctx)))) verstuurd.push("voorstel");
+  if (b.voorstel_reactie && await metClaim(db, id, "mail_reactie_op",
+    () => verstuur(vmv, k.email, mailReactie(b, k, ctx)))) verstuurd.push("reactie");
   if (b.status === "geannuleerd" && await metClaim(db, id, "mail_annulering_op",
     () => verstuur(klantAdres, vmv, mailAfgekeurd(b, k, doorsturen, ctx)))) verstuurd.push("afgekeurd");
   return antwoord({ verstuurd });

@@ -975,6 +975,25 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 }
 .beheer__invoer:focus { outline: 2px solid var(--rood); outline-offset: 0; border-color: var(--rood); }
 .beheer__bedrag { text-align: right; font-variant-numeric: tabular-nums; color: var(--zwart); }
+/* Voorstel van VMV in het portaal */
+.portaal__voorstel { margin: 0 0 var(--s-3); padding: var(--s-3); background: var(--champagne-licht); }
+.portaal__voorstel h3 { margin: 0 0 var(--s-1); font-size: var(--fs-h3); font-weight: 300; }
+.portaal__voorstel p { margin: 0 0 var(--s-2); }
+.portaal__voorstelknoppen { display: flex; flex-wrap: wrap; gap: var(--s-2); margin: var(--s-2) 0; }
+/* Een wijn vervangen (Bevestigen met wijziging) */
+.beheer__vervang { grid-column: 1 / -1; }
+.beheer__vervang > .bestel__terug { margin: 0; }
+.beheer__vervangrij {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 14rem) 7rem; gap: var(--s-2); align-items: end;
+  margin-top: var(--s-2); padding: var(--s-2); background: var(--champagne-licht);
+}
+.beheer__vervangrij .veld { margin: 0; }
+.beheer__vervangrij .beheer__invoer { width: 5rem; }
+.beheer__vervangprijs { margin: 0; padding: 0; border: 0; font-size: var(--fs-klein); }
+.beheer__vervangprijs legend { padding: 0; margin-bottom: 4px; font-weight: 500; color: var(--zwart); }
+.beheer__vervangprijs .akkoord { margin: 2px 0; }
+.beheer__vervangrij .beheer__bedrag { padding-bottom: 12px; }
+@media (max-width: 48rem) { .beheer__vervangrij { grid-template-columns: minmax(0, 1fr) auto; } }
 .beheer__totalen { margin: 0 0 var(--s-4); border-top: 0; }
 .beheer__formulier { max-width: var(--kolom); }
 .beheer__formulier .veld { margin-bottom: var(--s-2); }

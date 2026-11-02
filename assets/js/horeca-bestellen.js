@@ -303,29 +303,79 @@
     return vak;
   };
 
+  // ---------- Voorstel van VMV: akkoord of niet (supabase/020, klant_voorstel) ----------
+  var voorstelVak = function (b) {
+    var vak = el("div", "portaal__voorstel");
+    vak.appendChild(el("h3", null, "Ons voorstel"));
+    vak.appendChild(el("p", null, "Niet alles is leverbaar zoals besteld. Dit stellen we voor; de rest leveren we zoals besteld."));
+    var ul = el("ul", "mandje__regels");
+    ((b.voorstel && b.voorstel.wijzigingen) || []).forEach(function (w) {
+      var li = el("li");
+      var t = el("span", null, w.omschrijving);
+      var info = [w.leveren === 0 ? "niet leverbaar" : w.leveren < w.besteld ? "we leveren " + w.leveren + " in plaats van " + w.besteld : ""];
+      if (w.vervangen_door) info.push("in plaats daarvan " + w.vervangen_aantal + " × " + w.vervangen_door + " à " + euro(w.vervangen_prijs_ex) + " excl. btw");
+      t.appendChild(el("small", null, info.filter(Boolean).join(", ")));
+      li.appendChild(t);
+      ul.appendChild(li);
+    });
+    vak.appendChild(ul);
+    var knoppen = el("div", "portaal__voorstelknoppen");
+    var status = el("p", "formulier__status");
+    status.setAttribute("role", "status");
+    [[true, "Akkoord", "knop knop--primair"], [false, "Niet akkoord", "knop knop--secundair"]].forEach(function (o) {
+      var k = el("button", o[2], o[1]);
+      k.type = "button";
+      k.addEventListener("click", function () {
+        knoppen.querySelectorAll("button").forEach(function (x) { x.disabled = true; });
+        status.className = "formulier__status";
+        status.textContent = "Bezig…";
+        window.vmvHoreca.db.rpc("klant_voorstel", { bestelling: b.id, akkoord: o[0] })
+          .then(function (r) {
+            if (r.error) throw r.error;
+            laadBestellingen();
+          })
+          .catch(function (err) {
+            knoppen.querySelectorAll("button").forEach(function (x) { x.disabled = false; });
+            status.className = "formulier__status fout";
+            status.textContent = (err && /niet meer open/.test(err.message)) ? "Dit voorstel is niet meer open. Ververs de pagina."
+              : "Dat lukte niet. Probeer het opnieuw of mail ons op info@vmvwijnimport.com.";
+          });
+      });
+      knoppen.appendChild(k);
+    });
+    vak.appendChild(knoppen);
+    vak.appendChild(el("p", "horeca__klein", "Bij akkoord is je bestelling bevestigd en krijg je de bevestiging met de bedragen. Niet akkoord? Dan nemen we contact met je op."));
+    vak.appendChild(status);
+    return vak;
+  };
+
   // ---------- Eerdere bestellingen ----------
-  var STATUS = { ontvangen: "Wacht op bevestiging", bevestigd: "Bevestigd", geleverd: "Geleverd", geannuleerd: "Geannuleerd" };
+  var STATUS = { ontvangen: "Wacht op bevestiging", voorstel: "Voorstel: graag je akkoord", bevestigd: "Bevestigd", geleverd: "Geleverd", geannuleerd: "Geannuleerd" };
   var bestelDoel = pagina.querySelector("[data-bestellingen]");
   var laadBestellingen = function () {
     window.vmvHoreca.db.from("bestellingen")
-      .select("bestelnummer, besteld_op, status, spoed, totaal_ex, bevat_aanvraag, bericht_klant, bestelregels(product_id, omschrijving, aantal, prijs_ex, korting_pct, regel_ex, allocatie, toegewezen)")
+      .select("id, bestelnummer, besteld_op, status, spoed, totaal_ex, bevat_aanvraag, bericht_klant, voorstel, bestelregels(id, product_id, omschrijving, aantal, prijs_ex, korting_pct, regel_ex, allocatie, toegewezen, vervangt)")
       .order("besteld_op", { ascending: false })
       .then(function (r) {
         bestelDoel.textContent = "";
         if (r.error) throw r.error;
         var open = r.data.filter(function (b) { return b.status === "ontvangen"; }).length;
-        pagina.querySelector("[data-teller=bestellingen]").textContent = open ? "(" + open + " wacht op bevestiging)" : r.data.length ? "(" + r.data.length + ")" : "";
+        var voorstellen = r.data.filter(function (b) { return b.status === "voorstel"; }).length;
+        pagina.querySelector("[data-teller=bestellingen]").textContent = voorstellen ? "(" + voorstellen + (voorstellen === 1 ? " voorstel)" : " voorstellen)")
+          : open ? "(" + open + " wacht op bevestiging)" : r.data.length ? "(" + r.data.length + ")" : "";
         if (!r.data.length) { bestelDoel.appendChild(el("p", "horeca__klein", "Je hebt nog geen bestellingen geplaatst.")); return; }
         r.data.forEach(function (b) {
           // Na bevestiging telt het aantal dat VMV levert (toegewezen; leeg = besteld), zoals in de bevestigingsmail
           var bevestigd = b.status === "bevestigd" || b.status === "geleverd";
           var totaal = 0;
+          b.bestelregels.sort(function (x, y) { return x.id - y.id; });
           b.bestelregels.forEach(function (x) {
             x.getoond = bevestigd && x.toegewezen != null ? x.toegewezen : x.aantal;
             x.bedrag = bevestigd ? Math.round(x.prijs_ex * 100) * x.getoond / 100 : Number(x.regel_ex);
             totaal += Math.round(x.bedrag * 100);
           });
           var d = el("details", "bestelling");
+          if (b.status === "voorstel") d.open = true;
           var s = el("summary", "bestelling__kop");
           s.appendChild(el("span", "bestelling__nummer", b.bestelnummer));
           s.appendChild(el("span", null, new Date(b.besteld_op).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" })));
@@ -338,14 +388,20 @@
             var links = el("span", null, x.getoond + " × " + x.omschrijving);
             var extra = [];
             if (x.korting_pct > 0) extra.push(String(x.korting_pct).replace(".", ",") + "% schenkkorting");
-            if (x.getoond !== x.aantal) extra.push(x.getoond === 0 ? "niet leverbaar (besteld: " + x.aantal + ")" : "besteld: " + x.aantal + ", we leveren: " + x.getoond);
+            // Vervangende wijnen (supabase/020)
+            var origineel = x.vervangt && b.bestelregels.filter(function (y) { return y.id === x.vervangt; })[0];
+            var vervanger = b.bestelregels.filter(function (y) { return y.vervangt === x.id; })[0];
+            if (origineel) extra.push("in plaats van " + origineel.omschrijving);
+            else if (x.getoond !== x.aantal) extra.push(x.getoond === 0 ? (vervanger ? "vervangen (besteld: " + x.aantal + ")" : "niet leverbaar (besteld: " + x.aantal + ")") : "besteld: " + x.aantal + ", we leveren: " + x.getoond);
             else if (x.allocatie && !bevestigd) extra.push("allocatie-aanvraag");
+            if (vervanger && x.getoond !== 0) extra.push("de rest vervangen door " + vervanger.omschrijving);
             if (extra.length) links.appendChild(el("small", null, extra.join(" · ")));
             li.appendChild(links);
             li.appendChild(el("span", null, euro(x.bedrag)));
             ul.appendChild(li);
           });
           if (b.bericht_klant) d.appendChild(el("p", "bestel__voorbehoud", "Bericht van ons: " + b.bericht_klant));
+          if (b.status === "voorstel") d.appendChild(voorstelVak(b));
           d.appendChild(ul);
           if (b.spoed) d.appendChild(el("p", "horeca__klein", "Met spoed besteld."));
           d.appendChild(opnieuwKnop(b));
