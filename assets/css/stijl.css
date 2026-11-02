@@ -202,11 +202,11 @@ a:hover { color: var(--rood); }
 .mandjeherinnering {
   position: fixed; right: var(--rand); bottom: var(--s-3); z-index: 40;
   display: flex; align-items: center; gap: var(--s-2);
-  padding: var(--s-1) var(--s-1) var(--s-1) var(--s-1); padding-right: var(--s-2);
+  padding: var(--s-1) var(--s-1) var(--s-1) var(--s-2);
   background: var(--wit); border: 1px solid var(--zwart); color: var(--zwart); text-decoration: none;
 }
 .mandjeherinnering[hidden] { display: none; }
-.mandjeherinnering__foto { display: block; width: 56px; height: 70px; object-fit: cover; }
+.mandjeherinnering__icoon { display: block; flex: none; color: var(--zwart); }
 .mandjeherinnering__tekst { display: flex; flex-direction: column; gap: 2px; min-width: 9rem; }
 .mandjeherinnering__kop { font-size: var(--fs-ui); font-weight: 400; }
 .mandjeherinnering__info { font-size: var(--fs-klein); color: var(--tekst-zacht); }

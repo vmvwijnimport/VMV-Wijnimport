@@ -7,9 +7,10 @@
 {%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
 {%- unless page.url contains "/hedonist/" or page.url contains "/horeca/" or page.url == "/bestelling/" or page.url == "/en/order/" -%}
 {%- if site.data.winkel.open -%}
-{%- assign model = site.data.winkel.modellen | first -%}
 <a class="mandjeherinnering" id="mandjeherinnering" href="{{ t.url.hedonist | append: '#bestellen' | relative_url }}" hidden>
-  <img class="mandjeherinnering__foto" src="{{ model.foto | relative_url }}" alt="" width="56" height="70" loading="lazy">
+  <svg class="mandjeherinnering__icoon" viewBox="0 0 32 40" width="32" height="40" aria-hidden="true">
+    <path d="M9 3h14c1.2 5.5 1.2 10-1 13.5C20.6 18.8 18.6 20 16 20s-4.6-1.2-6-3.5C7.8 13 7.8 8.5 9 3zM16 20v14M10 37h12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+  </svg>
   <span class="mandjeherinnering__tekst">
     <span class="mandjeherinnering__kop">{{ t.winkel.mandje }}</span>
     <span class="mandjeherinnering__info" data-info></span>
