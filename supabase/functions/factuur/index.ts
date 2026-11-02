@@ -7,7 +7,8 @@
 // 3. "voorbereiden":  een voorbeeld van de factuur voor een bevestigde bestelling. Er wordt niets gemaakt.
 // 4. "maken":         de factuur echt maken in e-Boekhouden. Eén factuur per bestelling. De factuur wordt
 //                     niet gemaild: dat doet VMV zelf vanuit e-Boekhouden, na controle.
-// Factuurregels verwijzen naar het product in e-Boekhouden (productId), zodat de voorraad daar meeloopt.
+// Factuurregels verwijzen naar het product in e-Boekhouden (via de artikelcode, of anders productId),
+// zodat de voorraad daar meeloopt.
 // Bedragen komen uit de bestelling zoals VMV hem heeft bevestigd (prijs per stuk na korting).
 //
 // Instellingen in Supabase → Edge Functions → Secrets (niets hiervan staat in de repository):
@@ -199,8 +200,11 @@ const opbouwen = async (db, vraag, id) => {
     const p = (eb && details[eb]) || {};
     const pct = Number(r.korting_pct);
     const btw = p.vat || "HOOG_VERK_21";
+    // Met alleen productId koppelt e-Boekhouden het artikel, maar blijft de kolom Code op de factuur leeg
+    // (de API negeert code als productId er is). Heeft het artikel een code, dan sturen we die: e-Boekhouden
+    // zoekt het artikel er dan zelf bij en toont de code. Zonder code blijft het productId.
     return {
-      productId: eb || null,
+      ...(p.code ? { code: schoon(p.code, 50) } : { productId: eb || null }),
       description: schoon(r.omschrijving + (pct > 0 ? ` (incl. ${String(pct).replace(".", ",")}% schenkkorting)` : ""), 200),
       quantity: n,
       pricePerUnit: Number(r.prijs_ex),

@@ -106,6 +106,8 @@ De livegang voorbereiden met de eigenaar: Resend, Confirm email aan, FormSubmit 
 
 - **Wijnen vervangen en voorstel aan de klant (2 nov), wens van de eigenaar:** bij "Bevestigen met wijziging" kan per wijn "Vervangen door een andere wijn": keuze uit de prijslijst, aantal, en de prijs van de vervangende wijn of die van de bestelde wijn. Daarna twee knoppen: **Bevestigen met wijziging** (al overlegd; de klant krijgt de bevestiging) of **Als voorstel naar de klant** (status "voorstel"; de klant krijgt een mail en geeft in het portaal onder Je bestellingen akkoord of niet; VMV krijgt een mail met de reactie; bij niet akkoord staat de bestelling weer bij Nieuw). Een vervangende wijn wordt een extra bestelregel met `vervangt`, dus factuur, overzicht en mails kloppen vanzelf. Script `supabase/020-vervangen-en-voorstel.sql` (vervangt `beheer_bevestig`, `beheer_afkeur` en `bestelmail_versturen`), nieuwe mails in de functie `bestelmail`. Getest in de backoffice met nepgegevens; de databasefuncties konden lokaal niet worden getest (geen Postgres). ✔ **Nog door de eigenaar:** 020 uitvoeren en de functie bestelmail opnieuw plakken, dan pas live zetten.
 
+- **Factuur: kolom Code leeg (2 nov), gemeld door de eigenaar:** met alleen `productId` koppelt e-Boekhouden het artikel, maar blijft de kolom Code leeg (de API negeert `code` als `productId` er is). De functie `factuur` stuurt nu de artikelcode (`code`) als het artikel een code heeft, anders het productId. ✔ **Nog door de eigenaar:** de functie factuur opnieuw plakken en met de volgende factuur controleren of de code er staat, het artikel gekozen is en de voorraad daalt.
+
 ## Zo kun je terug
 
 - **Site van vóór het horecaportaal:** de tag `voor-horeca-portaal`.
