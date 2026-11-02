@@ -1140,7 +1140,8 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .prijslijst__wijnen li, .prijslijst__voet { break-inside: avoid; page-break-inside: avoid; }
 /* Voor PDF downloaden: een kopie buiten beeld, zo breed als een A4 binnen de marges (180 mm) */
 .prijslijst__houder { position: absolute; left: -10000px; top: 0; }
-.prijslijst.prijslijst--pdf { width: 680px; max-width: none; margin: 0; padding: 0; border: 0; }
+/* Wat ruimte links en rechts: anders vallen in Safari de laatste letters van rechts uitgelijnde tekst (de kop, de prijzen) net buiten de PDF */
+.prijslijst.prijslijst--pdf { box-sizing: border-box; width: 680px; max-width: none; margin: 0; padding: 0 12px; border: 0; }
 .prijslijst--pdf .prijslijst__logo { margin-left: 0; }
 .prijslijst__prijs { text-align: right; font-variant-numeric: tabular-nums; color: var(--zwart); }
 .prijslijst__voet { margin-top: var(--s-6); padding-top: var(--s-2); border-top: 1px solid var(--zwart); font-size: var(--fs-klein); color: var(--tekst-zacht); break-inside: avoid; }
