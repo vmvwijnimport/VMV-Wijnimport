@@ -1,13 +1,34 @@
 {%- comment -%}
-  Herinnering rechtsonder: er zitten nog Hedonist-glazen in het winkelmandje (localStorage, zie winkel.js).
-  Niet op de Hedonist-pagina zelf, na het betalen en in het horecaportaal. Logica: assets/js/site.js.
+  Zitten er Hedonist-glazen in het winkelmandje (localStorage), dan staat rechtsonder een herinnering.
+  Een klik opent het mandje in een lade aan de rechterkant, zodat je op deze pagina kunt afrekenen.
+  Zonder JavaScript gaat de link naar het mandje op de Hedonist-pagina.
+  Niet op de Hedonist-pagina zelf, in het horecaportaal en na het betalen. Logica: assets/js/winkel.js.
 {%- endcomment -%}
 {%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
 {%- unless page.url contains "/hedonist/" or page.url contains "/horeca/" or page.url == "/bestelling/" or page.url == "/en/order/" -%}
 {%- if site.data.winkel.open -%}
+{%- assign model = site.data.winkel.modellen | first -%}
 <a class="mandjeherinnering" id="mandjeherinnering" href="{{ t.url.hedonist | append: '#bestellen' | relative_url }}" hidden>
-  <span class="mandjeherinnering__tekst" data-tekst></span>
-  <span class="mandjeherinnering__actie" data-actie></span>
+  <img class="mandjeherinnering__foto" src="{{ model.foto | relative_url }}" alt="" width="56" height="70" loading="lazy">
+  <span class="mandjeherinnering__tekst">
+    <span class="mandjeherinnering__kop">{{ t.winkel.mandje }}</span>
+    <span class="mandjeherinnering__info" data-info></span>
+  </span>
+  <span class="knop knop--primair mandjeherinnering__knop">{% if page.taal == "en" %}Check out{% else %}Afrekenen{% endif %}</span>
 </a>
+
+<div class="lade" id="mandjelade" hidden>
+  <div class="lade__sluier" data-sluit></div>
+  <div class="lade__paneel" role="dialog" aria-modal="true" aria-labelledby="mandje-kop">
+    <button class="lade__sluit" type="button" data-sluit aria-label="{% if page.taal == "en" %}Close{% else %}Sluiten{% endif %}">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+    </button>
+    <div class="lade__inhoud" id="bestellen" data-lade>
+      {% include hedonist-mandje.html %}
+    </div>
+  </div>
+</div>
+{% include hedonist-gegevens.html %}
+<script src="{{ '/assets/js/winkel.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
 {%- endif -%}
 {%- endunless -%}

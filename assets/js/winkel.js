@@ -1,11 +1,14 @@
 // Pre-order Hedonist glazen: winkelmandje, prijsberekening en bestellen.
 // Prijzen en regels komen uit _data/winkel.yml (via #winkel-gegevens).
+// Op de Hedonist-pagina staat het mandje naast de glazen; op andere pagina's staat het in een lade
+// die opent vanuit de herinnering rechtsonder (_includes/mandje-herinnering.html, data-lade).
 document.addEventListener("DOMContentLoaded", function () {
   var bron = document.getElementById("winkel-gegevens");
   var winkel = document.getElementById("bestellen");
   if (!bron || !winkel) return;
 
   var W = JSON.parse(bron.textContent);
+  var LADE = winkel.hasAttribute("data-lade");
   // Op de Engelse pagina (/en/hedonist/) Engelse teksten; de mail aan VMV blijft Nederlands
   var EN = document.documentElement.lang === "en";
   var glas = function (n) { return EN ? (n === 1 ? " glass" : " glasses") : (n === 1 ? " glas" : " glazen"); };
@@ -74,9 +77,17 @@ document.addEventListener("DOMContentLoaded", function () {
       .map(function (id) {
         var a = mandje[id], sets = Math.floor(a / 6);
         var uitleg = sets > 0 ? "<small>" + sets + " × 6 " + (EN ? "for " : "voor ") + euro(W.prijsZes) + (a % 6 ? " + " + (a % 6) + (EN ? " single" + glas(a % 6) : " los") : "") + "</small>" : "";
-        return "<li><span>" + a + " × " + W.modellen[id] + uitleg + "</span><span>" + euro(prijsModel(a)) + "</span></li>";
+        // In de lade kun je het aantal hier aanpassen (op de Hedonist-pagina bij de glazen zelf)
+        var aantal = LADE
+          ? '<span class="aantal aantal--licht aantal--klein" role="group" aria-label="' + (EN ? "Quantity " : "Aantal ") + W.modellen[id] + '">' +
+            '<button type="button" class="aantal__knop" data-model="' + id + '" data-stap="-1" aria-label="' + (EN ? "One fewer" : "Eén minder") + '">−</button>' +
+            '<span class="aantal__veld" aria-live="polite">' + a + '</span>' +
+            '<button type="button" class="aantal__knop" data-model="' + id + '" data-stap="1" aria-label="' + (EN ? "One more" : "Eén meer") + '">+</button></span>'
+          : "";
+        return "<li" + (LADE ? ' class="mandje__regel"' : "") + "><span>" + (LADE ? "" : a + " × ") + W.modellen[id] + uitleg + aantal + "</span><span>" + euro(prijsModel(a)) + "</span></li>";
       })
       .join("");
+    if (LADE) herinnering(b);
 
     winkel.querySelector(".mandje__subtotaal").textContent = euro(b.glazen);
     form.querySelector(".bestel__betaal").textContent = (EN ? "Order and pay · " : "Bestellen en betalen · ") + euro(b.totaal);
@@ -84,6 +95,38 @@ document.addEventListener("DOMContentLoaded", function () {
     winkel.querySelector(".mandje__som").textContent = euro(b.totaal);
     winkel.querySelector(".mandje__tip").textContent = b.n > 0 ? tip(b) : "";
   };
+
+  // ---------- Herinnering rechtsonder en de lade (andere pagina's dan Hedonist) ----------
+  var lade = document.getElementById("mandjelade");
+  var knopHerinnering = document.getElementById("mandjeherinnering");
+  var herinnering = function (b) {
+    if (!knopHerinnering) return;
+    knopHerinnering.querySelector("[data-info]").textContent = b.n + glas(b.n) + " · " + euro(b.glazen);
+    knopHerinnering.hidden = b.n === 0 || !lade.hidden;
+    document.body.classList.toggle("heeft-herinnering", b.n > 0);
+    if (b.n === 0) leeg.textContent = EN ? "Your basket is empty." : "Je winkelmandje is leeg.";
+  };
+  var ladeOpen = function () {
+    lade.hidden = false;
+    document.body.classList.add("lade-open");
+    knopHerinnering.hidden = true;
+    lade.querySelector(".lade__sluit").focus();
+  };
+  var ladeDicht = function () {
+    lade.hidden = true;
+    document.body.classList.remove("lade-open");
+    toon();
+    if (!knopHerinnering.hidden) knopHerinnering.focus();
+  };
+  if (LADE && knopHerinnering && lade) {
+    knopHerinnering.addEventListener("click", function (e) { e.preventDefault(); ladeOpen(); });
+    lade.querySelectorAll("[data-sluit]").forEach(function (k) { k.addEventListener("click", ladeDicht); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !lade.hidden) ladeDicht(); });
+    winkel.querySelector(".mandje__regels").addEventListener("click", function (e) {
+      var k = e.target.closest("[data-stap]");
+      if (k) zet(k.dataset.model, (mandje[k.dataset.model] || 0) + parseInt(k.dataset.stap, 10));
+    });
+  }
 
   var zet = function (id, aantal) {
     mandje[id] = Math.max(0, Math.min(120, parseInt(aantal, 10) || 0));

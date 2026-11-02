@@ -198,23 +198,52 @@ a:hover { color: var(--rood); }
   body.menu-open { overflow: hidden; }
 }
 
-/* ---------- Herinnering winkelmandje (rechtsonder, op andere pagina's dan Hedonist) ---------- */
+/* ---------- Herinnering winkelmandje en de lade (andere pagina's dan Hedonist) ---------- */
 .mandjeherinnering {
   position: fixed; right: var(--rand); bottom: var(--s-3); z-index: 40;
   display: flex; align-items: center; gap: var(--s-2);
-  padding: 14px 20px; background: var(--zwart); color: var(--wit);
-  font-size: var(--fs-klein); text-decoration: none;
+  padding: var(--s-1) var(--s-1) var(--s-1) var(--s-1); padding-right: var(--s-2);
+  background: var(--wit); border: 1px solid var(--zwart); color: var(--zwart); text-decoration: none;
 }
 .mandjeherinnering[hidden] { display: none; }
-.mandjeherinnering__actie { font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
-.mandjeherinnering:hover { background: var(--rood); color: var(--wit); }
+.mandjeherinnering__foto { display: block; width: 56px; height: 70px; object-fit: cover; }
+.mandjeherinnering__tekst { display: flex; flex-direction: column; gap: 2px; min-width: 9rem; }
+.mandjeherinnering__kop { font-size: var(--fs-ui); font-weight: 400; }
+.mandjeherinnering__info { font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.mandjeherinnering__knop { padding: 12px 20px; }
+.mandjeherinnering:hover .mandjeherinnering__knop { background: var(--rood); border-color: var(--rood); }
 .mandjeherinnering:focus-visible { outline: 2px solid var(--rood); outline-offset: 3px; }
 .leeftijd-open .mandjeherinnering, body.menu-open .mandjeherinnering { display: none; }
 @media (max-width: 36rem) {
-  .mandjeherinnering { left: 0; right: 0; bottom: 0; justify-content: space-between; padding: 16px var(--rand); }
+  .mandjeherinnering { left: 0; right: 0; bottom: 0; border-width: 1px 0 0; padding: var(--s-1) var(--rand); }
+  .mandjeherinnering__tekst { flex: 1; min-width: 0; }
   /* Ruimte onderaan, zodat de balk de footer niet bedekt */
-  body.heeft-herinnering { padding-bottom: 56px; }
+  body.heeft-herinnering { padding-bottom: 88px; }
 }
+
+.lade { position: fixed; inset: 0; z-index: 150; }
+.lade[hidden] { display: none; }
+.lade__sluier { position: absolute; inset: 0; background: var(--sluier); }
+.lade__paneel {
+  position: absolute; top: 0; right: 0; bottom: 0; width: min(28rem, 100%);
+  overflow-y: auto; background: var(--wit); border-left: 1px solid var(--zwart);
+  animation: lade-in .25s ease;
+}
+@keyframes lade-in { from { transform: translateX(100%); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .lade__paneel { animation: none; } }
+.lade__sluit {
+  position: absolute; top: var(--s-2); right: var(--s-2); display: grid; place-items: center;
+  width: 44px; height: 44px; padding: 0; border: 0; background: none; color: var(--zwart); cursor: pointer;
+}
+.lade__sluit:hover { color: var(--rood); }
+.lade__sluit:focus-visible { outline: 2px solid var(--rood); outline-offset: 0; }
+.lade .mandje { position: static; padding: var(--s-4) var(--s-4) var(--s-6); }
+.lade .mandje h3 { padding-right: 48px; }
+.mandje__regels li.mandje__regel { align-items: center; }
+.mandje__regel .aantal--klein { display: flex; width: max-content; margin-top: 6px; }
+.aantal--klein .aantal__knop { width: 32px; height: 32px; font-size: 1rem; }
+.aantal--klein .aantal__veld { display: inline-grid; place-items: center; width: 40px; height: 32px; border-left: 1px solid var(--lijn); border-right: 1px solid var(--lijn); font-size: var(--fs-klein); }
+body.lade-open { overflow: hidden; }
 
 /* ---------- Knoppen en links ---------- */
 

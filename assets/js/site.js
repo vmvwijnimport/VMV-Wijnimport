@@ -3,24 +3,6 @@ document.addEventListener("DOMContentLoaded", function () {
   // Engelse pagina's (onder /en/) krijgen Engelse meldingen
   var EN = document.documentElement.lang === "en";
 
-  // ---- Herinnering: nog glazen in het winkelmandje (_includes/mandje-herinnering.html) ----
-  var herinnering = document.getElementById("mandjeherinnering");
-  if (herinnering) {
-    var glazen = 0;
-    try {
-      var mandje = JSON.parse(localStorage.getItem("vmv-hedonist-mandje")) || {};
-      Object.keys(mandje).forEach(function (id) { glazen += Math.max(0, parseInt(mandje[id], 10) || 0); });
-    } catch (e) {}
-    if (glazen > 0) {
-      herinnering.querySelector("[data-tekst]").textContent = EN
-        ? glazen + (glazen === 1 ? " glass" : " glasses") + " in your basket"
-        : glazen + (glazen === 1 ? " glas" : " glazen") + " in je winkelmandje";
-      herinnering.querySelector("[data-actie]").textContent = EN ? "Check out" : "Afrekenen";
-      herinnering.hidden = false;
-      document.body.classList.add("heeft-herinnering");
-    }
-  }
-
   // ---- Taalkeuze: onthouden, zodat de bezoeker niet meer automatisch wordt doorgestuurd (zie head.html) ----
   document.querySelectorAll(".taalkeuze a[hreflang]").forEach(function (a) {
     a.addEventListener("click", function () {
