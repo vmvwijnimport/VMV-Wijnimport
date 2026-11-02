@@ -108,6 +108,8 @@ De livegang voorbereiden met de eigenaar: Resend, Confirm email aan, FormSubmit 
 
 - **Factuur: kolom Code leeg (2 nov), gemeld door de eigenaar:** met alleen `productId` koppelt e-Boekhouden het artikel, maar blijft de kolom Code leeg (de API negeert `code` als `productId` er is). De functie `factuur` stuurt nu de artikelcode (`code`) als het artikel een code heeft, anders het productId. ✔ **Nog door de eigenaar:** de functie factuur opnieuw plakken en met de volgende factuur controleren of de code er staat, het artikel gekozen is en de voorraad daalt.
 
+- **Factuur opnieuw maken, nummer en eenheid (2 nov), wens van de eigenaar:** is een factuur in e-Boekhouden verwijderd, dan toont de backoffice "Factuur opnieuw maken"; de functie controleert eerst of de factuur echt weg is. Het factuurnummer is het hoogste nummer dat in e-Boekhouden staat plus 1 (F000130 → F000131), zodat een verwijderde factuur het gat opvult; het staat in het voorbeeld. Elke regel krijgt een eenheid: die van het artikel, anders "stuks". ✔ **Nog door de eigenaar:** functie factuur opnieuw plakken, "zet het live" voor de knop.
+
 ## Zo kun je terug
 
 - **Site van vóór het horecaportaal:** de tag `voor-horeca-portaal`.

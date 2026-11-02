@@ -166,13 +166,34 @@ const kandidaten = async (vraag, k) => {
   return lijst;
 };
 
+// Het volgende factuurnummer: het hoogste nummer dat nu in e-Boekhouden staat plus 1, met dezelfde
+// letters en hetzelfde aantal cijfers (F000130 → F000131). Zo vult een verwijderde factuur het gat op,
+// in plaats van dat e-Boekhouden een nummer overslaat. Geen bruikbare nummers: e-Boekhouden kiest zelf.
+export const volgendOp = (nummers) => {
+  const delen = nummers.map((n) => /^(.*?)(\d+)$/.exec(String(n || "").trim())).filter(Boolean)
+    .map((m) => ({ voor: m[1], cijfers: m[2], getal: parseInt(m[2], 10) }));
+  if (!delen.length) return null;
+  // De letters die het meest voorkomen (de gewone reeks), daarbinnen het hoogste nummer
+  const telling = {};
+  delen.forEach((d) => { telling[d.voor] = (telling[d.voor] || 0) + 1; });
+  const voor = Object.keys(telling).sort((a, b) => telling[b] - telling[a])[0];
+  const hoogste = delen.filter((d) => d.voor === voor).sort((a, b) => b.getal - a.getal)[0];
+  return voor + String(hoogste.getal + 1).padStart(hoogste.cijfers.length, "0");
+};
+const volgendNummer = async (vraag) => volgendOp((await alles(vraag, "/v1/invoice")).map((f) => f.invoiceNumber));
+
 const opbouwen = async (db, vraag, id) => {
   const { data: b, error } = await db.from("bestellingen")
     .select("*, klanten(*), bestelregels(*, producten(id, soort, eb_product_id))").eq("id", id).maybeSingle();
   if (error) throw error;
   if (!b) throw new Melding("Deze bestelling bestaat niet (meer).", 404);
+  // Is de factuur in e-Boekhouden verwijderd, dan mag hij opnieuw worden gemaakt
+  if (b.eb_factuur_id && !(await vraag("GET", `/v1/invoice/${b.eb_factuur_id}`))) {
+    await db.from("bestellingen").update({ eb_factuur_id: null, eb_factuurnummer: null, eb_factuur_op: null }).eq("id", b.id);
+    b.eb_factuur_id = null; b.eb_factuurnummer = null; b.eb_factuur_op = null;
+  }
   if (b.eb_factuur_id || b.eb_factuur_op) {
-    throw new Melding(b.eb_factuurnummer ? `Voor deze bestelling is al factuur ${b.eb_factuurnummer} gemaakt.` : "Voor deze bestelling is al een factuur gemaakt of wordt er nu een gemaakt.", 409);
+    throw new Melding(b.eb_factuurnummer ? `Factuur ${b.eb_factuurnummer} staat nog in e-Boekhouden. Wil je hem opnieuw maken, verwijder hem daar dan eerst.` : "Voor deze bestelling is al een factuur gemaakt of wordt er nu een gemaakt.", 409);
   }
   if (b.status !== "bevestigd" && b.status !== "geleverd") throw new Melding("Maak pas een factuur als de bestelling is bevestigd.");
   const { data: inst } = await db.from("instellingen").select("*").maybeSingle();
@@ -195,6 +216,15 @@ const opbouwen = async (db, vraag, id) => {
     else if (!p.ledgerId) problemen.push(`Het product bij ${r.omschrijving} heeft in e-Boekhouden geen grootboekrekening.`);
   }
 
+  // Eenheid op de factuur: die van het product, anders "stuks"
+  let stuks = null;
+  if (Object.values(details).some((p) => p && !p.unitId)) {
+    const eenheden = await alles(vraag, "/v1/unit");
+    const e = eenheden.find((x) => /^stuks?$/i.test(String(x.plural || "").trim()) || /^stuk$/i.test(String(x.singular || "").trim()));
+    stuks = e ? e.id : null;
+    if (!stuks) problemen.push("In e-Boekhouden staat geen eenheid \"stuks\". Maak die aan onder Instellingen, of geef de artikelen een eenheid.");
+  }
+
   const items = regels.map(({ r, n }) => {
     const eb = r.producten && r.producten.eb_product_id;
     const p = (eb && details[eb]) || {};
@@ -207,6 +237,7 @@ const opbouwen = async (db, vraag, id) => {
       ...(p.code ? { code: schoon(p.code, 50) } : { productId: eb || null }),
       description: schoon(r.omschrijving + (pct > 0 ? ` (incl. ${String(pct).replace(".", ",")}% schenkkorting)` : ""), 200),
       quantity: n,
+      unitId: p.unitId || stuks,
       pricePerUnit: Number(r.prijs_ex),
       vatCode: btw,
       ledgerId: p.ledgerId || null,
@@ -218,6 +249,8 @@ const opbouwen = async (db, vraag, id) => {
   const ex = items.reduce((s, i) => s + centen(i.pricePerUnit) * i.quantity, 0);
   const btw = items.reduce((s, i) => s + Math.round(centen(i.pricePerUnit) * i.quantity * (i._btw || 0) / 100), 0);
 
+  const nummer = await volgendNummer(vraag);
+
   let sjabloon = null;
   if (inst && inst.eb_sjabloon_id) {
     const s = (await alles(vraag, "/v1/invoicetemplate")).find((x) => x.id === inst.eb_sjabloon_id);
@@ -226,9 +259,9 @@ const opbouwen = async (db, vraag, id) => {
   }
 
   return {
-    b, k, inst, items, problemen,
+    b, k, inst, items, problemen, nummer,
     voorbeeld: {
-      bestelnummer: b.bestelnummer, datum: vandaag(), termijn: inst ? inst.betaaltermijn_dagen : 14,
+      bestelnummer: b.bestelnummer, datum: vandaag(), termijn: inst ? inst.betaaltermijn_dagen : 14, nummer,
       sjabloon, verwerken: inst ? inst.eb_verwerken !== false : true,
       regels: items.map((i) => ({ omschrijving: i.description, product: i._product, aantal: i.quantity, prijs: i.pricePerUnit, btw: i._btw })),
       totaal: { ex: ex / 100, btw: btw / 100, incl: (ex + btw) / 100 },
@@ -280,6 +313,7 @@ const maken = async (db, vraag, opdracht) => {
       mutatie = { description: `Factuur bestelling ${b.bestelnummer}`, ...(deb.length === 1 ? { ledgerId: deb[0].id } : {}) };
     }
     factuur = await vraag("POST", "/v1/invoice", {
+      ...(o.nummer ? { invoiceNumber: o.nummer } : {}),
       relationId: relatie,
       date: vandaag(),
       termOfPayment: inst.betaaltermijn_dagen,

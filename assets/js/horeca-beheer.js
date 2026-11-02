@@ -667,13 +667,16 @@
     bezig(voorbereidKnop); bezig(maakKnop);
     if (b.eb_factuur_id) {
       veld("factuurtekst").textContent = "Factuur " + (b.eb_factuurnummer || "") + " is gemaakt in e-Boekhouden" +
-        (b.eb_factuur_op ? " op " + datum(b.eb_factuur_op) : "") + ". Controleer hem daar en verstuur hem vanuit e-Boekhouden.";
-      voorbereidKnop.hidden = true;
+        (b.eb_factuur_op ? " op " + datum(b.eb_factuur_op) : "") + ". Controleer hem daar en verstuur hem vanuit e-Boekhouden." +
+        " Klopt hij niet? Verwijder hem in e-Boekhouden en maak hem hier opnieuw.";
+      voorbereidKnop.textContent = "Factuur opnieuw maken";
+      voorbereidKnop.hidden = false;
     } else if (b.eb_factuur_op) {
       veld("factuurtekst").textContent = "Er is op " + datum(b.eb_factuur_op) + " een factuur gestart, maar het nummer is niet teruggekomen. Kijk in e-Boekhouden of de factuur er staat.";
       voorbereidKnop.hidden = true;
     } else {
       veld("factuurtekst").textContent = "Bekijk eerst een voorbeeld. Pas als jij op “Maak factuur” klikt, komt de factuur in e-Boekhouden. De klant krijgt niets: je verstuurt de factuur zelf vanuit e-Boekhouden.";
+      voorbereidKnop.textContent = "Factuur voorbereiden";
       voorbereidKnop.hidden = false;
     }
   };
@@ -715,7 +718,8 @@
         factuurBlok.querySelector("[data-factuur=ex]").textContent = euro(v.totaal.ex);
         factuurBlok.querySelector("[data-factuur=btw]").textContent = euro(v.totaal.btw);
         factuurBlok.querySelector("[data-factuur=incl]").textContent = euro(v.totaal.incl);
-        veld("factuurinfo").textContent = "Factuurdatum vandaag, betaaltermijn " + v.termijn + " dagen" +
+        veld("factuurinfo").textContent = (v.nummer ? "Factuurnummer " + v.nummer + ". " : "") +
+          "Factuurdatum vandaag, betaaltermijn " + v.termijn + " dagen" +
           (v.sjabloon ? ", sjabloon “" + v.sjabloon + "”" : "") + ". " +
           (v.verwerken ? "De factuur wordt meteen verwerkt in de boekhouding." : "De factuur wordt niet meteen verwerkt in de boekhouding.") +
           " De btw rekent e-Boekhouden zelf uit.";
