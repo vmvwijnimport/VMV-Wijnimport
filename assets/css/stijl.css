@@ -1216,6 +1216,28 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   body.drukt-prijslijst .prijslijst__wijnen li { font-size: 10.5pt; padding: 5px 0; }
   body.drukt-prijslijst * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+/* Backoffice: bezoekers */
+.bezoek__cijfers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); margin: var(--s-3) 0 var(--s-4); }
+.bezoek__cijfers div { padding: var(--s-2) var(--s-3); border: 1px solid var(--lijn); }
+.bezoek__cijfers dt { font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.bezoek__cijfers dd { margin: 4px 0 0; font-size: var(--fs-h2); font-weight: 300; color: var(--zwart); font-variant-numeric: tabular-nums; }
+.bezoek__grafiek { margin: 0 0 var(--s-6); }
+.bezoek__grafiek figcaption { margin-bottom: var(--s-2); font-weight: 500; color: var(--zwart); }
+.staven { position: relative; display: flex; align-items: flex-end; gap: 2px; height: 180px; margin-top: 28px; border-bottom: 1px solid var(--zwart); }
+.staven::before { content: "hoogste: " attr(data-max); position: absolute; top: -26px; right: 0; font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.staaf { position: relative; flex: 1 1 0; height: 100%; display: flex; align-items: flex-end; outline: none; }
+.staaf__balk { display: block; width: 100%; min-height: 1px; background: var(--zwart); }
+.staaf:hover .staaf__balk, .staaf:focus-visible .staaf__balk { background: var(--rood); }
+.staaf:hover::after, .staaf:focus-visible::after {
+  content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); z-index: 2;
+  padding: 6px 10px; background: var(--zwart); color: var(--wit); font-size: var(--fs-klein); white-space: nowrap;
+}
+.staven__as { position: relative; height: 24px; margin-top: 6px; font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.staven__as span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.staven__as span:first-child { transform: none; left: 0 !important; }
+.staven__as span:last-child:not(:first-child) { transform: none; left: auto !important; right: 0; }
+.bezoek__zelf { margin-top: var(--s-4); }
+@media (max-width: 36rem) { .bezoek__cijfers { grid-template-columns: 1fr; } }
 /* Backoffice: overzicht */
 .beheer__overzicht { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-6); align-items: start; }
 .beheer__overzicht .beheer__producent { margin-top: 0; }

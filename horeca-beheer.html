@@ -82,6 +82,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
       <a href="#prijslijst" data-tab="prijslijst">Prijslijst</a>
       <a href="#hedonist" data-tab="hedonist">Hedonist <span data-teller="hedonist"></span></a>
       <a href="#overzicht" data-tab="overzicht">Overzicht</a>
+      <a href="#bezoekers" data-tab="bezoekers">Bezoekers</a>
       <a href="#nieuwsmail" data-tab="nieuwsmail">Nieuwsmail</a>
     </nav>
 
@@ -308,6 +309,36 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
           <div class="beheer__tabel"><table data-veld="topwijnen"></table></div>
         </section>
       </div>
+    </div>
+
+    {%- comment -%} Bezoekers van de website (supabase/021-bezoekers.sql) {%- endcomment -%}
+    <div data-scherm="bezoekers" hidden>
+      <div class="regiokeuze beheer__filter" role="group" aria-label="Periode" data-veld="bezoekperiodes"></div>
+      <p class="formulier__status" data-veld="bezoekmelding" role="status" aria-live="polite"></p>
+      <div class="bezoek" data-veld="bezoek" hidden>
+        <dl class="bezoek__cijfers">
+          <div><dt>Bezoeken</dt><dd data-cijfer="bezoeken"></dd></div>
+          <div><dt>Bekeken pagina's</dt><dd data-cijfer="weergaven"></dd></div>
+          <div><dt>Op een telefoon</dt><dd data-cijfer="mobiel"></dd></div>
+        </dl>
+        <figure class="bezoek__grafiek">
+          <figcaption data-veld="grafiekkop">Bezoeken per dag</figcaption>
+          <div class="staven" data-veld="staven"></div>
+          <div class="staven__as" data-veld="as"></div>
+        </figure>
+        <div class="beheer__overzicht">
+          <section>
+            <h2 class="beheer__producent">Meest bekeken pagina's</h2>
+            <div class="beheer__tabel"><table data-veld="bezoekpaginas"></table></div>
+          </section>
+          <section>
+            <h2 class="beheer__producent">Waar bezoekers vandaan komen</h2>
+            <div class="beheer__tabel"><table data-veld="bezoekherkomst"></table></div>
+          </section>
+        </div>
+      </div>
+      <label class="akkoord bezoek__zelf"><input type="checkbox" data-veld="niettellen"> Bezoeken vanaf dit apparaat (deze browser) niet meetellen</label>
+      <p class="beheer__klein beheer__lijstuitleg">Een bezoek is iemand die van buiten de site binnenkomt; elke pagina die hij daarna bekijkt, telt als bekeken pagina. Zoekmachines en de backoffice tellen niet mee. We bewaren geen IP-adressen en gebruiken geen cookies. "Direct" betekent: zonder link, bijvoorbeeld via een opgeslagen bladwijzer of door het adres in te typen.</p>
     </div>
 
     {%- comment -%} Eén wijn toevoegen of wijzigen {%- endcomment -%}

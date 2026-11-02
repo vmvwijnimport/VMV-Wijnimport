@@ -1,9 +1,35 @@
 {%- comment -%}
-  Bezoekersaantallen met GoatCounter: zonder cookies en zonder persoonsgegevens (zie de privacyverklaring).
-  Staat aan zodra goatcounter in _config.yml is ingevuld. De backoffice en lokaal testen tellen niet mee.
+  Bezoekers tellen (supabase/021-bezoekers.sql), te zien in de backoffice onder Bezoekers.
+  Per paginaweergave: de pagina, of het een binnenkomst van buiten de site was, de naam van de
+  website waarvandaan, en mobiel of computer. Geen cookies en geen IP-adres. Alleen op de live
+  site, niet voor zoekmachines, niet in de backoffice, en niet op een apparaat waar in de
+  backoffice "dit apparaat niet meetellen" aan staat.
 {%- endcomment -%}
-{%- if site.goatcounter != "" and site.goatcounter and jekyll.environment == "production" -%}
 {%- unless page.url contains "/horeca/beheer/" -%}
-<script data-goatcounter="https://{{ site.goatcounter }}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<script>
+(function () {
+  try {
+    if (location.hostname !== "vmvwijnimport.com") return;
+    if (navigator.webdriver || /bot|crawl|spider|slurp|lighthouse|preview|headless/i.test(navigator.userAgent)) return;
+    if (localStorage.getItem("vmv-niet-tellen")) return;
+    // Na de automatische doorsturing naar Engels (head.html) geldt de herkomst van vóór het doorsturen
+    var ref = sessionStorage.getItem("vmv-herkomst");
+    sessionStorage.removeItem("vmv-herkomst");
+    if (ref === null) ref = document.referrer;
+    var host = "";
+    try { host = ref ? new URL(ref).hostname : ""; } catch (e) {}
+    var intern = host === location.hostname;
+    fetch({{ site.horeca.supabase_url | append: "/rest/v1/rpc/bezoek_tellen" | jsonify }}, {
+      method: "POST", keepalive: true,
+      headers: { apikey: {{ site.horeca.supabase_key | jsonify }}, Authorization: "Bearer " + {{ site.horeca.supabase_key | jsonify }}, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        pad: location.pathname,
+        binnenkomst: !intern,
+        herkomst: intern ? null : host.replace(/^www\./, "") || null,
+        apparaat: matchMedia("(max-width: 48rem)").matches ? "mobiel" : "computer"
+      })
+    }).catch(function () {});
+  } catch (e) {}
+})();
+</script>
 {%- endunless -%}
-{%- endif -%}

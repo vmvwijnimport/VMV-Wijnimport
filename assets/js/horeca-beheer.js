@@ -126,9 +126,9 @@
     var h = location.hash.slice(1) || "bestellingen";
     var m = /^(bestelling|klant|wijn|lijst)-(.+)$/.exec(h);
     // #prijslijst (en het oude #wijnen) is het overzicht van de wijnen met hun prijzen
-    var scherm = m ? m[1] : h === "prijslijst" || h === "wijnen" ? "wijnen" : (["klanten", "overzicht", "hedonist", "nieuwsmail", "koppelen"].indexOf(h) >= 0 ? h : "bestellingen");
+    var scherm = m ? m[1] : h === "prijslijst" || h === "wijnen" ? "wijnen" : (["klanten", "overzicht", "bezoekers", "hedonist", "nieuwsmail", "koppelen"].indexOf(h) >= 0 ? h : "bestellingen");
     schermen.forEach(function (s) { s.hidden = s.dataset.scherm !== scherm; });
-    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : ["wijn", "wijnen", "lijst", "koppelen"].indexOf(scherm) >= 0 ? "prijslijst" : ["overzicht", "hedonist", "nieuwsmail"].indexOf(scherm) >= 0 ? scherm : "bestellingen";
+    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : ["wijn", "wijnen", "lijst", "koppelen"].indexOf(scherm) >= 0 ? "prijslijst" : ["overzicht", "bezoekers", "hedonist", "nieuwsmail"].indexOf(scherm) >= 0 ? scherm : "bestellingen";
     // Bij afdrukken alleen de prijslijst (zie stijl.css, @media print)
     document.body.classList.toggle("drukt-prijslijst", scherm === "lijst");
     pagina.querySelectorAll("[data-tab]").forEach(function (a) {
@@ -140,6 +140,7 @@
     if (scherm === "wijnen") toonWijnen();
     if (scherm === "wijn") toonWijn(m[2]);
     if (scherm === "overzicht") toonOverzicht();
+    if (scherm === "bezoekers") toonBezoekers();
     if (scherm === "hedonist") toonHedonist();
     if (scherm === "nieuwsmail") toonNieuws();
     if (scherm === "koppelen") toonKoppelen();
@@ -1885,6 +1886,115 @@
         codeForm.code.select();
       });
   });
+
+  // ---------- Bezoekers van de website (supabase/021-bezoekers.sql) ----------
+  // Totalen per dag (of per maand), de meest bekeken pagina's en waar bezoekers vandaan komen.
+  var BEZOEKPERIODES = [
+    { naam: "7 dagen", dagen: 7, per: "dag" }, { naam: "30 dagen", dagen: 30, per: "dag" },
+    { naam: "90 dagen", dagen: 90, per: "dag" }, { naam: "12 maanden", maanden: 12, per: "maand" }
+  ];
+  var bezoekPeriode = 1;
+  var isoDatum = function (d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  var telling = function (n) { return Number(n).toLocaleString("nl-NL"); };
+  var PAGINANAAM = { "/": "Home", "/en/": "Home (Engels)" };
+  var paginaNaam = function (pad) {
+    if (PAGINANAAM[pad]) return PAGINANAAM[pad];
+    var t = pad.replace(/^\/|\/$/g, "").replace(/-/g, " ").replace(/\//g, " / ");
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  };
+  var niet = veld("niettellen");
+  try { niet.checked = !!localStorage.getItem("vmv-niet-tellen"); } catch (e) {}
+  niet.addEventListener("change", function () {
+    try { if (niet.checked) localStorage.setItem("vmv-niet-tellen", "1"); else localStorage.removeItem("vmv-niet-tellen"); } catch (e) {}
+  });
+
+  var toonBezoekers = function () {
+    var knoppen = veld("bezoekperiodes");
+    knoppen.textContent = "";
+    BEZOEKPERIODES.forEach(function (p, i) {
+      var k = el("button", null, p.naam);
+      k.type = "button";
+      k.setAttribute("aria-pressed", i === bezoekPeriode ? "true" : "false");
+      k.addEventListener("click", function () { bezoekPeriode = i; toonBezoekers(); });
+      knoppen.appendChild(k);
+    });
+    var p = BEZOEKPERIODES[bezoekPeriode];
+    var tot = new Date(), van = new Date();
+    if (p.maanden) van = new Date(tot.getFullYear(), tot.getMonth() - p.maanden + 1, 1);
+    else van.setDate(tot.getDate() - p.dagen + 1);
+    var plek = veld("bezoekmelding");
+    melding(plek, "Even geduld…");
+    db.rpc("beheer_bezoekers", { van: isoDatum(van), tot: isoDatum(tot), per: p.per })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        melding(plek);
+        tekenBezoekers(r.data, p);
+      })
+      .catch(function (err) {
+        veld("bezoek").hidden = true;
+        melding(plek, /function|does not exist|schema cache/i.test((err && err.message) || "")
+          ? "Voer eerst supabase/021-bezoekers.sql uit in Supabase." : vertaal(err), "fout");
+      });
+  };
+
+  var tekenBezoekers = function (d, p) {
+    veld("bezoek").hidden = false;
+    pagina.querySelector("[data-cijfer=bezoeken]").textContent = telling(d.bezoeken);
+    pagina.querySelector("[data-cijfer=weergaven]").textContent = telling(d.weergaven);
+    pagina.querySelector("[data-cijfer=mobiel]").textContent = d.bezoeken ? Math.round(d.mobiel / d.bezoeken * 100) + "%" : "–";
+    veld("grafiekkop").textContent = p.per === "maand" ? "Bezoeken per maand" : "Bezoeken per dag";
+
+    // Staafjes: één per dag of maand, de hoogte naar het aantal bezoeken
+    var staven = veld("staven"), as = veld("as");
+    staven.textContent = ""; as.textContent = "";
+    var max = Math.max.apply(null, d.reeks.map(function (x) { return x.bezoeken; }).concat([1]));
+    var label = function (x) {
+      var dt = new Date(x.begin + "T12:00:00");
+      return p.per === "maand" ? dt.toLocaleDateString("nl-NL", { month: "short", year: "numeric" }) : dt.toLocaleDateString("nl-NL", { day: "numeric", month: "short" });
+    };
+    d.reeks.forEach(function (x) {
+      var s = el("span", "staaf");
+      var tekst = label(x) + ": " + x.bezoeken + (x.bezoeken === 1 ? " bezoek" : " bezoeken") + ", " + x.weergaven + (x.weergaven === 1 ? " pagina" : " pagina's");
+      s.setAttribute("role", "img");
+      s.setAttribute("aria-label", tekst);
+      s.dataset.tip = tekst;
+      s.tabIndex = 0;
+      var balk = el("span", "staaf__balk");
+      balk.style.height = (x.bezoeken / max * 100) + "%";
+      s.appendChild(balk);
+      staven.appendChild(s);
+    });
+    staven.dataset.max = telling(max);
+    // Onder de grafiek: het begin, het midden en het eind
+    var n = d.reeks.length;
+    [0, Math.floor((n - 1) / 2), n - 1].filter(function (i, j, a) { return a.indexOf(i) === j; }).forEach(function (i) {
+      var t = el("span", null, label(d.reeks[i]));
+      t.style.left = ((i + 0.5) / n * 100) + "%";
+      as.appendChild(t);
+    });
+
+    var tabel = function (doel, kop, rijen) {
+      var t = veld(doel);
+      t.textContent = "";
+      var thead = el("thead"), tr = el("tr");
+      kop.forEach(function (k, i) { var th = el("th", i ? "beheer__getal" : null, k); th.scope = "col"; tr.appendChild(th); });
+      thead.appendChild(tr); t.appendChild(thead);
+      var tbody = el("tbody");
+      if (!rijen.length) {
+        var leeg = el("tr"), cel = el("td", null, "Nog geen bezoeken in deze periode.");
+        cel.colSpan = kop.length; leeg.appendChild(cel); tbody.appendChild(leeg);
+      }
+      rijen.forEach(function (r) {
+        var rij = el("tr");
+        r.forEach(function (c, i) { rij.appendChild(el(i ? "td" : "th", i ? "beheer__getal" : null, c)); });
+        rij.firstChild.scope = "row";
+        tbody.appendChild(rij);
+      });
+      t.appendChild(tbody);
+    };
+    tabel("bezoekpaginas", ["Pagina", "Bekeken"], d.paginas.map(function (x) { return [paginaNaam(x.pad), telling(x.weergaven)]; }));
+    tabel("bezoekherkomst", ["Vandaan", "Bezoeken"], d.herkomst.map(function (x) { return [x.herkomst === "direct" ? "Direct" : x.herkomst, telling(x.bezoeken)]; }));
+  };
 
   var start = function () {
     return db.auth.getSession().then(function (r) {

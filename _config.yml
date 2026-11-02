@@ -35,10 +35,6 @@ wachtpagina: false
 # ook achter de wachtpagina. Verander de code om alle links en cookies ongeldig te maken.
 # Leeg laten = uit. De inhoud staat dan wel in de broncode van de wachtpagina.
 voorbeeld_code: ""
-# Bezoekersaantallen met GoatCounter (zonder cookies). Vul de code van je account in,
-# bijvoorbeeld "vmvwijnimport" als je dashboard op vmvwijnimport.goatcounter.com staat.
-# Leeg = uit. De backoffice wordt nooit geteld.
-goatcounter: ""
 
 wachtpagina_open:
   - /horeca/

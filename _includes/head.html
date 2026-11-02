@@ -68,6 +68,8 @@ if(document.cookie.indexOf("vmvvoorbeeld="+c)>-1){h.classList.add("voorbeeld");i
     var keuze = localStorage.getItem("vmv-taal");
     var talen = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ""];
     var nl = [].some.call(talen, function (t) { return /^nl\b/i.test(t); });
+    // De herkomst onthouden voor het tellen van bezoekers (bezoekers.html)
+    if (keuze === "en" || (!keuze && !nl)) sessionStorage.setItem("vmv-herkomst", document.referrer || "");
     if (keuze === "en" || (!keuze && !nl)) location.replace({{ hl_en | relative_url | jsonify }} + location.search + location.hash);
   } catch (e) {}
 })();
