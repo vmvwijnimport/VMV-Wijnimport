@@ -1,0 +1,13 @@
+{%- comment -%}
+  Herinnering rechtsonder: er zitten nog Hedonist-glazen in het winkelmandje (localStorage, zie winkel.js).
+  Niet op de Hedonist-pagina zelf, na het betalen en in het horecaportaal. Logica: assets/js/site.js.
+{%- endcomment -%}
+{%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
+{%- unless page.url contains "/hedonist/" or page.url contains "/horeca/" or page.url == "/bestelling/" or page.url == "/en/order/" -%}
+{%- if site.data.winkel.open -%}
+<a class="mandjeherinnering" id="mandjeherinnering" href="{{ t.url.hedonist | append: '#bestellen' | relative_url }}" hidden>
+  <span class="mandjeherinnering__tekst" data-tekst></span>
+  <span class="mandjeherinnering__actie" data-actie></span>
+</a>
+{%- endif -%}
+{%- endunless -%}

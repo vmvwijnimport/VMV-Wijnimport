@@ -198,6 +198,24 @@ a:hover { color: var(--rood); }
   body.menu-open { overflow: hidden; }
 }
 
+/* ---------- Herinnering winkelmandje (rechtsonder, op andere pagina's dan Hedonist) ---------- */
+.mandjeherinnering {
+  position: fixed; right: var(--rand); bottom: var(--s-3); z-index: 40;
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: 14px 20px; background: var(--zwart); color: var(--wit);
+  font-size: var(--fs-klein); text-decoration: none;
+}
+.mandjeherinnering[hidden] { display: none; }
+.mandjeherinnering__actie { font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
+.mandjeherinnering:hover { background: var(--rood); color: var(--wit); }
+.mandjeherinnering:focus-visible { outline: 2px solid var(--rood); outline-offset: 3px; }
+.leeftijd-open .mandjeherinnering, body.menu-open .mandjeherinnering { display: none; }
+@media (max-width: 36rem) {
+  .mandjeherinnering { left: 0; right: 0; bottom: 0; justify-content: space-between; padding: 16px var(--rand); }
+  /* Ruimte onderaan, zodat de balk de footer niet bedekt */
+  body.heeft-herinnering { padding-bottom: 56px; }
+}
+
 /* ---------- Knoppen en links ---------- */
 
 .knoppen { display: flex; flex-wrap: wrap; gap: var(--s-2); }

@@ -110,6 +110,8 @@ De livegang voorbereiden met de eigenaar: Resend, Confirm email aan, FormSubmit 
 
 - **Factuur opnieuw maken, nummer en eenheid (2 nov), wens van de eigenaar:** is een factuur in e-Boekhouden verwijderd, dan toont de backoffice "Factuur opnieuw maken"; de functie controleert eerst of de factuur echt weg is. Het factuurnummer is het hoogste nummer dat in e-Boekhouden staat plus 1 (F000130 → F000131), zodat een verwijderde factuur het gat opvult; het staat in het voorbeeld. Elke regel krijgt een eenheid: die van het artikel, anders "stuks". ✔ **Nog door de eigenaar:** functie factuur opnieuw plakken, "zet het live" voor de knop.
 
+- **Herinnering winkelmandje (2 nov), wens van de eigenaar:** zitten er Hedonist-glazen in het mandje, dan staat op andere pagina's rechtsonder (op de telefoon onderaan over de volle breedte) een zwart blok "8 glazen in je winkelmandje · Afrekenen", dat naar het mandje op de Hedonist-pagina gaat. Niet op de Hedonist-pagina, in het horecaportaal, de backoffice en na het betalen; niet als de pre-order dicht is. NL en EN. `_includes/mandje-herinnering.html`, `assets/js/site.js`.
+
 ## Zo kun je terug
 
 - **Site van vóór het horecaportaal:** de tag `voor-horeca-portaal`.
