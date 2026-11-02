@@ -29,6 +29,7 @@ We verkopen je gegevens nooit. We werken met een paar diensten die gegevens voor
 - **Supabase** beheert de inlog en de database van het horecaportaal. De gegevens staan op servers in Frankfurt (Duitsland), binnen de EU.
 - **Cloudflare** verwerkt de bestelling richting Mollie.
 - **GitHub Pages** host de website, en **Google Fonts** levert de lettertypes. Daarbij wordt je IP-adres verwerkt.
+- **GoatCounter** telt hoeveel mensen de website bezoeken en welke pagina's ze bekijken. Dat gebeurt zonder cookies en zonder dat we zien wie je bent: je IP-adres wordt niet bewaard. We zien alleen totalen, zoals het aantal bezoekers per dag, de bekeken pagina's, de website waarvandaan je kwam en het soort apparaat.
 - Onze **boekhoudsoftware** bewaart facturen.
 - **Vervoerders** krijgen je naam en adres om je bestelling te bezorgen.
 
@@ -40,7 +41,7 @@ Een account in het horecaportaal bewaren we zolang je klant bij ons bent. Stop j
 
 ## Cookies en opslag in je browser
 
-We gebruiken geen tracking- of advertentiecookies. We gebruiken alleen:
+We gebruiken geen tracking- of advertentiecookies; ook het tellen van bezoekers gebeurt zonder cookies. We gebruiken alleen:
 
 - een cookie (`vmv18`) dat onthoudt dat je hebt bevestigd dat je 18 jaar of ouder bent, 30 dagen lang;
 - opslag in je browser voor de inhoud van je winkelmandje;
@@ -50,4 +51,4 @@ We gebruiken geen tracking- of advertentiecookies. We gebruiken alleen:
 
 Je mag je gegevens inzien, laten aanpassen of laten verwijderen, en bezwaar maken tegen het gebruik ervan. Mail ons daarvoor op [{{ site.email }}](mailto:{{ site.email }}). Ben je niet tevreden over hoe we met je gegevens omgaan, dan kun je een klacht indienen bij de Autoriteit Persoonsgegevens.
 
-*Versie: oktober 2026 (aangevuld met het horecaportaal)*
+*Versie: november 2026 (aangevuld met het tellen van bezoekers)*

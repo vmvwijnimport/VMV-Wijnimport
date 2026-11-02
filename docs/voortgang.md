@@ -114,6 +114,8 @@ De livegang voorbereiden met de eigenaar: Resend, Confirm email aan, FormSubmit 
 
 - **Horecaportaal in het Engels (2 nov), wens van de eigenaar:** /en/trade/ ("Trade login" in het Engelse menu), met dezelfde scripts, die op een Engelse pagina Engels tonen (`horeca.js`, `horeca-portaal.js`, `horeca-bestellen.js`). NL/EN wisselt tussen /horeca/ en /en/trade/. De links in de mails van Supabase (bevestigen, wachtwoord herstellen) gaan naar /horeca/; wie Engels heeft gekozen, gaat daar vanzelf door naar /en/trade/. De mails zelf en de meldingen uit de database blijven Nederlands. De backoffice blijft Nederlands.
 
+- **Bezoekersaantallen (2 nov), wens van de eigenaar:** GoatCounter, zonder cookies. `_includes/bezoekers.html`, aan zodra `goatcounter` in `_config.yml` de code van het account bevat; telt alleen op de live site (niet lokaal) en niet in de backoffice. Privacyverklaring aangevuld. ✔ **Nog door de eigenaar:** account aanmaken op goatcounter.com en de code doorgeven.
+
 ## Zo kun je terug
 
 - **Site van vóór het horecaportaal:** de tag `voor-horeca-portaal`.

@@ -1,0 +1,9 @@
+{%- comment -%}
+  Bezoekersaantallen met GoatCounter: zonder cookies en zonder persoonsgegevens (zie de privacyverklaring).
+  Staat aan zodra goatcounter in _config.yml is ingevuld. De backoffice en lokaal testen tellen niet mee.
+{%- endcomment -%}
+{%- if site.goatcounter != "" and site.goatcounter and jekyll.environment == "production" -%}
+{%- unless page.url contains "/horeca/beheer/" -%}
+<script data-goatcounter="https://{{ site.goatcounter }}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+{%- endunless -%}
+{%- endif -%}
