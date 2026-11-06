@@ -1216,6 +1216,26 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   body.drukt-prijslijst .prijslijst__wijnen li { font-size: 10.5pt; padding: 5px 0; }
   body.drukt-prijslijst * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+/* Backoffice: losse factuur */
+.beheer__losfactuur { max-width: 52rem; }
+.beheer__losfactuur .beheer__tussenkop:first-child { margin-top: 0; }
+.beheer__zoekrij { display: flex; align-items: flex-end; gap: var(--s-2); }
+.beheer__zoekrij .veld { flex: 1; margin: 0; }
+.beheer__klanten { margin: var(--s-2) 0 0; padding: 0; border: 0; }
+.beheer__klantkeuze { margin: 6px 0; }
+.beheer__nieuweklant { margin-top: var(--s-2); }
+.beheer__nieuweklant .regiokeuze, .beheer__losfactuur > .regiokeuze { gap: var(--s-3); }
+.beheer__losregels { margin: 0 0 var(--s-2); padding: 0; list-style: none; }
+.beheer__losregel {
+  display: grid; grid-template-columns: minmax(0, 1fr) 6rem 9rem 7rem auto; gap: var(--s-2); align-items: end;
+  padding: var(--s-2) 0; border-bottom: 1px solid var(--lijn);
+}
+.beheer__losregel .veld { margin: 0; }
+.beheer__losregel .beheer__invoer { width: 100%; }
+.beheer__losregel .beheer__bedrag { padding-bottom: 12px; }
+.beheer__losregel .bestel__terug { margin: 0 0 14px; }
+.beheer__lostotaal { margin: var(--s-2) 0 var(--s-4); }
+@media (max-width: 48rem) { .beheer__losregel { grid-template-columns: 1fr 1fr; } .beheer__losregel .veld:first-child { grid-column: 1 / -1; } }
 /* Backoffice: bezoekers */
 .bezoek__cijfers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); margin: var(--s-3) 0 var(--s-4); }
 .bezoek__cijfers div { padding: var(--s-2) var(--s-3); border: 1px solid var(--lijn); }

@@ -83,6 +83,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
       <a href="#hedonist" data-tab="hedonist">Hedonist <span data-teller="hedonist"></span></a>
       <a href="#overzicht" data-tab="overzicht">Overzicht</a>
       <a href="#bezoekers" data-tab="bezoekers">Bezoekers</a>
+      <a href="#factuur" data-tab="factuur">Losse factuur</a>
       <a href="#nieuwsmail" data-tab="nieuwsmail">Nieuwsmail</a>
     </nav>
 
@@ -308,6 +309,78 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
           <h2 class="beheer__producent">Wijnen en glazen</h2>
           <div class="beheer__tabel"><table data-veld="topwijnen"></table></div>
         </section>
+      </div>
+    </div>
+
+    {%- comment -%} Losse factuur in e-Boekhouden: klant, wijnen, horeca- of particuliere prijs (functie factuur) {%- endcomment -%}
+    <div data-scherm="factuur" hidden>
+      <p class="beheer__uitleg">Een factuur die niet via het portaal komt. Kies de klant, de prijs en de wijnen; de prijzen komen uit de prijslijst. Je ziet eerst een voorbeeld. Pas na "Maak factuur" staat hij in e-Boekhouden. De klant krijgt niets: je verstuurt de factuur zelf vanuit e-Boekhouden.</p>
+      <form class="formulier beheer__losfactuur" id="losfactuur" novalidate>
+        <h2 class="beheer__tussenkop">Klant</h2>
+        <div class="beheer__zoekrij">
+          <div class="veld">
+            <label for="lf-zoek">Zoek in e-Boekhouden <span class="veld__optioneel">(naam of e-mailadres)</span></label>
+            <input id="lf-zoek" type="search" autocomplete="off">
+          </div>
+          <button class="knop knop--secundair" type="button" data-actie="lf-zoek">Zoeken</button>
+        </div>
+        <fieldset class="beheer__klanten" data-veld="lfklanten">
+          <legend class="visueel-verborgen">Kies de klant</legend>
+        </fieldset>
+        <div class="beheer__nieuweklant" data-veld="lfnieuw" hidden>
+          <div class="regiokeuze" role="radiogroup" aria-label="Soort klant">
+            <label class="akkoord"><input type="radio" name="lf-type" value="B" checked> Bedrijf</label>
+            <label class="akkoord"><input type="radio" name="lf-type" value="P"> Particulier</label>
+          </div>
+          <div class="beheer__velden">
+            <div class="veld"><label for="lf-naam">Naam <span class="veld__optioneel">(bedrijf of persoon)</span></label><input id="lf-naam" name="naam" autocomplete="off"></div>
+            <div class="veld" data-bedrijf><label for="lf-contact">Contactpersoon <span class="veld__optioneel">(niet verplicht)</span></label><input id="lf-contact" name="contact" autocomplete="off"></div>
+            <div class="veld"><label for="lf-email">E-mailadres</label><input id="lf-email" name="email" type="email" autocomplete="off"></div>
+            <div class="veld"><label for="lf-adres">Straat en huisnummer</label><input id="lf-adres" name="adres" autocomplete="off"></div>
+            <div class="veld"><label for="lf-postcode">Postcode</label><input id="lf-postcode" name="postcode" autocomplete="off"></div>
+            <div class="veld"><label for="lf-plaats">Plaats</label><input id="lf-plaats" name="plaats" autocomplete="off"></div>
+            <div class="veld" data-bedrijf><label for="lf-btw">Btw-nummer <span class="veld__optioneel">(niet verplicht)</span></label><input id="lf-btw" name="btw" autocomplete="off"></div>
+          </div>
+        </div>
+
+        <h2 class="beheer__tussenkop">Prijs</h2>
+        <div class="regiokeuze" role="radiogroup" aria-label="Welke prijs">
+          <label class="akkoord"><input type="radio" name="lf-soort" value="horeca" checked> Horecaprijs (excl. btw)</label>
+          <label class="akkoord"><input type="radio" name="lf-soort" value="particulier"> Particuliere prijs (incl. btw)</label>
+        </div>
+
+        <h2 class="beheer__tussenkop">Wijnen</h2>
+        <ol class="beheer__losregels" data-veld="lfregels"></ol>
+        <button class="knop knop--secundair" type="button" data-actie="lf-regel">Wijn toevoegen</button>
+        <dl class="mandje__totalen beheer__totalen beheer__lostotaal">
+          <div class="mandje__totaal"><dt data-veld="lftotaalkop">Totaal excl. btw</dt><dd data-veld="lftotaal"></dd></div>
+        </dl>
+
+        <div class="veld">
+          <label for="lf-tekst">Tekst op de factuur <span class="veld__optioneel">(niet verplicht, bijv. een referentie)</span></label>
+          <input id="lf-tekst" name="tekst" maxlength="500" autocomplete="off">
+        </div>
+        <button class="knop knop--primair" type="submit">Voorbeeld bekijken</button>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="beheer__formulier beheer__factuur" data-veld="lfvoorbeeld" hidden>
+        <h2 class="beheer__tussenkop" data-veld="lfkop" tabindex="-1">Voorbeeld</h2>
+        <div class="beheer__tabel">
+          <table>
+            <thead><tr><th scope="col">Product</th><th scope="col" class="beheer__getal">Aantal</th><th scope="col" class="beheer__getal" data-veld="lfprijskop">Prijs</th><th scope="col" class="beheer__getal">Bedrag</th></tr></thead>
+            <tbody data-veld="lfvoorbeeldregels"></tbody>
+          </table>
+        </div>
+        <dl class="mandje__totalen beheer__totalen">
+          <div><dt>Totaal excl. btw</dt><dd data-lf="ex"></dd></div>
+          <div><dt>Btw</dt><dd data-lf="btw"></dd></div>
+          <div class="mandje__totaal"><dt>Totaal incl. btw</dt><dd data-lf="incl"></dd></div>
+        </dl>
+        <p class="beheer__klein" data-veld="lfinfo"></p>
+        <ul class="beheer__problemen" data-veld="lfproblemen" hidden></ul>
+        <button class="knop knop--primair" type="button" data-actie="lf-maak">Maak factuur in e-Boekhouden</button>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
       </div>
     </div>
 

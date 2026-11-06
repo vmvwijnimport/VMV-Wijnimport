@@ -116,6 +116,8 @@ De livegang voorbereiden met de eigenaar: Resend, Confirm email aan, FormSubmit 
 
 - **Bezoekers in de backoffice (2 nov), wens van de eigenaar:** eerst GoatCounter voorgesteld; de eigenaar wilde het liever in de backoffice. Elke paginaweergave op de live site wordt via `bezoek_tellen` één regel in Supabase (pagina, binnenkomst ja/nee, naam van de verwijzende site, mobiel/computer; geen IP, geen cookies; na 13 maanden weg). Tabblad **Bezoekers** in de backoffice: bezoeken, bekeken pagina's, aandeel telefoon, staafgrafiek per dag of maand (7/30/90 dagen, 12 maanden), meest bekeken pagina's en herkomst; vinkje "dit apparaat niet meetellen". Niet geteld: zoekmachines, de backoffice, lokaal testen. Na de automatische doorsturing naar Engels blijft de herkomst bewaard. Privacyverklaring aangevuld. Script `supabase/021-bezoekers.sql`. ✔ **Nog door de eigenaar:** 021 uitvoeren, dan live zetten.
 
+- **Losse factuur (6 nov), wens van de eigenaar:** eerst een AI-variant voorgesteld (tekst plakken); de eigenaar koos zonder AI, met een keuze tussen horecaprijs en particuliere prijs. Tabblad **Losse factuur** in de backoffice: klant zoeken in e-Boekhouden (of een nieuwe aanmaken, bedrijf of particulier), horecaprijs (excl. btw) of particuliere prijs (incl. btw, `inExVat: IN`), wijnen met aantallen (prijs uit de prijslijst, per regel aan te passen), tekst op de factuur, voorbeeld met het volgende factuurnummer, daarna pas de factuur. Functie `factuur`: opdrachten `klanten`, `los_voorbereiden`, `los_maken`. ✔ **Nog door de eigenaar:** functie factuur opnieuw plakken, dan live zetten.
+
 ## Zo kun je terug
 
 - **Site van vóór het horecaportaal:** de tag `voor-horeca-portaal`.

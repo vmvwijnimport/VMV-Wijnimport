@@ -7,6 +7,10 @@
 // 3. "voorbereiden":  een voorbeeld van de factuur voor een bevestigde bestelling. Er wordt niets gemaakt.
 // 4. "maken":         de factuur echt maken in e-Boekhouden. Eén factuur per bestelling. De factuur wordt
 //                     niet gemaild: dat doet VMV zelf vanuit e-Boekhouden, na controle.
+// 5. "klanten":       klanten (relaties) in e-Boekhouden zoeken, voor een losse factuur.
+// 6. "los_voorbereiden" en "los_maken": een losse factuur, los van het portaal: een klant uit e-Boekhouden
+//                     (of een nieuwe), wijnen uit de prijslijst, en de horecaprijs (excl. btw) of de
+//                     particuliere prijs (incl. btw). Ook hier eerst een voorbeeld en pas na een klik de factuur.
 // Factuurregels verwijzen naar het product in e-Boekhouden (productId), zodat de voorraad daar meeloopt.
 // Bedragen komen uit de bestelling zoals VMV hem heeft bevestigd (prijs per stuk na korting).
 //
@@ -332,13 +336,149 @@ const maken = async (db, vraag, opdracht) => {
   return { nummer: factuur.invoiceNumber || "", id: factuur.id };
 };
 
+// ---------- 5 en 6. Losse factuur (niet uit het portaal) ----------
+const klantenZoeken = async (vraag, opdracht) => {
+  const tekst = schoon(opdracht.zoek, 100).replace(/[%?]/g, "");
+  if (tekst.length < 2) return { klanten: [] };
+  const ids = [];
+  const zoek = async (q) => {
+    const j = await vraag("GET", `/v1/relation?limit=15&${q}`);
+    ((j && j.items) || []).forEach((x) => { if (!ids.includes(x.id)) ids.push(x.id); });
+  };
+  await zoek(`name%5Blike%5D=${encodeURIComponent(`%${tekst}%`)}`);
+  if (tekst.includes("@")) await zoek(`email=${encodeURIComponent(tekst)}`);
+  const lijst = [];
+  for (const id of ids.slice(0, 10)) {
+    const r = await vraag("GET", `/v1/relation/${id}`);
+    if (r && !r.inactive) lijst.push({ ...relatieVan(r), type: r.type || "B" });
+  }
+  return { klanten: lijst };
+};
+
+// regels: [{ product: <id in de prijslijst>, aantal, prijs (leeg = uit de prijslijst) }]
+// soort: "horeca" (prijs excl. btw) of "particulier" (prijs incl. btw)
+const losOpbouwen = async (db, vraag, opdracht) => {
+  const soort = opdracht.soort === "particulier" ? "particulier" : "horeca";
+  const problemen = [];
+  const invoer = Array.isArray(opdracht.regels) ? opdracht.regels.slice(0, 100) : [];
+  if (!invoer.length) problemen.push("Kies minstens één wijn.");
+  const ids = invoer.map((r) => r.product).filter(Number.isInteger);
+  const { data: producten, error } = ids.length
+    ? await db.from("producten").select("id, soort, producent, naam, jaargang, formaat, prijs_ex, prijs_particulier, eb_product_id").in("id", ids)
+    : { data: [], error: null };
+  if (error) throw error;
+  const { data: inst } = await db.from("instellingen").select("*").maybeSingle();
+  if (!inst || !inst.eb_sjabloon_id) problemen.push("Kies eerst een factuursjabloon onder Prijslijst → Koppelen met e-Boekhouden.");
+
+  const omschrijving = (p) => (p.soort === "glas" ? p.naam : `${p.producent} – ${p.naam}`) + (p.jaargang ? ` ${p.jaargang}` : "") +
+    (p.formaat && p.formaat !== "75 cl" && p.formaat !== "per glas" ? ` (${p.formaat})` : "");
+  const details = {};
+  const regels = [];
+  for (const r of invoer) {
+    const p = (producten || []).find((x) => x.id === r.product);
+    const aantal = Math.floor(Number(r.aantal));
+    if (!p) { problemen.push("Een gekozen wijn bestaat niet (meer) in de prijslijst."); continue; }
+    if (!Number.isFinite(aantal) || aantal < 1 || aantal > 10000) { problemen.push(`Vul bij ${omschrijving(p)} een aantal in.`); continue; }
+    const eigen = r.prijs === "" || r.prijs == null ? null : Math.round(Number(r.prijs) * 100) / 100;
+    if (eigen != null && !(Number.isFinite(eigen) && eigen >= 0 && eigen <= 100000)) { problemen.push(`Vul bij ${omschrijving(p)} een geldige prijs in.`); continue; }
+    const lijstprijs = soort === "particulier" ? p.prijs_particulier : p.prijs_ex;
+    const prijs = eigen != null ? eigen : lijstprijs != null ? Number(lijstprijs) : null;
+    if (prijs == null) { problemen.push(`${omschrijving(p)} heeft geen ${soort === "particulier" ? "particuliere prijs" : "horecaprijs"}. Vul de prijs zelf in.`); continue; }
+    const eb = p.eb_product_id;
+    if (!eb) { problemen.push(`${omschrijving(p)} is nog niet gekoppeld aan een product in e-Boekhouden.`); continue; }
+    if (!(eb in details)) details[eb] = await vraag("GET", `/v1/product/${eb}`);
+    const d = details[eb];
+    if (!d) { problemen.push(`Het product bij ${omschrijving(p)} bestaat niet meer in e-Boekhouden. Koppel het opnieuw.`); continue; }
+    if (!d.ledgerId) { problemen.push(`Het product bij ${omschrijving(p)} heeft in e-Boekhouden geen grootboekrekening.`); continue; }
+    regels.push({ p, d, aantal, prijs, eb });
+  }
+
+  let stuks = null;
+  if (regels.some((r) => !r.d.unitId)) {
+    const e = (await alles(vraag, "/v1/unit")).find((x) => /^stuks?$/i.test(String(x.plural || "").trim()) || /^stuk$/i.test(String(x.singular || "").trim()));
+    stuks = e ? e.id : null;
+    if (!stuks) problemen.push("In e-Boekhouden staat geen eenheid \"stuks\". Maak die aan, of geef de artikelen een eenheid.");
+  }
+  const items = regels.map(({ p, d, aantal, prijs, eb }) => {
+    const btw = d.vat || "HOOG_VERK_21";
+    return {
+      productId: eb, ...(d.code ? { code: schoon(d.code, 50) } : {}),
+      description: schoon(omschrijving(p), 200), quantity: aantal, unitId: d.unitId || stuks,
+      pricePerUnit: prijs, vatCode: btw, ledgerId: d.ledgerId,
+      _product: d.code ? `${d.code} ${d.description || ""}`.trim() : (d.description || ""), _btw: btw in BTW ? BTW[btw] : null
+    };
+  });
+  // Totalen: bij de horecaprijs komt de btw erbij, bij de particuliere prijs zit hij erin
+  let ex = 0, btw = 0, incl = 0;
+  items.forEach((i) => {
+    const bedrag = centen(i.pricePerUnit) * i.quantity, pct = i._btw || 0;
+    if (soort === "particulier") { const b = Math.round(bedrag * pct / (100 + pct)); incl += bedrag; btw += b; ex += bedrag - b; }
+    else { const b = Math.round(bedrag * pct / 100); ex += bedrag; btw += b; incl += bedrag + b; }
+  });
+
+  // De klant: een bestaande relatie, of een nieuwe
+  let klant = null, nieuw = null;
+  if (Number.isInteger(opdracht.relatie)) {
+    const r = await vraag("GET", `/v1/relation/${opdracht.relatie}`);
+    if (!r) problemen.push("Deze klant bestaat niet (meer) in e-Boekhouden. Zoek hem opnieuw.");
+    else klant = relatieVan(r);
+  } else if (opdracht.relatie === "nieuw") {
+    const n = opdracht.nieuw || {};
+    nieuw = {
+      type: n.type === "P" ? "P" : "B",
+      name: schoon(n.naam, 100), contact: schoon(n.contact, 50),
+      address: schoon(n.adres, 100), postalCode: schoon(n.postcode, 10), city: schoon(n.plaats, 50),
+      emailAddress: schoon(n.email, 150), emailAddressInvoice: schoon(n.email, 150),
+      ...(n.type !== "P" && schoon(n.btw, 20) ? { vatNumber: schoon(n.btw, 20).replace(/\s/g, "").toUpperCase() } : {}),
+      termOfPayment: inst ? inst.betaaltermijn_dagen : 14
+    };
+    if (!nieuw.name) problemen.push("Vul de naam van de nieuwe klant in.");
+    klant = { id: null, naam: nieuw.name, plaats: nieuw.city, nieuw: true };
+  } else problemen.push("Kies de klant.");
+
+  return {
+    inst, items, nieuw, soort, problemen,
+    voorbeeld: {
+      nummer: await volgendNummer(vraag), datum: vandaag(), termijn: inst ? inst.betaaltermijn_dagen : 14, soort, klant,
+      verwerken: inst ? inst.eb_verwerken !== false : true,
+      regels: items.map((i) => ({ omschrijving: i.description, product: i._product, aantal: i.quantity, prijs: i.pricePerUnit, btw: i._btw })),
+      totaal: { ex: ex / 100, btw: btw / 100, incl: incl / 100 },
+      problemen
+    }
+  };
+};
+
+const losMaken = async (db, vraag, opdracht) => {
+  const o = await losOpbouwen(db, vraag, opdracht);
+  if (o.problemen.length) throw new Melding(o.problemen[0]);
+  let relatie = opdracht.relatie;
+  if (o.nieuw) relatie = (await vraag("POST", "/v1/relation", o.nieuw)).id;
+  let mutatie = null;
+  if (o.inst.eb_verwerken !== false) {
+    const deb = await alles(vraag, "/v1/ledger?category=DEB");
+    mutatie = { description: `Factuur ${schoon(opdracht.tekst, 100) || o.voorbeeld.klant.naam}`, ...(deb.length === 1 ? { ledgerId: deb[0].id } : {}) };
+  }
+  const factuur = await vraag("POST", "/v1/invoice", {
+    ...(o.voorbeeld.nummer ? { invoiceNumber: o.voorbeeld.nummer } : {}),
+    relationId: relatie,
+    date: vandaag(),
+    termOfPayment: o.inst.betaaltermijn_dagen,
+    inExVat: o.soort === "particulier" ? "IN" : "EX",
+    templateId: o.inst.eb_sjabloon_id,
+    text: schoon(opdracht.tekst, 500),
+    items: o.items.map(({ _product, _btw, ...i }) => i),
+    ...(mutatie ? { mutation: mutatie } : {})
+  });
+  return { nummer: factuur.invoiceNumber || "", id: factuur.id };
+};
+
 // ---------- Afhandelen ----------
 const afhandelen = async (req, db) => {
   const be = await beheerderUit(db, req);
   if (!be) return antwoord({ fout: "Geen toegang. Log opnieuw in op de backoffice." }, 401);
   const opdracht = await req.json().catch(() => ({}));
   const soort = opdracht.opdracht;
-  if (!["gegevens", "koppelen", "voorbereiden", "maken"].includes(soort)) return antwoord({ fout: "Onbekende opdracht." }, 400);
+  if (!["gegevens", "koppelen", "voorbereiden", "maken", "klanten", "los_voorbereiden", "los_maken"].includes(soort)) return antwoord({ fout: "Onbekende opdracht." }, 400);
   if ((soort === "voorbereiden" || soort === "maken") && !Number.isInteger(opdracht.bestelling)) return antwoord({ fout: "Onbekende bestelling." }, 400);
   let vraag = null;
   try {
@@ -346,6 +486,9 @@ const afhandelen = async (req, db) => {
     if (soort === "gegevens") return antwoord(await gegevens(db, vraag));
     if (soort === "koppelen") return antwoord(await koppelen(db, vraag, opdracht));
     if (soort === "voorbereiden") return antwoord((await opbouwen(db, vraag, opdracht.bestelling)).voorbeeld);
+    if (soort === "klanten") return antwoord(await klantenZoeken(vraag, opdracht));
+    if (soort === "los_voorbereiden") return antwoord((await losOpbouwen(db, vraag, opdracht)).voorbeeld);
+    if (soort === "los_maken") return antwoord(await losMaken(db, vraag, opdracht));
     return antwoord(await maken(db, vraag, opdracht));
   } catch (e) {
     if (e instanceof Melding) return antwoord({ fout: e.message }, e.status);
