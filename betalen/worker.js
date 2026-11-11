@@ -9,10 +9,13 @@
 //    AFZENDER                  standaard "VMV Wijnimport <bestellingen@vmvwijnimport.com>"
 //    VMV_MAIL                  standaard info@vmvwijnimport.com
 //    HEDONIST_SLEUTEL (geheim) sleutel uit supabase/015-hedonist.sql; zet betaalde bestellingen
-//                              in de backoffice. Zonder deze sleutel komen ze alleen per mail.
+//                              in de backoffice. Zonder deze sleutel komen ze alleen per mail,
+//                              en kan er geen wijn (drops) worden besteld.
 //
 //  Endpoints:
 //    POST /betaling        maakt een Mollie-betaling aan, geeft de betaallink terug
+//    POST /drop/betaling   hetzelfde voor een mandje met wijn uit een drop, eventueel met glazen
+//                          (supabase/022-drops.sql)
 //    GET  /status?id=tr_…  geeft de status van een betaling terug
 //    POST /webhook         Mollie meldt een statuswijziging; is de betaling binnen,
 //                          dan krijgen de klant en VMV een mail in de huisstijl en komt
@@ -44,11 +47,16 @@ export default {
       if (pad === "/betaling" && request.method === "POST") {
         return antwoord(await maakBetaling(await request.json(), env, site, `${url.origin}/webhook`));
       }
+      if (pad === "/drop/betaling" && request.method === "POST") {
+        return antwoord(await maakDropBetaling(await request.json(), env, site, `${url.origin}/webhook`));
+      }
       if (pad === "/webhook" && request.method === "POST") {
         // Mollie stuurt alleen het id; de status halen we zelf bij Mollie op, dus dit is niet te vervalsen
         const id = String((await request.formData()).get("id") || "");
         if (!/^tr_[A-Za-z0-9]+$/.test(id)) return new Response("Onbekende betaling", { status: 400 });
-        await naBetaling(await mollie(`/payments/${id}`, env), env, site);
+        const betaling = await mollie(`/payments/${id}`, env);
+        if (betaling.metadata?.soort === "drop") await naDropBetaling(betaling, env, site);
+        else await naBetaling(betaling, env, site);
         return new Response("OK");
       }
       if (pad === "/status" && request.method === "GET") {
@@ -81,17 +89,24 @@ async function mollie(pad, env, body) {
 
 // Prijzen en regels komen van de website zelf (winkel.json), dus er is maar één plek om ze aan te passen.
 // De prijs wordt hier opnieuw berekend; wat de browser stuurt aan bedragen wordt genegeerd.
-export function bereken(winkel, aantallen, bezorging) {
+// Per model: elke 6 glazen voor de setprijs, de rest per glas
+export function glasRegels(winkel, aantallen) {
   let n = 0, glazen = 0;
-  const regels = [];
+  const lijst = [];
   for (const [id, naam] of Object.entries(winkel.modellen)) {
     const a = Math.floor(Number(aantallen?.[id] || 0));
     if (!Number.isFinite(a) || a < 0 || a > 120) throw new Fout("Ongeldig aantal");
     if (a === 0) continue;
     const prijs = Math.floor(a / 6) * winkel.prijsZes + (a % 6) * winkel.prijsGlas;
     n += a; glazen += prijs;
-    regels.push(`${a} × ${naam}`);
+    lijst.push({ naam, aantal: a, bedrag: Math.round(prijs * 100) / 100 });
   }
+  return { n, glazen, lijst };
+}
+
+export function bereken(winkel, aantallen, bezorging) {
+  const { n, glazen, lijst } = glasRegels(winkel, aantallen);
+  const regels = lijst.map((r) => `${r.aantal} × ${r.naam}`);
   if (n === 0) throw new Fout("Je winkelmandje is leeg");
   const amsterdam = bezorging === "amsterdam";
   const gratis = bezorging === "ophalen" || n >= winkel.gratisVanaf || (amsterdam && n >= winkel.gratisAmsterdamVanaf);
@@ -315,4 +330,211 @@ async function opslaan(betaling, env) {
     })
   });
   if (!r.ok) throw new Fout(`Opslaan in de backoffice mislukt (${r.status})`, 502);
+}
+
+// ---------- Drops: wijn, eventueel samen met glazen (supabase/022-drops.sql) ----------
+// De wijn, de prijzen, de voorraad en de bezorgkosten komen uit de database; de glazen uit winkel.json.
+// Wat de browser stuurt aan bedragen wordt genegeerd. De database houdt de flessen vast tijdens het
+// betalen; mislukt of verloopt de betaling, dan komen ze weer vrij.
+
+async function rpc(functie, body) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${functie}`, {
+    method: "POST",
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body || {})
+  });
+  const tekst = await r.text();
+  let data = null;
+  try { data = tekst ? JSON.parse(tekst) : null; } catch (e) {}
+  if (!r.ok) {
+    // Een melding uit de database (bijv. "… is uitverkocht") is voor de klant bedoeld
+    if (data?.code === "P0001" && data.message) throw new Fout(data.message, 409);
+    throw new Fout(`Database gaf een fout (${r.status})`, 502);
+  }
+  return data;
+}
+
+async function maakDropBetaling(invoer, env, site, webhook) {
+  const taal = invoer.taal === "en" ? "en" : "nl";
+  const en = taal === "en";
+  if (!env.HEDONIST_SLEUTEL) throw new Fout(en ? "Ordering isn’t possible right now" : "Bestellen lukt nu niet", 500);
+
+  const k = invoer.klant || {};
+  const bezorging = ["verzenden", "amsterdam", "ophalen"].includes(invoer.bezorging) ? invoer.bezorging : "";
+  if (!bezorging) throw new Fout(en ? "Choose how you’d like to receive your order" : "Kies hoe je je bestelling wilt ontvangen");
+  const verplicht = bezorging === "ophalen" ? ["naam", "email", "telefoon"] : ["naam", "email", "telefoon", "adres", "postcode", "plaats"];
+  for (const veld of verplicht) {
+    if (!String(k[veld] || "").trim()) throw new Fout(en ? "Please fill in all required fields" : "Vul alle verplichte velden in");
+  }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(k.email)) throw new Fout(en ? "Please enter a valid email address" : "Vul een geldig e-mailadres in");
+  if (bezorging === "amsterdam" && !isAmsterdam(k.postcode)) {
+    throw new Fout(en ? "Delivery in Amsterdam is only possible with an Amsterdam postcode" : "Bezorgen in Amsterdam kan alleen bij een Amsterdamse postcode");
+  }
+  if (!invoer.achttien) throw new Fout(en ? "You must be 18 or over to order wine" : "Je moet 18 jaar of ouder zijn om wijn te bestellen");
+
+  const wijnen = {};
+  for (const [code, aantal] of Object.entries(invoer.wijnen || {})) {
+    const a = Math.floor(Number(aantal));
+    if (!/^[a-z0-9]{4,16}$/.test(code) || !Number.isFinite(a) || a < 0 || a > 50) throw new Fout("Ongeldig aantal");
+    if (a > 0) wijnen[code] = a;
+  }
+  if (!Object.keys(wijnen).length) throw new Fout(en ? "Your basket is empty" : "Je winkelmandje is leeg");
+
+  // Glazen uit de Hedonist-pre-order mogen mee in dezelfde bestelling
+  let glazen = [], glasLevering = "";
+  if (Object.values(invoer.glazen || {}).some((a) => Number(a) > 0)) {
+    const r = await fetch(`${site}/winkel.json`, { cf: { cacheTtl: 60 } });
+    if (!r.ok) throw new Fout("Kon de prijzen niet ophalen", 502);
+    const winkel = await r.json();
+    if (!winkel.open) throw new Fout(en ? "The Hedonist pre-order is closed" : "De pre-order van de glazen is gesloten");
+    glazen = glasRegels(winkel, invoer.glazen).lijst;
+    glasLevering = winkel.levering || "";
+  }
+
+  const nu = new Date();
+  const bestelnummer = `VMV-D${nu.toISOString().slice(2, 10).replace(/-/g, "")}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+  const kort = (s, max = 200) => String(s || "").trim().slice(0, max);
+  const sleutel = env.HEDONIST_SLEUTEL;
+
+  const b = await rpc("drop_reserveren", {
+    sleutel,
+    gegevens: {
+      bestelnummer, taal, wijnen, glazen, glas_levering: glasLevering, bezorging,
+      bezorging_tekst: { verzenden: "Verzenden", amsterdam: "Bezorgen in Amsterdam", ophalen: "Ophalen bij Oocker" }[bezorging],
+      naam: kort(k.naam), email: kort(k.email), telefoon: kort(k.telefoon, 40),
+      adres: bezorging === "ophalen" ? "Ophalen" : `${kort(k.adres)}, ${kort(k.postcode, 12)} ${kort(k.plaats, 80)}`,
+      opmerking: kort(k.opmerking, 500)
+    }
+  });
+
+  let betaling;
+  try {
+    betaling = await mollie("/payments", env, {
+      amount: { currency: "EUR", value: Number(b.totaal).toFixed(2) },
+      description: `${en ? "Order" : "Bestelling"} ${bestelnummer}`,
+      redirectUrl: `${site}/bestelling/`,
+      webhookUrl: webhook,
+      locale: en ? "en_US" : "nl_NL",
+      // Alleen iDEAL: die betaling is binnen een kwartier rond, zodat de flessen niet dagen vastliggen
+      method: ["ideal"],
+      billingEmail: kort(k.email),
+      metadata: { soort: "drop", bestelnummer }
+    });
+  } catch (e) {
+    await rpc("drop_vervallen", { bestelnummer, sleutel }).catch(() => {});
+    throw e;
+  }
+  // Lukt dit niet, dan vindt de webhook de bestelling alsnog via het bestelnummer
+  await rpc("drop_koppelen", { bestelnummer, mollie: betaling.id, sleutel }).catch(() => {});
+
+  return { id: betaling.id, betaallink: betaling._links.checkout.href, bestelnummer, totaal: Number(b.totaal) };
+}
+
+// De regels, de bezorgkosten en het totaal (incl. btw)
+const dropTabel = (b, en) => {
+  const cel = `font-family:${LETTER};font-size:15px;color:${KLEUR.zwart};border-bottom:1px solid ${KLEUR.lijn};`;
+  const rijen = (b.regels || []).map((r) => `<tr><td style="${cel}padding:12px 12px 12px 0;line-height:1.45;">${r.aantal} × ${html(r.naam)}</td>
+    <td align="right" style="${cel}padding:12px 0;white-space:nowrap;">${euro(r.bedrag)}</td></tr>`).join("");
+  const regel = (label, bedrag, vet) => {
+    const st = `font-family:${LETTER};font-size:${vet ? 16 : 14}px;${vet ? "font-weight:500;" : ""}color:${vet ? KLEUR.zwart : KLEUR.tekst};border-bottom:1px solid ${KLEUR.lijn};`;
+    return `<tr><td style="${st}padding:8px 12px 8px 0;">${label}</td><td align="right" style="${st}padding:8px 0;white-space:nowrap;">${bedrag}</td></tr>`;
+  };
+  const verzending = Number(b.verzending || 0);
+  const label = isOphalen(b) ? (en ? "Pick-up" : "Ophalen") : b.bezorging === "Bezorgen in Amsterdam" ? (en ? "Delivery" : "Bezorgen") : (en ? "Shipping" : "Verzending");
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;border-top:1px solid ${KLEUR.zwart};">
+    ${rijen}${regel(label, verzending ? euro(verzending) : (en ? "Free" : "Gratis"))}${regel(en ? "Total incl. VAT" : "Totaal incl. btw", euro(b.totaal), true)}
+  </table>`;
+};
+
+// Wanneer de wijn en de glazen komen, zoals bij de drop en in winkel.json staat
+const dropLevering = (b, en) => (b.regels || [])
+  .map((r) => {
+    const tekst = en && r.soort === "wijn" ? (r.levering_en || r.levering) : r.levering;
+    if (!tekst) return "";
+    if (r.soort === "glas") return en ? `Hedonist glasses: expected in ${tekst}` : `Hedonist-glazen: verwacht in ${tekst}`;
+    return `${r.naam}: ${tekst}`;
+  })
+  .filter((t, i, lijst) => t && lijst.indexOf(t) === i)
+  .map(html).join("<br>");
+
+export const dropMailKlant = (b, site) => {
+  const en = b.taal === "en";
+  const bezorging = isOphalen(b) ? (en ? "Pick-up at Oocker, Frederiksplein 29h, Amsterdam" : bezorgregel(b))
+    : en ? `${b.bezorging === "Bezorgen in Amsterdam" ? "Delivery in Amsterdam" : "Shipping"}<br>${html(b.adres)}` : bezorgregel(b);
+  const inhoud = en
+    ? alinea(`Dear ${html(b.naam)},`) +
+      alinea("Thank you for your order. Your payment has come in. Below is what you ordered.") +
+      dropTabel(b, true) +
+      gegevens([
+        ["Order number", html(b.bestelnummer)],
+        ["Delivery", dropLevering(b, true)],
+        [isOphalen(b) ? "Pick-up" : "Address", bezorging],
+        ["Note", b.opmerking ? html(b.opmerking) : ""]
+      ]) +
+      alinea(isOphalen(b) ? "We’ll let you know when your order is ready for pick-up. We’ll send you the invoice separately by email." : "We’ll let you know when we deliver or ship your order. We’ll send you the invoice separately by email.") +
+      alinea("We may ask for ID on delivery or pick-up: we only deliver wine to people aged 18 or over.") +
+      alinea(`You have a 14-day cooling-off period. Read more in our <a href="${site}/algemene-voorwaarden/" style="color:${KLEUR.rood};">terms and conditions</a> (in Dutch).`) +
+      alinea(`Any questions? Email us at <a href="mailto:info@vmvwijnimport.com" style="color:${KLEUR.rood};">info@vmvwijnimport.com</a> or send a WhatsApp to +31 6 15 74 23 32.`)
+    : alinea(`Beste ${html(b.naam)},`) +
+      alinea("Bedankt voor je bestelling. Je betaling is binnen. Hieronder staat wat je hebt besteld.") +
+      dropTabel(b) +
+      gegevens([
+        ["Bestelnummer", html(b.bestelnummer)],
+        ["Levering", dropLevering(b)],
+        [isOphalen(b) ? "Ophalen" : "Bezorging", bezorging],
+        ["Opmerking", b.opmerking ? html(b.opmerking) : ""]
+      ]) +
+      alinea(isOphalen(b) ? "We laten je weten wanneer je je bestelling kunt ophalen. De factuur sturen we je apart per mail." : "We laten je weten wanneer we je bestelling brengen of versturen. De factuur sturen we je apart per mail.") +
+      alinea("Bij de bezorging of het ophalen kunnen we om je legitimatie vragen: we leveren wijn alleen aan mensen van 18 jaar en ouder.") +
+      alinea(`Je hebt 14 dagen bedenktijd. Lees meer over het <a href="${site}/algemene-voorwaarden/#herroepingsrecht" style="color:${KLEUR.rood};">herroepingsrecht</a> en de <a href="${site}/algemene-voorwaarden/" style="color:${KLEUR.rood};">algemene voorwaarden</a>.`) +
+      alinea(`Vragen? Mail ons op <a href="mailto:info@vmvwijnimport.com" style="color:${KLEUR.rood};">info@vmvwijnimport.com</a> of stuur een WhatsApp naar 06 15 74 23 32.`);
+  const kop = en ? "Thank you for your order" : "Bedankt voor je bestelling";
+  const mail = omhulsel(kop, en ? "Your payment has come in." : "Je betaling is binnen.", inhoud);
+  return {
+    onderwerp: `${kop} ${b.bestelnummer}`,
+    html: en ? mail.replace('<html lang="nl">', '<html lang="en">') : mail
+  };
+};
+
+export const dropMailVmv = (b, mollieId) => {
+  const naam = { ideal: "iDEAL", banktransfer: "Bankoverschrijving" }[b.methode] || b.methode || "";
+  const inhoud =
+    vlak(`<strong style="font-weight:500;">Betaald via ${html(naam)}.</strong> Maak de factuur in e-Boekhouden. De bestelling staat in de backoffice onder Webwinkel.`) +
+    (b.te_veel ? vlak(`<strong style="font-weight:500;color:${KLEUR.rood};">Let op: van deze drop is nu meer verkocht dan het aantal flessen.</strong> De betaling kwam binnen nadat de reservering was verlopen. Neem contact op met de klant.`) : "") +
+    dropTabel(b) +
+    gegevens([
+      ["Bestelnummer", html(b.bestelnummer)],
+      ["Klant", html(b.naam)],
+      ["E-mail", `<a href="mailto:${html(b.email)}" style="color:${KLEUR.rood};">${html(b.email)}</a>`],
+      ["Telefoon", `<a href="tel:${html(String(b.telefoon || "").replace(/[^\d+]/g, ""))}" style="color:${KLEUR.rood};">${html(b.telefoon)}</a>`],
+      [isOphalen(b) ? "Ophalen" : "Bezorging", bezorgregel(b)],
+      ["Levering", dropLevering(b)],
+      ["Opmerking", b.opmerking ? html(b.opmerking) : ""],
+      ["Mollie", html(mollieId)]
+    ]) +
+    alinea("De klant heeft een bevestiging gekregen. Antwoorden op deze mail gaan naar de klant.");
+  const wat = (b.regels || []).map((r) => `${r.aantal} × ${r.naam}`).join(", ");
+  return {
+    onderwerp: `Betaald: ${b.te_veel ? "LET OP te veel verkocht, " : ""}bestelling ${b.bestelnummer}, ${b.naam}${b.taal === "en" ? " (Engelse site)" : ""}`,
+    html: omhulsel("Nieuwe bestelling", `Betaald, ${wat}`, inhoud)
+  };
+};
+
+// Betaald: vastleggen en mailen. Mislukt, afgebroken of verlopen: de flessen komen vrij.
+// Lukt iets niet, dan geven we een fout terug; Mollie probeert het later opnieuw.
+async function naDropBetaling(betaling, env, site) {
+  const bestelnummer = betaling.metadata?.bestelnummer;
+  if (!bestelnummer) return;
+  if (!env.HEDONIST_SLEUTEL) throw new Fout("HEDONIST_SLEUTEL ontbreekt", 500);
+  if (["expired", "canceled", "failed"].includes(betaling.status)) {
+    await rpc("drop_vervallen", { bestelnummer, sleutel: env.HEDONIST_SLEUTEL });
+    return;
+  }
+  if (betaling.status !== "paid") return;
+  if (!env.RESEND_API_KEY) throw new Fout("RESEND_API_KEY ontbreekt", 500);
+  const b = await rpc("drop_betaald", { bestelnummer, mollie: betaling.id, methode: betaling.method || "", sleutel: env.HEDONIST_SLEUTEL });
+  if (!b) throw new Fout("Bestelling niet gevonden", 404);
+  const vmv = env.VMV_MAIL || "info@vmvwijnimport.com";
+  await verstuur(env, `drop-vmv-${betaling.id}`, vmv, b.email, dropMailVmv(b, betaling.id));
+  await verstuur(env, `drop-klant-${betaling.id}`, b.email, vmv, dropMailKlant(b, site));
 }

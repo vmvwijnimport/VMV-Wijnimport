@@ -26,7 +26,7 @@ We verkopen je gegevens nooit. We werken met een paar diensten die gegevens voor
 
 - **Mollie** verwerkt je betaling.
 - **FormSubmit** stuurt berichten uit de formulieren op de website naar ons door, en ook aanvragen en bestellingen uit het horecaportaal.
-- **Supabase** beheert de inlog en de database van het horecaportaal. De gegevens staan op servers in Frankfurt (Duitsland), binnen de EU.
+- **Supabase** beheert de inlog en de database van het horecaportaal, en bewaart bestellingen uit de webwinkel (glazen en wijn). De gegevens staan op servers in Frankfurt (Duitsland), binnen de EU.
 - **Cloudflare** verwerkt de bestelling richting Mollie.
 - **GitHub Pages** host de website, en **Google Fonts** levert de lettertypes. Daarbij wordt je IP-adres verwerkt.
 - Onze **boekhoudsoftware** bewaart facturen.

@@ -1,5 +1,5 @@
 {%- comment -%}
-  Het winkelmandje met het bestelformulier voor de Hedonist-glazen. Staat op de Hedonist-pagina
+  Het winkelmandje met het bestelformulier voor de Hedonist-glazen en de wijn uit een drop (/drop/). Staat op de Hedonist-pagina
   (hedonist-winkel.html) en in de uitschuiflade op andere pagina's (mandje-herinnering.html).
   Logica: assets/js/winkel.js.
 {%- endcomment -%}
@@ -9,6 +9,7 @@
 {%- assign levering = w.levering -%}{%- if en %}{% assign levering = w.levering_en | default: w.levering %}{% endif -%}
       <aside class="mandje" aria-labelledby="mandje-kop">
         <h3 id="mandje-kop">{{ wt.mandje }}</h3>
+        <p class="mandje__melding" data-veld="melding" role="status" hidden></p>
         <p class="mandje__leeg">{{ wt.leeg }}</p>
         <div class="mandje__inhoud" hidden>
           <ul class="mandje__regels"></ul>
@@ -18,7 +19,7 @@
             <label><input type="radio" name="bezorging" value="ophalen"> {{ wt.ophalen }} {{ w.ophalen.naam }}, Amsterdam ({{ wt.gratis }})</label>
           </div>
           <dl class="mandje__totalen">
-            <div><dt>{{ wt.glazen }}</dt><dd class="mandje__subtotaal"></dd></div>
+            <div><dt data-veld="subtotaal">{{ wt.glazen }}</dt><dd class="mandje__subtotaal"></dd></div>
             <div><dt>{{ wt.verzending }}</dt><dd class="mandje__verzending"></dd></div>
             <div class="mandje__totaal"><dt>{{ wt.totaal }}</dt><dd class="mandje__som"></dd></div>
           </dl>
@@ -40,9 +41,10 @@
           </div>
           <div class="betaalwijze">
             <p class="betaalwijze__kop">{{ wt.betalen }}</p>
-            <div class="betaalwijze__optie"><span class="ideal" aria-hidden="true">iDEAL</span> {{ wt.betalen_tekst }}</div>
+            <div class="betaalwijze__optie"><span class="ideal" aria-hidden="true">iDEAL</span> <span data-veld="betaaltekst">{{ wt.betalen_tekst }}</span></div>
           </div>
           <div class="veld"><label for="b-opmerking">{{ wt.opmerking }} <span class="veld__optioneel">{{ wt.optioneel }}</span></label><textarea id="b-opmerking" name="opmerking" rows="3"></textarea></div>
+          <label class="akkoord" data-achttien hidden><input type="checkbox" name="achttien"> {{ wt.achttien }}</label>
           <label class="akkoord"><input type="checkbox" name="akkoord" required> {{ wt.akkoord }} <a href="{{ '/algemene-voorwaarden/' | relative_url }}" target="_blank" rel="noopener">{{ wt.voorwaarden }}</a></label>
           <button class="knop knop--licht bestel__betaal" type="submit">{{ wt.bestellen }}</button>
           <p class="bestel__klein">{{ wt.btw }}</p>

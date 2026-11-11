@@ -80,7 +80,8 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
       <a href="#bestellingen" data-tab="bestellingen">Bestellingen <span data-teller="bestellingen"></span></a>
       <a href="#klanten" data-tab="klanten">Klanten <span data-teller="klanten"></span></a>
       <a href="#prijslijst" data-tab="prijslijst">Prijslijst</a>
-      <a href="#hedonist" data-tab="hedonist">Hedonist <span data-teller="hedonist"></span></a>
+      <a href="#hedonist" data-tab="hedonist">Webwinkel <span data-teller="hedonist"></span></a>
+      <a href="#drops" data-tab="drops">Drops</a>
       <a href="#overzicht" data-tab="overzicht">Overzicht</a>
       <a href="#bezoekers" data-tab="bezoekers">Bezoekers</a>
       <a href="#factuur" data-tab="factuur">Losse factuur</a>
@@ -213,15 +214,111 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
 
     {%- comment -%} Hedonist-bestellingen (betaald via Mollie) {%- endcomment -%}
     <div data-scherm="hedonist" hidden>
-      <div class="regiokeuze beheer__filter" role="group" aria-label="Toon Hedonist-bestellingen">
+      <div class="regiokeuze beheer__filter" role="group" aria-label="Toon bestellingen uit de webwinkel">
         <button type="button" data-hfilter="te_leveren" aria-pressed="true">Te leveren</button>
         <button type="button" data-hfilter="geleverd" aria-pressed="false">Geleverd</button>
         <button type="button" data-hfilter="" aria-pressed="false">Alle</button>
       </div>
-      <p class="beheer__klein beheer__lijstuitleg">Betaalde bestellingen van de Hedonist-pagina. Klik op een bestelling voor de gegevens. Facturen maak je zoals altijd in e-Boekhouden.</p>
+      <p class="beheer__klein beheer__lijstuitleg">Betaalde bestellingen van particulieren: Hedonist-glazen en wijn uit een drop. Klik op een bestelling voor de gegevens. Facturen maak je zoals altijd in e-Boekhouden.</p>
       <p class="formulier__status" data-veld="hedonistmelding" role="status" aria-live="polite"></p>
       <div class="beheer__hedonist" data-veld="hedonistlijst"></div>
       <p class="beheer__leeg" data-veld="hedonistleeg" hidden></p>
+    </div>
+
+    {%- comment -%} Drops: één wijn met een eigen link voor WhatsApp (supabase/022-drops.sql) {%- endcomment -%}
+    <div data-scherm="drops" hidden>
+      <p class="beheer__uitleg">Een drop is één wijn met een eigen link, om te delen via WhatsApp. De link staat niet op de website en niet in Google. Klanten betalen met iDEAL; tijdens het betalen houden we de flessen een half uur vast. Betaalde bestellingen staan onder Webwinkel.</p>
+      <p class="formulier__status" data-veld="dropmelding" role="status" aria-live="polite"></p>
+      <div class="beheer__knoppen beheer__dropnieuw">
+        <button class="knop knop--primair" type="button" data-actie="drop-nieuw">Nieuwe drop</button>
+      </div>
+
+      <form class="formulier beheer__formulier beheer__dropform" id="dropformulier" hidden novalidate>
+        <h2 class="beheer__tussenkop" data-veld="dropkop" tabindex="-1">Nieuwe drop</h2>
+        <div class="veld">
+          <label for="d-wijn">Wijn</label>
+          <select id="d-wijn" name="product_id" required></select>
+        </div>
+        <div class="beheer__velden">
+          <div class="veld">
+            <label for="d-prijs">Prijs per fles <span class="veld__optioneel">(incl. btw)</span></label>
+            <input id="d-prijs" name="prijs" type="text" inputmode="decimal" autocomplete="off" required>
+          </div>
+          <div class="veld">
+            <label for="d-aantal">Aantal flessen</label>
+            <input id="d-aantal" name="aantal" type="number" min="0" inputmode="numeric" autocomplete="off" required>
+          </div>
+          <div class="veld">
+            <label for="d-max">Maximum per klant <span class="veld__optioneel">(leeg = geen)</span></label>
+            <input id="d-max" name="max_per_klant" type="number" min="1" inputmode="numeric" autocomplete="off">
+          </div>
+          <div class="veld">
+            <label for="d-vanaf">Open vanaf</label>
+            <input id="d-vanaf" name="open_vanaf" type="datetime-local" required>
+          </div>
+          <div class="veld">
+            <label for="d-tot">Open tot <span class="veld__optioneel">(leeg = tot het op is)</span></label>
+            <input id="d-tot" name="open_tot" type="datetime-local">
+          </div>
+        </div>
+        <label class="akkoord"><input type="checkbox" name="toon_aantal" checked> Op de pagina laten zien hoeveel flessen er nog zijn</label>
+        <label class="akkoord"><input type="checkbox" name="gestopt"> Gestopt: niet meer te bestellen</label>
+        <div class="veld">
+          <label for="d-tekst">Tekst over de wijn <span class="veld__optioneel">(een witregel is een nieuwe alinea)</span></label>
+          <textarea id="d-tekst" name="tekst" rows="6" maxlength="3000"></textarea>
+        </div>
+        <div class="veld">
+          <label for="d-tekst-en">Tekst in het Engels <span class="veld__optioneel">(leeg = de Nederlandse tekst)</span></label>
+          <textarea id="d-tekst-en" name="tekst_en" rows="6" maxlength="3000"></textarea>
+        </div>
+        <div class="beheer__velden">
+          <div class="veld">
+            <label for="d-levering">Levering <span class="veld__optioneel">(bijv. "Volgende week in huis")</span></label>
+            <input id="d-levering" name="levering" maxlength="200" autocomplete="off">
+          </div>
+          <div class="veld">
+            <label for="d-levering-en">Levering in het Engels</label>
+            <input id="d-levering-en" name="levering_en" maxlength="200" autocomplete="off">
+          </div>
+        </div>
+        <div class="veld">
+          <label for="d-foto">Foto <span class="veld__optioneel">(niet verplicht; zonder eigen foto staat de foto van de producent erbij)</span></label>
+          <input id="d-foto" type="file" accept="image/jpeg,image/png,image/webp">
+        </div>
+        <div class="beheer__dropfoto" data-veld="dropfoto" hidden>
+          <img alt="Foto bij de drop">
+          <button class="knop knop--secundair" type="button" data-actie="drop-fotoweg">Foto weghalen</button>
+        </div>
+        <div class="beheer__knoppen">
+          <button class="knop knop--primair" type="submit">Opslaan</button>
+          <button class="knop knop--secundair" type="button" data-actie="drop-annuleer">Annuleren</button>
+        </div>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="beheer__drops" data-veld="droplijst"></div>
+      <p class="beheer__leeg" data-veld="dropleeg" hidden>Er zijn nog geen drops.</p>
+
+      <form class="formulier beheer__formulier beheer__dropkosten" id="dropkosten" novalidate>
+        <h2 class="beheer__tussenkop">Bezorgkosten bij bestellingen met wijn</h2>
+        <p class="beheer__klein">Voor de hele bestelling, ook als er glazen bij zitten. Ophalen bij Oocker is altijd gratis. Zonder deze bedragen kan niemand een drop bestellen.</p>
+        <div class="beheer__velden">
+          <div class="veld">
+            <label for="dk-kosten">Verzend- en bezorgkosten <span class="veld__optioneel">(incl. btw)</span></label>
+            <input id="dk-kosten" name="verzendkosten" type="text" inputmode="decimal" autocomplete="off" required>
+          </div>
+          <div class="veld">
+            <label for="dk-gratis">Gratis verzenden vanaf</label>
+            <input id="dk-gratis" name="gratis_vanaf" type="text" inputmode="decimal" autocomplete="off" required>
+          </div>
+          <div class="veld">
+            <label for="dk-amsterdam">Gratis bezorgen in Amsterdam vanaf</label>
+            <input id="dk-amsterdam" name="gratis_amsterdam_vanaf" type="text" inputmode="decimal" autocomplete="off" required>
+          </div>
+        </div>
+        <button class="knop knop--secundair" type="submit">Bezorgkosten opslaan</button>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+      </form>
     </div>
 
     {%- comment -%} Nieuwsmail aan horecaklanten: alleen versturen na twee keer klikken {%- endcomment -%}

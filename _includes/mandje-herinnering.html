@@ -1,12 +1,11 @@
 {%- comment -%}
-  Zitten er Hedonist-glazen in het winkelmandje (localStorage), dan staat rechtsonder een herinnering.
+  Zitten er Hedonist-glazen of wijn uit een drop in het winkelmandje (localStorage), dan staat rechtsonder een herinnering.
   Een klik opent het mandje in een lade aan de rechterkant, zodat je op deze pagina kunt afrekenen.
   Zonder JavaScript gaat de link naar het mandje op de Hedonist-pagina.
   Niet op de Hedonist-pagina zelf, in het horecaportaal en na het betalen. Logica: assets/js/winkel.js.
 {%- endcomment -%}
 {%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
 {%- unless page.url contains "/hedonist/" or page.url contains "/horeca/" or page.url == "/en/trade/" or page.url == "/bestelling/" or page.url == "/en/order/" -%}
-{%- if site.data.winkel.open -%}
 <a class="mandjeherinnering" id="mandjeherinnering" href="{{ t.url.hedonist | append: '#bestellen' | relative_url }}" hidden>
   <svg class="mandjeherinnering__icoon" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
     <path d="M3 12h26l-3 15H6L3 12zM10 12l5-8M22 12l-5-8M12 17v5M16 17v5M20 17v5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
@@ -31,5 +30,4 @@
 </div>
 {% include hedonist-gegevens.html %}
 <script src="{{ '/assets/js/winkel.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
-{%- endif -%}
 {%- endunless -%}

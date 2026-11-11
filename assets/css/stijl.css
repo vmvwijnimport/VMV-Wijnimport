@@ -1324,3 +1324,65 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   .tabbladen { gap: var(--s-3); }
   .tabbladen a { font-size: var(--fs-knop); }
 }
+
+/* ---------- Drop: één wijn via een eigen link uit WhatsApp (/drop/?c=…), zie assets/js/drop.js ---------- */
+.drop { padding-top: var(--s-3); }
+.drop [hidden] { display: none !important; }
+.drop__taal { display: flex; justify-content: flex-end; margin-bottom: var(--s-4); }
+.drop__taal a {
+  display: inline-grid; place-items: center; min-height: 44px; padding: 0 var(--s-2);
+  border: 1px solid var(--zwart); font-size: var(--fs-klein); text-decoration: none; color: var(--zwart);
+}
+.drop__taal a + a { border-left: 0; }
+.drop__taal a:hover { color: var(--rood); }
+.drop__taal a[aria-current] { background: var(--zwart); color: var(--wit); }
+.drop__taal a:focus-visible { outline: 2px solid var(--rood); outline-offset: 2px; }
+.drop__laden { min-height: 40vh; }
+.drop__bericht { max-width: var(--kolom); min-height: 40vh; }
+.drop__knoppen { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-4); }
+
+.drop__wijn { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: var(--s-8); align-items: start; }
+.drop__foto { margin: 0; position: sticky; top: calc(var(--kopgrootte) + var(--s-3)); }
+.drop__foto img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; background: var(--champagne-licht); }
+.drop__info { max-width: var(--kolom); }
+.drop__producent { margin: 0 0 var(--s-2); font-size: var(--fs-ui); color: var(--tekst-zacht); }
+.drop__producent a { color: inherit; }
+.drop__producent a:hover { color: var(--rood); }
+.drop__kenmerken { margin: var(--s-2) 0 0; color: var(--tekst-zacht); }
+.drop__prijs { margin: var(--s-4) 0 var(--s-1); font-size: var(--fs-h2); font-weight: 300; color: var(--zwart); }
+.drop__prijs small { font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.drop__voorraad { margin: 0 0 var(--s-3); }
+.drop__voorraad--stip { display: flex; align-items: center; gap: var(--s-1); }
+.drop__voorraad--stip::before {
+  content: ""; width: 10px; height: 10px; border-radius: 50%; flex: none;
+  background: var(--champagne); border: 1px solid var(--champagne-rand);
+}
+.drop__bestel { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: stretch; }
+.drop__aantal .aantal__knop { width: 48px; height: 100%; min-height: 50px; font-size: 1.25rem; }
+.drop__aantal .aantal__veld { width: 56px; height: auto; min-height: 50px; }
+.drop__klein { margin: var(--s-2) 0 0; font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.drop__verhaal { margin-top: var(--s-6); padding-top: var(--s-4); border-top: 1px solid var(--lijn); }
+.drop__meer { margin: var(--s-3) 0 0; }
+@media (max-width: 56rem) {
+  .drop__wijn { grid-template-columns: 1fr; gap: var(--s-4); }
+  .drop__foto { position: static; margin: 0 calc(var(--rand) * -1); }
+  .drop__foto img { aspect-ratio: 1 / 1; }
+}
+.mandje__melding { margin: 0 0 var(--s-2); padding: 12px 14px; background: var(--champagne-licht); font-size: var(--fs-klein); color: var(--tekst); }
+.mandje__melding[hidden] { display: none; }
+
+/* Backoffice: drops */
+.beheer__dropnieuw { margin-bottom: var(--s-3); }
+.beheer__dropform { margin-bottom: var(--s-6); }
+.beheer__dropkosten .beheer__klein { margin-bottom: var(--s-3); }
+.beheer__dropform textarea { width: 100%; }
+.beheer__dropfoto { display: flex; align-items: flex-end; gap: var(--s-2); margin-bottom: var(--s-3); }
+.beheer__dropfoto img { width: 120px; aspect-ratio: 4 / 5; object-fit: cover; }
+.beheer__droprij {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-1) var(--s-3); align-items: start;
+  padding: var(--s-3) 0; border-bottom: 1px solid var(--lijn);
+}
+.beheer__droprij:first-child { border-top: 1px solid var(--zwart); }
+.beheer__dropknoppen { grid-column: 1 / -1; }
+.beheer__dropknoppen .knop { padding: 10px 18px; }
+.beheer__dropkosten { margin-top: var(--s-8); }

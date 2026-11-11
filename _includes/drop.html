@@ -1,0 +1,63 @@
+{%- comment -%}
+  De droppagina: één wijn, via een eigen link uit WhatsApp (/drop/?c=<code> en /en/drop/?c=<code>).
+  Staat niet in het menu en niet in Google. De wijn, de prijs (incl. btw) en de voorraad staan alleen
+  in de database (supabase/022-drops.sql) en worden in de backoffice ingesteld, onder Drops.
+  Logica: assets/js/drop.js; het mandje en afrekenen: assets/js/winkel.js.
+{%- endcomment -%}
+{%- assign en = false %}{% if page.taal == "en" %}{% assign en = true %}{% endif -%}
+<section class="pagina pagina--breed drop" id="drop"
+         data-url="{{ site.horeca.supabase_url }}" data-sleutel="{{ site.horeca.supabase_key }}">
+  <nav class="drop__taal" aria-label="{% if en %}Language{% else %}Taal{% endif %}">
+    <a href="{{ '/drop/' | relative_url }}" hreflang="nl" lang="nl"{% unless en %} aria-current="true"{% endunless %}>Nederlands</a>
+    <a href="{{ '/en/drop/' | relative_url }}" hreflang="en" lang="en"{% if en %} aria-current="true"{% endif %}>English</a>
+  </nav>
+
+  <p class="horeca__laden drop__laden" data-toestand="laden">{% if en %}One moment…{% else %}Even geduld…{% endif %}</p>
+
+  <div class="drop__bericht" data-toestand="onbekend" hidden>
+    <h1>{% if en %}This link doesn’t work{% else %}Deze link werkt niet{% endif %}</h1>
+    <p class="pagina__intro">{% if en %}Check the link from our WhatsApp message, or send us a message.{% else %}Controleer de link uit ons WhatsApp-bericht, of stuur ons een bericht.{% endif %}</p>
+    <p class="drop__knoppen">
+      <a class="knop knop--primair" href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">{% if en %}Send us a WhatsApp{% else %}Stuur ons een WhatsApp{% endif %}</a>
+      <a class="knop knop--secundair" href="{% if en %}{{ '/en/producers/' | relative_url }}{% else %}{{ '/producenten/' | relative_url }}{% endif %}">{% if en %}Our producers{% else %}Onze producenten{% endif %}</a>
+    </p>
+  </div>
+
+  <div class="drop__bericht" data-toestand="binnenkort" hidden>
+    <h1>{% if en %}Almost there{% else %}Nog even geduld{% endif %}</h1>
+    <p class="pagina__intro" data-veld="opent"></p>
+  </div>
+
+  <article class="drop__wijn" data-toestand="wijn" hidden>
+    <figure class="drop__foto" data-veld="fotovak">
+      <img data-veld="foto" alt="">
+    </figure>
+    <div class="drop__info">
+      <p class="drop__producent" data-veld="producent"></p>
+      <h1 data-veld="naam"></h1>
+      <p class="drop__kenmerken" data-veld="kenmerken"></p>
+      <p class="drop__prijs"><span data-veld="prijs"></span> <small>{% if en %}per bottle, incl. VAT{% else %}per fles, incl. btw{% endif %}</small></p>
+      <p class="drop__voorraad" data-veld="voorraad"></p>
+
+      <div class="drop__bestel" data-veld="bestel">
+        <div class="aantal aantal--licht drop__aantal" role="group" aria-label="{% if en %}Number of bottles{% else %}Aantal flessen{% endif %}">
+          <button type="button" class="aantal__knop" data-stap="-1" aria-label="{% if en %}One fewer{% else %}Eén minder{% endif %}">−</button>
+          <input class="aantal__veld" type="number" min="1" value="1" inputmode="numeric" aria-label="{% if en %}Number of bottles{% else %}Aantal flessen{% endif %}">
+          <button type="button" class="aantal__knop" data-stap="1" aria-label="{% if en %}One more{% else %}Eén meer{% endif %}">+</button>
+        </div>
+        <button class="knop knop--primair" type="button" data-veld="erin">{% if en %}Add to basket{% else %}In winkelmandje{% endif %}</button>
+      </div>
+      <p class="drop__klein" data-veld="regels"></p>
+      <p class="drop__klein" data-veld="levering"></p>
+
+      <div class="verhaal drop__verhaal" data-veld="tekst"></div>
+      <p class="drop__meer" data-veld="meer" hidden><a href=""></a></p>
+    </div>
+  </article>
+</section>
+
+{%- comment -%} Foto's van de producenten, voor een drop zonder eigen foto {%- endcomment -%}
+<script id="drop-fotos" type="application/json">
+[{% for p in site.producenten %}{% assign f = p.lijst_foto | default: p.foto %}{% if f and f != "" %}[{{ p.slug | jsonify }}, {{ f | relative_url | jsonify }}], {% endif %}{% endfor %}null]
+</script>
+<script src="{{ '/assets/js/drop.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>

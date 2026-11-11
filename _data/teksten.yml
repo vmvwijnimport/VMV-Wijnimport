@@ -119,6 +119,7 @@ nl:
     ontvangen: We hebben je bestelling ontvangen.
     betaallink: Je krijgt van ons per mail een iDEAL-betaallink.
     levering_in: De verwachte levering is
+    achttien: Ik ben 18 jaar of ouder
 
 en:
   locale: en_GB
@@ -230,6 +231,7 @@ en:
     ontvangen: We’ve received your order.
     betaallink: We’ll email you an iDEAL payment link.
     levering_in: "Expected delivery:"
+    achttien: I am 18 or over
   # Namen van landen, regio's en druiven in het Engels
   namen:
     Frankrijk: France

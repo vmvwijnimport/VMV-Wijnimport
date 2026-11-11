@@ -1,10 +1,11 @@
-{%- comment -%} Prijzen en regels voor assets/js/winkel.js, uit _data/winkel.yml {%- endcomment -%}
+{%- comment -%} Prijzen en regels voor assets/js/winkel.js, uit _data/winkel.yml. Wijn uit een drop haalt winkel.js zelf op (supabase/022). {%- endcomment -%}
 {%- assign w = site.data.winkel -%}
 {%- assign wt = site.data.teksten[page.taal].winkel | default: site.data.teksten.nl.winkel -%}
 {%- assign en = false %}{% if page.taal == "en" %}{% assign en = true %}{% endif -%}
 {%- assign levering = w.levering -%}{%- if en %}{% assign levering = w.levering_en | default: w.levering %}{% endif -%}
 <script id="winkel-gegevens" type="application/json">
 {
+  "open": {{ w.open | default: false }},
   "prijsGlas": {{ w.prijs_glas }},
   "prijsZes": {{ w.prijs_zes }},
   "verzendkosten": {{ w.verzendkosten }},
@@ -14,6 +15,7 @@
   "idealActief": {{ w.betalen.actief | default: false }},
   "ophalenBij": {{ w.ophalen.naam | jsonify }},
   "koppeling": {{ w.betalen.koppeling | default: "" | jsonify }},
+  "supabase": { "url": {{ site.horeca.supabase_url | jsonify }}, "sleutel": {{ site.horeca.supabase_key | jsonify }} },
   "modellen": { {% for m in w.modellen %}{{ m.id | jsonify }}: {{ m.naam | jsonify }}{% unless forloop.last %}, {% endunless %}{% endfor %} }
 }
 </script>

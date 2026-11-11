@@ -27,7 +27,7 @@ Let op: Mollie controleert de website voordat je live mag. Daarvoor moeten de al
    - `MOLLIE_API_KEY` als type **Secret**, met je testsleutel (`test_...`)
    - `SITE_URL` als type **Text**: `https://vmvwijnimport.com`, zonder `/` aan het eind
    - `RESEND_API_KEY` als type **Secret**: een sleutel uit Resend (**API Keys → Create API Key**, naam `cloudflare`, **Sending access**). Daarmee verstuurt de Worker na betaling een mail in de huisstijl naar de klant en naar info@.
-   - `HEDONIST_SLEUTEL` als type **Secret**: de sleutel die `supabase/015-hedonist.sql` laat zien. Daarmee komt elke betaalde bestelling ook in de backoffice onder **Hedonist**. Zonder deze sleutel werkt alles, maar komen de bestellingen alleen per mail.
+   - `HEDONIST_SLEUTEL` als type **Secret**: de sleutel die `supabase/015-hedonist.sql` laat zien. Daarmee komt elke betaalde bestelling ook in de backoffice onder **Webwinkel**. Zonder deze sleutel komen glazenbestellingen alleen per mail en kan er geen wijn uit een drop worden besteld (`supabase/022-drops.sql`).
 5. Kopieer het adres van de Worker, bijvoorbeeld `https://vmv-betalen.jouwnaam.workers.dev`.
 
 ## Stap 3: De website koppelen

@@ -17,7 +17,7 @@ sitemap: false
   </header>
   <div class="tekst">
     <p id="bestelling-nummer"></p>
-    <p><a href="{{ '/en/hedonist/' | relative_url }}">Back to Hedonist</a></p>
+    <p><a id="bestelling-terug" href="{{ '/en/hedonist/' | relative_url }}">Back to Hedonist</a></p>
     <p class="contactregel">Questions about your order? <a href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">Send us a WhatsApp</a> or email <a href="mailto:{{ site.email }}">{{ site.email }}</a>.</p>
   </div>
 </section>
@@ -37,18 +37,33 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
   nummer.textContent = "Order number: " + betaling.bestelnummer;
+  // An order with wine from a drop (possibly with glasses): different texts, and both baskets emptied
+  var drop = betaling.soort === "drop";
+  if (drop) {
+    var terug = document.getElementById("bestelling-terug");
+    terug.href = {{ '/en/' | relative_url | jsonify }};
+    terug.textContent = "Go to the website";
+  }
+  var leegMandje = function () {
+    try { localStorage.removeItem("vmv-hedonist-mandje"); if (drop) localStorage.removeItem("vmv-wijn-mandje"); } catch (e) {}
+  };
 
   fetch(koppeling.replace(/\/$/, "") + "/status?id=" + encodeURIComponent(betaling.id))
     .then(function (r) { return r.json(); })
     .then(function (s) {
       if (s.status === "paid") {
         kop.textContent = "Thank you for your order";
-        tekst.textContent = "Your payment was successful. You’ll receive an invoice by email. Expected delivery is in " + levering + ".";
-        try { localStorage.removeItem("vmv-hedonist-mandje"); sessionStorage.removeItem("vmv-betaling"); } catch (e) {}
+        tekst.textContent = drop
+          ? "Your payment was successful. You’ll receive a confirmation by email, including when your order will arrive. We’ll send the invoice separately."
+          : "Your payment was successful. You’ll receive an invoice by email. Expected delivery is in " + levering + ".";
+        leegMandje();
+        try { sessionStorage.removeItem("vmv-betaling"); } catch (e) {}
       } else if (s.status === "open" || s.status === "pending") {
         kop.textContent = "Thank you, your payment hasn’t come in yet";
-        tekst.textContent = "Paying by bank transfer? We will process your order as soon as the amount is in our account. The payment details are in the email from Mollie.";
-        try { localStorage.removeItem("vmv-hedonist-mandje"); } catch (e) {}
+        tekst.textContent = drop
+          ? "As soon as your payment has come in, you’ll receive a confirmation by email."
+          : "Paying by bank transfer? We will process your order as soon as the amount is in our account. The payment details are in the email from Mollie.";
+        leegMandje();
       } else {
         kop.textContent = "Your payment didn’t go through";
         tekst.textContent = "You haven’t been charged. Your basket is still there, so you can try again.";
