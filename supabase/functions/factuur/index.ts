@@ -11,6 +11,8 @@
 // 6. "los_voorbereiden" en "los_maken": een losse factuur, los van het portaal: een klant uit e-Boekhouden
 //                     (of een nieuwe), wijnen uit de prijslijst, en de horecaprijs (excl. btw) of de
 //                     particuliere prijs (incl. btw). Ook hier eerst een voorbeeld en pas na een klik de factuur.
+// 7. "webwinkel":      na een betaalde webwinkelbestelling (glazen en/of drops) automatisch de factuur
+//                     maken, aangevraagd door de betaal-Worker (met de koppelsleutel) of opnieuw vanuit de backoffice.
 // Factuurregels verwijzen naar het product in e-Boekhouden (productId), zodat de voorraad daar meeloopt.
 // Bedragen komen uit de bestelling zoals VMV hem heeft bevestigd (prijs per stuk na korting).
 //
@@ -104,13 +106,14 @@ const gegevens = async (db, vraag) => {
   const [producten, sjablonen, { data: inst }] = await Promise.all([
     alles(vraag, "/v1/product"),
     alles(vraag, "/v1/invoicetemplate"),
-    db.from("instellingen").select("eb_sjabloon_id, eb_verwerken").maybeSingle()
+    db.from("instellingen").select("*").maybeSingle()
   ]);
   return {
     producten: producten.map((p) => ({ id: p.id, code: p.code || "", omschrijving: p.description || "", actief: p.active !== false })),
     sjablonen: sjablonen.filter((s) => s.active !== false).map((s) => ({ id: s.id, naam: s.name || `Sjabloon ${s.id}` })),
     sjabloon: inst ? inst.eb_sjabloon_id : null,
-    verwerken: inst ? inst.eb_verwerken !== false : true
+    verwerken: inst ? inst.eb_verwerken !== false : true,
+    webwinkel: inst ? { eb_glas_breed: inst.eb_glas_breed ?? null, eb_glas_white: inst.eb_glas_white ?? null, eb_bezorgkosten: inst.eb_bezorgkosten ?? null } : {}
   };
 };
 
@@ -132,8 +135,16 @@ const koppelen = async (db, vraag, opdracht) => {
     const { error } = await db.from("producten").update({ eb_product_id: k.eb }).eq("id", k.id);
     if (error) throw error;
   }
+  // Webwinkel (supabase/023): de producten voor de glazen en de bezorgkosten
+  const ww = opdracht.webwinkel || {};
+  for (const n of ["eb_glas_breed", "eb_glas_white", "eb_bezorgkosten"]) {
+    if (ww[n] != null && !(Number.isInteger(ww[n]) && ebIds.has(ww[n]))) throw new Melding("Een gekozen product voor de webwinkel bestaat niet (meer) in e-Boekhouden.");
+  }
   const { error } = await db.from("instellingen")
-    .update({ eb_sjabloon_id: Number.isInteger(opdracht.sjabloon) ? opdracht.sjabloon : null, eb_verwerken: opdracht.verwerken !== false })
+    .update({
+      eb_sjabloon_id: Number.isInteger(opdracht.sjabloon) ? opdracht.sjabloon : null, eb_verwerken: opdracht.verwerken !== false,
+      ...(opdracht.webwinkel ? { eb_glas_breed: ww.eb_glas_breed ?? null, eb_glas_white: ww.eb_glas_white ?? null, eb_bezorgkosten: ww.eb_bezorgkosten ?? null } : {})
+    })
     .eq("id", 1);
   if (error) throw error;
   return { opgeslagen: lijst.length };
@@ -472,13 +483,176 @@ const losMaken = async (db, vraag, opdracht) => {
   return { nummer: factuur.invoiceNumber || "", id: factuur.id };
 };
 
+// ---------- 7. Webwinkel: automatisch een factuur na de betaling (supabase/023) ----------
+// De betaal-Worker vraagt dit aan met de koppelsleutel; in de backoffice kan een beheerder het opnieuw
+// proberen. Prijzen zijn incl. btw (particulier). De factuur wordt niet gemaild.
+
+// "Teststraat 1, 1017 AB Amsterdam" → straat, postcode, plaats
+export const adresDelen = (adres) => {
+  const m = /^(.*?),\s*(\d{4}\s?[A-Za-z]{2})\s+(.*)$/.exec(String(adres || "").trim());
+  return m ? { straat: m[1], postcode: m[2].toUpperCase(), plaats: m[3] } : { straat: String(adres || ""), postcode: "", plaats: "" };
+};
+
+// Een bedrag over een aantal stuks verdelen in hele centen: 6 glazen voor 185,00 → 2 × 30,84 en 4 × 30,83
+export const verdeel = (bedrag, aantal) => {
+  const c = centen(bedrag), per = Math.floor(c / aantal), rest = c - per * aantal;
+  return [{ aantal: rest, prijs: (per + 1) / 100 }, { aantal: aantal - rest, prijs: per / 100 }].filter((x) => x.aantal > 0);
+};
+
+const webwinkelOpbouwen = async (db, vraag, h) => {
+  const problemen = [];
+  let regels = h.regels;
+  if (/^VMV-D/.test(h.bestelnummer)) {
+    const { data: d } = await db.from("drop_bestellingen").select("regels").eq("bestelnummer", h.bestelnummer).maybeSingle();
+    regels = d ? d.regels : null;
+  }
+  if (!Array.isArray(regels) || !regels.length) {
+    throw new Melding("Van deze bestelling zijn de regels niet bewaard (een oudere bestelling). Maak de factuur onder Losse factuur.");
+  }
+  const { data: inst } = await db.from("instellingen").select("*").maybeSingle();
+  if (!inst || !inst.eb_sjabloon_id) problemen.push("Kies eerst een factuursjabloon onder Prijslijst → Koppelen met e-Boekhouden.");
+
+  // Wijn: via de drop naar de wijn in de prijslijst en het gekoppelde product
+  const dropIds = regels.filter((r) => r.soort === "wijn").map((r) => Number(r.drop_id));
+  const { data: drops } = dropIds.length
+    ? await db.from("drops").select("id, product_id, producten(eb_product_id)").in("id", dropIds)
+    : { data: [] };
+  const lijst = [];
+  for (const r of regels) {
+    let eb = null;
+    if (r.soort === "wijn") {
+      const d = (drops || []).find((x) => x.id === Number(r.drop_id));
+      eb = d && d.producten ? d.producten.eb_product_id : null;
+      if (!eb) { problemen.push(`${r.naam} is nog niet gekoppeld aan een product in e-Boekhouden (Prijslijst → Koppelen).`); continue; }
+      lijst.push({ eb, naam: r.naam, delen: verdeel(r.bedrag, r.aantal) });
+    } else if (r.soort === "glas") {
+      eb = /white/i.test(r.naam) ? inst && inst.eb_glas_white : inst && inst.eb_glas_breed;
+      if (!eb) { problemen.push(`Kies onder Prijslijst → Koppelen bij Webwinkel het product voor ${r.naam}.`); continue; }
+      lijst.push({ eb, naam: r.naam, delen: verdeel(r.bedrag, r.aantal) });
+    }
+  }
+  if (Number(h.verzending) > 0) {
+    const eb = inst && inst.eb_bezorgkosten;
+    if (!eb) problemen.push("Kies onder Prijslijst → Koppelen bij Webwinkel het product voor de bezorgkosten.");
+    else lijst.push({ eb, naam: h.bezorging === "Bezorgen in Amsterdam" ? "Bezorgen in Amsterdam" : "Verzendkosten", delen: [{ aantal: 1, prijs: Number(h.verzending) }] });
+  }
+
+  const details = {};
+  for (const l of lijst) {
+    if (!(l.eb in details)) details[l.eb] = await vraag("GET", `/v1/product/${l.eb}`);
+    const p = details[l.eb];
+    if (!p) problemen.push(`Het product bij ${l.naam} bestaat niet meer in e-Boekhouden. Koppel het opnieuw.`);
+    else if (!p.ledgerId) problemen.push(`Het product bij ${l.naam} heeft in e-Boekhouden geen grootboekrekening.`);
+  }
+  let stuks = null;
+  if (Object.values(details).some((p) => p && !p.unitId)) {
+    const e = (await alles(vraag, "/v1/unit")).find((x) => /^stuks?$/i.test(String(x.plural || "").trim()) || /^stuk$/i.test(String(x.singular || "").trim()));
+    stuks = e ? e.id : null;
+    if (!stuks) problemen.push("In e-Boekhouden staat geen eenheid \"stuks\". Maak die aan, of geef de artikelen een eenheid.");
+  }
+  const items = [];
+  lijst.forEach((l) => {
+    const p = details[l.eb] || {};
+    l.delen.forEach((d) => items.push({
+      productId: l.eb, ...(p.code ? { code: schoon(p.code, 50) } : {}),
+      description: schoon(l.naam, 200), quantity: d.aantal, unitId: p.unitId || stuks,
+      pricePerUnit: d.prijs, vatCode: p.vat || "HOOG_VERK_21", ledgerId: p.ledgerId || null
+    }));
+  });
+  // Controle: de factuur moet precies het betaalde bedrag zijn
+  const som = items.reduce((s, i) => s + centen(i.pricePerUnit) * i.quantity, 0);
+  if (!problemen.length && som !== centen(h.totaal)) problemen.push("Het bedrag van de factuur komt niet overeen met de betaling. Maak de factuur onder Losse factuur.");
+  return { inst, items, problemen };
+};
+
+const webwinkel = async (db, vraag, opdracht) => {
+  const q = db.from("hedonist_bestellingen").select("*");
+  const { data: h, error } = await (Number.isInteger(opdracht.bestelling) ? q.eq("id", opdracht.bestelling) : q.eq("bestelnummer", schoon(opdracht.bestelnummer, 40))).maybeSingle();
+  if (error) throw error;
+  if (!h) throw new Melding("Deze bestelling bestaat niet (meer).", 404);
+  // Is de factuur in e-Boekhouden verwijderd, dan mag hij opnieuw worden gemaakt
+  if (h.eb_factuur_id && !(await vraag("GET", `/v1/invoice/${h.eb_factuur_id}`))) {
+    await db.from("hedonist_bestellingen").update({ eb_factuur_id: null, eb_factuurnummer: null, eb_factuur_op: null }).eq("id", h.id);
+    h.eb_factuur_id = null; h.eb_factuur_op = null;
+  }
+  if (h.eb_factuur_id || h.eb_factuur_op) throw new Melding(h.eb_factuurnummer ? `Factuur ${h.eb_factuurnummer} staat al in e-Boekhouden.` : "Voor deze bestelling wordt al een factuur gemaakt.", 409);
+
+  // Claimen: zo komt er nooit twee keer een factuur voor dezelfde bestelling (Mollie meldt soms vaker)
+  const { data: claim } = await db.from("hedonist_bestellingen").update({ eb_factuur_op: new Date().toISOString() })
+    .eq("id", h.id).is("eb_factuur_op", null).is("eb_factuur_id", null).select("id");
+  if (!claim || !claim.length) throw new Melding("Voor deze bestelling wordt al een factuur gemaakt.", 409);
+
+  let factuur = null;
+  try {
+    const o = await webwinkelOpbouwen(db, vraag, h);
+    if (o.problemen.length) throw new Melding(o.problemen[0]);
+    const { inst } = o;
+
+    // De klant: dezelfde relatie als eerder (op e-mailadres), anders een nieuwe particulier
+    let relatie = null;
+    if (h.email) {
+      const j = await vraag("GET", `/v1/relation?limit=10&email=${encodeURIComponent(h.email)}`);
+      for (const x of (j && j.items) || []) {
+        const r = await vraag("GET", `/v1/relation/${x.id}`);
+        if (r && !r.inactive) { relatie = r.id; break; }
+      }
+    }
+    if (!relatie) {
+      const a = h.adres === "Ophalen" ? { straat: "", postcode: "", plaats: "" } : adresDelen(h.adres);
+      relatie = (await vraag("POST", "/v1/relation", {
+        type: "P", name: schoon(h.naam, 100),
+        address: schoon(a.straat, 100), postalCode: schoon(a.postcode, 10), city: schoon(a.plaats, 50),
+        phoneNumber: schoon(h.telefoon, 25), emailAddress: schoon(h.email, 150), emailAddressInvoice: schoon(h.email, 150),
+        termOfPayment: inst.betaaltermijn_dagen
+      })).id;
+    }
+
+    let mutatie = null;
+    if (inst.eb_verwerken !== false) {
+      const deb = await alles(vraag, "/v1/ledger?category=DEB");
+      mutatie = { description: `Factuur webwinkel ${h.bestelnummer}`, ...(deb.length === 1 ? { ledgerId: deb[0].id } : {}) };
+    }
+    const betaald = new Intl.DateTimeFormat("nl-NL", { timeZone: "Europe/Amsterdam", day: "numeric", month: "long", year: "numeric" }).format(new Date(h.betaald_op));
+    const nummer = await volgendNummer(vraag);
+    factuur = await vraag("POST", "/v1/invoice", {
+      ...(nummer ? { invoiceNumber: nummer } : {}),
+      relationId: relatie,
+      date: vandaag(),
+      termOfPayment: inst.betaaltermijn_dagen,
+      inExVat: "IN",
+      templateId: inst.eb_sjabloon_id,
+      text: `Bestelling ${h.bestelnummer}. Al betaald met ${h.methode === "banktransfer" ? "een bankoverschrijving" : "iDEAL"} via Mollie op ${betaald}.`,
+      items: o.items,
+      ...(mutatie ? { mutation: mutatie } : {})
+    });
+  } catch (e) {
+    // Mislukt vóór de factuur er was: vrijgeven en de reden bewaren, zodat je het in de backoffice opnieuw kunt proberen
+    if (!factuur) {
+      await db.from("hedonist_bestellingen").update({ eb_factuur_op: null, eb_factuur_fout: e instanceof Melding ? e.message : "Er ging iets mis bij e-Boekhouden." })
+        .eq("id", h.id).is("eb_factuur_id", null);
+    }
+    throw e;
+  }
+  await db.from("hedonist_bestellingen").update({ eb_factuur_id: factuur.id, eb_factuurnummer: factuur.invoiceNumber || null, eb_factuur_fout: null }).eq("id", h.id);
+  return { nummer: factuur.invoiceNumber || "", id: factuur.id };
+};
+
+// De betaal-Worker bewijst met de koppelsleutel (supabase/015) dat hij het is
+const isWorker = async (db, sleutel) => {
+  if (!sleutel || typeof sleutel !== "string") return false;
+  const { data } = await db.from("koppelsleutels").select("sleutel").eq("naam", "hedonist").maybeSingle();
+  return !!(data && data.sleutel === sleutel);
+};
+
 // ---------- Afhandelen ----------
 const afhandelen = async (req, db) => {
-  const be = await beheerderUit(db, req);
-  if (!be) return antwoord({ fout: "Geen toegang. Log opnieuw in op de backoffice." }, 401);
   const opdracht = await req.json().catch(() => ({}));
   const soort = opdracht.opdracht;
-  if (!["gegevens", "koppelen", "voorbereiden", "maken", "klanten", "los_voorbereiden", "los_maken"].includes(soort)) return antwoord({ fout: "Onbekende opdracht." }, 400);
+  // De webwinkelfactuur mag ook de betaal-Worker aanvragen, met de koppelsleutel; al het andere alleen een beheerder
+  const worker = soort === "webwinkel" && await isWorker(db, opdracht.sleutel);
+  if (!worker && !(await beheerderUit(db, req))) return antwoord({ fout: "Geen toegang. Log opnieuw in op de backoffice." }, 401);
+  if (!["gegevens", "koppelen", "voorbereiden", "maken", "klanten", "los_voorbereiden", "los_maken", "webwinkel"].includes(soort)) return antwoord({ fout: "Onbekende opdracht." }, 400);
+  if (soort === "webwinkel" && !Number.isInteger(opdracht.bestelling) && !opdracht.bestelnummer) return antwoord({ fout: "Onbekende bestelling." }, 400);
   if ((soort === "voorbereiden" || soort === "maken") && !Number.isInteger(opdracht.bestelling)) return antwoord({ fout: "Onbekende bestelling." }, 400);
   let vraag = null;
   try {
@@ -489,6 +663,7 @@ const afhandelen = async (req, db) => {
     if (soort === "klanten") return antwoord(await klantenZoeken(vraag, opdracht));
     if (soort === "los_voorbereiden") return antwoord((await losOpbouwen(db, vraag, opdracht)).voorbeeld);
     if (soort === "los_maken") return antwoord(await losMaken(db, vraag, opdracht));
+    if (soort === "webwinkel") return antwoord(await webwinkel(db, vraag, opdracht));
     return antwoord(await maken(db, vraag, opdracht));
   } catch (e) {
     if (e instanceof Melding) return antwoord({ fout: e.message }, e.status);

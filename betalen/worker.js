@@ -18,8 +18,9 @@
 //                          (supabase/022-drops.sql)
 //    GET  /status?id=tr_…  geeft de status van een betaling terug
 //    POST /webhook         Mollie meldt een statuswijziging; is de betaling binnen,
-//                          dan krijgen de klant en VMV een mail in de huisstijl en komt
-//                          de bestelling in de backoffice
+//                          dan krijgen de klant en VMV een mail in de huisstijl, komt
+//                          de bestelling in de backoffice en wordt de factuur in e-Boekhouden
+//                          klaargezet (functie factuur in Supabase, supabase/023; niet gemaild)
 // ------------------------------------------------------------------
 
 const MOLLIE = "https://api.mollie.com/v2";
@@ -28,7 +29,7 @@ const SUPABASE_URL = "https://iemduldvpylppckpttja.supabase.co";
 const SUPABASE_KEY = "sb_publishable_w0sVLgS2_qy-HdTgVyvfqw_xpahvjXV";
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const site = (env.SITE_URL || "").replace(/\/$/, "");
     const herkomst = new URL(site).origin;
     const cors = {
@@ -55,8 +56,8 @@ export default {
         const id = String((await request.formData()).get("id") || "");
         if (!/^tr_[A-Za-z0-9]+$/.test(id)) return new Response("Onbekende betaling", { status: 400 });
         const betaling = await mollie(`/payments/${id}`, env);
-        if (betaling.metadata?.soort === "drop") await naDropBetaling(betaling, env, site);
-        else await naBetaling(betaling, env, site);
+        if (betaling.metadata?.soort === "drop") await naDropBetaling(betaling, env, site, ctx);
+        else await naBetaling(betaling, env, site, ctx);
         return new Response("OK");
       }
       if (pad === "/status" && request.method === "GET") {
@@ -112,7 +113,7 @@ export function bereken(winkel, aantallen, bezorging) {
   const gratis = bezorging === "ophalen" || n >= winkel.gratisVanaf || (amsterdam && n >= winkel.gratisAmsterdamVanaf);
   const verzending = gratis ? 0 : winkel.verzendkosten;
   const totaal = Math.round((glazen + verzending) * 100) / 100;
-  return { n, regels, glazen, verzending, totaal };
+  return { n, regels, lijst, glazen, verzending, totaal };
 }
 
 export function isAmsterdam(postcode) {
@@ -159,6 +160,8 @@ async function maakBetaling(invoer, env, site, webhook) {
       naam: kort(k.naam), email: kort(k.email), telefoon: kort(k.telefoon, 40),
       adres: bezorging === "ophalen" ? "Ophalen" : `${kort(k.adres)}, ${kort(k.postcode, 12)} ${kort(k.plaats, 80)}`,
       opmerking: kort(k.opmerking, 500),
+      // Voor de factuur: [{ naam, aantal, bedrag }]
+      glasregels: JSON.stringify(b.lijst.map((r) => ({ soort: "glas", ...r }))),
     },
   });
 
@@ -262,7 +265,7 @@ export const mailVmv = (betaling, levering) => {
   const m = betaling.metadata || {};
   const methode = { ideal: "iDEAL", banktransfer: "Bankoverschrijving" }[betaling.method] || betaling.method || "";
   const inhoud =
-    vlak(`<strong style="font-weight:500;">Betaald via ${html(methode)}.</strong> Maak de factuur in e-Boekhouden.`) +
+    vlak(`<strong style="font-weight:500;">Betaald via ${html(methode)}.</strong> De factuur wordt klaargezet in e-Boekhouden (niet gemaild); verstuur hem daar na controle. In de backoffice onder Webwinkel zie je het factuurnummer.`) +
     regelTabel(m, betaling.amount.value) +
     gegevens([
       ["Bestelnummer", html(m.bestelnummer)],
@@ -300,7 +303,7 @@ async function verstuur(env, sleutel, aan, antwoordAan, mail) {
 
 // Alleen bij een betaalde pre-order; andere statussen (open, mislukt, verlopen) krijgen geen mail.
 // Lukt een mail niet, dan geven we een fout terug; Mollie probeert het later opnieuw.
-async function naBetaling(betaling, env, site) {
+async function naBetaling(betaling, env, site, ctx) {
   if (betaling.status !== "paid" || !betaling.metadata?.bestelnummer) return;
   if (!env.RESEND_API_KEY) throw new Fout("RESEND_API_KEY ontbreekt", 500);
   let levering = "";
@@ -309,13 +312,15 @@ async function naBetaling(betaling, env, site) {
   const m = betaling.metadata;
   await verstuur(env, `hedonist-vmv-${betaling.id}`, vmv, m.email, mailVmv(betaling, levering));
   await verstuur(env, `hedonist-klant-${betaling.id}`, m.email, vmv, mailKlant(betaling, levering, site));
-  await opslaan(betaling, env);
+  if (await opslaan(betaling, env)) nuOfLater(ctx, factuurAanvragen(m.bestelnummer, env));
 }
 
 // De betaalde bestelling in de backoffice zetten. Een tweede melding van Mollie slaat de database over.
 async function opslaan(betaling, env) {
-  if (!env.HEDONIST_SLEUTEL) return;
+  if (!env.HEDONIST_SLEUTEL) return false;
   const m = betaling.metadata;
+  let regels = null;
+  try { regels = m.glasregels ? JSON.parse(m.glasregels) : null; } catch (e) {}
   const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/hedonist_opslaan`, {
     method: "POST",
     headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
@@ -325,12 +330,27 @@ async function opslaan(betaling, env) {
         mollie_id: betaling.id, bestelnummer: m.bestelnummer, methode: betaling.method || "",
         naam: m.naam, email: m.email, telefoon: m.telefoon, bezorging: m.bezorging, adres: m.adres,
         opmerking: m.opmerking || "", bestelling: m.bestelling || "",
-        glazen: m.glazen || "", verzending: m.verzending || "", totaal: betaling.amount.value
+        glazen: m.glazen || "", verzending: m.verzending || "", totaal: betaling.amount.value, regels
       }
     })
   });
   if (!r.ok) throw new Fout(`Opslaan in de backoffice mislukt (${r.status})`, 502);
+  return true;
 }
+
+// ---------- Factuur in e-Boekhouden (supabase/023, functie factuur) ----------
+// Na het antwoord aan Mollie, zodat de melding niet te lang duurt. Lukt het niet, dan staat de reden in de
+// backoffice onder Webwinkel en kun je het daar opnieuw proberen; Mollie hoeft het niet opnieuw te melden.
+async function factuurAanvragen(bestelnummer, env) {
+  try {
+    await fetch(`${SUPABASE_URL}/functions/v1/factuur`, {
+      method: "POST",
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ opdracht: "webwinkel", bestelnummer, sleutel: env.HEDONIST_SLEUTEL })
+    });
+  } catch (e) {}
+}
+const nuOfLater = (ctx, belofte) => { if (ctx && ctx.waitUntil) ctx.waitUntil(belofte); };
 
 // ---------- Drops: wijn, eventueel samen met glazen (supabase/022-drops.sql) ----------
 // De wijn, de prijzen, de voorraad en de bezorgkosten komen uit de database; de glazen uit winkel.json.
@@ -499,7 +519,7 @@ export const dropMailKlant = (b, site) => {
 export const dropMailVmv = (b, mollieId) => {
   const naam = { ideal: "iDEAL", banktransfer: "Bankoverschrijving" }[b.methode] || b.methode || "";
   const inhoud =
-    vlak(`<strong style="font-weight:500;">Betaald via ${html(naam)}.</strong> Maak de factuur in e-Boekhouden. De bestelling staat in de backoffice onder Webwinkel.`) +
+    vlak(`<strong style="font-weight:500;">Betaald via ${html(naam)}.</strong> De factuur wordt klaargezet in e-Boekhouden (niet gemaild); verstuur hem daar na controle. In de backoffice onder Webwinkel zie je het factuurnummer.`) +
     (b.te_veel ? vlak(`<strong style="font-weight:500;color:${KLEUR.rood};">Let op: van deze drop is nu meer verkocht dan het aantal flessen.</strong> De betaling kwam binnen nadat de reservering was verlopen. Neem contact op met de klant.`) : "") +
     dropTabel(b) +
     gegevens([
@@ -522,7 +542,7 @@ export const dropMailVmv = (b, mollieId) => {
 
 // Betaald: vastleggen en mailen. Mislukt, afgebroken of verlopen: de flessen komen vrij.
 // Lukt iets niet, dan geven we een fout terug; Mollie probeert het later opnieuw.
-async function naDropBetaling(betaling, env, site) {
+async function naDropBetaling(betaling, env, site, ctx) {
   const bestelnummer = betaling.metadata?.bestelnummer;
   if (!bestelnummer) return;
   if (!env.HEDONIST_SLEUTEL) throw new Fout("HEDONIST_SLEUTEL ontbreekt", 500);
@@ -537,4 +557,5 @@ async function naDropBetaling(betaling, env, site) {
   const vmv = env.VMV_MAIL || "info@vmvwijnimport.com";
   await verstuur(env, `drop-vmv-${betaling.id}`, vmv, b.email, dropMailVmv(b, betaling.id));
   await verstuur(env, `drop-klant-${betaling.id}`, b.email, vmv, dropMailKlant(b, site));
+  nuOfLater(ctx, factuurAanvragen(bestelnummer, env));
 }

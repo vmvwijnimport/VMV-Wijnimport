@@ -811,6 +811,20 @@
         koppelForm.verwerken.checked = g.verwerken;
 
         var opties = ebProducten.slice().sort(function (a, b) { return (a.code + a.omschrijving).localeCompare(b.code + b.omschrijving, "nl"); });
+        // Webwinkel (supabase/023): de producten voor de glazen en de bezorgkosten
+        koppelForm.querySelectorAll("select[data-webwinkel]").forEach(function (s) {
+          s.textContent = "";
+          var geen = el("option", null, "Niet gekoppeld");
+          geen.value = "";
+          s.appendChild(geen);
+          opties.forEach(function (e) {
+            var o = el("option", null, (e.code ? e.code + " – " : "") + e.omschrijving + (e.actief ? "" : " (niet actief)"));
+            o.value = String(e.id);
+            s.appendChild(o);
+          });
+          var nu = g.webwinkel ? g.webwinkel[s.name] : null;
+          s.value = nu != null && ebProducten.some(function (e) { return e.id === nu; }) ? String(nu) : "";
+        });
         var tbody = veld("koppelrijen");
         tbody.textContent = "";
         data.producten.forEach(function (p) {
@@ -875,7 +889,9 @@
     var sjabloon = koppelForm.sjabloon.value ? Number(koppelForm.sjabloon.value) : null;
     melding(status);
     bezig(knop, "Opslaan…");
-    factuurFunctie({ opdracht: "koppelen", koppelingen: koppelingen, sjabloon: sjabloon, verwerken: koppelForm.verwerken.checked })
+    var webwinkel = {};
+    koppelForm.querySelectorAll("select[data-webwinkel]").forEach(function (s) { webwinkel[s.name] = s.value ? Number(s.value) : null; });
+    factuurFunctie({ opdracht: "koppelen", koppelingen: koppelingen, sjabloon: sjabloon, verwerken: koppelForm.verwerken.checked, webwinkel: webwinkel })
       .then(function () {
         bezig(knop);
         koppelForm.querySelectorAll(".beheer__voorstel").forEach(function (x) { x.textContent = ""; });
@@ -1082,6 +1098,7 @@
         ["Totaal incl. btw", euro(h.totaal)],
         ["Betaald", datum(h.betaald_op) + ({ ideal: ", iDEAL", banktransfer: ", overschrijving" }[h.methode] || "")],
         ["Geleverd", h.geleverd_op ? datum(h.geleverd_op) : ""],
+        ["Factuur", h.eb_factuurnummer ? h.eb_factuurnummer + " (klaargezet in e-Boekhouden)" : h.eb_factuur_fout ? "Niet gelukt: " + h.eb_factuur_fout : ""],
         ["Mollie", h.mollie_id]
       ].forEach(function (p) {
         if (!p[1]) return;
@@ -1099,6 +1116,25 @@
       knop.addEventListener("click", function () { hedonistActie(h, h.status === "te_leveren" ? "geleverd" : "te_leveren", knop); });
       var vak = el("div", "beheer__hknop");
       vak.appendChild(knop);
+      // De factuur komt vanzelf (supabase/023); lukte dat niet, of is hij in e-Boekhouden verwijderd, dan hier opnieuw
+      if (!h.eb_factuur_id && "eb_factuur_id" in h) {
+        var fk = el("button", "knop knop--secundair", "Factuur maken in e-Boekhouden");
+        fk.type = "button";
+        fk.addEventListener("click", function () {
+          var plek = veld("hedonistmelding");
+          melding(plek);
+          bezig(fk, "Factuur maken…");
+          factuurFunctie({ opdracht: "webwinkel", bestelling: h.id })
+            .then(function (r) {
+              return laadAlles().then(function () {
+                toonHedonist();
+                melding(veld("hedonistmelding"), "Factuur " + (r.nummer || "") + " staat klaar in e-Boekhouden. Hij is niet gemaild.", "goed");
+              });
+            })
+            .catch(function (err) { bezig(fk); melding(plek, foutTekst(err), "fout"); });
+        });
+        vak.appendChild(fk);
+      }
       d.appendChild(vak);
       doel.appendChild(d);
     });
@@ -1158,7 +1194,8 @@
     }
     var lijst = veld("droplijst");
     lijst.textContent = "";
-    data.drops.forEach(function (d) {
+    var zichtbaar = data.drops.filter(function (d) { return !d.verwijderd; });
+    zichtbaar.forEach(function (d) {
       var t = dropTelling(d), st = dropStatus(d, t);
       var rij = el("div", "beheer__droprij");
       var c1 = el("div", "beheer__cel");
@@ -1182,11 +1219,17 @@
       wijzig.type = "button";
       wijzig.addEventListener("click", function () { openDrop(d); });
       knoppen.appendChild(kopieer); knoppen.appendChild(bekijk); knoppen.appendChild(wijzig);
-      if (!t.bestellingen) {
+      // Verwijderen kan altijd; is er al op besteld, dan blijft de drop bewaard voor de bestellingen (supabase/023)
+      {
         var weg = el("button", "knop knop--secundair", "Verwijderen");
         weg.type = "button";
         weg.addEventListener("click", function () {
-          if (weg.dataset.zeker !== "ja") { weg.dataset.zeker = "ja"; weg.textContent = "Echt verwijderen?"; return; }
+          if (weg.dataset.zeker !== "ja") {
+            weg.dataset.zeker = "ja";
+            weg.textContent = "Echt verwijderen?";
+            if (t.bestellingen) melding(plek, "Op deze drop is besteld. Na verwijderen is hij niet meer te bestellen; de bestellingen blijven bewaard onder Webwinkel.");
+            return;
+          }
           bezig(weg, "Bezig…");
           db.rpc("beheer_drop_verwijderen", { drop_id: d.id })
             .then(function (r) { if (r.error) throw r.error; return laadAlles(); })
@@ -1198,7 +1241,7 @@
       rij.appendChild(c1); rij.appendChild(c2); rij.appendChild(knoppen);
       lijst.appendChild(rij);
     });
-    veld("dropleeg").hidden = data.drops.length > 0;
+    veld("dropleeg").hidden = zichtbaar.length > 0;
 
     // De wijnen om uit te kiezen: alle wijnen uit de prijslijst
     var keuze = dropForm.product_id;

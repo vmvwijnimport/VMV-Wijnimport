@@ -197,6 +197,13 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
           </div>
         </div>
         <label class="akkoord"><input type="checkbox" name="verwerken"> Factuur meteen verwerken in de boekhouding (zoals wanneer je hem in e-Boekhouden zelf maakt)</label>
+        <h3 class="beheer__tussenkop">Webwinkel</h3>
+        <p class="beheer__klein beheer__webwinkeluitleg">Na een betaalde bestelling uit de webwinkel zetten we automatisch de factuur klaar in e-Boekhouden (niet gemaild). Kies hier de producten voor de glazen en de bezorgkosten. Wijn uit een drop gebruikt de koppeling van die wijn in de lijst hieronder.</p>
+        <div class="beheer__velden">
+          <div class="veld"><label for="kp-breed">HEDONIST Glas</label><select id="kp-breed" name="eb_glas_breed" data-webwinkel></select></div>
+          <div class="veld"><label for="kp-white">HEDONIST Glas "White"</label><select id="kp-white" name="eb_glas_white" data-webwinkel></select></div>
+          <div class="veld"><label for="kp-bezorg">Verzend- en bezorgkosten</label><select id="kp-bezorg" name="eb_bezorgkosten" data-webwinkel></select></div>
+        </div>
         <div class="beheer__wijnbalk">
           <button class="knop knop--secundair" type="button" data-actie="voorstel">Voorstel op naam</button>
         </div>
@@ -219,7 +226,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
         <button type="button" data-hfilter="geleverd" aria-pressed="false">Geleverd</button>
         <button type="button" data-hfilter="" aria-pressed="false">Alle</button>
       </div>
-      <p class="beheer__klein beheer__lijstuitleg">Betaalde bestellingen van particulieren: Hedonist-glazen en wijn uit een drop. Klik op een bestelling voor de gegevens. Facturen maak je zoals altijd in e-Boekhouden.</p>
+      <p class="beheer__klein beheer__lijstuitleg">Betaalde bestellingen van particulieren: Hedonist-glazen en wijn uit een drop. Klik op een bestelling voor de gegevens. Na de betaling zetten we de factuur vanzelf klaar in e-Boekhouden; hij wordt niet gemaild, dat doe je zelf vanuit e-Boekhouden.</p>
       <p class="formulier__status" data-veld="hedonistmelding" role="status" aria-live="polite"></p>
       <div class="beheer__hedonist" data-veld="hedonistlijst"></div>
       <p class="beheer__leeg" data-veld="hedonistleeg" hidden></p>
