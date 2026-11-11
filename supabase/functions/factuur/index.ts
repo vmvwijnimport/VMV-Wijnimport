@@ -13,6 +13,7 @@
 //                     particuliere prijs (incl. btw). Ook hier eerst een voorbeeld en pas na een klik de factuur.
 // 7. "webwinkel":      na een betaalde webwinkelbestelling (glazen en/of drops) automatisch de factuur
 //                     maken, aangevraagd door de betaal-Worker (met de koppelsleutel) of opnieuw vanuit de backoffice.
+// 8. "cijfers":        de omzet van dit jaar en deze maand en de openstaande facturen, voor het startscherm.
 // Factuurregels verwijzen naar het product in e-Boekhouden (productId), zodat de voorraad daar meeloopt.
 // Bedragen komen uit de bestelling zoals VMV hem heeft bevestigd (prijs per stuk na korting).
 //
@@ -637,6 +638,28 @@ const webwinkel = async (db, vraag, opdracht) => {
   return { nummer: factuur.invoiceNumber || "", id: factuur.id };
 };
 
+// ---------- 8. Cijfers voor het startscherm van de backoffice ----------
+// Omzet = het totaal excl. btw van de facturen in e-Boekhouden (creditfacturen tellen negatief mee),
+// en wat er nog openstaat bij debiteuren (incl. btw).
+export const omzet = (facturen, nu) => {
+  const jaar = nu.slice(0, 4), maand = nu.slice(0, 7), vorig = String(Number(jaar) - 1), vorigTot = vorig + nu.slice(4);
+  let j = 0, m = 0, v = 0, n = 0;
+  for (const f of facturen) {
+    const d = String(f.date || "").slice(0, 10), ex = centen(f.totalExcl || 0);
+    if (d.startsWith(jaar)) { j += ex; n++; if (d.startsWith(maand)) m += ex; }
+    else if (d.startsWith(vorig) && d <= vorigTot) v += ex;
+  }
+  return { jaar: j / 100, maand: m / 100, vorigJaar: v / 100, facturen: n };
+};
+const cijfers = async (vraag) => {
+  const [facturen, open] = await Promise.all([alles(vraag, "/v1/invoice"), alles(vraag, "/v1/mutation/invoice/outstanding?credDeb=D")]);
+  const openstaand = open.filter((x) => Number(x.outstandingAmount) > 0);
+  return {
+    ...omzet(facturen, vandaag()),
+    openstaand: { aantal: openstaand.length, bedrag: openstaand.reduce((s, x) => s + centen(x.outstandingAmount), 0) / 100 }
+  };
+};
+
 // De betaal-Worker bewijst met de koppelsleutel (supabase/015) dat hij het is
 const isWorker = async (db, sleutel) => {
   if (!sleutel || typeof sleutel !== "string") return false;
@@ -651,7 +674,7 @@ const afhandelen = async (req, db) => {
   // De webwinkelfactuur mag ook de betaal-Worker aanvragen, met de koppelsleutel; al het andere alleen een beheerder
   const worker = soort === "webwinkel" && await isWorker(db, opdracht.sleutel);
   if (!worker && !(await beheerderUit(db, req))) return antwoord({ fout: "Geen toegang. Log opnieuw in op de backoffice." }, 401);
-  if (!["gegevens", "koppelen", "voorbereiden", "maken", "klanten", "los_voorbereiden", "los_maken", "webwinkel"].includes(soort)) return antwoord({ fout: "Onbekende opdracht." }, 400);
+  if (!["gegevens", "koppelen", "voorbereiden", "maken", "klanten", "los_voorbereiden", "los_maken", "webwinkel", "cijfers"].includes(soort)) return antwoord({ fout: "Onbekende opdracht." }, 400);
   if (soort === "webwinkel" && !Number.isInteger(opdracht.bestelling) && !opdracht.bestelnummer) return antwoord({ fout: "Onbekende bestelling." }, 400);
   if ((soort === "voorbereiden" || soort === "maken") && !Number.isInteger(opdracht.bestelling)) return antwoord({ fout: "Onbekende bestelling." }, 400);
   let vraag = null;
@@ -664,6 +687,7 @@ const afhandelen = async (req, db) => {
     if (soort === "los_voorbereiden") return antwoord((await losOpbouwen(db, vraag, opdracht)).voorbeeld);
     if (soort === "los_maken") return antwoord(await losMaken(db, vraag, opdracht));
     if (soort === "webwinkel") return antwoord(await webwinkel(db, vraag, opdracht));
+    if (soort === "cijfers") return antwoord(await cijfers(vraag));
     return antwoord(await maken(db, vraag, opdracht));
   } catch (e) {
     if (e instanceof Melding) return antwoord({ fout: e.message }, e.status);

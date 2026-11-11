@@ -31,8 +31,8 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
     <h2>Inloggen</h2>
     <p>Alleen voor VMV. Log in met je beheerdersaccount.</p>
     <div class="veld">
-      <label for="bi-email">E-mailadres</label>
-      <input id="bi-email" name="email" type="email" autocomplete="email" required aria-describedby="bi-email-fout">
+      <label for="bi-email">Gebruikersnaam of e-mailadres</label>
+      <input id="bi-email" name="email" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required aria-describedby="bi-email-fout">
       <p class="veld__fout" id="bi-email-fout" hidden></p>
     </div>
     <div class="veld">
@@ -74,9 +74,10 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
   {%- comment -%} Ingelogd: een eigen werkplek met een zwarte zijbalk; de kop en footer van de site staan uit (body_class) {%- endcomment -%}
   <div class="beheer__werkplek" data-toestand="backoffice" hidden>
     <aside class="beheer__zij">
-      <a class="beheer__logo" href="#bestellingen"><img src="{{ '/brand/logo/svg/vmv-logo-wit.svg' | relative_url }}" alt="VMV Wijnimport, naar de bestellingen" width="602" height="573"></a>
+      <a class="beheer__logo" href="#start"><img src="{{ '/brand/logo/svg/vmv-logo-wit.svg' | relative_url }}" alt="VMV Wijnimport, naar het startscherm" width="602" height="573"></a>
       <p class="beheer__wie">Backoffice <strong data-veld="naam"></strong></p>
       <nav class="beheer__nav" aria-label="Backoffice">
+        <a href="#start" data-tab="start">Start</a>
         <p class="beheer__groep">Bestellingen</p>
         <a href="#bestellingen" data-tab="bestellingen">Horeca <span data-teller="bestellingen"></span></a>
         <a href="#hedonist" data-tab="hedonist">Webwinkel <span data-teller="hedonist"></span></a>
@@ -106,6 +107,31 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
       </div>
       <p class="beheer__samenvatting" data-veld="samenvatting"></p>
     </header>
+
+    {%- comment -%} Startscherm: wat er te doen is, de cijfers uit e-Boekhouden, de drops en de bezoekers {%- endcomment -%}
+    <div data-scherm="start" hidden>
+      <section class="start__cijfers" aria-labelledby="start-cijfers-kop">
+        <h2 class="start__kop" id="start-cijfers-kop">Cijfers <span class="start__bron">uit e-Boekhouden; omzet is wat je hebt gefactureerd, excl. btw</span></h2>
+        <p class="beheer__klein" data-veld="startcijfermelding">Cijfers ophalen uit e-Boekhouden…</p>
+        <dl class="start__rij" data-veld="startcijfers" hidden>
+          <div><dt>Omzet dit jaar</dt><dd data-cijfer="jaar"></dd><p class="start__onder" data-cijfer="vergelijk"></p></div>
+          <div><dt>Omzet deze maand</dt><dd data-cijfer="maand"></dd><p class="start__onder" data-cijfer="facturen"></p></div>
+          <div><dt>Openstaande facturen</dt><dd data-cijfer="open"></dd><p class="start__onder" data-cijfer="openaantal"></p></div>
+        </dl>
+      </section>
+      <div class="start__raster">
+        <section aria-labelledby="start-tedoen-kop">
+          <h2 class="start__kop" id="start-tedoen-kop">Te doen</h2>
+          <ul class="start__lijst" data-veld="starttedoen"></ul>
+        </section>
+        <section aria-labelledby="start-drops-kop">
+          <h2 class="start__kop" id="start-drops-kop">Drops</h2>
+          <ul class="start__lijst" data-veld="startdrops"></ul>
+          <h2 class="start__kop start__kop--later" id="start-bezoek-kop">Bezoekers <span class="start__bron">afgelopen 7 dagen</span></h2>
+          <p class="start__bezoek" data-veld="startbezoek">…</p>
+        </section>
+      </div>
+    </div>
 
     {%- comment -%} Lijst met bestellingen {%- endcomment -%}
     <div data-scherm="bestellingen" hidden>

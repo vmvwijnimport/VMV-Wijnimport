@@ -1451,3 +1451,30 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   .beheer__werkplek { display: block; }
   .beheer__hoofd { padding: 0; }
 }
+
+/* Backoffice: startscherm */
+.start__kop { margin: 0 0 var(--s-2); font-size: var(--fs-ui); font-weight: 500; color: var(--zwart); }
+.start__kop--later { margin-top: var(--s-6); }
+.start__bron { margin-left: var(--s-1); font-size: var(--fs-klein); font-weight: 400; color: var(--tekst-zacht); }
+.start__cijfers { margin-bottom: var(--s-8); }
+.start__rij { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; border-top: 1px solid var(--zwart); }
+.start__rij > div { padding: var(--s-3) var(--s-3) var(--s-3) 0; }
+.start__rij > div + div { padding-left: var(--s-3); border-left: 1px solid var(--lijn); }
+.start__rij dt { font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.start__rij dd { margin: 4px 0 0; font-size: var(--fs-h1); font-weight: 300; line-height: 1.1; color: var(--zwart); font-variant-numeric: tabular-nums; }
+.start__onder { margin: var(--s-1) 0 0; font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.start__raster { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-8); align-items: start; }
+.start__lijst { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--zwart); }
+.start__lijst li { padding: 14px 0; border-bottom: 1px solid var(--lijn); }
+.start__lijst a { font-size: var(--fs-ui); color: var(--zwart); text-decoration: none; }
+.start__lijst a:hover { color: var(--rood); text-decoration: underline; text-underline-offset: 3px; }
+.start__lijst small { display: block; margin-top: 2px; font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.start__leeg { color: var(--tekst-zacht); }
+.start__balk { display: block; height: 4px; margin-top: var(--s-1); background: var(--lijn); }
+.start__balk span { display: block; height: 100%; background: var(--champagne-rand); }
+.start__bezoek { margin: 0; padding-top: 14px; border-top: 1px solid var(--zwart); font-size: var(--fs-ui); color: var(--zwart); }
+@media (max-width: 48rem) {
+  .start__rij { grid-template-columns: 1fr; }
+  .start__rij > div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--lijn); }
+  .start__raster { grid-template-columns: 1fr; gap: var(--s-6); }
+}

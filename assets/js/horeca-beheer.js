@@ -49,7 +49,7 @@
   };
   var vertaal = function (e) {
     var m = (e && e.message) || "";
-    if (/invalid login credentials/i.test(m)) return "Je e-mailadres of wachtwoord klopt niet.";
+    if (/invalid login credentials/i.test(m)) return "Je gebruikersnaam of wachtwoord klopt niet.";
     if (/rate limit|too many/i.test(m)) return "Te veel pogingen. Probeer het over een paar minuten opnieuw.";
     if (/geen toegang/i.test(m)) return "Dit account heeft geen toegang tot de backoffice.";
     // Meldingen uit de database (supabase/008) zijn al in gewoon Nederlands
@@ -113,13 +113,21 @@
   };
   inlog.addEventListener("submit", function (e) {
     e.preventDefault();
-    var goed = controleer(inlog.email, "Vul je e-mailadres in") & controleer(inlog.wachtwoord, "Vul je wachtwoord in");
+    var goed = controleer(inlog.email, "Vul je gebruikersnaam of e-mailadres in") & controleer(inlog.wachtwoord, "Vul je wachtwoord in");
     if (!goed) { inlog.querySelector("[aria-invalid=true]").focus(); return; }
     var knop = inlog.querySelector("button[type=submit]");
     var status = inlog.querySelector(".formulier__status");
     melding(status);
     knop.disabled = true; knop.textContent = "Inloggen…";
-    db.auth.signInWithPassword({ email: inlog.email.value.trim(), password: inlog.wachtwoord.value })
+    // Een gebruikersnaam (zonder @): eerst het e-mailadres van die beheerder opzoeken (supabase/025)
+    var naam = inlog.email.value.trim();
+    var adres = naam.indexOf("@") >= 0 ? Promise.resolve(naam)
+      : db.rpc("beheer_inlogadres", { gebruikersnaam: naam }).then(function (r) {
+          if (r.error || !r.data) throw new Error("Invalid login credentials");
+          return r.data;
+        });
+    adres
+      .then(function (email) { return db.auth.signInWithPassword({ email: email, password: inlog.wachtwoord.value }); })
       .then(function (r) { if (r.error) throw r.error; inlog.reset(); return start(); })
       .catch(function (err) { melding(status, vertaal(err), "fout"); })
       .finally(function () { knop.disabled = false; knop.textContent = "Inloggen"; });
@@ -134,12 +142,12 @@
   var startModus = null;
   var route = function () {
     melding(veld("lijstmelding"));
-    var h = location.hash.slice(1) || "bestellingen";
+    var h = location.hash.slice(1) || "start";
     var m = /^(bestelling|klant|wijn|lijst)-(.+)$/.exec(h);
     // #prijslijst (en het oude #wijnen) is het overzicht van de wijnen met hun prijzen
-    var scherm = m ? m[1] : h === "prijslijst" || h === "wijnen" ? "wijnen" : (["klanten", "overzicht", "bezoekers", "factuur", "hedonist", "drops", "nieuwsmail", "koppelen"].indexOf(h) >= 0 ? h : "bestellingen");
+    var scherm = m ? m[1] : h === "prijslijst" || h === "wijnen" ? "wijnen" : (["start", "klanten", "overzicht", "bezoekers", "factuur", "hedonist", "drops", "nieuwsmail", "koppelen"].indexOf(h) >= 0 ? h : "bestellingen");
     schermen.forEach(function (s) { s.hidden = s.dataset.scherm !== scherm; });
-    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : ["wijn", "wijnen", "lijst", "koppelen"].indexOf(scherm) >= 0 ? "prijslijst" : ["overzicht", "bezoekers", "factuur", "hedonist", "drops", "nieuwsmail"].indexOf(scherm) >= 0 ? scherm : "bestellingen";
+    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : ["wijn", "wijnen", "lijst", "koppelen"].indexOf(scherm) >= 0 ? "prijslijst" : ["start", "overzicht", "bezoekers", "factuur", "hedonist", "drops", "nieuwsmail"].indexOf(scherm) >= 0 ? scherm : "bestellingen";
     // Bij afdrukken alleen de prijslijst (zie stijl.css, @media print)
     document.body.classList.toggle("drukt-prijslijst", scherm === "lijst");
     pagina.querySelectorAll("[data-tab]").forEach(function (a) {
@@ -148,8 +156,12 @@
         veld("schermkop").textContent = a.firstChild.textContent.trim();
       } else a.removeAttribute("aria-current");
     });
-    var uur = new Date().getHours();
-    veld("groet").textContent = (uur < 12 ? "Goedemorgen" : uur < 18 ? "Goedemiddag" : "Goedenavond") + (veld("naam").textContent ? " " + veld("naam").textContent : "");
+    var uur = new Date().getHours(), wie = veld("naam").textContent;
+    veld("groet").textContent = scherm === "start"
+      ? new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" })
+      : (uur < 12 ? "Goedemorgen" : uur < 18 ? "Goedemiddag" : "Goedenavond") + (wie ? " " + wie : "");
+    if (scherm === "start") veld("schermkop").textContent = "Welkom" + (wie ? " " + wie : "");
+    veld("samenvatting").hidden = scherm === "start";
     if (scherm === "bestellingen" || scherm === "klanten") toonLijst(scherm);
     if (scherm === "bestelling") toonBestelling(Number(m[2]));
     if (scherm === "klant") toonKlant(m[2]);
@@ -160,6 +172,7 @@
     if (scherm === "factuur") toonLosFactuur();
     if (scherm === "hedonist") toonHedonist();
     if (scherm === "drops") toonDrops();
+    if (scherm === "start") toonStart();
     if (scherm === "nieuwsmail") toonNieuws();
     if (scherm === "koppelen") toonKoppelen();
     if (scherm === "lijst") { lijstsoort = m[2] === "particulier" ? "particulier" : "horeca"; toonPrijslijst(); }
@@ -1396,6 +1409,76 @@
       .then(function () { bezig(knop); toonDrops(); melding(kostenForm.querySelector(".formulier__status"), "De bezorgkosten zijn opgeslagen.", "goed"); })
       .catch(function (err) { bezig(knop); melding(status, vertaal(err), "fout"); });
   });
+
+  // ---------- Startscherm ----------
+  // Te doen en drops uit de gegevens die al geladen zijn; de omzet uit e-Boekhouden (functie factuur,
+  // opdracht "cijfers") en de bezoekers (supabase/021) worden apart opgehaald.
+  var startLink = function (tekst, adres, klein) {
+    var li = el("li");
+    var a = el("a", null, tekst);
+    a.href = adres;
+    li.appendChild(a);
+    if (klein) li.appendChild(el("small", null, klein));
+    return li;
+  };
+  var heel = function (n) { return "€" + Math.round(Number(n)).toLocaleString("nl-NL"); };
+  var toonStart = function () {
+    var nieuw = data.bestellingen.filter(function (b) { return b.status === "ontvangen"; }).length;
+    var voorstel = data.bestellingen.filter(function (b) { return b.status === "voorstel"; }).length;
+    var lever = data.bestellingen.filter(function (b) { return b.status === "bevestigd"; }).length;
+    var webwinkel = data.hedonist.filter(function (h) { return h.status === "te_leveren"; }).length;
+    var aanvragen = data.klanten.filter(function (k) { return k.status === "in_afwachting"; }).length;
+    var zonderFactuur = data.hedonist.filter(function (h) { return "eb_factuur_id" in h && !h.eb_factuur_id && h.eb_factuur_fout; }).length;
+    var lijst = veld("starttedoen");
+    lijst.textContent = "";
+    if (nieuw) lijst.appendChild(startLink(nieuw + (nieuw === 1 ? " nieuwe horecabestelling" : " nieuwe horecabestellingen"), "#bestellingen", "Bevestigen, aanpassen of afkeuren"));
+    if (aanvragen) lijst.appendChild(startLink(aanvragen + (aanvragen === 1 ? " aanvraag" : " aanvragen") + " van een horecazaak", "#klanten", "Goedkeuren of afwijzen"));
+    if (webwinkel) lijst.appendChild(startLink(webwinkel + (webwinkel === 1 ? " bestelling" : " bestellingen") + " uit de webwinkel te leveren", "#hedonist", "Glazen en drops"));
+    if (lever) lijst.appendChild(startLink(lever + (lever === 1 ? " horecabestelling" : " horecabestellingen") + " te bezorgen", "#bestellingen", "Bevestigd, nog niet geleverd"));
+    if (voorstel) lijst.appendChild(startLink(voorstel + (voorstel === 1 ? " voorstel wacht" : " voorstellen wachten") + " op de klant", "#bestellingen"));
+    if (zonderFactuur) lijst.appendChild(startLink(zonderFactuur + (zonderFactuur === 1 ? " factuur" : " facturen") + " uit de webwinkel niet gelukt", "#hedonist", "Bekijk de reden en maak hem opnieuw"));
+    if (!lijst.children.length) lijst.appendChild(el("li", "start__leeg", "Er wacht niets op je."));
+
+    var drops = veld("startdrops");
+    drops.textContent = "";
+    var lopend = data.drops.filter(function (d) { return !d.verwijderd && !d.gestopt && !(d.open_tot && new Date(d.open_tot) < new Date()); });
+    lopend.slice(0, 4).forEach(function (d) {
+      var t = dropTelling(d);
+      var li = startLink(dropNaam(d), "#drops", "Verkocht " + t.verkocht + " van " + d.aantal + (new Date(d.open_vanaf) > new Date() ? ", opent " + moment(d.open_vanaf) : ""));
+      var balk = el("span", "start__balk");
+      var vul = el("span");
+      vul.style.width = Math.min(100, d.aantal ? Math.round(t.verkocht / d.aantal * 100) : 0) + "%";
+      balk.appendChild(vul);
+      li.appendChild(balk);
+      drops.appendChild(li);
+    });
+    if (!lopend.length) drops.appendChild(startLink("Geen drop open", "#drops", "Maak een nieuwe drop"));
+
+    // Bezoekers: de afgelopen 7 dagen
+    var tot = new Date(), van = new Date(Date.now() - 6 * 864e5);
+    db.rpc("beheer_bezoekers", { van: isoDatum(van), tot: isoDatum(tot), per: "dag" })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        veld("startbezoek").textContent = telling(r.data.bezoeken) + (r.data.bezoeken === 1 ? " bezoek" : " bezoeken") + ", " + telling(r.data.weergaven) + " bekeken pagina's";
+      })
+      .catch(function () { veld("startbezoek").textContent = "Nu niet beschikbaar."; });
+
+    // Omzet uit e-Boekhouden
+    var cijferMelding = veld("startcijfermelding");
+    factuurFunctie({ opdracht: "cijfers" })
+      .then(function (c) {
+        var dl = veld("startcijfers");
+        dl.querySelector("[data-cijfer=jaar]").textContent = heel(c.jaar);
+        dl.querySelector("[data-cijfer=maand]").textContent = heel(c.maand);
+        dl.querySelector("[data-cijfer=open]").textContent = heel(c.openstaand.bedrag);
+        dl.querySelector("[data-cijfer=vergelijk]").textContent = c.vorigJaar ? "Vorig jaar tot vandaag: " + heel(c.vorigJaar) : "";
+        dl.querySelector("[data-cijfer=facturen]").textContent = c.facturen + (c.facturen === 1 ? " factuur" : " facturen") + " dit jaar";
+        dl.querySelector("[data-cijfer=openaantal]").textContent = c.openstaand.aantal + (c.openstaand.aantal === 1 ? " factuur" : " facturen") + ", incl. btw";
+        cijferMelding.hidden = true;
+        dl.hidden = false;
+      })
+      .catch(function (err) { cijferMelding.textContent = "De cijfers uit e-Boekhouden zijn nu niet beschikbaar. " + foutTekst(err); });
+  };
 
   // ---------- Nieuwsmail ----------
   // Opstellen, voorbeeld en proef gaan via de functie bestelmail, die controleert of je beheerder bent
