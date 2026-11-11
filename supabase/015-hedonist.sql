@@ -78,7 +78,7 @@ begin
   update public.hedonist_bestellingen h
   set status = beheer_hedonist.status,
       geleverd_op = case when beheer_hedonist.status = 'geleverd' then now() else null end
-  where h.id = bestelling;
+  where h.id = beheer_hedonist.bestelling;   -- hersteld in 024
   if not found then raise exception 'Deze bestelling bestaat niet (meer)'; end if;
 end $$;
 revoke all on function public.beheer_hedonist(bigint, text) from public, anon;
