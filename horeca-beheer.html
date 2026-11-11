@@ -4,6 +4,7 @@ title: Backoffice
 permalink: /horeca/beheer/
 noindex: true
 sitemap: false
+body_class: beheerpagina
 description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
 ---
 {%- comment -%}
@@ -18,6 +19,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
          data-logo="{{ '/brand/logo/svg/vmv-logo-horizontaal.svg' | relative_url }}"
          data-logo-png="{{ '/brand/logo/png/vmv-logo-horizontaal-1024.png' | relative_url }}">
   <header class="pagina__kop">
+    <img class="beheer__inloglogo" src="{{ '/brand/logo/svg/vmv-logo.svg' | relative_url }}" alt="VMV Wijnimport" width="160">
     <h1>Backoffice</h1>
   </header>
 
@@ -69,24 +71,41 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
     <p class="formulier__status" role="status" aria-live="polite"></p>
   </form>
 
-  {%- comment -%} ---------- Ingelogd als beheerder ---------- {%- endcomment -%}
-  <div data-toestand="backoffice" hidden>
-    <div class="horeca__balk">
-      <p>Ingelogd als <strong data-veld="naam"></strong></p>
-      <button class="knop knop--secundair" type="button" data-actie="uitloggen">Uitloggen</button>
-    </div>
+  {%- comment -%} Ingelogd: een eigen werkplek met een zwarte zijbalk; de kop en footer van de site staan uit (body_class) {%- endcomment -%}
+  <div class="beheer__werkplek" data-toestand="backoffice" hidden>
+    <aside class="beheer__zij">
+      <a class="beheer__logo" href="#bestellingen"><img src="{{ '/brand/logo/svg/vmv-logo-wit.svg' | relative_url }}" alt="VMV Wijnimport, naar de bestellingen" width="602" height="573"></a>
+      <p class="beheer__wie">Backoffice <strong data-veld="naam"></strong></p>
+      <nav class="beheer__nav" aria-label="Backoffice">
+        <p class="beheer__groep">Bestellingen</p>
+        <a href="#bestellingen" data-tab="bestellingen">Horeca <span data-teller="bestellingen"></span></a>
+        <a href="#hedonist" data-tab="hedonist">Webwinkel <span data-teller="hedonist"></span></a>
+        <p class="beheer__groep">Aanbod</p>
+        <a href="#prijslijst" data-tab="prijslijst">Prijslijst</a>
+        <a href="#drops" data-tab="drops">Drops</a>
+        <p class="beheer__groep">Klanten</p>
+        <a href="#klanten" data-tab="klanten">Horecaklanten <span data-teller="klanten"></span></a>
+        <a href="#nieuwsmail" data-tab="nieuwsmail">Nieuwsmail</a>
+        <p class="beheer__groep">Facturen</p>
+        <a href="#factuur" data-tab="factuur">Losse factuur</a>
+        <p class="beheer__groep">Inzicht</p>
+        <a href="#overzicht" data-tab="overzicht">Overzicht</a>
+        <a href="#bezoekers" data-tab="bezoekers">Bezoekers</a>
+      </nav>
+      <div class="beheer__zijvoet">
+        <a href="{{ '/' | relative_url }}" target="_blank" rel="noopener">Naar de website</a>
+        <button type="button" data-actie="uitloggen">Uitloggen</button>
+      </div>
+    </aside>
 
-    <nav class="tabbladen" aria-label="Backoffice">
-      <a href="#bestellingen" data-tab="bestellingen">Bestellingen <span data-teller="bestellingen"></span></a>
-      <a href="#klanten" data-tab="klanten">Klanten <span data-teller="klanten"></span></a>
-      <a href="#prijslijst" data-tab="prijslijst">Prijslijst</a>
-      <a href="#hedonist" data-tab="hedonist">Webwinkel <span data-teller="hedonist"></span></a>
-      <a href="#drops" data-tab="drops">Drops</a>
-      <a href="#overzicht" data-tab="overzicht">Overzicht</a>
-      <a href="#bezoekers" data-tab="bezoekers">Bezoekers</a>
-      <a href="#factuur" data-tab="factuur">Losse factuur</a>
-      <a href="#nieuwsmail" data-tab="nieuwsmail">Nieuwsmail</a>
-    </nav>
+    <div class="beheer__hoofd">
+    <header class="beheer__balk">
+      <div>
+        <p class="beheer__groet" data-veld="groet"></p>
+        <h1 class="beheer__schermkop" data-veld="schermkop">Backoffice</h1>
+      </div>
+      <p class="beheer__samenvatting" data-veld="samenvatting"></p>
+    </header>
 
     {%- comment -%} Lijst met bestellingen {%- endcomment -%}
     <div data-scherm="bestellingen" hidden>
@@ -704,6 +723,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
           <ul class="beheer__mini" data-veld="klantbestellingen"></ul>
         </aside>
       </div>
+    </div>
     </div>
   </div>
 </section>

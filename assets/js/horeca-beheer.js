@@ -11,7 +11,11 @@
   if (!pagina) return;
 
   var toestanden = pagina.querySelectorAll("[data-toestand]");
-  var toon = function (naam) { toestanden.forEach(function (t) { t.hidden = t.dataset.toestand !== naam; }); };
+  var toon = function (naam) {
+    toestanden.forEach(function (t) { t.hidden = t.dataset.toestand !== naam; });
+    // Ingelogd: de werkplek met de zijbalk over de hele breedte (stijl.css, .beheer--binnen)
+    pagina.classList.toggle("beheer--binnen", naam === "backoffice");
+  };
   var fout = function (tekst) { toon("fout"); pagina.querySelector("[data-toestand=fout]").textContent = tekst; };
   if (!window.supabase || !pagina.dataset.url || !pagina.dataset.sleutel) {
     fout("De backoffice is nu niet bereikbaar. Probeer het later opnieuw.");
@@ -139,8 +143,13 @@
     // Bij afdrukken alleen de prijslijst (zie stijl.css, @media print)
     document.body.classList.toggle("drukt-prijslijst", scherm === "lijst");
     pagina.querySelectorAll("[data-tab]").forEach(function (a) {
-      if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+      if (a.dataset.tab === tab) {
+        a.setAttribute("aria-current", "page");
+        veld("schermkop").textContent = a.firstChild.textContent.trim();
+      } else a.removeAttribute("aria-current");
     });
+    var uur = new Date().getHours();
+    veld("groet").textContent = (uur < 12 ? "Goedemorgen" : uur < 18 ? "Goedemiddag" : "Goedenavond") + (veld("naam").textContent ? " " + veld("naam").textContent : "");
     if (scherm === "bestellingen" || scherm === "klanten") toonLijst(scherm);
     if (scherm === "bestelling") toonBestelling(Number(m[2]));
     if (scherm === "klant") toonKlant(m[2]);
@@ -160,10 +169,16 @@
   var tellers = function () {
     var nieuw = data.bestellingen.filter(function (b) { return b.status === "ontvangen"; }).length;
     var aanvragen = data.klanten.filter(function (k) { return k.status === "in_afwachting"; }).length;
-    pagina.querySelector("[data-teller=bestellingen]").textContent = nieuw ? "(" + nieuw + " nieuw)" : "";
-    pagina.querySelector("[data-teller=klanten]").textContent = aanvragen ? "(" + aanvragen + (aanvragen === 1 ? " aanvraag)" : " aanvragen)") : "";
+    // In de zijbalk alleen het getal; bovenaan in woorden wat er te doen is
+    pagina.querySelector("[data-teller=bestellingen]").textContent = nieuw || "";
+    pagina.querySelector("[data-teller=klanten]").textContent = aanvragen || "";
     var teLeveren = data.hedonist.filter(function (h) { return h.status === "te_leveren"; }).length;
-    pagina.querySelector("[data-teller=hedonist]").textContent = teLeveren ? "(" + teLeveren + " te leveren)" : "";
+    pagina.querySelector("[data-teller=hedonist]").textContent = teLeveren || "";
+    var tedoen = [];
+    if (nieuw) tedoen.push(nieuw + (nieuw === 1 ? " nieuwe bestelling" : " nieuwe bestellingen"));
+    if (teLeveren) tedoen.push(teLeveren + " uit de webwinkel te leveren");
+    if (aanvragen) tedoen.push(aanvragen + (aanvragen === 1 ? " aanvraag" : " aanvragen") + " van horeca");
+    veld("samenvatting").textContent = tedoen.length ? "Te doen: " + tedoen.join(", ") : "Er wacht niets op je";
   };
 
   // ---------- Lijsten ----------

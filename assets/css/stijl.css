@@ -1386,3 +1386,68 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .beheer__dropknoppen { grid-column: 1 / -1; }
 .beheer__dropknoppen .knop { padding: 10px 18px; }
 .beheer__dropkosten { margin-top: var(--s-8); }
+
+/* ---------- Backoffice als eigen werkplek: zwarte zijbalk links, zonder de kop en footer van de site ---------- */
+.beheerpagina .kop, .beheerpagina .voet, .beheerpagina .naar-inhoud { display: none; }
+.beheer__inloglogo { display: block; width: 160px; height: auto; margin-bottom: var(--s-6); }
+.beheer--binnen { max-width: none; padding: 0; }
+.beheer--binnen > .pagina__kop { display: none; }
+.beheer__werkplek { display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); min-height: 100vh; }
+
+.beheer__zij {
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  display: flex; flex-direction: column;
+  padding: var(--s-4) var(--s-3) var(--s-3); background: var(--zwart); color: var(--donker-tekst);
+}
+.beheer__logo { display: block; width: 92px; }
+.beheer__logo img { display: block; width: 100%; height: auto; }
+.beheer__logo:focus-visible { outline: 2px solid var(--wit); outline-offset: 4px; }
+.beheer__wie { margin: var(--s-3) 0 var(--s-2); font-size: var(--fs-klein); color: var(--donker-zacht); }
+.beheer__wie strong { display: block; font-weight: 400; color: var(--wit); }
+.beheer__nav { display: flex; flex-direction: column; }
+.beheer__groep { margin: var(--s-3) 0 4px; font-size: var(--fs-klein); color: var(--donker-zacht); }
+.beheer__nav a {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-1);
+  margin: 0 calc(var(--s-3) * -1); padding: 8px var(--s-3);
+  border-left: 3px solid transparent;
+  font-size: var(--fs-ui); font-weight: 400; color: var(--donker-tekst); text-decoration: none;
+}
+.beheer__nav a:hover { background: var(--donker-lijn); color: var(--wit); }
+.beheer__nav a[aria-current="page"] { background: var(--donker-lijn); border-left-color: var(--champagne); color: var(--wit); }
+.beheer__nav a:focus-visible { outline: 2px solid var(--wit); outline-offset: -2px; }
+.beheer__nav span { min-width: 24px; padding: 1px 7px; background: var(--champagne); color: var(--zwart); font-size: var(--fs-klein); text-align: center; }
+.beheer__nav span:empty { display: none; }
+.beheer__zijvoet { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin-top: auto; padding-top: var(--s-3); border-top: 1px solid var(--donker-lijn); }
+.beheer__zijvoet a, .beheer__zijvoet button {
+  padding: 6px 0; border: 0; background: none; cursor: pointer;
+  font: inherit; font-size: var(--fs-klein); color: var(--donker-tekst); text-decoration: none;
+}
+.beheer__zijvoet a:hover, .beheer__zijvoet button:hover { color: var(--wit); text-decoration: underline; text-underline-offset: 3px; }
+
+.beheer__hoofd { min-width: 0; padding: var(--s-6) clamp(var(--s-3), 4vw, var(--s-8)) var(--s-12); }
+.beheer__balk {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--s-1) var(--s-4);
+  margin-bottom: var(--s-4); padding-bottom: var(--s-3); border-bottom: 1px solid var(--zwart);
+}
+.beheer__groet { margin: 0 0 var(--s-1); font-size: var(--fs-klein); color: var(--tekst-zacht); }
+.beheer__schermkop { font-size: var(--fs-h1); }
+.beheer__schermkop:focus { outline: none; }
+.beheer__samenvatting { margin: 0; max-width: 28rem; font-size: var(--fs-klein); color: var(--tekst); text-align: right; }
+
+@media (max-width: 56rem) {
+  .beheer__werkplek { grid-template-columns: 1fr; }
+  .beheer__zij { position: sticky; z-index: 20; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--s-1) var(--s-2); padding: 12px var(--rand); }
+  .beheer__logo { width: 48px; }
+  .beheer__wie, .beheer__groep { display: none; }
+  .beheer__nav { order: 3; flex-direction: row; flex-basis: 100%; overflow-x: auto; margin: 0 calc(var(--rand) * -1); padding: 0 var(--rand); scrollbar-width: none; }
+  .beheer__nav a { flex: none; margin: 0; padding: 10px 12px; border-left: 0; border-bottom: 3px solid transparent; font-size: var(--fs-klein); }
+  .beheer__nav a[aria-current="page"] { border-bottom-color: var(--champagne); }
+  .beheer__zijvoet { flex-direction: row; gap: var(--s-2); margin: 0 0 0 auto; padding: 0; border: 0; }
+  .beheer__hoofd { padding-top: var(--s-4); }
+  .beheer__samenvatting { text-align: left; }
+}
+@media print {
+  .beheer__zij, .beheer__balk { display: none !important; }
+  .beheer__werkplek { display: block; }
+  .beheer__hoofd { padding: 0; }
+}

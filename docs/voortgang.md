@@ -127,6 +127,8 @@ De livegang voorbereiden met de eigenaar: Resend, Confirm email aan, FormSubmit 
 
 - **Herstel "Op geleverd zetten" onder Webwinkel (11 nov), gemeld door de eigenaar:** gaf "Er ging iets mis". Oorzaak sinds 015: in `beheer_hedonist` was `bestelling` zowel de parameter als een kolom van de tabel. Script `supabase/024-geleverd-herstel.sql`.
 
+- **Backoffice met eigen uitstraling (11 nov), wens van de eigenaar** ("nu alle opties zo naast elkaar staan ziet het er wat simpel uit"; gekozen uit drie opzetten: zwarte zijbalk): de backoffice is een eigen werkplek zonder de kop en footer van de site (`body_class: beheerpagina`). Links een zwarte zijbalk met het witte logo, je naam en de onderdelen in groepen (Bestellingen: Horeca, Webwinkel; Aanbod: Prijslijst, Drops; Klanten: Horecaklanten, Nieuwsmail; Facturen: Losse factuur; Inzicht: Overzicht, Bezoekers), aantallen als champagnekleurig vakje, het actieve onderdeel met een champagnestreep; onderaan Naar de website en Uitloggen. Bovenaan elk scherm een groet, de naam van het onderdeel groot, en rechts wat er te doen is. Op de telefoon wordt de zijbalk een zwarte balk bovenaan met de onderdelen naast elkaar (schuiven). Bij inloggen het logo boven het formulier. De schermen zelf zijn niet veranderd.
+
 ## Zo kun je terug
 
 - **Site van vóór het horecaportaal:** de tag `voor-horeca-portaal`.
