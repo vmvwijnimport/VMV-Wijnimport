@@ -536,6 +536,31 @@ export const verdeel = (bedrag, aantal) => {
   return [{ aantal: rest, prijs: (per + 1) / 100 }, { aantal: aantal - rest, prijs: per / 100 }].filter((x) => x.aantal > 0);
 };
 
+// De glasprijzen van de site (_data/winkel.yml): de prijs per glas en voor elke 6 van hetzelfde model
+const glasprijzen = async () => {
+  try {
+    const r = await fetch("https://vmvwijnimport.com/winkel.json");
+    const w = r.ok ? await r.json() : null;
+    return w && w.prijsGlas > 0 && w.prijsZes > 0 ? w : null;
+  } catch (e) { return null; }
+};
+
+// Glazen op de factuur (wens van de eigenaar, 14 nov 2026): alle glazen voor de prijs per glas, en per
+// 6 stuks een regel "Korting 6 stuks" met een min-bedrag. Die kortingsregel heeft geen product, zodat
+// de voorraad in e-Boekhouden niet verandert. Klopt het bedrag niet met de prijzen van nu (de prijzen
+// zijn intussen veranderd), dan zoals eerst: het betaalde bedrag verdeeld over de glazen.
+export const glasDelen = (r, eb, w) => {
+  const zessen = Math.floor(r.aantal / 6);
+  const korting = w ? centen(6 * w.prijsGlas) - centen(w.prijsZes) : 0;
+  if (!w || !zessen || korting <= 0 || centen(r.aantal * w.prijsGlas) - zessen * korting !== centen(r.bedrag)) {
+    return [{ eb, naam: r.naam, delen: verdeel(r.bedrag, r.aantal) }];
+  }
+  return [
+    { eb, naam: r.naam, delen: [{ aantal: r.aantal, prijs: w.prijsGlas }] },
+    { eb, naam: `Korting 6 stuks ${r.naam}`, korting: true, delen: [{ aantal: zessen, prijs: -korting / 100 }] }
+  ];
+};
+
 const webwinkelOpbouwen = async (db, vraag, h) => {
   const problemen = [];
   let regels = h.regels;
@@ -554,6 +579,7 @@ const webwinkelOpbouwen = async (db, vraag, h) => {
   const { data: drops } = dropIds.length
     ? await db.from("drops").select("id, product_id, producten(eb_product_id)").in("id", dropIds)
     : { data: [] };
+  const winkel = regels.some((r) => r.soort === "glas") ? await glasprijzen() : null;
   const lijst = [];
   for (const r of regels) {
     let eb = null;
@@ -565,7 +591,7 @@ const webwinkelOpbouwen = async (db, vraag, h) => {
     } else if (r.soort === "glas") {
       eb = /white/i.test(r.naam) ? inst && inst.eb_glas_white : inst && inst.eb_glas_breed;
       if (!eb) { problemen.push(`Kies onder Prijslijst → Koppelen bij Webwinkel het product voor ${r.naam}.`); continue; }
-      lijst.push({ eb, naam: r.naam, delen: verdeel(r.bedrag, r.aantal) });
+      lijst.push(...glasDelen(r, eb, winkel));
     }
   }
   if (Number(h.verzending) > 0) {
@@ -591,7 +617,7 @@ const webwinkelOpbouwen = async (db, vraag, h) => {
   lijst.forEach((l) => {
     const p = details[l.eb] || {};
     l.delen.forEach((d) => items.push({
-      productId: l.eb, ...(p.code ? { code: schoon(p.code, 50) } : {}),
+      ...(l.korting ? {} : { productId: l.eb, ...(p.code ? { code: schoon(p.code, 50) } : {}) }),
       description: schoon(l.naam, 200), quantity: d.aantal, unitId: p.unitId || stuks,
       pricePerUnit: d.prijs, vatCode: p.vat || "HOOG_VERK_21", ledgerId: p.ledgerId || null
     }));
