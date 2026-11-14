@@ -494,6 +494,42 @@ export const adresDelen = (adres) => {
   return m ? { straat: m[1], postcode: m[2].toUpperCase(), plaats: m[3] } : { straat: String(adres || ""), postcode: "", plaats: "" };
 };
 
+// Is relatie r in e-Boekhouden dezelfde klant als de webwinkelbestelling h (met adres a)?
+// Hetzelfde e-mailadres (ook in een veld met meer adressen, hoofdletters maken niet uit), of dezelfde
+// naam met dezelfde postcode of hetzelfde telefoonnummer. Alleen de naam is niet genoeg.
+const kaal = (v) => String(v ?? "").toLowerCase().replace(/\s+/g, " ").trim();
+const adressen = (v) => kaal(v).split(/[;,\s]+/).filter(Boolean);
+const telnr = (v) => String(v ?? "").replace(/\D/g, "").replace(/^(31|0031)/, "0");
+export const zelfdeKlant = (r, h, a) => {
+  if (!r || r.inactive) return false;
+  const mail = kaal(h.email);
+  if (mail && [...adressen(r.emailAddress), ...adressen(r.emailAddressInvoice)].includes(mail)) return true;
+  if (!kaal(h.naam) || kaal(r.name) !== kaal(h.naam)) return false;
+  const pc = (v) => kaal(v).replace(/\s/g, "");
+  if (pc(a.postcode) && pc(r.postalCode) === pc(a.postcode)) return true;
+  const tel = telnr(h.telefoon);
+  return tel.length >= 9 && [r.phoneNumber, r.mobilePhoneNumber].some((t) => telnr(t) === tel);
+};
+
+// Een bestaande relatie zoeken: eerst op e-mailadres, dan op naam. Geeft het id, of null.
+const bestaandeKlant = async (vraag, h, a) => {
+  const ids = [];
+  const zoek = async (q) => {
+    const j = await vraag("GET", `/v1/relation?limit=10&${q}`);
+    ((j && j.items) || []).forEach((x) => { if (!ids.includes(x.id)) ids.push(x.id); });
+  };
+  const like = (v) => encodeURIComponent(`%${String(v).replace(/[%?]/g, "")}%`);
+  const mail = kaal(h.email);
+  if (mail) await zoek(`email%5Blike%5D=${like(mail)}`);
+  const naam = schoon(h.naam, 100);
+  if (naam) await zoek(`name%5Blike%5D=${like(naam)}`);
+  for (const id of ids.slice(0, 12)) {
+    const r = await vraag("GET", `/v1/relation/${id}`);
+    if (zelfdeKlant(r, h, a)) return r.id;
+  }
+  return null;
+};
+
 // Een bedrag over een aantal stuks verdelen in hele centen: 6 glazen voor 185,00 → 2 × 30,84 en 4 × 30,83
 export const verdeel = (bedrag, aantal) => {
   const c = centen(bedrag), per = Math.floor(c / aantal), rest = c - per * aantal;
@@ -589,17 +625,10 @@ const webwinkel = async (db, vraag, opdracht) => {
     if (o.problemen.length) throw new Melding(o.problemen[0]);
     const { inst } = o;
 
-    // De klant: dezelfde relatie als eerder (op e-mailadres), anders een nieuwe particulier
-    let relatie = null;
-    if (h.email) {
-      const j = await vraag("GET", `/v1/relation?limit=10&email=${encodeURIComponent(h.email)}`);
-      for (const x of (j && j.items) || []) {
-        const r = await vraag("GET", `/v1/relation/${x.id}`);
-        if (r && !r.inactive) { relatie = r.id; break; }
-      }
-    }
+    // De klant: een bestaande relatie (zie bestaandeKlant), anders een nieuwe particulier
+    const a = h.adres === "Ophalen" ? { straat: "", postcode: "", plaats: "" } : adresDelen(h.adres);
+    let relatie = await bestaandeKlant(vraag, h, a);
     if (!relatie) {
-      const a = h.adres === "Ophalen" ? { straat: "", postcode: "", plaats: "" } : adresDelen(h.adres);
       relatie = (await vraag("POST", "/v1/relation", {
         type: "P", name: schoon(h.naam, 100),
         address: schoon(a.straat, 100), postalCode: schoon(a.postcode, 10), city: schoon(a.plaats, 50),
