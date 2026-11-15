@@ -2,6 +2,8 @@
 import json, math, os, sys, unicodedata, re
 D=os.path.dirname(os.path.abspath(__file__)); UIT=sys.argv[1]
 P=json.load(open(D+"/plekken.json")); R=380
+# Zonder stip: als de precieze plek niet bekend is
+ZONDER_STIP=set()
 ROOD="#731515"; WATER="#D9D6A6"
 DIK={"motorway":2.4,"trunk":2.4,"primary":2.0,"secondary":1.8,"tertiary":1.5,"residential":1.0,"unclassified":1.0,"living_street":0.9,"pedestrian":0.8,"service":0.5}
 def slug(s):
@@ -45,5 +47,6 @@ for naam,(la,lo) in P.items():
     for (soort,dik),ls in sorted(straten.items(),key=lambda x:x[0][1]):
         kleur=WATER if soort=="w" else ROOD
         svg.append(f'<path fill="none" stroke="{kleur}" stroke-width="{dik}" stroke-linecap="round" stroke-linejoin="round" d="{"".join(pad(l) for l in ls if len(l)>1)}"/>')
-    svg.append('<circle cx="50" cy="50" r="6.5" fill="#fff" stroke="#000" stroke-width="2"/><circle cx="50" cy="50" r="3" fill="#000"/></g></svg>')
+    if naam in ZONDER_STIP: svg.append('</g></svg>')
+    else: svg.append('<circle cx="50" cy="50" r="6.5" fill="#fff" stroke="#000" stroke-width="2"/><circle cx="50" cy="50" r="3" fill="#000"/></g></svg>')
     s="".join(svg); open(os.path.join(UIT,slug(naam)+".svg"),"w").write(s); print(slug(naam),len(s))

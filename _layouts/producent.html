@@ -111,7 +111,7 @@ layout: default
   </div>
 
   {%- if p.drinken and p.drinken.size > 0 %}
-  {%- comment -%} Waar je de wijnen drinkt: steden met meer adressen eerst, de losse adressen samen onder "Verder" {%- endcomment -%}
+  {%- comment -%} Waar je de wijnen drinkt: steden met drie of meer adressen in een eigen kolom, de rest samen onder "Verder" {%- endcomment -%}
   {%- assign groepen = p.drinken | group_by: "stad" | sort: "size" | reverse %}
   <section class="drinken" aria-labelledby="drinken-kop">
     <div class="drinken__kop">
@@ -119,7 +119,7 @@ layout: default
       <p class="drinken__intro">{{ t.drinken_intro }}</p>
     </div>
     <div class="drinken__steden">
-    {%- for g in groepen %}{% if g.size > 1 %}
+    {%- for g in groepen %}{% if g.size > 2 %}
     <div class="drinken__stad{% if g.size > 4 %} drinken__stad--groot{% endif %}">
     <h3>{{ g.name }}</h3>
     <ul class="drinken__lijst">
@@ -128,13 +128,13 @@ layout: default
     </ul>
     </div>
     {%- endif %}{% endfor %}
-    {%- assign losse = 0 %}{% for g in groepen %}{% if g.size == 1 %}{% assign losse = losse | plus: 1 %}{% endif %}{% endfor %}
+    {%- assign losse = 0 %}{% for g in groepen %}{% if g.size < 3 %}{% assign losse = losse | plus: g.size %}{% endif %}{% endfor %}
     {%- if losse > 0 %}
     <div class="drinken__stad">
     <h3>{{ t.drinken_verder }}</h3>
     <ul class="drinken__lijst">
       {%- assign adressen = p.drinken | sort: "stad" %}
-      {%- for r in adressen %}{% assign g = groepen | where: "name", r.stad | first %}{% if g.size == 1 %}{% include drinken-adres.html r=r onder=r.stad %}{% endif %}{% endfor %}
+      {%- for r in adressen %}{% assign g = groepen | where: "name", r.stad | first %}{% if g.size < 3 %}{% include drinken-adres.html r=r onder=r.stad %}{% endif %}{% endfor %}
     </ul>
     </div>
     {%- endif %}

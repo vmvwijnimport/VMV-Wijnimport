@@ -78,6 +78,8 @@ nl:
   drinken_noot: Het kan zijn dat de wijn er al op is, of dat een restaurant hem pas later op de kaart zet. Vraag het dus even voordat je gaat.
   drinken_verder: Verder in Nederland
   drinken_osm: "Kaartjes:"
+  popup_gestopt: pop-up, inmiddels gestopt
+  popup_gestopt_bij: pop-up in %plek%, inmiddels gestopt
   drinken_kaart: "%naam% op de kaart"
   michelinster: Michelinster
   michelinsterren: Michelinsterren
@@ -199,6 +201,8 @@ en:
   drinken_noot: The wine may have sold out, or a restaurant may only add it to the list later on. So it’s best to check before you go.
   drinken_verder: Elsewhere in the Netherlands
   drinken_osm: "Maps:"
+  popup_gestopt: pop-up, now closed
+  popup_gestopt_bij: pop-up at %plek%, now closed
   drinken_kaart: "%naam% on the map"
   michelinster: Michelin star
   michelinsterren: Michelin stars

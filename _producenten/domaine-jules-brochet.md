@@ -36,7 +36,7 @@ cuvees:
     type: wit
     binnenkort: true
 # Waar je de wijnen kunt drinken (blok onder het verhaal). stad + buurt; sterren = Michelinsterren.
-# Een stad met één adres komt onder "Verder in Nederland".
+# Een stad met één of twee adressen komt onder "Verder in Nederland". popup: gestopt = een pop-up die al gestopt is (popup_bij: waar hij zat).
 drinken:
   - { naam: "4850", stad: Amsterdam, buurt: Oost }
   - { naam: "De Badcuyp", stad: Amsterdam, buurt: De Pijp }
@@ -55,7 +55,8 @@ drinken:
   - { naam: Bouzy, stad: Den Haag, buurt: Denneweg }
   - { naam: De Librije, stad: Zwolle, sterren: 3 }
   - { naam: "Restaurant Loca", stad: Arnhem }
-  - { naam: "Café-Restaurant Terroir", stad: Utrecht }
+  - { naam: "Café-Restaurant Terroir", stad: Utrecht, buurt: Binnenstad }
+  - { naam: Utregs Wijnbar, stad: Utrecht, popup: gestopt, popup_bij: "Café-Restaurant Terroir" }
 ---
 
 Pierric Brochet komt uit een familie van wijnboeren in Taissy, net ten zuiden van Reims. Hij noemde zijn domein naar zijn overgrootvader Jules, omdat hij te bescheiden was om zijn eigen naam op het etiket te zetten. Hij studeerde aan de Viti Campus in Avize en liep stage bij Anselme Selosse. Daarna ging hij terug naar het familiebedrijf. Al snel merkte hij dat hij meer gemeen had met de manier van werken van Anselme dan met die van zijn vader, en hij besloot zijn eigen weg te gaan.
