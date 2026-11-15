@@ -44,8 +44,6 @@
   --donker-paneel: rgba(0, 0, 0, 0.72);
   --sluier: rgba(0, 0, 0, 0.32);
   --wa-groen: #25D366;
-  --op-rood-zacht: rgba(255, 255, 255, 0.74);   /* bijschrift op een bordeaux vlak */
-  --op-rood-lijn: rgba(255, 255, 255, 0.22);
 }
 
 :focus-visible { outline: 2px solid var(--rood); outline-offset: 3px; }

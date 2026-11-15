@@ -8,7 +8,7 @@
 {%- if r.stad == "Rotterdam" and k.rotterdam[r.buurt] %}{% assign kaart = "rotterdam" %}{% assign plek = k.rotterdam[r.buurt] %}{% endif -%}
 {%- assign zoek = r.naam | append: " " | append: r.stad | url_encode -%}
 <li>
-  <svg class="drinken__kaartje drinken__kaartje--{{ kaart }}" viewBox="-4 -4 108 108" width="64" height="64" aria-hidden="true">
+  <svg class="drinken__kaartje drinken__kaartje--{{ kaart }}" viewBox="-4 -4 108 108" width="72" height="72" aria-hidden="true">
     <g class="drinken__lijnen">{% include kaartjes/{{ kaart }}.html %}</g>
     {%- if plek %}
     <circle class="drinken__ring" cx="{{ plek[0] }}" cy="{{ plek[1] }}" r="11"/>

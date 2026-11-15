@@ -608,26 +608,24 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 .cuvees__druif { color: var(--tekst-zacht); font-size: var(--fs-klein); }
 .cuvees__extra { display: flex; align-items: baseline; gap: var(--s-1) var(--s-2); margin-left: auto; }
 
-/* Waar je de wijnen drinkt: een bordeaux vlak met per adres een getekend kaartje (_includes/drinken-adres.html).
-   Op dit vlak is de hover een onderstreping, want rood op rood valt weg. */
-.drinken { margin-top: var(--s-8); padding: var(--s-6) var(--s-4) var(--s-4); background: var(--rood); color: var(--wit); }
-.drinken h2 { margin: 0 0 var(--s-1); color: var(--wit); }
-.drinken__intro { margin: 0 0 var(--s-4); color: var(--op-rood-zacht); max-width: 34em; }
-.drinken h3 { margin: var(--s-4) 0 0; padding-bottom: var(--s-1); border-bottom: 1px solid var(--wit); font-size: var(--fs-klein); font-weight: 500; letter-spacing: 0; color: var(--wit); }
+/* Waar je de wijnen drinkt: een champagne vlak met per adres een getekend kaartje in rood (_includes/drinken-adres.html) */
+.drinken { margin-top: var(--s-8); padding: var(--s-6) var(--s-4) var(--s-4); background: var(--champagne); color: var(--tekst); }
+.drinken h2 { margin: 0 0 var(--s-1); }
+.drinken__intro { margin: 0 0 var(--s-4); max-width: 34em; }
+.drinken h3 { margin: var(--s-4) 0 0; padding-bottom: var(--s-1); border-bottom: 1px solid var(--zwart); font-size: var(--fs-klein); font-weight: 500; letter-spacing: 0; color: var(--zwart); }
 .drinken .drinken__lijst { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--s-4); margin: 0; padding: 0; list-style: none; }
-.drinken__lijst li { display: flex; align-items: center; gap: var(--s-2); padding: 12px 0; border-bottom: 1px solid var(--op-rood-lijn); }
+.drinken__lijst li { display: flex; align-items: center; gap: var(--s-2); padding: 12px 0; border-bottom: 1px solid var(--champagne-rand); }
 .drinken__kaartje { flex: 0 0 auto; overflow: visible; }
-.drinken__lijnen path { fill: none; stroke: var(--champagne); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.drinken__kaartje--nederland .drinken__lijnen path { stroke-width: 2.6; }
-.drinken__ring { fill: none; stroke: var(--wit); stroke-width: 1.6; }
-.drinken__stip { fill: var(--wit); }
+.drinken__lijnen path { fill: none; stroke: var(--rood); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.drinken__kaartje--nederland .drinken__lijnen path { stroke-width: 3; }
+.drinken__ring { fill: var(--champagne); stroke: var(--zwart); stroke-width: 2; }
+.drinken__stip { fill: var(--zwart); }
 .drinken__tekst { min-width: 0; }
-.drinken__naam { color: var(--wit); text-decoration: none; }
-.drinken__naam:hover, .drinken__naam:focus-visible { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-.drinken__naam:focus-visible { outline-color: var(--wit); }
-.drinken__sterren { display: inline-flex; gap: 2px; margin-left: 6px; color: var(--wit); }
-.drinken__onder { display: block; margin-top: 2px; color: var(--op-rood-zacht); font-size: var(--fs-klein); }
-.drinken__noot { margin: var(--s-3) 0 0; color: var(--op-rood-zacht); font-size: var(--fs-klein); }
+.drinken__naam { color: var(--zwart); text-decoration: none; }
+.drinken__naam:hover { color: var(--rood); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.drinken__sterren { display: inline-flex; gap: 2px; margin-left: 6px; color: var(--zwart); }
+.drinken__onder { display: block; margin-top: 2px; color: var(--tekst); font-size: var(--fs-klein); }
+.drinken__noot { margin: var(--s-3) 0 0; color: var(--tekst); font-size: var(--fs-klein); }
 @media (max-width: 36rem) {
   .drinken { margin-left: calc(var(--rand) * -1); margin-right: calc(var(--rand) * -1); padding: var(--s-6) var(--rand) var(--s-4); }
   .drinken .drinken__lijst { grid-template-columns: 1fr; }
