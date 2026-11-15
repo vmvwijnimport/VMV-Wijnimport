@@ -608,30 +608,45 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 .cuvees__druif { color: var(--tekst-zacht); font-size: var(--fs-klein); }
 .cuvees__extra { display: flex; align-items: baseline; gap: var(--s-1) var(--s-2); margin-left: auto; }
 
-/* Waar je de wijnen drinkt: een champagne vlak met per adres een getekend kaartje in rood (_includes/drinken-adres.html) */
-.drinken { margin-top: var(--s-8); padding: var(--s-6) var(--s-4) var(--s-4); background: var(--champagne); color: var(--tekst); }
-.drinken h2 { margin: 0 0 var(--s-1); }
-.drinken__intro { margin: 0 0 var(--s-4); max-width: 34em; }
-.drinken h3 { margin: var(--s-4) 0 0; padding-bottom: var(--s-1); border-bottom: 1px solid var(--zwart); font-size: var(--fs-klein); font-weight: 500; letter-spacing: 0; color: var(--zwart); }
-.drinken .drinken__lijst { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--s-4); margin: 0; padding: 0; list-style: none; }
-.drinken__lijst li { display: flex; align-items: center; gap: var(--s-2); padding: 12px 0; border-bottom: 1px solid var(--champagne-rand); }
+/* Waar je de wijnen drinkt: een rood vlak over de breedte van de pagina, per stad een kolom,
+   per zaak een ingelijst stratenplan (_includes/drinken-adres.html). Op rood is de hover een onderstreping. */
+.drinken { margin-top: var(--s-12); padding: var(--s-8) var(--s-6) var(--s-6); background: var(--rood); color: var(--wit); }
+.drinken__kop { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-3) var(--s-8); align-items: end; margin-bottom: var(--s-6); }
+.drinken__kop h2 { margin: 0; color: var(--wit); }
+.drinken__intro { margin: 0; max-width: 34em; color: var(--op-rood-zacht); }
+.drinken__steden { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-6) var(--s-4); }
+.drinken__stad--groot { grid-column: span 2; }
+.drinken h3 { margin: 0; padding-bottom: var(--s-1); border-bottom: 1px solid var(--wit); font-size: var(--fs-klein); font-weight: 500; letter-spacing: 0; color: var(--wit); }
+.drinken .drinken__lijst { margin: 0; padding: 0; list-style: none; }
+.drinken__stad--groot .drinken__lijst { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--s-4); }
+.drinken__lijst li { display: flex; align-items: center; gap: var(--s-2); padding: 12px 0; border-bottom: 1px solid var(--op-rood-lijn); }
 .drinken__kaartje { flex: 0 0 auto; overflow: visible; }
-/* Een stratenplan als een ingelijste poster: zwarte lijst, wit passe-partout */
-.drinken__poster { flex: 0 0 auto; box-sizing: content-box; width: 72px; height: 72px; padding: 6px; background: var(--wit); border: 1px solid var(--zwart); }
-.drinken__lijnen path { fill: none; stroke: var(--rood); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+/* Een stratenplan als een kleine poster op wit papier */
+.drinken__poster { flex: 0 0 auto; box-sizing: content-box; width: 72px; height: 72px; padding: 5px; background: var(--wit); }
+.drinken__lijnen path { fill: none; stroke: var(--champagne); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .drinken__kaartje--nederland .drinken__lijnen path { stroke-width: 3; }
-.drinken__ring { fill: var(--champagne); stroke: var(--zwart); stroke-width: 2; }
-.drinken__stip { fill: var(--zwart); }
+.drinken__ring { fill: var(--rood); stroke: var(--wit); stroke-width: 2; }
+.drinken__stip { fill: var(--wit); }
 .drinken__tekst { min-width: 0; }
-.drinken__naam { color: var(--zwart); text-decoration: none; }
-.drinken__naam:hover { color: var(--rood); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-.drinken__sterren { display: inline-flex; gap: 2px; margin-left: 6px; color: var(--zwart); }
-.drinken__onder { display: block; margin-top: 2px; color: var(--tekst); font-size: var(--fs-klein); }
-.drinken__noot { margin: var(--s-3) 0 0; color: var(--tekst); font-size: var(--fs-klein); }
+.drinken__naam { color: var(--wit); text-decoration: none; }
+.drinken__naam:hover, .drinken__naam:focus-visible { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.drinken__naam:focus-visible, .drinken__noot a:focus-visible { outline-color: var(--wit); }
+.drinken__sterren { display: inline-flex; gap: 3px; margin-left: 8px; vertical-align: -2px; color: var(--wit); }
+/* De Michelinster: een bloem met zes bladen, als lijn */
+.drinken__ster path { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linejoin: round; }
+.drinken__onder { display: block; margin-top: 2px; color: var(--op-rood-zacht); font-size: var(--fs-klein); }
+.drinken__noot { margin: var(--s-4) 0 0; color: var(--op-rood-zacht); font-size: var(--fs-klein); }
 .drinken__noot a { color: inherit; }
+@media (max-width: 80rem) { .drinken { margin-left: calc(var(--rand) * -1); margin-right: calc(var(--rand) * -1); padding-left: var(--rand); padding-right: var(--rand); } }
+@media (max-width: 64rem) { .drinken__steden { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 56rem) {
+  .drinken { margin-top: var(--s-8); padding-top: var(--s-6); }
+  .drinken__kop { grid-template-columns: 1fr; }
+}
 @media (max-width: 36rem) {
-  .drinken { margin-left: calc(var(--rand) * -1); margin-right: calc(var(--rand) * -1); padding: var(--s-6) var(--rand) var(--s-4); }
-  .drinken .drinken__lijst { grid-template-columns: 1fr; }
+  .drinken__steden { grid-template-columns: 1fr; }
+  .drinken__stad--groot { grid-column: auto; }
+  .drinken__stad--groot .drinken__lijst { grid-template-columns: 1fr; }
 }
 
 /* ---------- Hedonist-pagina ---------- */
