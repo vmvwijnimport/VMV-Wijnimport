@@ -110,7 +110,7 @@ layout: default
           {%- for r in adressen %}{% assign g = groepen | where: "name", r.stad | first %}{% if g.size == 1 %}{% include drinken-adres.html r=r onder=r.stad %}{% endif %}{% endfor %}
         </ul>
         {%- endif %}
-        <p class="drinken__noot">{{ t.drinken_noot }}</p>
+        <p class="drinken__noot">{{ t.drinken_noot }} {{ t.drinken_osm }} <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>.</p>
       </section>
       {%- endif %}
     </div>

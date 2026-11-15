@@ -77,6 +77,7 @@ nl:
   drinken_intro: De vraag is groot en de flessen zijn schaars. Bij deze restaurants en wijnbars staan de wijnen op de kaart.
   drinken_noot: Wat er open is, wisselt per avond. Vraag het even voordat je gaat.
   drinken_verder: Verder in Nederland
+  drinken_osm: "Kaartjes:"
   drinken_kaart: "%naam% op de kaart"
   michelinster: Michelinster
   michelinsterren: Michelinsterren
@@ -197,6 +198,7 @@ en:
   drinken_intro: Demand is high and bottles are scarce. These restaurants and wine bars have the wines on their list.
   drinken_noot: What’s open changes from night to night, so ask before you go.
   drinken_verder: Elsewhere in the Netherlands
+  drinken_osm: "Maps:"
   drinken_kaart: "%naam% on the map"
   michelinster: Michelin star
   michelinsterren: Michelin stars

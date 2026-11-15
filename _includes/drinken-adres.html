@@ -1,5 +1,6 @@
 {%- comment -%} Eén adres in de lijst "Waar je ... drinkt" (_layouts/producent.html). include.onder: buurt of stad.
-  Het kaartje: Amsterdam en Rotterdam per buurt, de rest van Nederland per plaats (_data/kaartjes.yml, _includes/kaartjes/). {%- endcomment -%}
+  Het kaartje: een stratenplan rond de zaak als in /assets/img/kaartjes/<naam>.svg staat (gemaakt uit OpenStreetMap),
+  anders een getekend kaartje: Amsterdam en Rotterdam per buurt, de rest van Nederland per plaats (_data/kaartjes.yml, _includes/kaartjes/). {%- endcomment -%}
 {%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
 {%- assign r = include.r -%}
 {%- assign k = site.data.kaartjes -%}
@@ -8,6 +9,12 @@
 {%- if r.stad == "Rotterdam" and k.rotterdam[r.buurt] %}{% assign kaart = "rotterdam" %}{% assign plek = k.rotterdam[r.buurt] %}{% endif -%}
 {%- assign zoek = r.naam | append: " " | append: r.stad | url_encode -%}
 <li>
+  {%- assign posternaam = r.naam | slugify: "latin" -%}
+  {%- assign poster = "/assets/img/kaartjes/" | append: posternaam | append: ".svg" -%}
+  {%- assign posterbestand = site.static_files | where: "path", poster | first %}
+  {%- if posterbestand %}
+  <img class="drinken__poster" src="{{ poster | relative_url }}" width="72" height="72" alt="" loading="lazy">
+  {%- else %}
   <svg class="drinken__kaartje drinken__kaartje--{{ kaart }}" viewBox="-4 -4 108 108" width="72" height="72" aria-hidden="true">
     <g class="drinken__lijnen">{% include kaartjes/{{ kaart }}.html %}</g>
     {%- if plek %}
@@ -15,6 +22,7 @@
     <circle class="drinken__stip" cx="{{ plek[0] }}" cy="{{ plek[1] }}" r="5.5"/>
     {%- endif %}
   </svg>
+  {%- endif %}
   <span class="drinken__tekst">
     <a class="drinken__naam" href="https://www.google.com/maps/search/?api=1&amp;query={{ zoek }}" target="_blank" rel="noopener" title="{{ t.drinken_kaart | replace: '%naam%', r.naam }}">{{ r.naam }}</a>
     {%- if r.sterren %}

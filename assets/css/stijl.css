@@ -616,6 +616,8 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 .drinken .drinken__lijst { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--s-4); margin: 0; padding: 0; list-style: none; }
 .drinken__lijst li { display: flex; align-items: center; gap: var(--s-2); padding: 12px 0; border-bottom: 1px solid var(--champagne-rand); }
 .drinken__kaartje { flex: 0 0 auto; overflow: visible; }
+/* Een stratenplan als een ingelijste poster: zwarte lijst, wit passe-partout */
+.drinken__poster { flex: 0 0 auto; box-sizing: content-box; width: 72px; height: 72px; padding: 6px; background: var(--wit); border: 1px solid var(--zwart); }
 .drinken__lijnen path { fill: none; stroke: var(--rood); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .drinken__kaartje--nederland .drinken__lijnen path { stroke-width: 3; }
 .drinken__ring { fill: var(--champagne); stroke: var(--zwart); stroke-width: 2; }
@@ -626,6 +628,7 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 .drinken__sterren { display: inline-flex; gap: 2px; margin-left: 6px; color: var(--zwart); }
 .drinken__onder { display: block; margin-top: 2px; color: var(--tekst); font-size: var(--fs-klein); }
 .drinken__noot { margin: var(--s-3) 0 0; color: var(--tekst); font-size: var(--fs-klein); }
+.drinken__noot a { color: inherit; }
 @media (max-width: 36rem) {
   .drinken { margin-left: calc(var(--rand) * -1); margin-right: calc(var(--rand) * -1); padding: var(--s-6) var(--rand) var(--s-4); }
   .drinken .drinken__lijst { grid-template-columns: 1fr; }
