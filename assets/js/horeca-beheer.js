@@ -699,56 +699,63 @@
     data.producten.forEach(function (p) { if (p.soort !== "glas" && namen.indexOf(p.producent) < 0) namen.push(p.producent); });
     namen.sort(function (a, b) { return a.localeCompare(b, "nl"); }).forEach(function (n) { keuze.appendChild(new Option(n, n)); });
   };
+  // De laatste uitkomst bewaren, zodat de keuze "alleen zakelijk" zonder opnieuw zoeken werkt
+  var kopersUitkomst = null;
+  var toonKopersUitkomst = function () {
+    var r = kopersUitkomst, uit = veld("koperuitkomst");
+    uit.textContent = "";
+    if (!r) return;
+    var zakelijk = document.getElementById("ko-zakelijk").checked, particulier = {};
+    var cuvees = r.cuvees.map(function (c) {
+      return { cuvee: c.cuvee, klanten: c.klanten.filter(function (k) {
+        if (k.zakelijk !== false) return true;
+        particulier[k.naam] = true;
+        return !zakelijk;
+      }) };
+    }).filter(function (c) { return c.klanten.length; });
+    var aantal = cuvees.length, zonder = zakelijk ? Object.keys(particulier).length : 0;
+    melding(veld("kopermelding"), (aantal
+      ? r.facturen + " facturen doorzocht. " + r.producent + " staat op facturen van " + aantal + (aantal === 1 ? " cuvée." : " cuvées.")
+      : r.facturen + " facturen doorzocht. Geen " + (zakelijk ? "zakelijke " : "") + "klanten gevonden met wijnen van " + r.producent + ".")
+      + (zonder ? " " + zonder + (zonder === 1 ? " particuliere klant" : " particuliere klanten") + " niet getoond." : ""));
+    // Eerst alle klanten samen, daarna per cuvée
+    var alle = {};
+    cuvees.forEach(function (c) {
+      c.klanten.forEach(function (k) {
+        var a = alle[k.naam] || (alle[k.naam] = { naam: k.naam, plaats: k.plaats, flessen: 0, cuvees: 0, laatst: "" });
+        a.flessen += k.flessen; a.cuvees++;
+        if (k.laatst > a.laatst) a.laatst = k.laatst;
+      });
+    });
+    var wie = function (k) { return k.naam + (k.plaats ? ", " + k.plaats : ""); };
+    var blok = function (kop, koppen, rijen) {
+      var sec = el("section", "kopers__cuvee"), t = el("table"), w = el("div", "beheer__tabel");
+      sec.appendChild(el("h2", "beheer__producent", kop));
+      tabel(t, koppen, rijen, "");
+      w.appendChild(t); sec.appendChild(w); uit.appendChild(sec);
+    };
+    if (aantal > 1) {
+      blok("Alle klanten", ["Klant", "Flessen", "Cuvées", "Laatste factuur"], Object.keys(alle).map(function (n) { return alle[n]; })
+        .sort(function (a, b) { return b.laatst.localeCompare(a.laatst); })
+        .map(function (k) { return [wie(k), k.flessen, k.cuvees, datum(k.laatst)]; }));
+    }
+    cuvees.forEach(function (c) {
+      blok(c.cuvee, ["Klant", "Flessen", "Facturen", "Laatste factuur"], c.klanten.map(function (k) {
+        return [wie(k), k.flessen, k.facturen, datum(k.laatst)];
+      }));
+    });
+  };
+  document.getElementById("ko-zakelijk").addEventListener("change", toonKopersUitkomst);
   veld("koperform").addEventListener("submit", function (e) {
     e.preventDefault();
-    var knop = this.querySelector("button"), uit = veld("koperuitkomst"), producent = document.getElementById("ko-producent").value;
+    var knop = this.querySelector("button"), producent = document.getElementById("ko-producent").value;
     if (!producent) return;
     bezig(knop, "Zoeken…");
-    uit.textContent = "";
+    kopersUitkomst = null;
+    toonKopersUitkomst();
     melding(veld("kopermelding"), "Alle facturen doorzoeken. Dat kan een minuut duren.");
     factuurFunctie({ opdracht: "kopers", producent: producent })
-      .then(function (r) {
-        bezig(knop);
-        // Alleen zakelijke klanten (bedrijven); particulieren tellen we wel, maar tonen we niet
-        var particulier = {};
-        r.cuvees.forEach(function (c) {
-          c.klanten = c.klanten.filter(function (k) { if (k.zakelijk === false) particulier[k.naam] = true; return k.zakelijk !== false; });
-        });
-        r.cuvees = r.cuvees.filter(function (c) { return c.klanten.length; });
-        var aantal = r.cuvees.length, zonder = Object.keys(particulier).length;
-        melding(veld("kopermelding"), aantal
-          ? r.facturen + " facturen doorzocht. " + producent + " staat op facturen van " + aantal + (aantal === 1 ? " cuvée." : " cuvées.")
-          : r.facturen + " facturen doorzocht. Geen zakelijke klanten gevonden met wijnen van " + producent + ".");
-        if (zonder) veld("kopermelding").textContent += " " + zonder + (zonder === 1 ? " particuliere klant" : " particuliere klanten") + " niet getoond.";
-        // Eerst alle klanten samen, daarna per cuvée
-        var alle = {};
-        r.cuvees.forEach(function (c) {
-          c.klanten.forEach(function (k) {
-            var a = alle[k.naam] || (alle[k.naam] = { naam: k.naam, plaats: k.plaats, flessen: 0, cuvees: 0, laatst: "" });
-            a.flessen += k.flessen; a.cuvees++;
-            if (k.laatst > a.laatst) a.laatst = k.laatst;
-          });
-        });
-        var wie = function (k) { return k.naam + (k.plaats ? ", " + k.plaats : ""); };
-        if (aantal > 1) {
-          var sec = el("section", "kopers__cuvee");
-          sec.appendChild(el("h2", "beheer__producent", "Alle klanten"));
-          var t = el("table"), w = el("div", "beheer__tabel");
-          tabel(t, ["Klant", "Flessen", "Cuvées", "Laatste factuur"], Object.keys(alle).map(function (n) { return alle[n]; })
-            .sort(function (a, b) { return b.laatst.localeCompare(a.laatst); })
-            .map(function (k) { return [wie(k), k.flessen, k.cuvees, datum(k.laatst)]; }), "");
-          w.appendChild(t); sec.appendChild(w); uit.appendChild(sec);
-        }
-        r.cuvees.forEach(function (c) {
-          var sec = el("section", "kopers__cuvee");
-          sec.appendChild(el("h2", "beheer__producent", c.cuvee));
-          var t = el("table"), w = el("div", "beheer__tabel");
-          tabel(t, ["Klant", "Flessen", "Facturen", "Laatste factuur"], c.klanten.map(function (k) {
-            return [wie(k), k.flessen, k.facturen, datum(k.laatst)];
-          }), "");
-          w.appendChild(t); sec.appendChild(w); uit.appendChild(sec);
-        });
-      })
+      .then(function (r) { bezig(knop); kopersUitkomst = r; toonKopersUitkomst(); })
       .catch(function (err) { bezig(knop); melding(veld("kopermelding"), foutTekst(err), "fout"); });
   });
 

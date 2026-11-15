@@ -653,6 +653,7 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 .kopers__zoek { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--s-2); margin: var(--s-3) 0 var(--s-2); }
 .kopers__zoek .veld { margin: 0; min-width: 16rem; }
 .kopers__cuvee { margin-top: var(--s-6); }
+.kopers__keuze { align-self: center; margin: 0; }
 
 /* ---------- Hedonist-pagina ---------- */
 

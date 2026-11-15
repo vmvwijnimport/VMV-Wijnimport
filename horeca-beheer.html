@@ -464,10 +464,11 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
 
     {%- comment -%} Wie kocht wat: per cuvée van een producent de klanten uit de facturen in e-Boekhouden (functie factuur, opdracht kopers) {%- endcomment -%}
     <div data-scherm="kopers" hidden>
-      <p class="beheer__klein beheer__lijstuitleg">Zoekt in alle verkoopfacturen in e-Boekhouden naar de wijnen van een producent: wijnen die je hebt gekoppeld, en regels waarin de naam van de producent of een cuvée staat. Alleen zakelijke klanten. Dat kan een minuut duren.</p>
+      <p class="beheer__klein beheer__lijstuitleg">Zoekt in alle verkoopfacturen in e-Boekhouden naar de wijnen van een producent: wijnen die je hebt gekoppeld, en regels waarin de naam van de producent of een cuvée staat. Dat kan een minuut duren.</p>
       <form class="kopers__zoek" data-veld="koperform" novalidate>
         <div class="veld"><label for="ko-producent">Producent</label><select id="ko-producent" name="producent"></select></div>
         <button class="knop knop--primair" type="submit">Zoeken</button>
+        <label class="akkoord kopers__keuze"><input type="checkbox" id="ko-zakelijk" checked> Alleen zakelijke klanten</label>
       </form>
       <p class="formulier__status" data-veld="kopermelding" role="status" aria-live="polite"></p>
       <div data-veld="koperuitkomst"></div>
