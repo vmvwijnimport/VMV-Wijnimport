@@ -10,14 +10,4 @@ Théo’s project is tiny. His Champagne comes from one plot in Barzy-sur-Marne,
 
 Les Mocque-Souris is 100 percent Pinot Noir. The wine ages in oak barrels and then spends 36 months on the lees. Théo does as little as possible with the wine. The current release is the 2022.
 
-Because there are only very few bottles, we only offer this Champagne to restaurants and bars in the Netherlands. That way as many people as possible can taste it.
-
-You can soon find Théo’s wine at:
-
-- De Librije \*\*\*
-- Gebr. Hartering
-- Café Parlotte
-- NOTK
-- Oocker
-- Restaurant Domenica
-- De Lepelaar
+Because there are only very few bottles, we only offer this Champagne to restaurants and bars in the Netherlands. That way as many people as possible can taste it. [Below you can see where to drink it.](#drinken-kop)

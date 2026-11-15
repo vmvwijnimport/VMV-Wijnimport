@@ -17,6 +17,15 @@ cuvees:
   - naam: Les Mocque-Souris
     druif: Pinot Noir
     type: wit
+# Waar je de wijn kunt drinken (blok onder het verhaal), zoals bij Jules Brochet.
+drinken:
+  - { naam: De Librije, stad: Zwolle, sterren: 3 }
+  - { naam: Gebr. Hartering, stad: Amsterdam, buurt: Lastage }
+  - { naam: "Café Parlotte", stad: Amsterdam, buurt: Jordaan }
+  - { naam: "NOTK Wine & Food", stad: Rotterdam, buurt: Katendrecht }
+  - { naam: Oocker, stad: Amsterdam, buurt: Frederiksplein }
+  - { naam: Domenica, stad: Amsterdam, buurt: Jordaan }
+  - { naam: "Café de Lepelaar", stad: Jisp }
 ---
 
 Via ons werk met Pierric Brochet hadden we al over Théo Cecchetti en zijn champagne gehoord, maar we proefden hem voor het eerst tijdens Champagne Day in Reims, bij Le Wine Bar by Le Vintage. De explosieve neus viel ons meteen op. Het was zo'n wijn waar je nog lang aan blijft denken.
@@ -25,14 +34,4 @@ Het project van Théo is heel klein. Zijn champagne komt van één plot in Barzy
 
 Les Mocque-Souris is honderd procent pinot noir. De wijn rijpt op eikenhouten vaten en ligt daarna 36 maanden op de gist. Théo doet zo weinig mogelijk met de wijn. De huidige release is de 2022.
 
-Omdat er maar heel weinig flessen zijn, bieden we deze champagne alleen aan in de Nederlandse horeca. Zo kunnen zoveel mogelijk mensen hem proeven.
-
-De wijn is (binnenkort) te vinden bij:
-
-- De Librije \*\*\*
-- Gebr. Hartering
-- Café Parlotte
-- NOTK
-- Oocker
-- Restaurant Domenica
-- De Lepelaar
+Omdat er maar heel weinig flessen zijn, bieden we deze champagne alleen aan in de Nederlandse horeca. Zo kunnen zoveel mogelijk mensen hem proeven. [Hieronder zie je waar je hem kunt drinken.](#drinken-kop)
