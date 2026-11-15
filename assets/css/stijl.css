@@ -608,9 +608,9 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 .cuvees__druif { color: var(--tekst-zacht); font-size: var(--fs-klein); }
 .cuvees__extra { display: flex; align-items: baseline; gap: var(--s-1) var(--s-2); margin-left: auto; }
 
-/* Waar je de wijnen drinkt: een bordeaux vlak over de breedte van de pagina, per stad een kolom,
+/* Waar je de wijnen drinkt: een rood vlak (de kleur van de rode stip in het logo) over de breedte van de pagina, per stad een kolom,
    per zaak een ingelijst stratenplan (_includes/drinken-adres.html). Op rood is de hover een onderstreping. */
-.drinken { margin-top: var(--s-12); padding: var(--s-8) var(--s-6) var(--s-6); background: var(--bordeaux); color: var(--wit); }
+.drinken { margin-top: var(--s-12); padding: var(--s-8) var(--s-6) var(--s-6); background: var(--rood); color: var(--wit); }
 .drinken__kop { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-3) var(--s-8); align-items: end; margin-bottom: var(--s-6); }
 .drinken__kop h2 { margin: 0; color: var(--wit); }
 .drinken__intro { margin: 0; max-width: 34em; color: var(--op-rood-zacht); }
@@ -625,7 +625,7 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 .drinken__poster { flex: 0 0 auto; box-sizing: content-box; width: 72px; height: 72px; padding: 5px; background: var(--wit); }
 .drinken__lijnen path { fill: none; stroke: var(--champagne); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .drinken__kaartje--nederland .drinken__lijnen path { stroke-width: 3; }
-.drinken__ring { fill: var(--bordeaux); stroke: var(--wit); stroke-width: 2; }
+.drinken__ring { fill: var(--rood); stroke: var(--wit); stroke-width: 2; }
 .drinken__stip { fill: var(--wit); }
 .drinken__tekst { min-width: 0; }
 .drinken__naam { color: var(--wit); text-decoration: none; }
