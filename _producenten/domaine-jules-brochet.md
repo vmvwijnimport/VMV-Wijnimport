@@ -67,4 +67,4 @@ Als je met Pierric praat, merk je meteen waar het hem om draait: het terroir. Hi
 
 Na ons eerste bezoek liepen we weg met de glimlach die je alleen krijgt bij heel bijzondere wijnen. Sindsdien staan we bij elk bezoek weer versteld van de kwaliteit. Wat ons betreft hoort Pierric bij de grote talenten van de nieuwe generatie, en er komt nog veel moois aan.
 
-De vraag naar de wijnen van Pierric is erg groot. Daarom bieden we ze vooral aan in de Nederlandse horeca, zodat zoveel mogelijk mensen ze kunnen proeven.
+De vraag naar de wijnen van Pierric is erg groot. Daarom bieden we ze vooral aan in de Nederlandse horeca, zodat zoveel mogelijk mensen ze kunnen proeven. [Hieronder zie je waar je ze kunt drinken.](#drinken-kop)

@@ -10,4 +10,4 @@ Talk to Pierric and you immediately understand what matters to him: terroir. He 
 
 After our first visit we walked away with the kind of smile you only get from very special wines. Since then, the quality has amazed us on every visit. In our view, Pierric is one of the great talents of the new generation, and there’s plenty more to come.
 
-Demand for Pierric's wines is very high. That is why we mainly offer them to restaurants and bars in the Netherlands, so that as many people as possible can taste them.
+Demand for Pierric's wines is very high. That is why we mainly offer them to restaurants and bars in the Netherlands, so that as many people as possible can taste them. [Below you can see where to drink them.](#drinken-kop)
