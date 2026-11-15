@@ -52,6 +52,7 @@ drinken:
   - { naam: "NOTK Wine & Food", stad: Rotterdam, buurt: Katendrecht }
   - { naam: Alma, stad: Oisterwijk, sterren: 1 }
   - { naam: "Café de Lepelaar", stad: Jisp }
+  - { naam: Bouzy, stad: Den Haag, buurt: Denneweg }
   - { naam: De Librije, stad: Zwolle, sterren: 3 }
   - { naam: "Restaurant Loca", stad: Arnhem }
   - { naam: "Café-Restaurant Terroir", stad: Utrecht }
