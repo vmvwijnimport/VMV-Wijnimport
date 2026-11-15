@@ -44,6 +44,7 @@
   --donker-paneel: rgba(0, 0, 0, 0.72);
   --sluier: rgba(0, 0, 0, 0.32);
   --wa-groen: #25D366;
+  --bordeaux: #45101A;   /* donker vlak, zoals op het visitekaartje en in Instagram-posts */
   --op-rood-zacht: rgba(255, 255, 255, 0.78);   /* bijschrift op een rood vlak */
   --op-rood-lijn: rgba(255, 255, 255, 0.24);
 }
