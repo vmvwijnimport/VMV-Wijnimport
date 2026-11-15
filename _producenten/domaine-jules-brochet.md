@@ -50,7 +50,9 @@ drinken:
   - { naam: Café Kiem, stad: Rotterdam, buurt: Provenierswijk }
   - { naam: De Matroos en het Meisje, stad: Rotterdam, buurt: Katendrecht }
   - { naam: "NOTK Wine & Food", stad: Rotterdam, buurt: Katendrecht }
+  - { naam: Aan de Poel, stad: Amstelveen, sterren: 2 }
   - { naam: Alma, stad: Oisterwijk, sterren: 1 }
+  - { naam: Zarzo, stad: Eindhoven, sterren: 1 }
   - { naam: "Café de Lepelaar", stad: Jisp }
   - { naam: Bouzy, stad: Den Haag, buurt: Denneweg }
   - { naam: De Librije, stad: Zwolle, sterren: 3 }
