@@ -73,6 +73,13 @@ nl:
   beschikbaarheid: Vraag naar beschikbaarheid
   website_van: "Website van %naam%"
   meer_uit: Meer uit
+  drinken_kop: Waar je %naam% drinkt
+  drinken_intro: De vraag is groot en de flessen zijn schaars. Bij deze restaurants en wijnbars staan de wijnen op de kaart.
+  drinken_noot: Wat er open is, wisselt per avond. Vraag het even voordat je gaat.
+  drinken_verder: Verder in Nederland
+  drinken_kaart: "%naam% op de kaart"
+  michelinster: Michelinster
+  michelinsterren: Michelinsterren
   producent_kop: Interesse in de wijnen van %naam%?
   producent_tekst: Stuur ons een bericht via WhatsApp of mail. Dan laten we weten wat er beschikbaar is en wanneer de nieuwe jaargang binnenkomt.
   seo_importeur: importeur in Nederland
@@ -186,6 +193,13 @@ en:
   beschikbaarheid: Ask about availability
   website_van: "%naam% website"
   meer_uit: More from
+  drinken_kop: Where to drink %naam%
+  drinken_intro: Demand is high and bottles are scarce. These restaurants and wine bars have the wines on their list.
+  drinken_noot: What’s open changes from night to night, so ask before you go.
+  drinken_verder: Elsewhere in the Netherlands
+  drinken_kaart: "%naam% on the map"
+  michelinster: Michelin star
+  michelinsterren: Michelin stars
   producent_kop: Interested in the wines of %naam%?
   producent_tekst: Send us a message on WhatsApp or by email. We’ll let you know what’s available and when the new vintage arrives.
   seo_importeur: importer in the Netherlands
@@ -240,5 +254,6 @@ en:
     Bourgogne: Burgundy
     Piëmont: Piedmont
     Franken: Franconia
+    Oost: East
     Champagne: Champagne
     Assemblage: Blend

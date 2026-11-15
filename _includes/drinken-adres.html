@@ -1,0 +1,11 @@
+{%- comment -%} Eén adres in het blok "Waar je ... drinkt" (_layouts/producent.html). include.onder: buurt of stad {%- endcomment -%}
+{%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
+{%- assign r = include.r -%}
+{%- assign zoek = r.naam | append: " " | append: r.stad | url_encode -%}
+<li>
+  <a href="https://www.google.com/maps/search/?api=1&amp;query={{ zoek }}" target="_blank" rel="noopener" aria-label="{{ t.drinken_kaart | replace: '%naam%', r.naam }}{% if r.sterren %}, {{ r.sterren }} {% if r.sterren == 1 %}{{ t.michelinster }}{% else %}{{ t.michelinsterren }}{% endif %}{% endif %}">
+    <span class="drinken__naam">{{ r.naam }}</span>
+    {%- if r.sterren %}<span class="drinken__sterren" aria-hidden="true">{% for i in (1..r.sterren) %}<svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 2.5l2.9 6.2 6.6.7-5 4.5 1.4 6.6L12 17.2l-5.9 3.3 1.4-6.6-5-4.5 6.6-.7z" fill="currentColor"/></svg>{% endfor %}</span>{% endif %}
+  </a>
+  <span class="drinken__onder">{{ t.namen[include.onder] | default: include.onder }}{% if r.sterren %}, {{ r.sterren }} {% if r.sterren == 1 %}{{ t.michelinster }}{% else %}{{ t.michelinsterren }}{% endif %}{% endif %}</span>
+</li>
