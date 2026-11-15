@@ -145,9 +145,9 @@
     var h = location.hash.slice(1) || "start";
     var m = /^(bestelling|klant|wijn|lijst)-(.+)$/.exec(h);
     // #prijslijst (en het oude #wijnen) is het overzicht van de wijnen met hun prijzen
-    var scherm = m ? m[1] : h === "prijslijst" || h === "wijnen" ? "wijnen" : (["start", "klanten", "overzicht", "bezoekers", "factuur", "hedonist", "drops", "nieuwsmail", "koppelen"].indexOf(h) >= 0 ? h : "bestellingen");
+    var scherm = m ? m[1] : h === "prijslijst" || h === "wijnen" ? "wijnen" : (["start", "klanten", "overzicht", "kopers", "bezoekers", "factuur", "hedonist", "drops", "nieuwsmail", "koppelen"].indexOf(h) >= 0 ? h : "bestellingen");
     schermen.forEach(function (s) { s.hidden = s.dataset.scherm !== scherm; });
-    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : ["wijn", "wijnen", "lijst", "koppelen"].indexOf(scherm) >= 0 ? "prijslijst" : ["start", "overzicht", "bezoekers", "factuur", "hedonist", "drops", "nieuwsmail"].indexOf(scherm) >= 0 ? scherm : "bestellingen";
+    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : ["wijn", "wijnen", "lijst", "koppelen"].indexOf(scherm) >= 0 ? "prijslijst" : ["start", "overzicht", "kopers", "bezoekers", "factuur", "hedonist", "drops", "nieuwsmail"].indexOf(scherm) >= 0 ? scherm : "bestellingen";
     // Bij afdrukken alleen de prijslijst (zie stijl.css, @media print)
     document.body.classList.toggle("drukt-prijslijst", scherm === "lijst");
     pagina.querySelectorAll("[data-tab]").forEach(function (a) {
@@ -168,6 +168,7 @@
     if (scherm === "wijnen") toonWijnen();
     if (scherm === "wijn") toonWijn(m[2]);
     if (scherm === "overzicht") toonOverzicht();
+    if (scherm === "kopers") toonKopers();
     if (scherm === "bezoekers") toonBezoekers();
     if (scherm === "factuur") toonLosFactuur();
     if (scherm === "hedonist") toonHedonist();
@@ -689,6 +690,60 @@
     });
   };
   var foutTekst = function (err) { return (err && err.message) || "Er ging iets mis. Probeer het opnieuw."; };
+
+  // ---------- Wie kocht wat: klanten per cuvée uit de facturen in e-Boekhouden ----------
+  var toonKopers = function () {
+    var keuze = document.getElementById("ko-producent");
+    if (keuze.options.length) return;
+    var namen = [];
+    data.producten.forEach(function (p) { if (p.soort !== "glas" && namen.indexOf(p.producent) < 0) namen.push(p.producent); });
+    namen.sort(function (a, b) { return a.localeCompare(b, "nl"); }).forEach(function (n) { keuze.appendChild(new Option(n, n)); });
+  };
+  veld("koperform").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var knop = this.querySelector("button"), uit = veld("koperuitkomst"), producent = document.getElementById("ko-producent").value;
+    if (!producent) return;
+    bezig(knop, "Zoeken…");
+    uit.textContent = "";
+    melding(veld("kopermelding"), "Alle facturen doorzoeken. Dat kan een minuut duren.");
+    factuurFunctie({ opdracht: "kopers", producent: producent })
+      .then(function (r) {
+        bezig(knop);
+        var aantal = r.cuvees.length;
+        melding(veld("kopermelding"), aantal
+          ? r.facturen + " facturen doorzocht. " + producent + " staat op facturen van " + aantal + (aantal === 1 ? " cuvée." : " cuvées.")
+          : r.facturen + " facturen doorzocht. Geen facturen gevonden met wijnen van " + producent + ".");
+        // Eerst alle klanten samen, daarna per cuvée
+        var alle = {};
+        r.cuvees.forEach(function (c) {
+          c.klanten.forEach(function (k) {
+            var a = alle[k.naam] || (alle[k.naam] = { naam: k.naam, plaats: k.plaats, flessen: 0, cuvees: 0, laatst: "" });
+            a.flessen += k.flessen; a.cuvees++;
+            if (k.laatst > a.laatst) a.laatst = k.laatst;
+          });
+        });
+        var wie = function (k) { return k.naam + (k.plaats ? ", " + k.plaats : ""); };
+        if (aantal > 1) {
+          var sec = el("section", "kopers__cuvee");
+          sec.appendChild(el("h2", "beheer__producent", "Alle klanten"));
+          var t = el("table"), w = el("div", "beheer__tabel");
+          tabel(t, ["Klant", "Flessen", "Cuvées", "Laatste factuur"], Object.keys(alle).map(function (n) { return alle[n]; })
+            .sort(function (a, b) { return b.laatst.localeCompare(a.laatst); })
+            .map(function (k) { return [wie(k), k.flessen, k.cuvees, datum(k.laatst)]; }), "");
+          w.appendChild(t); sec.appendChild(w); uit.appendChild(sec);
+        }
+        r.cuvees.forEach(function (c) {
+          var sec = el("section", "kopers__cuvee");
+          sec.appendChild(el("h2", "beheer__producent", c.cuvee));
+          var t = el("table"), w = el("div", "beheer__tabel");
+          tabel(t, ["Klant", "Flessen", "Facturen", "Laatste factuur"], c.klanten.map(function (k) {
+            return [wie(k), k.flessen, k.facturen, datum(k.laatst)];
+          }), "");
+          w.appendChild(t); sec.appendChild(w); uit.appendChild(sec);
+        });
+      })
+      .catch(function (err) { bezig(knop); melding(veld("kopermelding"), foutTekst(err), "fout"); });
+  });
 
   var factuurBlok = document.getElementById("factuurblok");
   var factuurStatus = factuurBlok.querySelector(".formulier__status");

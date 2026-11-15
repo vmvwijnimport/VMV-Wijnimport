@@ -14,6 +14,7 @@
 // 7. "webwinkel":      na een betaalde webwinkelbestelling (glazen en/of drops) automatisch de factuur
 //                     maken, aangevraagd door de betaal-Worker (met de koppelsleutel) of opnieuw vanuit de backoffice.
 // 8. "cijfers":        de omzet van dit jaar en deze maand en de openstaande facturen, voor het startscherm.
+// 9. "kopers":         per cuvée van één producent welke klanten hem op een factuur hadden (alleen lezen).
 // Factuurregels verwijzen naar het product in e-Boekhouden (productId), zodat de voorraad daar meeloopt.
 // Bedragen komen uit de bestelling zoals VMV hem heeft bevestigd (prijs per stuk na korting).
 //
@@ -722,6 +723,63 @@ const isWorker = async (db, sleutel) => {
   return !!(data && data.sleutel === sleutel);
 };
 
+// ---------- 9. Wie kocht de wijnen van een producent? ----------
+// Zoekt in alle verkoopfacturen naar regels met een product van die producent: een product dat aan een
+// van zijn wijnen is gekoppeld, of een product of regel waarin de naam van de producent of een cuvée staat.
+// Geeft per cuvée de klanten met het aantal flessen, het aantal facturen en de laatste datum (geen bedragen).
+const gewoon = (v) => String(v ?? "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+export const kopersVerzamelen = (facturen, productNaam, pastBij) => {
+  const per = new Map();
+  for (const f of facturen) {
+    for (const r of f.items || []) {
+      const naam = r.productId ? productNaam.get(r.productId) : null;
+      if (!(r.productId && naam) && !pastBij(r.description)) continue;
+      const cuvee = naam || String(r.description || "").split("\n")[0].trim() || "Onbekend";
+      if (!per.has(cuvee)) per.set(cuvee, new Map());
+      const klanten = per.get(cuvee);
+      const k = klanten.get(f.relationId) || { relatie: f.relationId, flessen: 0, facturen: new Set(), laatst: "" };
+      k.flessen += Number(r.quantity ?? r.amount ?? 0);
+      k.facturen.add(f.invoiceNumber || f.id);
+      if (String(f.date || "") > k.laatst) k.laatst = String(f.date || "").slice(0, 10);
+      klanten.set(f.relationId, k);
+    }
+  }
+  return [...per.entries()].sort((a, b) => a[0].localeCompare(b[0], "nl")).map(([cuvee, klanten]) => ({
+    cuvee,
+    klanten: [...klanten.values()].map((k) => ({ ...k, facturen: k.facturen.size })).sort((a, b) => b.laatst.localeCompare(a.laatst))
+  }));
+};
+
+const kopers = async (db, vraag, opdracht) => {
+  const producent = schoon(opdracht.producent, 100);
+  if (!producent) throw new Melding("Kies een producent.");
+  const { data: wijnen, error } = await db.from("producten").select("naam, eb_product_id").eq("producent", producent);
+  if (error) throw error;
+  const woorden = [gewoon(producent), ...(wijnen || []).map((w) => gewoon(w.naam)).filter((w) => w.length >= 4)];
+  const pastBij = (tekst) => { const t = gewoon(tekst); return !!t && woorden.some((w) => t.includes(w)); };
+  const gekoppeld = new Set((wijnen || []).map((w) => w.eb_product_id).filter(Boolean));
+  const productNaam = new Map();
+  for (const p of await alles(vraag, "/v1/product")) {
+    if (gekoppeld.has(p.id) || pastBij(p.description) || pastBij(p.code)) productNaam.set(p.id, p.description || p.code || `Product ${p.id}`);
+  }
+  // Alle facturen met hun regels ophalen, een paar tegelijk
+  const lijst = await alles(vraag, "/v1/invoice");
+  const facturen = [];
+  for (let i = 0; i < lijst.length; i += 6) {
+    facturen.push(...(await Promise.all(lijst.slice(i, i + 6).map((f) => vraag("GET", `/v1/invoice/${f.id}`)))).filter(Boolean));
+  }
+  const uitkomst = kopersVerzamelen(facturen, productNaam, pastBij);
+  const namen = new Map();
+  for (const id of new Set(uitkomst.flatMap((c) => c.klanten.map((k) => k.relatie)))) {
+    const r = id ? await vraag("GET", `/v1/relation/${id}`) : null;
+    namen.set(id, r ? { naam: r.name || `Relatie ${id}`, plaats: r.city || "" } : { naam: "Onbekende klant", plaats: "" });
+  }
+  return {
+    producent, facturen: facturen.length,
+    cuvees: uitkomst.map((c) => ({ cuvee: c.cuvee, klanten: c.klanten.map((k) => ({ ...namen.get(k.relatie), flessen: k.flessen, facturen: k.facturen, laatst: k.laatst })) }))
+  };
+};
+
 // ---------- Afhandelen ----------
 const afhandelen = async (req, db) => {
   const opdracht = await req.json().catch(() => ({}));
@@ -729,7 +787,7 @@ const afhandelen = async (req, db) => {
   // De webwinkelfactuur mag ook de betaal-Worker aanvragen, met de koppelsleutel; al het andere alleen een beheerder
   const worker = soort === "webwinkel" && await isWorker(db, opdracht.sleutel);
   if (!worker && !(await beheerderUit(db, req))) return antwoord({ fout: "Geen toegang. Log opnieuw in op de backoffice." }, 401);
-  if (!["gegevens", "koppelen", "voorbereiden", "maken", "klanten", "los_voorbereiden", "los_maken", "webwinkel", "cijfers"].includes(soort)) return antwoord({ fout: "Onbekende opdracht." }, 400);
+  if (!["gegevens", "koppelen", "voorbereiden", "maken", "klanten", "los_voorbereiden", "los_maken", "webwinkel", "cijfers", "kopers"].includes(soort)) return antwoord({ fout: "Onbekende opdracht." }, 400);
   if (soort === "webwinkel" && !Number.isInteger(opdracht.bestelling) && !opdracht.bestelnummer) return antwoord({ fout: "Onbekende bestelling." }, 400);
   if ((soort === "voorbereiden" || soort === "maken") && !Number.isInteger(opdracht.bestelling)) return antwoord({ fout: "Onbekende bestelling." }, 400);
   let vraag = null;
@@ -743,6 +801,7 @@ const afhandelen = async (req, db) => {
     if (soort === "los_maken") return antwoord(await losMaken(db, vraag, opdracht));
     if (soort === "webwinkel") return antwoord(await webwinkel(db, vraag, opdracht));
     if (soort === "cijfers") return antwoord(await cijfers(vraag));
+    if (soort === "kopers") return antwoord(await kopers(db, vraag, opdracht));
     return antwoord(await maken(db, vraag, opdracht));
   } catch (e) {
     if (e instanceof Melding) return antwoord({ fout: e.message }, e.status);

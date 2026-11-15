@@ -649,6 +649,11 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
   .drinken__stad--groot .drinken__lijst { grid-template-columns: 1fr; }
 }
 
+/* Wie kocht wat (backoffice) */
+.kopers__zoek { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--s-2); margin: var(--s-3) 0 var(--s-2); }
+.kopers__zoek .veld { margin: 0; min-width: 16rem; }
+.kopers__cuvee { margin-top: var(--s-6); }
+
 /* ---------- Hedonist-pagina ---------- */
 
 body.donker { background: var(--zwart); }
