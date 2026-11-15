@@ -39,22 +39,22 @@ cuvees:
 # Een stad met één adres komt onder "Verder in Nederland".
 drinken:
   - { naam: "4850", stad: Amsterdam, buurt: Oost }
-  - { naam: Badcuyp, stad: Amsterdam, buurt: De Pijp }
+  - { naam: "De Badcuyp", stad: Amsterdam, buurt: De Pijp }
   - { naam: Domenica, stad: Amsterdam, buurt: Jordaan }
-  - { naam: Entrepot, stad: Amsterdam, buurt: Plantage }
+  - { naam: "Restaurant Entrepot", stad: Amsterdam, buurt: Plantage }
   - { naam: Gebr. Hartering, stad: Amsterdam, buurt: Lastage }
   - { naam: Oocker, stad: Amsterdam, buurt: Frederiksplein }
-  - { naam: Parlotte, stad: Amsterdam, buurt: Jordaan }
-  - { naam: Paskamer, stad: Amsterdam, buurt: De Pijp }
-  - { naam: Vita Lente, stad: Amsterdam, buurt: Oud-West }
+  - { naam: "Café Parlotte", stad: Amsterdam, buurt: Jordaan }
+  - { naam: "Wijnbar Paskamer", stad: Amsterdam, buurt: De Pijp }
+  - { naam: "Café-Bar Vita Lente", stad: Amsterdam, buurt: Oud-West }
   - { naam: Café Kiem, stad: Rotterdam, buurt: Provenierswijk }
   - { naam: De Matroos en het Meisje, stad: Rotterdam, buurt: Katendrecht }
-  - { naam: NOTK, stad: Rotterdam, buurt: Katendrecht }
+  - { naam: "NOTK Wine & Food", stad: Rotterdam, buurt: Katendrecht }
   - { naam: Alma, stad: Oisterwijk, sterren: 1 }
-  - { naam: De Lepelaar, stad: Jisp }
+  - { naam: "Café de Lepelaar", stad: Jisp }
   - { naam: De Librije, stad: Zwolle, sterren: 3 }
-  - { naam: Loca, stad: Arnhem }
-  - { naam: Terroir, stad: Utrecht }
+  - { naam: "Restaurant Loca", stad: Arnhem }
+  - { naam: "Café-Restaurant Terroir", stad: Utrecht }
 ---
 
 Pierric Brochet komt uit een familie van wijnboeren in Taissy, net ten zuiden van Reims. Hij noemde zijn domein naar zijn overgrootvader Jules, omdat hij te bescheiden was om zijn eigen naam op het etiket te zetten. Hij studeerde aan de Viti Campus in Avize en liep stage bij Anselme Selosse. Daarna ging hij terug naar het familiebedrijf. Al snel merkte hij dat hij meer gemeen had met de manier van werken van Anselme dan met die van zijn vader, en hij besloot zijn eigen weg te gaan.
