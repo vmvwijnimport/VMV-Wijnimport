@@ -128,9 +128,10 @@ layout: default
     </ul>
     </div>
     {%- endif %}{% endfor %}
-    {%- assign losse = 0 %}{% for g in groepen %}{% if g.size < 3 %}{% assign losse = losse | plus: g.size %}{% endif %}{% endfor %}
+    {%- assign losse = 0 %}{% assign breedte = 0 %}{% for g in groepen %}{% if g.size < 3 %}{% assign losse = losse | plus: g.size %}{% elsif g.size > 4 %}{% assign breedte = breedte | plus: 2 %}{% else %}{% assign breedte = breedte | plus: 1 %}{% endif %}{% endfor %}
+    {%- comment -%} Verder in Nederland ook over twee kolommen als er veel adressen zijn en het past {%- endcomment -%}
     {%- if losse > 0 %}
-    <div class="drinken__stad">
+    <div class="drinken__stad{% if losse > 4 and breedte < 3 %} drinken__stad--groot{% endif %}">
     <h3>{{ t.drinken_verder }}</h3>
     <ul class="drinken__lijst">
       {%- assign adressen = p.drinken | sort: "stad" %}
