@@ -727,7 +727,7 @@ const isWorker = async (db, sleutel) => {
 // Zoekt in alle verkoopfacturen naar regels met een product van die producent: een product dat aan een
 // van zijn wijnen is gekoppeld, of een product of regel waarin de naam van de producent of een cuvée staat.
 // Geeft per cuvée de klanten met het aantal flessen, het aantal facturen en de laatste datum (geen bedragen),
-// en of de klant een bedrijf is (relatie type B) of een particulier (P).
+// en of de klant zakelijk is (zie hieronder bij "Zakelijk").
 const gewoon = (v) => String(v ?? "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 export const kopersVerzamelen = (facturen, productNaam, pastBij) => {
   const per = new Map();
@@ -770,10 +770,15 @@ const kopers = async (db, vraag, opdracht) => {
     facturen.push(...(await Promise.all(lijst.slice(i, i + 6).map((f) => vraag("GET", `/v1/invoice/${f.id}`)))).filter(Boolean));
   }
   const uitkomst = kopersVerzamelen(facturen, productNaam, pastBij);
+  // Zakelijk: gekoppeld aan een horecaklant uit het portaal, of in e-Boekhouden een bedrijf met een KvK- of
+  // btw-nummer. Alleen "bedrijf" is niet genoeg: in e-Boekhouden staan ook particulieren vaak als bedrijf.
+  const { data: horeca } = await db.from("klanten").select("eb_relatie_id").not("eb_relatie_id", "is", null);
+  const portaal = new Set((horeca || []).map((k) => k.eb_relatie_id));
   const namen = new Map();
   for (const id of new Set(uitkomst.flatMap((c) => c.klanten.map((k) => k.relatie)))) {
     const r = id ? await vraag("GET", `/v1/relation/${id}`) : null;
-    namen.set(id, r ? { naam: r.name || `Relatie ${id}`, plaats: r.city || "", zakelijk: r.type !== "P" } : { naam: "Onbekende klant", plaats: "", zakelijk: false });
+    const zakelijk = !!r && (portaal.has(id) || (r.type !== "P" && !!(schoon(r.companyRegistrationNumber, 40) || schoon(r.vatNumber, 40))));
+    namen.set(id, r ? { naam: r.name || `Relatie ${id}`, plaats: r.city || "", zakelijk } : { naam: "Onbekende klant", plaats: "", zakelijk: false });
   }
   return {
     producent, facturen: facturen.length,
