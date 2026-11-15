@@ -709,10 +709,17 @@
     factuurFunctie({ opdracht: "kopers", producent: producent })
       .then(function (r) {
         bezig(knop);
-        var aantal = r.cuvees.length;
+        // Alleen zakelijke klanten (bedrijven); particulieren tellen we wel, maar tonen we niet
+        var particulier = {};
+        r.cuvees.forEach(function (c) {
+          c.klanten = c.klanten.filter(function (k) { if (k.zakelijk === false) particulier[k.naam] = true; return k.zakelijk !== false; });
+        });
+        r.cuvees = r.cuvees.filter(function (c) { return c.klanten.length; });
+        var aantal = r.cuvees.length, zonder = Object.keys(particulier).length;
         melding(veld("kopermelding"), aantal
           ? r.facturen + " facturen doorzocht. " + producent + " staat op facturen van " + aantal + (aantal === 1 ? " cuvée." : " cuvées.")
-          : r.facturen + " facturen doorzocht. Geen facturen gevonden met wijnen van " + producent + ".");
+          : r.facturen + " facturen doorzocht. Geen zakelijke klanten gevonden met wijnen van " + producent + ".");
+        if (zonder) veld("kopermelding").textContent += " " + zonder + (zonder === 1 ? " particuliere klant" : " particuliere klanten") + " niet getoond.";
         // Eerst alle klanten samen, daarna per cuvée
         var alle = {};
         r.cuvees.forEach(function (c) {

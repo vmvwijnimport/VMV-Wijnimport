@@ -726,7 +726,8 @@ const isWorker = async (db, sleutel) => {
 // ---------- 9. Wie kocht de wijnen van een producent? ----------
 // Zoekt in alle verkoopfacturen naar regels met een product van die producent: een product dat aan een
 // van zijn wijnen is gekoppeld, of een product of regel waarin de naam van de producent of een cuvée staat.
-// Geeft per cuvée de klanten met het aantal flessen, het aantal facturen en de laatste datum (geen bedragen).
+// Geeft per cuvée de klanten met het aantal flessen, het aantal facturen en de laatste datum (geen bedragen),
+// en of de klant een bedrijf is (relatie type B) of een particulier (P).
 const gewoon = (v) => String(v ?? "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 export const kopersVerzamelen = (facturen, productNaam, pastBij) => {
   const per = new Map();
@@ -772,7 +773,7 @@ const kopers = async (db, vraag, opdracht) => {
   const namen = new Map();
   for (const id of new Set(uitkomst.flatMap((c) => c.klanten.map((k) => k.relatie)))) {
     const r = id ? await vraag("GET", `/v1/relation/${id}`) : null;
-    namen.set(id, r ? { naam: r.name || `Relatie ${id}`, plaats: r.city || "" } : { naam: "Onbekende klant", plaats: "" });
+    namen.set(id, r ? { naam: r.name || `Relatie ${id}`, plaats: r.city || "", zakelijk: r.type !== "P" } : { naam: "Onbekende klant", plaats: "", zakelijk: false });
   }
   return {
     producent, facturen: facturen.length,
