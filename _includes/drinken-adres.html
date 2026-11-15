@@ -1,11 +1,25 @@
-{%- comment -%} Eén adres in de lijst "Waar je ... drinkt" (_layouts/producent.html). include.onder: buurt of stad {%- endcomment -%}
+{%- comment -%} Eén adres in de lijst "Waar je ... drinkt" (_layouts/producent.html). include.onder: buurt of stad.
+  Het kaartje: Amsterdam en Rotterdam per buurt, de rest van Nederland per plaats (_data/kaartjes.yml, _includes/kaartjes/). {%- endcomment -%}
 {%- assign t = site.data.teksten[page.taal] | default: site.data.teksten.nl -%}
 {%- assign r = include.r -%}
+{%- assign k = site.data.kaartjes -%}
+{%- assign kaart = "nederland" -%}{%- assign plek = k.nederland[r.stad] -%}
+{%- if r.stad == "Amsterdam" and k.amsterdam[r.buurt] %}{% assign kaart = "amsterdam" %}{% assign plek = k.amsterdam[r.buurt] %}{% endif -%}
+{%- if r.stad == "Rotterdam" and k.rotterdam[r.buurt] %}{% assign kaart = "rotterdam" %}{% assign plek = k.rotterdam[r.buurt] %}{% endif -%}
 {%- assign zoek = r.naam | append: " " | append: r.stad | url_encode -%}
 <li>
-  <a class="drinken__naam" href="https://www.google.com/maps/search/?api=1&amp;query={{ zoek }}" target="_blank" rel="noopener" title="{{ t.drinken_kaart | replace: '%naam%', r.naam }}">{{ r.naam }}</a>
-  {%- if r.sterren %}
-  <span class="drinken__sterren" title="{{ r.sterren }} {% if r.sterren == 1 %}{{ t.michelinster }}{% else %}{{ t.michelinsterren }}{% endif %}">{% for i in (1..r.sterren) %}<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.6.7-5 4.5 1.4 6.6L12 17.2l-5.9 3.3 1.4-6.6-5-4.5 6.6-.7z" fill="currentColor"/></svg>{% endfor %}<span class="visueel-verborgen">{{ r.sterren }} {% if r.sterren == 1 %}{{ t.michelinster }}{% else %}{{ t.michelinsterren }}{% endif %}</span></span>
-  {%- endif %}
-  <span class="drinken__onder">{{ t.namen[include.onder] | default: include.onder }}</span>
+  <svg class="drinken__kaartje drinken__kaartje--{{ kaart }}" viewBox="-4 -4 108 108" width="64" height="64" aria-hidden="true">
+    <g class="drinken__lijnen">{% include kaartjes/{{ kaart }}.html %}</g>
+    {%- if plek %}
+    <circle class="drinken__ring" cx="{{ plek[0] }}" cy="{{ plek[1] }}" r="11"/>
+    <circle class="drinken__stip" cx="{{ plek[0] }}" cy="{{ plek[1] }}" r="5.5"/>
+    {%- endif %}
+  </svg>
+  <span class="drinken__tekst">
+    <a class="drinken__naam" href="https://www.google.com/maps/search/?api=1&amp;query={{ zoek }}" target="_blank" rel="noopener" title="{{ t.drinken_kaart | replace: '%naam%', r.naam }}">{{ r.naam }}</a>
+    {%- if r.sterren %}
+    <span class="drinken__sterren" title="{{ r.sterren }} {% if r.sterren == 1 %}{{ t.michelinster }}{% else %}{{ t.michelinsterren }}{% endif %}">{% for i in (1..r.sterren) %}<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.6.7-5 4.5 1.4 6.6L12 17.2l-5.9 3.3 1.4-6.6-5-4.5 6.6-.7z" fill="currentColor"/></svg>{% endfor %}<span class="visueel-verborgen">{{ r.sterren }} {% if r.sterren == 1 %}{{ t.michelinster }}{% else %}{{ t.michelinsterren }}{% endif %}</span></span>
+    {%- endif %}
+    <span class="drinken__onder">{{ t.namen[include.onder] | default: include.onder }}</span>
+  </span>
 </li>
