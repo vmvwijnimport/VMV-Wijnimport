@@ -590,39 +590,6 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 .producent__buren a { text-decoration: none; color: var(--tekst-zacht); }
 .producent__buren a:hover { color: var(--rood); }
 
-/* Waar je de wijnen drinkt: zwart vlak met de adressen per stad (_includes/drinken-adres.html) */
-.drinken { margin-top: var(--s-12); padding: var(--s-8) var(--s-6) var(--s-6); background: var(--zwart); color: var(--donker-tekst); }
-.drinken__kop { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-3) var(--s-8); align-items: end; margin-bottom: var(--s-8); }
-.drinken__kop h2 { margin: 0; color: var(--wit); font-weight: 300; font-size: var(--fs-h2); }
-.drinken__intro { margin: 0; max-width: 34em; font-family: var(--font-tekst); font-size: var(--fs-verhaal); line-height: 1.6; }
-.drinken__steden { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-6) var(--s-4); }
-.drinken__stad--groot { grid-column: span 2; }
-.drinken__stad h3 {
-  display: flex; justify-content: space-between; margin: 0; padding-bottom: 12px; border-bottom: 1px solid var(--wit);
-  font-size: var(--fs-ui); font-weight: 500; letter-spacing: 0; color: var(--wit);
-}
-.drinken__stad h3 span { font-weight: 400; color: var(--donker-zacht); }
-.drinken__stad ul { margin: 0; padding: 0; list-style: none; }
-.drinken__stad--groot ul { columns: 2; column-gap: var(--s-4); }
-.drinken__stad li { break-inside: avoid; padding: var(--s-2) 0; border-bottom: 1px solid var(--donker-lijn); }
-.drinken__stad a { display: inline-flex; align-items: baseline; gap: var(--s-1); color: var(--wit); text-decoration: none; font-size: var(--fs-h3); font-weight: 300; line-height: 1.2; }
-.drinken__stad a:hover .drinken__naam, .drinken__stad a:focus-visible .drinken__naam { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-.drinken__stad a:focus-visible { outline-color: var(--wit); }
-.drinken__sterren { display: inline-flex; gap: 2px; color: var(--wit); }
-.drinken__onder { display: block; margin-top: 4px; font-size: var(--fs-klein); color: var(--donker-zacht); }
-.drinken__noot { margin: var(--s-6) 0 0; font-size: var(--fs-klein); color: var(--donker-zacht); }
-@media (max-width: 80rem) { .drinken { margin-left: calc(var(--rand) * -1); margin-right: calc(var(--rand) * -1); padding-left: var(--rand); padding-right: var(--rand); } }
-@media (max-width: 56rem) {
-  .drinken { margin-top: var(--s-8); padding-top: var(--s-6); }
-  .drinken__kop { grid-template-columns: 1fr; margin-bottom: var(--s-6); }
-  .drinken__steden { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 36rem) {
-  .drinken__steden { grid-template-columns: 1fr; }
-  .drinken__stad--groot { grid-column: auto; }
-  .drinken__stad--groot ul { columns: 1; }
-}
-
 @media (max-width: 56rem) {
   .producent__inhoud { grid-template-columns: 1fr; gap: var(--s-6); }
 }
@@ -640,6 +607,19 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 .cuvees__naam { color: var(--zwart); flex: 1 1 auto; }
 .cuvees__druif { color: var(--tekst-zacht); font-size: var(--fs-klein); }
 .cuvees__extra { display: flex; align-items: baseline; gap: var(--s-1) var(--s-2); margin-left: auto; }
+
+/* Waar je de wijnen drinkt: een lijst zoals de cuvées, per stad (_includes/drinken-adres.html) */
+.drinken { margin-top: var(--s-8); }
+.drinken h2 { margin: 0 0 var(--s-1); }
+.drinken__intro { margin: 0 0 var(--s-3); color: var(--tekst); }
+.drinken h3 { margin: var(--s-3) 0 var(--s-1); font-size: var(--fs-klein); font-weight: 500; letter-spacing: 0; color: var(--zwart); }
+.drinken .drinken__lijst { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--zwart); }
+.drinken__lijst li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px var(--s-1); padding: 12px 0; border-bottom: 1px solid var(--lijn); }
+.drinken__naam { color: var(--zwart); text-decoration: none; }
+.drinken__naam:hover { color: var(--rood); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.drinken__sterren { display: inline-flex; gap: 2px; color: var(--zwart); }
+.drinken__onder { margin-left: auto; color: var(--tekst-zacht); font-size: var(--fs-klein); }
+.drinken__noot { margin: var(--s-2) 0 0; color: var(--tekst-zacht); font-size: var(--fs-klein); }
 
 /* ---------- Hedonist-pagina ---------- */
 

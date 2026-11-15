@@ -89,6 +89,30 @@ layout: default
         {% include contact-regel.html tekst=t.interesse_wijnen producent=p.naam %}
       </section>
       {%- endif %}
+      {%- if p.drinken and p.drinken.size > 0 %}
+      {%- comment -%} Waar je de wijnen drinkt: steden met meer adressen eerst, de losse adressen samen onder "Verder" {%- endcomment -%}
+      {%- assign groepen = p.drinken | group_by: "stad" | sort: "size" | reverse %}
+      <section class="drinken" aria-labelledby="drinken-kop">
+        <h2 id="drinken-kop">{{ t.drinken_kop | replace: "%naam%", p.naam }}</h2>
+        <p class="drinken__intro">{{ t.drinken_intro }}</p>
+        {%- for g in groepen %}{% if g.size > 1 %}
+        <h3>{{ g.name }}</h3>
+        <ul class="drinken__lijst">
+          {%- assign adressen = g.items | sort: "naam" %}
+          {%- for r in adressen %}{% include drinken-adres.html r=r onder=r.buurt %}{% endfor %}
+        </ul>
+        {%- endif %}{% endfor %}
+        {%- assign losse = 0 %}{% for g in groepen %}{% if g.size == 1 %}{% assign losse = losse | plus: 1 %}{% endif %}{% endfor %}
+        {%- if losse > 0 %}
+        <h3>{{ t.drinken_verder }}</h3>
+        <ul class="drinken__lijst">
+          {%- assign adressen = p.drinken | sort: "stad" %}
+          {%- for r in adressen %}{% assign g = groepen | where: "name", r.stad | first %}{% if g.size == 1 %}{% include drinken-adres.html r=r onder=r.stad %}{% endif %}{% endfor %}
+        </ul>
+        {%- endif %}
+        <p class="drinken__noot">{{ t.drinken_noot }}</p>
+      </section>
+      {%- endif %}
     </div>
 
     <aside class="producent__feiten" aria-label="{{ t.over_naam }} {{ p.naam }}">
@@ -109,39 +133,6 @@ layout: default
       {%- endif %}
     </aside>
   </div>
-
-  {%- if p.drinken and p.drinken.size > 0 %}
-  {%- comment -%} Waar je de wijnen drinkt: steden met meer adressen eerst, de losse adressen samen onder "Verder" {%- endcomment -%}
-  {%- assign groepen = p.drinken | group_by: "stad" | sort: "size" | reverse -%}
-  <section class="drinken" aria-labelledby="drinken-kop">
-    <div class="drinken__kop">
-      <h2 id="drinken-kop">{{ t.drinken_kop | replace: "%naam%", p.naam }}</h2>
-      <p class="drinken__intro">{{ t.drinken_intro }}</p>
-    </div>
-    <div class="drinken__steden">
-      {%- for g in groepen %}{% if g.size > 1 %}
-      <div class="drinken__stad{% if g.size > 5 %} drinken__stad--groot{% endif %}">
-        <h3>{{ g.name }} <span>{{ g.size }}</span></h3>
-        <ul>
-          {%- assign adressen = g.items | sort: "naam" %}
-          {%- for r in adressen %}{% include drinken-adres.html r=r onder=r.buurt %}{% endfor %}
-        </ul>
-      </div>
-      {%- endif %}{% endfor %}
-      {%- assign losse = 0 %}{% for g in groepen %}{% if g.size == 1 %}{% assign losse = losse | plus: 1 %}{% endif %}{% endfor %}
-      {%- if losse > 0 %}
-      <div class="drinken__stad">
-        <h3>{{ t.drinken_verder }} <span>{{ losse }}</span></h3>
-        <ul>
-          {%- assign adressen = p.drinken | sort: "stad" %}
-          {%- for r in adressen %}{% assign g = groepen | where: "name", r.stad | first %}{% if g.size == 1 %}{% include drinken-adres.html r=r onder=r.stad %}{% endif %}{% endfor %}
-        </ul>
-      </div>
-      {%- endif %}
-    </div>
-    <p class="drinken__noot">{{ t.drinken_noot }}</p>
-  </section>
-  {%- endif %}
 
   {%- if buren.size > 1 %}
   <section class="producent__buren">
