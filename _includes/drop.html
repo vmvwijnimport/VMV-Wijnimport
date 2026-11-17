@@ -1,5 +1,7 @@
 {%- comment -%}
   De droppagina: één wijn, via een eigen link uit WhatsApp (/drop/?c=<code> en /en/drop/?c=<code>).
+  Twee of drie wijnen in één link: /drop/?c=<code>-<code>(-<code>); ze staan dan naast elkaar
+  onder één kop (de link maak je in de backoffice door de drops aan te vinken).
   Staat niet in het menu en niet in Google. De wijn, de prijs (incl. btw) en de voorraad staan alleen
   in de database (supabase/022-drops.sql) en worden in de backoffice ingesteld, onder Drops.
   Logica: assets/js/drop.js; het mandje en afrekenen: assets/js/winkel.js.
@@ -27,6 +29,14 @@
     <h1>{% if en %}Almost there{% else %}Nog even geduld{% endif %}</h1>
     <p class="pagina__intro" data-veld="opent"></p>
   </div>
+
+  {%- comment -%} Bij meer wijnen in één link: een kop, en daaronder de wijnen naast elkaar {%- endcomment -%}
+  <header class="drop__samenkop" data-toestand="samen" hidden>
+    <p class="drop__producent" data-veld="samenproducent"></p>
+    <h1 data-veld="samennaam"></h1>
+  </header>
+  <div class="drop__samen" data-toestand="samen" data-veld="samen" hidden></div>
+  <p class="drop__meer drop__samenmeer" data-veld="samenmeer" hidden><a href=""></a></p>
 
   <article class="drop__wijn" data-toestand="wijn" hidden>
     <figure class="drop__foto" data-veld="fotovak">

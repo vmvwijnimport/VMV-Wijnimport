@@ -1410,10 +1410,25 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .drop__klein { margin: var(--s-2) 0 0; font-size: var(--fs-klein); color: var(--tekst-zacht); }
 .drop__verhaal { margin-top: var(--s-6); padding-top: var(--s-4); border-top: 1px solid var(--lijn); }
 .drop__meer { margin: var(--s-3) 0 0; }
+/* Twee of drie wijnen in één link: een kop, en de wijnen naast elkaar */
+.drop__samenkop { max-width: var(--kolom); margin-bottom: var(--s-6); }
+.drop__samen {
+  display: grid; grid-template-columns: repeat(var(--wijnen, 2), minmax(0, 1fr)); gap: var(--s-6);
+  padding-top: var(--s-4); border-top: 1px solid var(--zwart);
+}
+.drop__samen .drop__wijn { grid-template-columns: 1fr; gap: var(--s-3); align-content: start; }
+.drop__samen .drop__foto { position: static; }
+.drop__samen h2 { margin: 0; font-size: var(--fs-h2); }
+.drop__samen .drop__verhaal { margin-top: var(--s-4); }
+.drop__samenmeer { margin-top: var(--s-6); }
 @media (max-width: 56rem) {
   .drop__wijn { grid-template-columns: 1fr; gap: var(--s-4); }
   .drop__foto { position: static; margin: 0 calc(var(--rand) * -1); }
   .drop__foto img { aspect-ratio: 1 / 1; }
+  .drop__samen { grid-template-columns: 1fr; gap: 0; padding-top: 0; }
+  .drop__samen .drop__wijn { padding: var(--s-4) 0 var(--s-6); }
+  .drop__samen .drop__wijn + .drop__wijn { border-top: 1px solid var(--lijn); }
+  .drop__samen .drop__wijn:last-child { padding-bottom: 0; }
 }
 .mandje__melding { margin: 0 0 var(--s-2); padding: 12px 14px; background: var(--champagne-licht); font-size: var(--fs-klein); color: var(--tekst); }
 .mandje__melding[hidden] { display: none; }
@@ -1433,6 +1448,10 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .beheer__dropknoppen { grid-column: 1 / -1; }
 .beheer__dropknoppen .knop { padding: 10px 18px; }
 .beheer__dropkosten { margin-top: var(--s-8); }
+.beheer__dropsamen { margin-bottom: var(--s-3); padding: var(--s-2) var(--s-3); background: var(--champagne-licht); }
+.beheer__dropsamen .beheer__klein { margin: 0; }
+.beheer__dropsamen .beheer__knoppen { margin-top: var(--s-2); }
+.beheer__dropsamenvink { margin: var(--s-1) 0 0; }
 
 /* ---------- Backoffice als eigen werkplek: zwarte zijbalk links, zonder de kop en footer van de site ---------- */
 .beheerpagina .kop, .beheerpagina .voet, .beheerpagina .naar-inhoud { display: none; }

@@ -1246,6 +1246,19 @@
   var drop = null;          // de drop die open staat; null = nieuwe drop
   var dropFoto = "";        // adres van de foto (Supabase Storage)
   var dropLink = function (d) { return location.origin + "/drop/?c=" + d.code; };
+  var samen = [];           // aangevinkte drops voor één gezamenlijke link (maximaal drie)
+  var samenLink = function () {
+    return location.origin + "/drop/?c=" + samen.map(function (d) { return d.code; }).join("-");
+  };
+  var toonSamen = function () {
+    var n = samen.length;
+    veld("dropsamentekst").textContent = n < 2
+      ? "Vink twee of drie drops aan om ze samen in één link te delen. Ze staan dan naast elkaar op één pagina." + (n ? " Nu aangevinkt: " + dropNaam(samen[0]) + "." : "")
+      : "Samen in één link: " + samen.map(dropNaam).join(" en ") + ".";
+    veld("dropsamenknoppen").hidden = n < 2;
+    veld("dropsamenbekijk").href = n < 2 ? "" : samenLink();
+    veld("droplijst").querySelectorAll(".beheer__dropsamenvink input").forEach(function (v) { v.disabled = !v.checked && n >= 3; });
+  };
   // datetime-local werkt met de tijd van de computer; de database met een vast tijdstip
   var lokaal = function (iso) {
     if (!iso) return "";
@@ -1292,6 +1305,8 @@
     var lijst = veld("droplijst");
     lijst.textContent = "";
     var zichtbaar = data.drops.filter(function (d) { return !d.verwijderd; });
+    samen = samen.filter(function (s) { return zichtbaar.some(function (d) { return d.id === s.id; }); })
+                 .map(function (s) { return zichtbaar.filter(function (d) { return d.id === s.id; })[0]; });
     zichtbaar.forEach(function (d) {
       var t = dropTelling(d), st = dropStatus(d, t);
       var rij = el("div", "beheer__droprij");
@@ -1302,6 +1317,18 @@
         (d.max_per_klant ? " · max. " + d.max_per_klant + " per klant" : "")));
       var c2 = el("div", "beheer__labels");
       c2.appendChild(el("span", "label label--" + st[1], st[0]));
+      var vink = el("label", "akkoord beheer__dropsamenvink");
+      var vakje = el("input");
+      vakje.type = "checkbox";
+      vakje.checked = samen.some(function (s) { return s.id === d.id; });
+      vakje.addEventListener("change", function () {
+        samen = samen.filter(function (s) { return s.id !== d.id; });
+        if (vakje.checked) samen.push(d);
+        toonSamen();
+      });
+      vink.appendChild(vakje);
+      vink.appendChild(document.createTextNode(" Samen in één link"));
+      c1.appendChild(vink);
       var knoppen = el("div", "beheer__knoppen beheer__dropknoppen");
       var kopieer = el("button", "knop knop--primair", "Kopieer link");
       kopieer.type = "button";
@@ -1339,6 +1366,8 @@
       lijst.appendChild(rij);
     });
     veld("dropleeg").hidden = zichtbaar.length > 0;
+    veld("dropsamen").hidden = zichtbaar.length < 2;
+    toonSamen();
 
     // De wijnen om uit te kiezen: alle wijnen uit de prijslijst
     var keuze = dropForm.product_id;
@@ -1398,6 +1427,12 @@
     pagina.querySelector(".beheer__dropnieuw").hidden = false;
   };
   pagina.querySelector("[data-actie=drop-nieuw]").addEventListener("click", function () { openDrop(null); });
+  pagina.querySelector("[data-actie=drop-samenkopieer]").addEventListener("click", function () {
+    var plek = veld("dropmelding"), link = samenLink();
+    var klaar = function () { melding(plek, "De link staat op je klembord: " + link, "goed"); };
+    if (navigator.clipboard) navigator.clipboard.writeText(link).then(klaar, function () { melding(plek, "Kopieer deze link: " + link); });
+    else melding(plek, "Kopieer deze link: " + link);
+  });
   pagina.querySelector("[data-actie=drop-annuleer]").addEventListener("click", sluitDrop);
   pagina.querySelector("[data-actie=drop-fotoweg]").addEventListener("click", function () { zetFoto(""); dropForm.querySelector("#d-foto").value = ""; });
   // Bij een nieuwe drop de particuliere prijs uit de prijslijst voorstellen
