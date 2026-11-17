@@ -1,7 +1,7 @@
 {%- comment -%}
   De droppagina: één wijn, via een eigen link uit WhatsApp (/drop/?c=<code> en /en/drop/?c=<code>).
-  Twee of drie wijnen in één link: /drop/?c=<code>-<code>(-<code>); ze staan dan naast elkaar
-  onder één kop (de link maak je in de backoffice door de drops aan te vinken).
+  Een drop kan twee of drie wijnen hebben (supabase/026): de link is die van de eerste wijn, en
+  drop_aanbod geeft de codes van de andere wijnen mee. /drop/?c=<code>-<code> werkt ook.
   Staat niet in het menu en niet in Google. De wijn, de prijs (incl. btw) en de voorraad staan alleen
   in de database (supabase/022-drops.sql) en worden in de backoffice ingesteld, onder Drops.
   Logica: assets/js/drop.js; het mandje en afrekenen: assets/js/winkel.js.
@@ -30,13 +30,31 @@
     <p class="pagina__intro" data-veld="opent"></p>
   </div>
 
-  {%- comment -%} Bij meer wijnen in één link: een kop, en daaronder de wijnen naast elkaar {%- endcomment -%}
-  <header class="drop__samenkop" data-toestand="samen" hidden>
-    <p class="drop__producent" data-veld="samenproducent"></p>
-    <h1 data-veld="samennaam"></h1>
-  </header>
-  <div class="drop__samen" data-toestand="samen" data-veld="samen" hidden></div>
-  <p class="drop__meer drop__samenmeer" data-veld="samenmeer" hidden><a href=""></a></p>
+  {%- comment -%}
+    Twee of drie wijnen in één drop: links de foto van de wijn die je aanwijst (op de telefoon veeg je
+    erdoorheen), met de stippen uit het logo in de kleur van elke wijn; rechts de wijnkaart met per wijn
+    een aantal, één totaal en één knop. De regels en foto's maakt assets/js/drop.js.
+  {%- endcomment %}
+  <div class="drop__kaart" data-toestand="samen" hidden>
+    <div class="drop__fotokolom">
+      <div class="drop__fotos" data-veld="fotos"></div>
+      <div class="drop__stippen" data-veld="stippen" role="group" aria-label="{% if en %}Photos{% else %}Foto's{% endif %}"></div>
+    </div>
+    <div class="drop__info">
+      <p class="drop__producent" data-veld="samenproducent"></p>
+      <h1 data-veld="samennaam"></h1>
+      <ul class="drop__lijst" data-veld="lijst"></ul>
+      <div class="drop__som">
+        <p class="drop__totaal" data-veld="totaal" aria-live="polite"></p>
+        <button class="knop knop--primair" type="button" data-veld="samenerin">{% if en %}Add to basket{% else %}In winkelmandje{% endif %}</button>
+      </div>
+      <p class="drop__klein drop__fout" data-veld="samenfout" role="alert" hidden></p>
+      <p class="drop__klein" data-veld="samenregels"></p>
+      <p class="drop__klein" data-veld="samenlevering"></p>
+      <div class="verhaal drop__verhaal" data-veld="samentekst"></div>
+      <p class="drop__meer" data-veld="samenmeer" hidden><a href=""></a></p>
+    </div>
+  </div>
 
   <article class="drop__wijn" data-toestand="wijn" hidden>
     <figure class="drop__foto" data-veld="fotovak">
