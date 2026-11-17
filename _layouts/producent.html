@@ -35,17 +35,20 @@ layout: default
     <p class="producent__nl">{{ t.verkrijgbaar }} {{ site.title }}</p>
   </header>
 
-  {%- comment -%} Eerst de eigen foto, daarna de fles op het bankje; met twee foto's kun je doorklikken {%- endcomment -%}
+  {%- comment -%}
+    Eerst de eigen foto, daarna de fles op het bankje; met twee foto's kun je doorklikken.
+    fotoreeks: false = de lijstfoto alleen in de lijst met producenten (bijv. als het dezelfde foto is)
+  {%- endcomment -%}
   {%- assign aantal = 0 -%}
   {%- if p.foto %}{% assign aantal = aantal | plus: 1 %}{% endif -%}
-  {%- if p.lijst_foto contains "/lijst/" %}{% assign aantal = aantal | plus: 1 %}{% endif -%}
+  {%- if p.lijst_foto contains "/lijst/" and p.fotoreeks != false %}{% assign aantal = aantal | plus: 1 %}{% endif -%}
   {%- if aantal > 0 %}
   <figure class="producent__foto{% if aantal > 1 %} fotoreeks{% endif %}"{% if aantal > 1 %} data-fotoreeks{% endif %}>
     <div class="fotoreeks__baan">
       {%- if p.foto %}
       <img src="{{ p.foto | relative_url }}" alt="{{ foto_alt }}" style="object-position: {{ p.foto_positie | default: 'center' }}">
       {%- endif %}
-      {%- if p.lijst_foto contains "/lijst/" %}
+      {%- if p.lijst_foto contains "/lijst/" and p.fotoreeks != false %}
       {%- assign kleinefoto = p.lijst_foto | replace: ".jpg", "-klein.jpg" %}
       <img src="{{ p.lijst_foto | relative_url }}" srcset="{{ kleinefoto | relative_url }} 1200w, {{ p.lijst_foto | relative_url }} 2400w" sizes="(min-width: 80rem) 1200px, 100vw" alt="{{ t.fles_alt | replace: '%naam%', p.naam }}"{% if aantal > 1 %} loading="lazy"{% endif %}>
       {%- endif %}
@@ -77,9 +80,11 @@ layout: default
           <li>
             <span class="stip stip--{{ c.type | default: 'wit' }}" aria-hidden="true"></span>
             <span class="cuvees__naam">{{ c.naam }}</span>
-            {%- if c.binnenkort or c.druif %}
+            {%- if c.binnenkort or c.druif or c.herkomst %}
             <span class="cuvees__extra">
               {% if c.binnenkort %}<span class="label label--binnenkort">{{ t.binnenkort }}</span>{% endif %}
+              {%- comment %} Eigen wijngaard (domaine) of gekochte druiven (négoce) {% endcomment %}
+              {% if c.herkomst %}<span class="label">{% if c.herkomst == "negoce" %}Négoce{% else %}Domaine{% endif %}</span>{% endif %}
               {% if c.druif %}<span class="cuvees__druif">{{ t.namen[c.druif] | default: c.druif }}</span>{% endif %}
             </span>
             {%- endif %}
