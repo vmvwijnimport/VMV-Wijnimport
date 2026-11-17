@@ -8,9 +8,9 @@ Lees dit bestand en `docs/voortgang.md` aan het begin van elke sessie. Daar staa
 
 **VMV Wijnimport B.V.** in Amsterdam, opgericht in november 2024 door Tim Meyer Viol en Stijn Vrolijk. Ze leerden elkaar kennen bij Oocker, het restaurant van Tim aan het Frederiksplein. VMV importeert wijn van een **nieuwe generatie wijnmakers**: veelal biologisch of biodynamisch, zonder pesticiden of herbiciden, met zo weinig mogelijk ingrijpen in de kelder. Van sommige wijnmakers is de productie klein en de vraag groot; die wijnen gaan vooral naar de Nederlandse horeca.
 
-- **Producenten** (`_producenten/`, 16 stuks):
+- **Producenten** (`_producenten/`, 17 stuks):
   - Champagne: Aurore Casanova, Champagne INSU, Champagne Petit-Collino, Domaine A. Limar, Domaine Jules Brochet, Hélène Charbaut, Julien Hénin, Maison Raday, Sacy Soeur & Frère, Théo Cecchetti, Thomas Perseval.
-  - Bourgogne: Les Monts, Maison Ex Nihilo, Vins Saisons.
+  - Bourgogne: Jérémy Carteret, Les Monts, Maison Ex Nihilo, Vins Saisons.
   - Franken: Krawalter.
   - Piëmont: Rosanna Sandri.
 - **Hedonist:** VMV is officieel distributeur van Hedonist-glazen (handgeblazen, loodvrij) in Nederland. Er zijn twee modellen: HEDONIST Glas (breed) en HEDONIST Glas "White" (smaller). Op /hedonist/ staat een pre-order met winkelmandje.
