@@ -6,7 +6,7 @@ werkwijze: Organic (not certified)
 
 Jérémy Carteret spent almost ten years at Benjamin Leroux in Beaune, in the last years as his right hand. In 2019 he also made his first wine of his own. In 2022 he went out on his own, with his own cellar in La Rochepot, a village in the hills behind Meursault.
 
-His own vineyards are in Pommard, and they are old. Les Grandes Carelles was planted in 1937, Les Nazarettes in 1939. Three of his wines come from there. For the other wines he buys grapes from growers who farm organically. The grapes for Euphoria, for example, come from Les Crucibées, the vineyard of Nina Saulnier of [Les Monts](/en/producers/les-monts/).
+His own vineyards are in Pommard. Les Grandes Carelles was planted in 1937, Les Nazarettes in 1939. Three of his wines come from there. For the other wines he buys grapes from growers who farm organically. The grapes for Euphoria, for example, come from Les Crucibées, the vineyard of Nina Saulnier of [Les Monts](/en/producers/les-monts/).
 
 In the vineyard, everything is about concentration. Jérémy keeps yields low, sometimes only 15 hectolitres per hectare, around six bunches per vine. Even on the oldest vines he still removes bunches in summer. He doesn't trim the vines: he weaves the long shoots together instead.
 

@@ -62,7 +62,7 @@ cuvees:
 
 Jérémy Carteret werkte bijna tien jaar bij Benjamin Leroux in Beaune, de laatste jaren als zijn rechterhand. In 2019 maakte hij daarnaast zijn eerste eigen wijn. In 2022 ging hij voor zichzelf verder, met een eigen kelder in La Rochepot, een dorp in de heuvels achter Meursault.
 
-Zijn eigen wijngaarden liggen in Pommard en zijn oud. Les Grandes Carelles werd in 1937 geplant, Les Nazarettes in 1939. Daar komen drie van zijn wijnen vandaan. Voor de andere wijnen koopt hij druiven bij boeren die biologisch werken. De druiven voor Euphoria komen bijvoorbeeld van Les Crucibées, de wijngaard van Nina Saulnier van [Les Monts](/producenten/les-monts/).
+Zijn eigen wijngaarden liggen in Pommard. Les Grandes Carelles werd in 1937 geplant, Les Nazarettes in 1939. Daar komen drie van zijn wijnen vandaan. Voor de andere wijnen koopt hij druiven bij boeren die biologisch werken. De druiven voor Euphoria komen bijvoorbeeld van Les Crucibées, de wijngaard van Nina Saulnier van [Les Monts](/producenten/les-monts/).
 
 In de wijngaard draait alles om concentratie. Jérémy houdt de opbrengst laag, soms maar 15 hectoliter per hectare, zo'n zes trossen per stok. Ook bij de oudste stokken haalt hij in de zomer nog trossen weg. Bijknippen doet hij niet: de lange takken vlecht hij in elkaar.
 
