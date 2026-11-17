@@ -67,6 +67,10 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         kop.textContent = "Your payment didn’t go through";
         tekst.textContent = "You haven’t been charged. Your basket is still there, so you can try again.";
+        // Back to the page where you checked out (the drop or Hedonist), with the basket
+        var terugNaar = document.getElementById("bestelling-terug");
+        if (/^\/[^\/]/.test(betaling.terug || "")) terugNaar.href = betaling.terug;
+        terugNaar.textContent = "Back to your basket";
       }
     })
     .catch(function () {

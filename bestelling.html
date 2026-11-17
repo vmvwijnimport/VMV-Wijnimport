@@ -68,6 +68,10 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         kop.textContent = "Je betaling is niet gelukt";
         tekst.textContent = "Er is niets afgeschreven. Je winkelmandje staat nog klaar, dus je kunt het opnieuw proberen.";
+        // Terug naar de pagina waar je afrekende (de drop of Hedonist), met het mandje
+        var terugNaar = document.getElementById("bestelling-terug");
+        if (/^\/[^\/]/.test(betaling.terug || "")) terugNaar.href = betaling.terug;
+        terugNaar.textContent = "Terug naar je winkelmandje";
       }
     })
     .catch(function () {

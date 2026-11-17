@@ -385,7 +385,8 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(function (r) { return r.json().then(function (j) { if (!r.ok) { var f = new Error(j.fout || "Betalen lukt nu niet"); f.status = r.status; throw f; } return j; }); })
         .then(function (betaling) {
           // taal: na het betalen stuurt /bestelling/ Engelse klanten door naar /en/order/
-          try { sessionStorage.setItem("vmv-betaling", JSON.stringify({ id: betaling.id, bestelnummer: betaling.bestelnummer, taal: EN ? "en" : "nl", soort: metWijn ? "drop" : "hedonist" })); } catch (e) {}
+          // terug: de pagina waar je afrekende (bijv. de drop), voor als de betaling niet lukt
+          try { sessionStorage.setItem("vmv-betaling", JSON.stringify({ id: betaling.id, bestelnummer: betaling.bestelnummer, taal: EN ? "en" : "nl", soort: metWijn ? "drop" : "hedonist", terug: location.pathname + location.search })); } catch (e) {}
           status.textContent = EN ? "Taking you to the payment page..." : "Je gaat nu naar de betaalpagina...";
           // De mails naar de klant en naar VMV gaan pas als de betaling binnen is (betalen/worker.js)
           location.href = betaling.betaallink;
