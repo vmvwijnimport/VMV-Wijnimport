@@ -607,6 +607,13 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 .cuvees__naam { color: var(--zwart); flex: 1 1 auto; }
 .cuvees__druif { color: var(--tekst-zacht); font-size: var(--fs-klein); }
 .cuvees__extra { display: flex; align-items: baseline; gap: var(--s-1) var(--s-2); margin-left: auto; }
+.cuvees__herkomst { min-width: 5.5em; text-align: center; }
+@media (max-width: 36rem) {
+  /* Smal: een lange naam blijft naast de stip, druif en label eronder rechts */
+  .cuvees__lijst li { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+  .cuvees__lijst .stip { align-self: baseline; }
+  .cuvees__extra { grid-column: 2; justify-self: end; }
+}
 
 /* Waar je de wijnen drinkt: een bordeaux vlak (de kleur van het visitekaartje) over de breedte van de pagina, per stad een kolom,
    per zaak een ingelijst stratenplan (_includes/drinken-adres.html). Op rood is de hover een onderstreping. */

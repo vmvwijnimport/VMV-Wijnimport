@@ -83,9 +83,9 @@ layout: default
             {%- if c.binnenkort or c.druif or c.herkomst %}
             <span class="cuvees__extra">
               {% if c.binnenkort %}<span class="label label--binnenkort">{{ t.binnenkort }}</span>{% endif %}
-              {%- comment %} Eigen wijngaard (domaine) of gekochte druiven (négoce) {% endcomment %}
-              {% if c.herkomst %}<span class="label">{% if c.herkomst == "negoce" %}Négoce{% else %}Domaine{% endif %}</span>{% endif %}
               {% if c.druif %}<span class="cuvees__druif">{{ t.namen[c.druif] | default: c.druif }}</span>{% endif %}
+              {%- comment %} Eigen wijngaard (domaine) of gekochte druiven (négoce), achteraan met een vaste breedte zodat ze onder elkaar staan {% endcomment %}
+              {% if c.herkomst %}<span class="label cuvees__herkomst">{% if c.herkomst == "negoce" %}Négoce{% else %}Domaine{% endif %}</span>{% endif %}
             </span>
             {%- endif %}
           </li>
