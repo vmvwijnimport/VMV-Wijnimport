@@ -15,47 +15,47 @@ werkwijze: Biologisch (niet gecertificeerd)
 website:
 instagram:
 cuvees:
-  - naam: "Bourgogne “Aligoté Doré”"
+  - naam: "Aligoté Doré"
     druif: Aligoté
     type: wit
     herkomst: domaine
-  - naam: "Hautes-Côtes de Beaune “Euphoria”"
+  - naam: "Euphoria"
     druif: Chardonnay
     type: wit
     herkomst: negoce
-  - naam: "Hautes-Côtes de Nuits “Aux Champs Perdrix”"
+  - naam: "Aux Champs Perdrix"
     druif: Chardonnay, Pinot Blanc
     type: wit
     herkomst: negoce
-  - naam: "Rully “Les Pétales Blancs”"
+  - naam: "Les Pétales Blancs"
     druif: Chardonnay
     type: wit
     herkomst: negoce
-  - naam: "Bourgogne “Flower Power”"
+  - naam: "Flower Power"
     druif: Pinot Noir
     type: rood
     herkomst: negoce
-  - naam: "Bourgogne “Euphoria”"
+  - naam: "Euphoria"
     druif: Pinot Noir
     type: rood
     herkomst: negoce
-  - naam: "Bourgogne Côte d'Or “Monpoulain”"
+  - naam: "Monpoulain"
     druif: Pinot Noir
     type: rood
     herkomst: negoce
-  - naam: "Bourgogne Côte d'Or “Les Grandes Carelles”"
+  - naam: "Les Grandes Carelles"
     druif: Pinot Noir
     type: rood
     herkomst: domaine
-  - naam: "Bourgogne Côte d'Or “Les Nazarettes”"
+  - naam: "Les Nazarettes"
     druif: Pinot Noir
     type: rood
     herkomst: domaine
-  - naam: "Hautes-Côtes de Nuits “Les Pétales Rouges”"
+  - naam: "Les Pétales Rouges"
     druif: Pinot Noir
     type: rood
     herkomst: negoce
-  - naam: "Hautes-Côtes de Nuits “Les Dames Huguettes”"
+  - naam: "Les Dames Huguettes"
     druif: Pinot Noir
     type: rood
     herkomst: negoce
