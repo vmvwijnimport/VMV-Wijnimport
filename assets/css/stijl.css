@@ -544,6 +544,7 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 
 .producent__foto { margin: 0 calc(var(--rand) * -1); }
 .producent__foto img { width: 100%; height: clamp(18rem, 55vw, 40rem); object-fit: cover; }
+.producent__foto--heel { margin: 0; }
 .producent__foto--heel img { height: auto; }
 @media (min-width: 80rem) { .producent__foto { margin: 0; } }
 
