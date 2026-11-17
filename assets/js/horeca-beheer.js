@@ -1476,7 +1476,20 @@
     fotoVeld.appendChild(fl); fotoVeld.appendChild(foto);
     velden.appendChild(prijsVeld); velden.appendChild(aantalVeld); velden.appendChild(fotoVeld);
     regel.appendChild(velden);
-    if (d) { prijs.value = kaal(d.prijs); aantal.value = d.aantal; }
+    // Elke wijn een eigen beschrijving, in het Nederlands en het Engels
+    var tekstVeld = function (klasse, label, uitleg) {
+      var v = el("div", "veld"), t = el("textarea", klasse);
+      t.id = keuze.id + "-" + klasse; t.rows = 5; t.maxLength = 3000;
+      var l = el("label", null, label + " ");
+      l.appendChild(el("span", "veld__optioneel", uitleg));
+      l.htmlFor = t.id;
+      v.appendChild(l); v.appendChild(t);
+      regel.appendChild(v);
+      return t;
+    };
+    var tekst = tekstVeld("beheer__droptekst", "Tekst over deze wijn", "(een witregel is een nieuwe alinea)");
+    var tekstEn = tekstVeld("beheer__droptekst-en", "In het Engels", "(leeg = de Nederlandse tekst)");
+    if (d) { prijs.value = kaal(d.prijs); aantal.value = d.aantal; tekst.value = d.tekst || ""; tekstEn.value = d.tekst_en || ""; }
 
     var vak = el("div", "beheer__dropfoto");
     var img = el("img");
@@ -1520,8 +1533,6 @@
       dropForm.open_tot.value = lokaal(d.open_tot);
       dropForm.toon_aantal.checked = d.toon_aantal;
       dropForm.gestopt.checked = d.gestopt;
-      dropForm.tekst.value = d.tekst || "";
-      dropForm.tekst_en.value = d.tekst_en || "";
       dropForm.levering.value = d.levering || "";
       dropForm.levering_en.value = d.levering_en || "";
     } else {
@@ -1550,7 +1561,8 @@
       return { id: r.dataset.id ? Number(r.dataset.id) : null, foto: r.dataset.foto,
                product_id: r.querySelector(".beheer__dropkeuze").value,
                prijs: getal(r.querySelector(".beheer__dropprijs").value),
-               aantal: r.querySelector(".beheer__dropaantal").value };
+               aantal: r.querySelector(".beheer__dropaantal").value,
+               tekst: r.querySelector(".beheer__droptekst").value, tekst_en: r.querySelector(".beheer__droptekst-en").value };
     });
     var fout = null;
     regels.forEach(function (w, i) {
@@ -1572,9 +1584,7 @@
     var bewaar = function (w, groep) {
       return db.rpc("beheer_drop", { gegevens: Object.assign({}, samen, {
         id: w.id, product_id: w.product_id, prijs: w.prijs, aantal: w.aantal, foto: w.foto,
-        // De tekst hoort bij de drop en staat bij de eerste wijn
-        tekst: groep ? "" : dropForm.tekst.value, tekst_en: groep ? "" : dropForm.tekst_en.value,
-        groep: groep || ""
+        tekst: w.tekst, tekst_en: w.tekst_en, groep: groep || ""
       }) }).then(function (r) { if (r.error) throw r.error; return r.data; });
     };
     var knop = dropForm.querySelector("button[type=submit]");

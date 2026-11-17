@@ -31,29 +31,13 @@
   </div>
 
   {%- comment -%}
-    Twee of drie wijnen in één drop: links de foto van de wijn die je aanwijst (op de telefoon veeg je
-    erdoorheen), met de stippen uit het logo in de kleur van elke wijn; rechts de wijnkaart met per wijn
-    een aantal, één totaal en één knop. De regels en foto's maakt assets/js/drop.js.
+    Twee of drie wijnen in één drop: bovenaan een rij met de wijnen (stip in de kleur van de wijn, naam,
+    prijs); daaronder de gekozen wijn als een eigen pagina, met eigen foto, tekst, aantal en knop.
+    De panelen zijn kopieën van de wijn hieronder (assets/js/drop.js).
   {%- endcomment %}
-  <div class="drop__kaart" data-toestand="samen" hidden>
-    <div class="drop__fotokolom">
-      <div class="drop__fotos" data-veld="fotos"></div>
-      <div class="drop__stippen" data-veld="stippen" role="group" aria-label="{% if en %}Photos{% else %}Foto's{% endif %}"></div>
-    </div>
-    <div class="drop__info">
-      <p class="drop__producent" data-veld="samenproducent"></p>
-      <h1 data-veld="samennaam"></h1>
-      <ul class="drop__lijst" data-veld="lijst"></ul>
-      <div class="drop__som">
-        <p class="drop__totaal" data-veld="totaal" aria-live="polite"></p>
-        <button class="knop knop--primair" type="button" data-veld="samenerin">{% if en %}Add to basket{% else %}In winkelmandje{% endif %}</button>
-      </div>
-      <p class="drop__klein drop__fout" data-veld="samenfout" role="alert" hidden></p>
-      <p class="drop__klein" data-veld="samenregels"></p>
-      <p class="drop__klein" data-veld="samenlevering"></p>
-      <div class="verhaal drop__verhaal" data-veld="samentekst"></div>
-      <p class="drop__meer" data-veld="samenmeer" hidden><a href=""></a></p>
-    </div>
+  <div class="drop__meerdere" data-toestand="samen" hidden>
+    <div class="drop__kiezer" role="tablist" aria-label="{% if en %}Wines in this drop{% else %}Wijnen in deze drop{% endif %}" data-veld="kiezer"></div>
+    <div data-veld="panelen"></div>
   </div>
 
   <article class="drop__wijn" data-toestand="wijn" hidden>

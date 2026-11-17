@@ -1410,68 +1410,37 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .drop__klein { margin: var(--s-2) 0 0; font-size: var(--fs-klein); color: var(--tekst-zacht); }
 .drop__verhaal { margin-top: var(--s-6); padding-top: var(--s-4); border-top: 1px solid var(--lijn); }
 .drop__meer { margin: var(--s-3) 0 0; }
-/* Twee of drie wijnen in één drop: links de foto van de wijn die je aanwijst, rechts de wijnkaart.
-   De stippen uit het logo staan voor de kleur van elke wijn (champagne, rosé, rood). */
-.drop__kaart { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: var(--s-8); align-items: start; }
-.drop__fotokolom { position: sticky; top: calc(var(--kopgrootte) + var(--s-3)); }
-.drop__fotos { display: grid; }
-.drop__fotovak { grid-area: 1 / 1; margin: 0; opacity: 0; transition: opacity .45s ease; }
-.drop__fotovak:only-child, .drop__fotovak.is-actief { opacity: 1; }
-.drop__fotovak img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; background: var(--champagne-licht); }
-.drop__stippen { display: flex; gap: var(--s-1); margin-top: var(--s-2); }
-.drop__stip {
-  display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; background: transparent; cursor: pointer;
+/* Twee of drie wijnen in één drop: een rij met de wijnen, en de gekozen wijn als eigen pagina.
+   De stip heeft de kleur van de wijn, zoals de stippen in het logo (champagne, rosé, rood). */
+.drop__kiezer { display: flex; gap: var(--s-4); margin-bottom: var(--s-6); border-bottom: 1px solid var(--lijn); }
+.drop__keuze {
+  display: flex; gap: var(--s-1); align-items: flex-start; margin-bottom: -1px; padding: 0 0 var(--s-2);
+  border: 0; border-bottom: 2px solid transparent; background: none; font: inherit; color: var(--tekst-zacht);
+  text-align: left; cursor: pointer;
 }
-.drop__stip::before {
-  content: ""; width: 14px; height: 14px; border-radius: 50%;
-  background: var(--stip); border: 1px solid var(--stiprand); transition: transform .2s ease;
-}
-.drop__stip[aria-pressed="true"]::before { transform: scale(1.3); outline: 1px solid var(--zwart); outline-offset: 3px; }
-.drop__stip:focus-visible { outline: 2px solid var(--rood); outline-offset: 2px; }
+.drop__keuze:hover { color: var(--rood); }
+.drop__keuze[aria-selected="true"] { border-bottom-color: var(--zwart); color: var(--zwart); }
+.drop__keuze:focus-visible { outline: 2px solid var(--rood); outline-offset: 3px; }
+.drop__keuzetekst { display: grid; }
+.drop__keuzenaam { font-size: var(--fs-ui); }
+.drop__keuzeklein { font-size: var(--fs-klein); color: var(--tekst-zacht); }
 .drop__kleurstip--wit  { --stip: var(--champagne); --stiprand: var(--champagne-rand); }
 .drop__kleurstip--rose { --stip: var(--rose); --stiprand: var(--rose); }
 .drop__kleurstip--rood { --stip: var(--rood); --stiprand: var(--rood); }
-.drop__kleurstip { flex: none; width: 12px; height: 12px; margin-top: 12px; border-radius: 50%; background: var(--stip); border: 1px solid var(--stiprand); }
-
-.drop__lijst { list-style: none; margin: var(--s-6) calc(var(--s-2) * -1) 0; padding: 0; border-top: 1px solid var(--zwart); }
-.drop__rij {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-2) var(--s-3); align-items: center;
-  padding: var(--s-3) var(--s-2); border-bottom: 1px solid var(--lijn);
-  transition: background .2s ease;
-}
-.drop__rij.is-actief { background: var(--champagne-licht); }
-.drop__rijnaam { display: flex; gap: var(--s-2); align-items: flex-start; }
-.drop__rij h2 { margin: 0; font-size: var(--fs-h3); font-weight: 300; color: var(--zwart); }
-.drop__rij.is-op h2 { color: var(--tekst-zacht); }
-.drop__rijklein { margin: 4px 0 0; font-size: var(--fs-klein); color: var(--tekst-zacht); }
-.drop__rijvoorraad { color: var(--tekst); }
-.drop__rijkoop { display: flex; align-items: center; gap: var(--s-3); }
-.drop__rijprijs { margin: 0; font-size: var(--fs-h3); font-weight: 300; color: var(--zwart); }
-.drop__rijaantal .aantal__knop { width: 40px; height: 44px; }
-.drop__rijaantal .aantal__veld { width: 44px; height: 44px; }
-.drop__som { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--s-2) var(--s-3); margin-top: var(--s-4); }
-.drop__totaal { margin: 0; color: var(--tekst-zacht); }
-.drop__totaal.is-gekozen { display: flex; align-items: baseline; gap: var(--s-2); color: var(--tekst); }
-.drop__totaal strong { font-size: var(--fs-h3); font-weight: 300; color: var(--zwart); }
-.drop__fout { color: var(--rood); }
+.drop__kleurstip { flex: none; width: 12px; height: 12px; margin-top: 7px; border-radius: 50%; background: var(--stip); border: 1px solid var(--stiprand); }
+.drop__paneel { animation: drop-in .35s ease; }
+@keyframes drop-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .drop__paneel { animation: none; } }
 @media (max-width: 36rem) {
-  /* Smal: de naam over de hele breedte, prijs en aantal eronder */
-  .drop__rij { grid-template-columns: 1fr; }
-  .drop__rijkoop { justify-content: space-between; padding-left: calc(12px + var(--s-2)); }
+  /* Smal: de wijnen naast elkaar om doorheen te schuiven */
+  .drop__kiezer { margin: 0 calc(var(--rand) * -1) var(--s-4); padding: 0 var(--rand); overflow-x: auto; scrollbar-width: none; }
+  .drop__kiezer::-webkit-scrollbar { display: none; }
+  .drop__keuze { flex: none; }
 }
 @media (max-width: 56rem) {
   .drop__wijn { grid-template-columns: 1fr; gap: var(--s-4); }
   .drop__foto { position: static; margin: 0 calc(var(--rand) * -1); }
   .drop__foto img { aspect-ratio: 1 / 1; }
-  /* Op de telefoon: de foto's naast elkaar om doorheen te vegen, de volgende piept erbij */
-  .drop__kaart { grid-template-columns: 1fr; gap: var(--s-4); }
-  .drop__fotokolom { position: static; margin: 0 calc(var(--rand) * -1); }
-  .drop__fotos { display: flex; gap: var(--s-1); overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
-  .drop__fotos::-webkit-scrollbar { display: none; }
-  .drop__fotovak { flex: 0 0 86%; opacity: 1; scroll-snap-align: start; }
-  .drop__fotovak:only-child { flex-basis: 100%; }
-  .drop__fotovak img { aspect-ratio: 1 / 1; }
-  .drop__stippen { padding: 0 var(--rand); }
 }
 .mandje__melding { margin: 0 0 var(--s-2); padding: 12px 14px; background: var(--champagne-licht); font-size: var(--fs-klein); color: var(--tekst); }
 .mandje__melding[hidden] { display: none; }
