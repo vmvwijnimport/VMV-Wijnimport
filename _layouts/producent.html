@@ -38,12 +38,13 @@ layout: default
   {%- comment -%}
     Eerst de eigen foto, daarna de fles op het bankje; met twee foto's kun je doorklikken.
     fotoreeks: false = de lijstfoto alleen in de lijst met producenten (bijv. als het dezelfde foto is)
+    foto_heel: true = de foto altijd helemaal tonen, niet bijsnijden (bijv. een etiket)
   {%- endcomment -%}
   {%- assign aantal = 0 -%}
   {%- if p.foto %}{% assign aantal = aantal | plus: 1 %}{% endif -%}
   {%- if p.lijst_foto contains "/lijst/" and p.fotoreeks != false %}{% assign aantal = aantal | plus: 1 %}{% endif -%}
   {%- if aantal > 0 %}
-  <figure class="producent__foto{% if aantal > 1 %} fotoreeks{% endif %}"{% if aantal > 1 %} data-fotoreeks{% endif %}>
+  <figure class="producent__foto{% if p.foto_heel %} producent__foto--heel{% endif %}{% if aantal > 1 %} fotoreeks{% endif %}"{% if aantal > 1 %} data-fotoreeks{% endif %}>
     <div class="fotoreeks__baan">
       {%- if p.foto %}
       <img src="{{ p.foto | relative_url }}" alt="{{ foto_alt }}" style="object-position: {{ p.foto_positie | default: 'center' }}">

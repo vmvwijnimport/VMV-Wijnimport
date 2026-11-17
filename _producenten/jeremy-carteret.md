@@ -6,6 +6,7 @@ plaats: La Rochepot
 foto: /assets/img/producenten/jeremy-carteret.jpg
 lijst_foto: /assets/img/producenten/lijst/jeremy-carteret.jpg
 fotoreeks: false
+foto_heel: true
 foto_alt: Het etiket van Euphoria van Jérémy Carteret, met bloemen en een bij
 samenvatting: In La Rochepot maakt Jérémy Carteret geconcentreerde, precieze wijnen van oude stokken en kleine opbrengsten.
 druiven:
