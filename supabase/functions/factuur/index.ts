@@ -988,7 +988,8 @@ const inkoopMaken = async (db, vraag, opdracht) => {
   for (const r of o.regels) {
     if (r.bestaand) { r.ebId = r.bestaandId; continue; }
     const nieuwProduct = await vraag("POST", "/v1/product", {
-      code: r.code, description: r.omschrijving, purchasePriceExcl: r.prijs,
+      // e-Boekhouden eist een verkoopprijs; 0 = leeg, zoals bij de producten die VMV zelf aanmaakt
+      code: r.code, description: r.omschrijving, purchasePriceExcl: r.prijs, priceExcl: 0,
       vat: o.sjabloon.vat, ledgerId: o.sjabloon.ledgerId,
       ...(o.sjabloon.groupId ? { groupId: o.sjabloon.groupId } : {}),
       inStockManagement: true, active: true
@@ -1019,10 +1020,10 @@ const inkoopMaken = async (db, vraag, opdracht) => {
     markup_particulier: o.markup.particulier, markup_horeca: o.markup.horeca, toeslag: o.markup.toeslag,
     bijgewerkt: new Date().toISOString()
   });
-  // 5. De pdf van de factuur naar de inbox van e-Boekhouden mailen (alleen bij een nieuwe boeking)
+  // 5. De pdf van de factuur naar de inbox van e-Boekhouden mailen (ook bij een nieuwe poging, als de boeking er al stond)
   const pdf = String(opdracht.pdf || "").replace(/^data:[^,]*,/, "").replace(/\s/g, "");
   let pdfGemaild = false, pdfFout = "";
-  if (pdf && geboekt) {
+  if (pdf) {
     try { await pdfNaarInbox(pdf, schoon(opdracht.pdfnaam, 120), o); pdfGemaild = true; }
     catch (e) { console.error(e); pdfFout = e instanceof Melding ? e.message : "De pdf kon niet naar e-Boekhouden worden gemaild."; }
   }
