@@ -122,3 +122,10 @@ De volgorde is belangrijk:
 2. **Supabase → Edge Functions → factuur → Code:** vervang alles door de inhoud van `supabase/functions/factuur/index.ts` en klik op **Deploy**. Laat de instelling Verify JWT staan zoals hij nu staat.
 3. Zeg "zet het live".
 4. **Backoffice → Facturen → Inkoopfactuur:** boek een eerste factuur in. Controleer daarna in e-Boekhouden de boeking en de nieuwe producten, en vul via **Voorraad bewerken** de aantallen in die het scherm toont.
+
+### Factuur uploaden (pdf laten lezen)
+
+1. Maak een API-sleutel aan op **console.anthropic.com** (API Keys → Create Key) en zet er wat tegoed op (Billing). Eén factuur lezen kost een paar cent.
+2. **Supabase → Edge Functions → Secrets:** voeg toe met de naam **`ANTHROPIC_API_KEY`** en plak de sleutel als waarde. Deel de sleutel met niemand en zet hem nergens anders neer.
+3. **Supabase → Edge Functions → factuur → Code:** vervang alles door de nieuwe inhoud van `supabase/functions/factuur/index.ts` en klik op **Deploy**.
+4. Zeg "zet het live".

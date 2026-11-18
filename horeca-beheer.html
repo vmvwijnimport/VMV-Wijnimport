@@ -527,8 +527,18 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
 
     {%- comment -%} Inkoopfactuur inboeken in e-Boekhouden en nieuwe wijnen als product (functie factuur, supabase/027) {%- endcomment -%}
     <div data-scherm="inkoop" hidden>
-      <p class="beheer__uitleg">Boek een inkoopfactuur in e-Boekhouden en maak de nieuwe wijnen daar aan als product, met de inkoopprijs. De verkoopprijzen rekenen we uit met de markup; ze komen niet in e-Boekhouden. Je ziet eerst een voorbeeld. Pas na "Inboeken" gebeurt er iets.</p>
+      <p class="beheer__uitleg">Boek een inkoopfactuur in e-Boekhouden en maak de nieuwe wijnen daar aan als product, met de inkoopprijs. Upload de pdf om het formulier automatisch in te vullen, of vul het zelf in. De verkoopprijzen rekenen we uit met de markup; ze komen niet in e-Boekhouden. Je ziet eerst een voorbeeld. Pas na "Inboeken" gebeurt er iets.</p>
       <form class="formulier beheer__losfactuur" id="inkoop" novalidate>
+        <h2 class="beheer__tussenkop">Factuur uploaden</h2>
+        <div class="beheer__zoekrij">
+          <div class="veld">
+            <label for="ik-pdf">Pdf van de factuur <span class="veld__optioneel">(vult het formulier in; kijk alles na)</span></label>
+            <input id="ik-pdf" type="file" accept="application/pdf,.pdf">
+          </div>
+          <button class="knop knop--secundair" type="button" data-actie="ik-lees">Lees factuur</button>
+        </div>
+        <ul class="beheer__klein" data-veld="ikoverig" hidden></ul>
+
         <h2 class="beheer__tussenkop">Leverancier</h2>
         <div class="beheer__zoekrij">
           <div class="veld">
@@ -571,7 +581,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
         <div class="beheer__velden">
           <div class="veld"><label for="ik-mp">Markup particulier <span class="veld__optioneel">(bijv. 1,45)</span></label><input id="ik-mp" name="markup_particulier" inputmode="decimal" autocomplete="off"></div>
           <div class="veld"><label for="ik-mh">Markup horeca <span class="veld__optioneel">(bijv. 1,45)</span></label><input id="ik-mh" name="markup_horeca" inputmode="decimal" autocomplete="off"></div>
-          <div class="veld"><label for="ik-toeslag">Accijns en transport <span class="veld__optioneel">(per fles)</span></label><input id="ik-toeslag" name="toeslag" inputmode="decimal" autocomplete="off"></div>
+          <div class="veld"><label for="ik-toeslag">Accijns en transport <span class="veld__optioneel">(per fles)</span></label><input id="ik-toeslag" name="toeslag" inputmode="decimal" autocomplete="off" value="1,25"></div>
         </div>
         <p class="beheer__klein">Horeca excl. btw = inkoop × markup + accijns en transport. Particulier incl. btw = (inkoop × markup + accijns en transport) × 1,21, naar boven afgerond op 50 cent. De markup wordt per leverancier onthouden.</p>
 
@@ -584,7 +594,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
           </div>
           <button class="knop knop--secundair" type="button" data-actie="ik-plak">Regels overnemen</button>
         </details>
-        <ol class="beheer__losregels" data-veld="ikregels"></ol>
+        <ol class="beheer__losregels beheer__losregels--breed" data-veld="ikregels"></ol>
         <button class="knop knop--secundair" type="button" data-actie="ik-regel">Wijn toevoegen</button>
         <dl class="mandje__totalen beheer__totalen beheer__lostotaal">
           <div class="mandje__totaal"><dt>Totaal excl. btw</dt><dd data-veld="iktotaal"></dd></div>

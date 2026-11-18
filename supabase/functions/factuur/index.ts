@@ -17,11 +17,13 @@
 // 9. "kopers":         per cuvée van één producent welke klanten hem op een factuur hadden (alleen lezen).
 // 10. "leveranciers", "inkoop_voorbereiden" en "inkoop_maken": een inkoopfactuur inboeken en de nieuwe wijnen
 //                     als product aanmaken, met de inkoopprijs (supabase/027). Ook hier eerst een voorbeeld.
+//     "inkoop_lezen":  de pdf van de inkoopfactuur laten lezen door Claude, om het formulier in te vullen.
 // Factuurregels verwijzen naar het product in e-Boekhouden (productId), zodat de voorraad daar meeloopt.
 // Bedragen komen uit de bestelling zoals VMV hem heeft bevestigd (prijs per stuk na korting).
 //
 // Instellingen in Supabase → Edge Functions → Secrets (niets hiervan staat in de repository):
 //   EBOEKHOUDEN_TOKEN  het API-token uit e-Boekhouden (Beheer → Inrichting → Koppelingen → e-Boekhouden API)
+//   ANTHROPIC_API_KEY  een API-sleutel van Anthropic (console.anthropic.com), om inkoopfacturen te lezen
 
 const EB = "https://api.e-boekhouden.nl";
 const BRON = "VMVportaal";   // naam van deze koppeling bij e-Boekhouden (max. 10 tekens)
@@ -919,6 +921,96 @@ const inkoopOpbouwen = async (vraag, opdracht) => {
   };
 };
 
+// De pdf van een inkoopfactuur laten lezen door Claude (Anthropic). Er wordt niets opgeslagen of geboekt:
+// de gegevens komen in het formulier, waar je ze nakijkt. Secret in Supabase: ANTHROPIC_API_KEY.
+const FACTUUR_SCHEMA = {
+  type: "object", additionalProperties: false,
+  required: ["leverancier", "factuurnummer", "datum", "termijn", "regels", "overig"],
+  properties: {
+    leverancier: {
+      type: "object", additionalProperties: false,
+      required: ["naam", "adres", "postcode", "plaats", "land", "btw", "email"],
+      properties: {
+        naam: { type: "string" }, adres: { type: "string" }, postcode: { type: "string" }, plaats: { type: "string" },
+        land: { type: "string" }, btw: { type: "string" }, email: { type: "string" }
+      }
+    },
+    factuurnummer: { type: "string" },
+    datum: { type: "string", description: "JJJJ-MM-DD, of leeg" },
+    termijn: { type: ["integer", "null"], description: "betaaltermijn in dagen" },
+    regels: {
+      type: "array",
+      items: {
+        type: "object", additionalProperties: false, required: ["omschrijving", "aantal", "prijs"],
+        properties: { omschrijving: { type: "string" }, aantal: { type: "integer" }, prijs: { type: "number" } }
+      }
+    },
+    overig: { type: "array", items: { type: "string" }, description: "regels die geen wijn zijn (transport, accijns, statiegeld, korting), met bedrag" }
+  }
+};
+const FACTUUR_OPDRACHT = `Dit is een inkoopfactuur van een wijnleverancier aan VMV Wijnimport (Amsterdam). Haal de gegevens eruit.
+- leverancier: de verkoper die de factuur stuurt (niet VMV Wijnimport). Laat onbekende velden leeg.
+- datum: de factuurdatum als JJJJ-MM-DD. termijn: de betaaltermijn in dagen (uit een vervaldatum of "30 jours"), anders null.
+- regels: alleen de wijnen. Per wijn het aantal flessen en de prijs per fles excl. btw, na een eventuele korting op die regel.
+  Staat de prijs per doos of per karton, reken dan om naar flessen en prijs per fles.
+- omschrijving: in de vorm "<producent> - <cuvée> <jaargang> <inhoud>", bijvoorbeeld
+  "Champagne Sacy Soeur & Frère - Cuvée Les Courtisols du Fût(ur) 2019 75cl". Gebruik de namen zoals op de factuur, met accenten.
+  Laat de jaargang weg als die er niet staat. Inhoud als 75cl, 150cl (magnum), 37,5cl.
+- overig: transport, accijns, statiegeld, korting op het totaal en andere regels die geen wijn zijn, elk als korte tekst met het bedrag.
+Verzin niets: wat niet op de factuur staat, laat je leeg.`;
+
+const inkoopLezen = async (opdracht, voorbeelden = []) => {
+  const sleutel = Deno.env.get("ANTHROPIC_API_KEY");
+  if (!sleutel) throw new Melding("Het lezen van facturen is nog niet ingesteld: de sleutel ANTHROPIC_API_KEY ontbreekt in Supabase.", 503);
+  const pdf = String(opdracht.pdf || "").replace(/^data:[^,]*,/, "").replace(/\s/g, "");
+  if (!pdf || !/^[A-Za-z0-9+/]+=*$/.test(pdf)) throw new Melding("Kies een pdf van de factuur.");
+  if (pdf.length > 14_000_000) throw new Melding("Deze pdf is te groot (meer dan 10 MB).");
+  const { default: Anthropic } = await import("npm:@anthropic-ai/sdk");
+  const client = new Anthropic({ apiKey: sleutel });
+  let antwoord;
+  try {
+    antwoord = await client.beta.messages.create({
+      model: "claude-opus-5-5",
+      max_tokens: 16000,
+      betas: ["server-side-fallback-2026-07-01"],
+      fallbacks: "default",
+      output_config: { effort: "low", format: { type: "json_schema", schema: FACTUUR_SCHEMA } },
+      messages: [{
+        role: "user",
+        content: [
+          { type: "document", source: { type: "base64", media_type: "application/pdf", data: pdf } },
+          { type: "text", text: FACTUUR_OPDRACHT + (voorbeelden.length
+            ? `\n\nZo heten bestaande producten in onze boekhouding. Volg dezelfde opbouw en schrijfwijze:\n${voorbeelden.map((v) => `- ${v}`).join("\n")}`
+            : "") }
+        ]
+      }]
+    });
+  } catch (e) {
+    console.error(e);
+    const status = e && e.status;
+    if (status === 401 || status === 403) throw new Melding("Anthropic accepteert de sleutel niet. Controleer ANTHROPIC_API_KEY in Supabase.", 502);
+    if (status === 400) throw new Melding("Deze pdf kan niet worden gelezen. Is het een gewone pdf (geen foto of beveiligd bestand)?", 400);
+    throw new Melding("Het lezen van de factuur lukte nu niet. Probeer het zo opnieuw.", 502);
+  }
+  if (antwoord.stop_reason === "refusal") throw new Melding("Deze factuur kon niet automatisch worden gelezen. Vul hem met de hand in.", 422);
+  if (antwoord.stop_reason === "max_tokens") throw new Melding("Deze factuur is te lang om in één keer te lezen. Vul hem met de hand in.", 422);
+  const tekst = antwoord.content.filter((b) => b.type === "text").map((b) => b.text).join("");
+  let g;
+  try { g = JSON.parse(tekst); } catch (_) { throw new Melding("De factuur kon niet goed worden gelezen. Vul hem met de hand in.", 502); }
+  const l = g.leverancier || {};
+  return {
+    leverancier: { naam: schoon(l.naam, 100), adres: schoon(l.adres, 100), postcode: schoon(l.postcode, 10), plaats: schoon(l.plaats, 50), land: schoon(l.land, 50), btw: schoon(l.btw, 20), email: schoon(l.email, 150) },
+    factuurnummer: schoon(g.factuurnummer, 50),
+    datum: /^\d{4}-\d{2}-\d{2}$/.test(String(g.datum || "")) ? g.datum : "",
+    termijn: Number.isInteger(g.termijn) && g.termijn >= 0 && g.termijn <= 365 ? g.termijn : null,
+    regels: (Array.isArray(g.regels) ? g.regels : []).slice(0, 100).map((r) => ({
+      omschrijving: schoon(r.omschrijving, 200), aantal: Number.isInteger(r.aantal) ? r.aantal : null,
+      prijs: Number.isFinite(r.prijs) ? Math.round(r.prijs * 100) / 100 : null
+    })),
+    overig: (Array.isArray(g.overig) ? g.overig : []).slice(0, 20).map((t) => schoon(t, 200))
+  };
+};
+
 const inkoopMaken = async (db, vraag, opdracht) => {
   const o = await inkoopOpbouwen(vraag, opdracht);
   if (o.problemen.length) throw new Melding(o.problemen[0]);
@@ -964,9 +1056,30 @@ const afhandelen = async (req, db) => {
   // De webwinkelfactuur mag ook de betaal-Worker aanvragen, met de koppelsleutel; al het andere alleen een beheerder
   const worker = soort === "webwinkel" && await isWorker(db, opdracht.sleutel);
   if (!worker && !(await beheerderUit(db, req))) return antwoord({ fout: "Geen toegang. Log opnieuw in op de backoffice." }, 401);
-  if (!["gegevens", "koppelen", "voorbereiden", "maken", "klanten", "los_voorbereiden", "los_maken", "webwinkel", "cijfers", "kopers", "leveranciers", "inkoop_voorbereiden", "inkoop_maken"].includes(soort)) return antwoord({ fout: "Onbekende opdracht." }, 400);
+  if (!["gegevens", "koppelen", "voorbereiden", "maken", "klanten", "los_voorbereiden", "los_maken", "webwinkel", "cijfers", "kopers", "leveranciers", "inkoop_lezen", "inkoop_voorbereiden", "inkoop_maken"].includes(soort)) return antwoord({ fout: "Onbekende opdracht." }, 400);
   if (soort === "webwinkel" && !Number.isInteger(opdracht.bestelling) && !opdracht.bestelnummer) return antwoord({ fout: "Onbekende bestelling." }, 400);
   if ((soort === "voorbereiden" || soort === "maken") && !Number.isInteger(opdracht.bestelling)) return antwoord({ fout: "Onbekende bestelling." }, 400);
+  // De pdf lezen heeft e-Boekhouden niet nodig
+  if (soort === "inkoop_lezen") {
+    try {
+      // De omschrijvingen van de nieuwste producten in e-Boekhouden als voorbeeld voor de naamgeving
+      let voorbeelden = [];
+      let v = null;
+      try {
+        v = await ebSessie();
+        voorbeelden = (await alles(v, "/v1/product"))
+          .filter((p) => p.active !== false && /^\d+$/.test(String(p.code || "").trim()) && p.description)
+          .sort((a, b) => parseInt(b.code, 10) - parseInt(a.code, 10)).slice(0, 25).map((p) => schoon(p.description, 200));
+      } catch (_) { voorbeelden = []; }
+      finally { if (v) await v.sluit(); }
+      return antwoord(await inkoopLezen(opdracht, voorbeelden));
+    }
+    catch (e) {
+      if (e instanceof Melding) return antwoord({ fout: e.message }, e.status);
+      console.error(e);
+      return antwoord({ fout: "Er ging iets mis. Probeer het opnieuw." }, 500);
+    }
+  }
   let vraag = null;
   try {
     vraag = await ebSessie();

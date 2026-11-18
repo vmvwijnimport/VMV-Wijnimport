@@ -1289,6 +1289,11 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .beheer__losregel .beheer__bedrag { padding-bottom: 12px; }
 .beheer__losregel .bestel__terug { margin: 0 0 14px; }
 .beheer__lostotaal { margin: var(--s-2) 0 var(--s-4); }
+/* Inkoopfactuur: de omschrijving over de hele breedte, daaronder flessen en prijs */
+.beheer__losregels--breed .beheer__losregel { grid-template-columns: 6rem 9rem minmax(0, 1fr) auto; }
+.beheer__losregels--breed .beheer__losregel .veld:first-child { grid-column: 1 / -1; }
+.beheer__losregels--breed .beheer__bedrag { justify-self: end; }
+@media (max-width: 48rem) { .beheer__losregels--breed .beheer__losregel { grid-template-columns: 1fr 1fr; } .beheer__losregels--breed .beheer__bedrag { justify-self: start; } .beheer__losregel .beheer__bedrag { grid-column: auto; grid-row: auto; } }
 .beheer__plakken { margin: 0 0 var(--s-2); }
 .beheer__plakken summary { cursor: pointer; }
 .beheer__plakken textarea { width: 100%; }
