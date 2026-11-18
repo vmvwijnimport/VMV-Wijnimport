@@ -36,7 +36,18 @@
       "Allocated wines are in limited supply: you request a quantity and we confirm how many we can deliver.")));
     doel.appendChild(uitleg);
 
-    // Groeperen per producent, in de volgorde van de lijst
+    // Volgorde: eerst per regio (Champagne eerst, glazen als laatste), dan per producent in de volgorde
+    // van de lijst, en binnen een producent eerst wit, dan rosé, dan rood
+    var KLEUR = { wit: 0, rose: 1, rood: 2 };
+    var regioPlek = function (p) { var i = VOLGORDE.indexOf(filterNaam(p)); return i < 0 ? VOLGORDE.length : i; };
+    var producentPlek = {};
+    producten.forEach(function (p, i) { if (!(p.producent in producentPlek)) producentPlek[p.producent] = i; });
+    producten = producten.map(function (p, i) { return { p: p, i: i }; }).sort(function (a, b) {
+      return regioPlek(a.p) - regioPlek(b.p) || producentPlek[a.p.producent] - producentPlek[b.p.producent] ||
+        (a.p.kleur in KLEUR ? KLEUR[a.p.kleur] : 3) - (b.p.kleur in KLEUR ? KLEUR[b.p.kleur] : 3) || a.i - b.i;
+    }).map(function (x) { return x.p; });
+
+    // Groeperen per producent
     var groepen = [];
     var index = {};
     producten.forEach(function (p) {
