@@ -18,47 +18,36 @@ cuvees:
   - naam: "Aligoté Doré"
     druif: Aligoté
     type: wit
-    herkomst: domaine
   - naam: "Euphoria"
     druif: Chardonnay
     type: wit
-    herkomst: negoce
   - naam: "Aux Champs Perdrix"
     druif: Chardonnay, Pinot Blanc
     type: wit
-    herkomst: negoce
   - naam: "Les Pétales Blancs"
     druif: Chardonnay
     type: wit
-    herkomst: negoce
   - naam: "Flower Power"
     druif: Pinot Noir
     type: rood
-    herkomst: negoce
   - naam: "Euphoria"
     druif: Pinot Noir
     type: rood
-    herkomst: negoce
   - naam: "Monpoulain"
     druif: Pinot Noir
     type: rood
-    herkomst: negoce
   - naam: "Les Grandes Carelles"
     druif: Pinot Noir
     type: rood
-    herkomst: domaine
   - naam: "Les Nazarettes"
     druif: Pinot Noir
     type: rood
-    herkomst: domaine
   - naam: "Les Pétales Rouges"
     druif: Pinot Noir
     type: rood
-    herkomst: negoce
   - naam: "Les Dames Huguettes"
     druif: Pinot Noir
     type: rood
-    herkomst: negoce
 ---
 
 Jérémy Carteret werkte bijna tien jaar bij Benjamin Leroux in Beaune, de laatste jaren als zijn rechterhand. In 2019 maakte hij daarnaast zijn eerste eigen wijn. In 2022 ging hij voor zichzelf verder, met een eigen kelder in La Rochepot, een dorp in de heuvels achter Meursault.
