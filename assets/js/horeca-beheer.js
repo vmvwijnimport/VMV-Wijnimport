@@ -2800,15 +2800,38 @@
   var ikKlaar = function () { ikVoorbeeld.hidden = true; };
   var ikVeld = function (naam) { return (ik.elements[naam] && ik.elements[naam].value.trim()) || ""; };
 
+  // Uit de omschrijving ("Producent - Cuvée 2019 75cl") de gegevens voor de prijslijst halen
+  var ikBekend = function () {
+    var lijst = [];
+    siteProducenten.forEach(function (p) { lijst.push({ naam: p.naam, regio: p.regio || "", slug: p.slug || "" }); });
+    data.producten.forEach(function (p) {
+      if (p.soort === "wijn" && !lijst.some(function (x) { return x.naam.toLowerCase() === p.producent.toLowerCase(); })) lijst.push({ naam: p.producent, regio: p.regio || "", slug: p.producent_slug || "" });
+    });
+    return lijst.sort(function (a, b) { return b.naam.length - a.naam.length; });
+  };
+  var ikOntleed = function (tekst) {
+    var t = String(tekst || "").trim(), delen = t.split(/\s+[-–]\s+/);
+    var links = delen.length > 1 ? delen[0] : "", rest = delen.length > 1 ? delen.slice(1).join(" - ") : t;
+    var formaat = "", jaargang = "", m;
+    if ((m = /\s+(\d+(?:[.,]\d+)?)\s*cl$/i.exec(rest))) { formaat = m[1] + " cl"; rest = rest.slice(0, m.index); }
+    if ((m = /\s+((?:19|20)\d{2}|B\d{2}|NV)$/i.exec(rest))) { jaargang = m[1]; rest = rest.slice(0, m.index); }
+    var waar = zoekTekst(links || t);
+    var p = ikBekend().filter(function (x) { return waar.indexOf(zoekTekst(x.naam)) >= 0; })[0] || null;
+    var kleuren = {};
+    data.producten.forEach(function (x) { if (p && x.kleur && x.producent.toLowerCase() === p.naam.toLowerCase()) kleuren[x.kleur] = (kleuren[x.kleur] || 0) + 1; });
+    var kleur = Object.keys(kleuren).sort(function (a, b) { return kleuren[b] - kleuren[a]; })[0] || "";
+    return { producent: p ? p.naam : links, regio: p ? p.regio : "", producent_slug: p ? p.slug : "", naam: rest.trim().replace(/^["“”']+|["“”']+$/g, ""), jaargang: jaargang, formaat: formaat || "75 cl", kleur: kleur };
+  };
+
   var ikRegel = function (w) {
     w = w || {};
     var li = el("li", "beheer__losregel");
     var nr = Date.now() + Math.random().toString(36).slice(2, 6);
-    var maak = function (label, klasse, waarde, soort) {
+    var maak = function (label, klasse, waarde, soort, plek) {
       var v = el("div", "veld"), l = el("label", null, label), i = el("input", klasse);
       i.id = "ik-" + soort + "-" + nr; l.htmlFor = i.id; i.autocomplete = "off";
       if (waarde != null) i.value = waarde;
-      v.appendChild(l); v.appendChild(i); li.appendChild(v);
+      v.appendChild(l); v.appendChild(i); (plek || li).appendChild(v);
       i.addEventListener("input", function () { ikTotaal(); ikKlaar(); });
       return i;
     };
@@ -2821,8 +2844,35 @@
     var weg = el("button", "bestel__terug", "Weghalen"); weg.type = "button";
     weg.addEventListener("click", function () { li.remove(); ikTotaal(); ikKlaar(); });
     li.appendChild(bedrag); li.appendChild(weg);
+    // Voor de prijslijst: ingevuld uit de omschrijving, tot je een veld zelf aanpast
+    var lijst = el("div", "beheer__inkooplijst");
+    lijst.dataset.prijslijst = "";
+    var lp = maak("Producent", null, "", "lp", lijst); lp.setAttribute("list", "w-producenten");
+    var ln = maak("Wijn", null, "", "ln", lijst);
+    var lj = maak("Jaargang", null, "", "lj", lijst);
+    var lf = maak("Formaat", null, "", "lf", lijst);
+    var kv = el("div", "veld"), kl = el("label", null, "Kleur"), lk = el("select");
+    lk.id = "ik-lk-" + nr; kl.htmlFor = lk.id;
+    [["", "Kies"], ["wit", "Wit"], ["rood", "Rood"], ["rose", "Rosé"]].forEach(function (k) { var o = el("option", null, k[1]); o.value = k[0]; lk.appendChild(o); });
+    kv.appendChild(kl); kv.appendChild(lk); lijst.appendChild(kv);
+    li.appendChild(lijst);
+    var ontleed = {};
+    [lp, ln, lj, lf, lk].forEach(function (i) { i.addEventListener("input", function () { i.dataset.handmatig = "1"; ikKlaar(); }); i.addEventListener("change", function () { i.dataset.handmatig = "1"; ikKlaar(); }); });
+    var vulLijst = function () {
+      ontleed = ikOntleed(oms.value);
+      [[lp, "producent"], [ln, "naam"], [lj, "jaargang"], [lf, "formaat"], [lk, "kleur"]].forEach(function (x) { if (!x[0].dataset.handmatig) x[0].value = ontleed[x[1]] || ""; });
+    };
+    oms.addEventListener("input", vulLijst);
+    vulLijst();
     li.bedrag = bedrag;
-    li.lees = function () { var x = getal(prijs.value); return { omschrijving: oms.value.trim(), aantal: parseInt(aantal.value, 10) || 0, prijs: isNaN(x) ? null : x }; };
+    li.lees = function () {
+      var x = getal(prijs.value);
+      var naam = lp.value.trim(), b = ikBekend().filter(function (p) { return p.naam.toLowerCase() === naam.toLowerCase(); })[0];
+      return {
+        omschrijving: oms.value.trim(), aantal: parseInt(aantal.value, 10) || 0, prijs: isNaN(x) ? null : x,
+        prijslijst: { producent: naam, regio: b ? b.regio : "", producent_slug: b ? b.slug : "", naam: ln.value.trim(), jaargang: lj.value.trim(), formaat: lf.value.trim(), kleur: lk.value }
+      };
+    };
     return li;
   };
   var ikRegels = function () { return [].slice.call(veld("ikregels").children); };
@@ -2836,6 +2886,7 @@
     });
     veld("iktotaal").textContent = euro(c / 100);
   };
+  veld("ikprijslijst").addEventListener("change", function () { veld("ikregels").classList.toggle("beheer__losregels--zonderlijst", !this.checked); ikKlaar(); });
   ik.querySelector("[data-actie=ik-regel]").addEventListener("click", function () {
     var li = ikRegel(); veld("ikregels").appendChild(li); li.querySelector("input").focus();
   });
@@ -2916,7 +2967,9 @@
       nieuw: ikLeverancier === "nieuw" ? { naam: n("naam"), adres: n("adres"), postcode: n("postcode"), plaats: n("plaats"), land: n("land"), email: n("email"), btw: n("btw") } : null,
       factuurnummer: ikVeld("factuurnummer"), datum: ikVeld("datum"), termijn: ikVeld("termijn"), btw: ikVeld("btw"),
       markup_particulier: g("markup_particulier"), markup_horeca: g("markup_horeca"), toeslag: g("toeslag"),
+      prijslijst: veld("ikprijslijst").checked,
       regels: ikRegels().map(function (li) { return li.lees(); }).filter(function (r) { return r.omschrijving || r.prijs != null; })
+        .map(function (r) { if (!veld("ikprijslijst").checked) delete r.prijslijst; return r; })
     };
   };
   var ikToon = function (v) {
@@ -2931,6 +2984,7 @@
       tr.appendChild(el("td", "beheer__getal", euro(r.prijs)));
       tr.appendChild(el("td", "beheer__getal", r.horeca == null ? "" : euro(r.horeca)));
       tr.appendChild(el("td", "beheer__getal", r.particulier == null ? "" : euro(r.particulier)));
+      tr.appendChild(el("td", null, r.prijslijst === "nieuw" ? "Nieuw, binnenkort" : r.prijslijst === "bestaat" ? "Staat er al" : "Niet"));
       tbody.appendChild(tr);
     });
     veld("iktotaal2").textContent = euro(v.totaal);
@@ -2984,7 +3038,10 @@
         knop.hidden = true;
         ikToon(r);
         melding(status, (r.geboekt ? "De factuur is ingeboekt" : "De factuur stond al in e-Boekhouden") +
-          (r.producten.length ? (r.producten.length === 1 ? " en product " : " en de producten ") + r.producten.join(", ") + (r.producten.length === 1 ? " is" : " zijn") + " aangemaakt." : ". Er waren geen nieuwe producten."), "goed");
+          (r.producten.length ? (r.producten.length === 1 ? " en product " : " en de producten ") + r.producten.join(", ") + (r.producten.length === 1 ? " is" : " zijn") + " aangemaakt." : ". Er waren geen nieuwe producten.") +
+          (r.prijslijst && r.prijslijst.length ? " " + (r.prijslijst.length === 1 ? "1 wijn staat" : r.prijslijst.length + " wijnen staan") + " nu in de prijslijst, op binnenkort." : "") +
+          (r.nietInPrijslijst && r.nietInPrijslijst.length ? " Niet in de prijslijst gelukt: " + r.nietInPrijslijst.join(", ") + ". Voeg die zelf toe." : ""), r.nietInPrijslijst && r.nietInPrijslijst.length ? "fout" : "goed");
+        if (r.prijslijst && r.prijslijst.length) laadAlles().catch(function () {});
         veld("ikbijlage").textContent = r.pdfGemaild ? "De pdf is naar de inbox van e-Boekhouden gemaild. Koppel hem daar aan de boeking."
           : (r.pdfFout ? r.pdfFout + " " : "") + (r.geboekt ? "Voeg de pdf van de factuur zelf toe aan de boeking in e-Boekhouden." : "");
         var vr = veld("ikvoorraad");
@@ -3025,6 +3082,7 @@
   });
   ik.closest("[data-scherm]").querySelector("[data-actie=ik-pdfdicht]").addEventListener("click", ikPdfDicht);
   var toonInkoop = function () {
+    vulProducenten();
     if (!veld("ikregels").children.length) { veld("ikregels").appendChild(ikRegel()); ikTotaal(); }
     if (!ik.elements.datum.value) ik.elements.datum.value = new Date().toISOString().slice(0, 10);
   };

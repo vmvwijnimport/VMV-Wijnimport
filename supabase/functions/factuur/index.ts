@@ -819,7 +819,7 @@ const leveranciersZoeken = async (db, vraag, opdracht) => {
   };
 };
 
-const inkoopOpbouwen = async (vraag, opdracht) => {
+const inkoopOpbouwen = async (db, vraag, opdracht) => {
   const problemen = [];
   const getal = (v) => (v === "" || v == null ? NaN : Number(v));
   const mP = getal(opdracht.markup_particulier), mH = getal(opdracht.markup_horeca), toeslag = getal(opdracht.toeslag);
@@ -895,9 +895,34 @@ const inkoopOpbouwen = async (vraag, opdracht) => {
     const code = bestaand ? (bestaand.code || "") : String(volgende++).padStart(breedte, "0");
     if (!bestaand && code.length > 20) { problemen.push("Het volgende productnummer is te lang voor e-Boekhouden."); continue; }
     const v = mP >= 1 && mH >= 1 && toeslag >= 0 ? verkoopprijzen(prijs, mP, mH, toeslag) : { horeca: null, particulier: null };
-    regels.push({ omschrijving, aantal, prijs, code, bestaand: !!bestaand, bestaandId: bestaand ? bestaand.id : null, ...v });
+    // De wijn ook in de prijslijst van het portaal (op binnenkort), als dat is aangevinkt
+    let lijst = null;
+    if (r.prijslijst && opdracht.prijslijst !== false) {
+      const l = r.prijslijst;
+      lijst = {
+        producent: schoon(l.producent, 100), producent_slug: schoon(l.producent_slug, 100), regio: schoon(l.regio, 60),
+        naam: schoon(l.naam, 150), jaargang: schoon(l.jaargang, 10), formaat: schoon(l.formaat, 20) || "75 cl",
+        kleur: ["wit", "rood", "rose"].includes(l.kleur) ? l.kleur : null
+      };
+      if (!lijst.producent || !lijst.naam) { problemen.push(`Vul bij ${omschrijving} de producent en de naam voor de prijslijst in.`); continue; }
+    }
+    regels.push({ omschrijving, aantal, prijs, code, bestaand: !!bestaand, bestaandId: bestaand ? bestaand.id : null, lijst, ...v });
   }
   const totaal = regels.reduce((s, r) => s + centen(r.prijs) * r.aantal, 0) / 100;
+  // Staat de wijn al in de prijslijst? (zelfde producent, naam, jaargang en formaat)
+  if (regels.some((r) => r.lijst)) {
+    const { data: bestaandeWijnen, error } = await db.from("producten").select("id, producent, naam, jaargang, formaat, eb_product_id").eq("soort", "wijn");
+    if (error) throw error;
+    const sleutelVan = (p) => [p.producent, p.naam, p.jaargang || "", p.formaat || "75 cl"].map((x) => gewoon(String(x).replace(/\s+cl$/i, "cl"))).join("|");
+    const index = new Map((bestaandeWijnen || []).map((p) => [sleutelVan(p), p]));
+    regels.forEach((r) => {
+      if (!r.lijst) return;
+      const p = index.get(sleutelVan(r.lijst));
+      r.lijstId = p ? p.id : null;
+      r.lijstGekoppeld = p ? p.eb_product_id || null : null;
+      r.prijslijst = p ? "bestaat" : "nieuw";
+    });
+  }
 
   // Rekeningen: Inkopen (7000) voor de regel, Crediteuren voor de boeking
   const [inkopen] = await Promise.all([vraag("GET", "/v1/ledger?code=7000")]);
@@ -915,7 +940,7 @@ const inkoopOpbouwen = async (vraag, opdracht) => {
       leverancier, factuurnummer: nummer, datum, termijn, btw: btwCode ? INKOOP_BTW[btwCode] : "",
       rekening: inkoopRekening ? `${inkoopRekening.code} ${inkoopRekening.description || ""}`.trim() : "",
       alGeboekt: !!alGeboekt, totaal,
-      regels: regels.map(({ bestaandId, ...r }) => r),
+      regels: regels.map(({ bestaandId, lijstId, lijstGekoppeld, ...r }) => r),
       problemen
     }
   };
@@ -942,7 +967,7 @@ const pdfNaarInbox = async (pdf, naam, o) => {
 };
 
 const inkoopMaken = async (db, vraag, opdracht) => {
-  const o = await inkoopOpbouwen(vraag, opdracht);
+  const o = await inkoopOpbouwen(db, vraag, opdracht);
   if (o.problemen.length) throw new Melding(o.problemen[0]);
   // 1. De leverancier
   let relatie = o.leverancier.id;
@@ -961,14 +986,32 @@ const inkoopMaken = async (db, vraag, opdracht) => {
   // 3. De nieuwe producten (bestaande met dezelfde omschrijving slaan we over)
   const gemaakt = [];
   for (const r of o.regels) {
-    if (r.bestaand) continue;
-    await vraag("POST", "/v1/product", {
+    if (r.bestaand) { r.ebId = r.bestaandId; continue; }
+    const nieuwProduct = await vraag("POST", "/v1/product", {
       code: r.code, description: r.omschrijving, purchasePriceExcl: r.prijs,
       vat: o.sjabloon.vat, ledgerId: o.sjabloon.ledgerId,
       ...(o.sjabloon.groupId ? { groupId: o.sjabloon.groupId } : {}),
       inStockManagement: true, active: true
     });
+    r.ebId = nieuwProduct && nieuwProduct.id ? nieuwProduct.id : null;
     gemaakt.push(r.code);
+  }
+  // 3b. De wijnen in de prijslijst van het portaal: nieuw op binnenkort met de uitgerekende prijzen,
+  //     of (staat hij er al) alleen koppelen aan het product in e-Boekhouden als dat nog niet zo was
+  const inPrijslijst = [], nietInPrijslijst = [];
+  for (const r of o.regels) {
+    if (!r.lijst) continue;
+    if (r.lijstId) {
+      if (!r.lijstGekoppeld && r.ebId) await db.from("producten").update({ eb_product_id: r.ebId }).eq("id", r.lijstId);
+      continue;
+    }
+    const { error } = await db.from("producten").insert({
+      soort: "wijn", ...r.lijst, producent_slug: r.lijst.producent_slug || null, regio: r.lijst.regio || null,
+      jaargang: r.lijst.jaargang || null, prijs_ex: r.horeca, prijs_particulier: r.particulier,
+      beschikbaarheid: "binnenkort", actief: true, eb_product_id: r.ebId || null
+    });
+    if (error) { console.error(error); nietInPrijslijst.push(r.omschrijving); continue; }
+    inPrijslijst.push(r.omschrijving);
   }
   // 4. De markup onthouden voor de volgende keer
   await db.from("inkoop_leveranciers").upsert({
@@ -983,7 +1026,7 @@ const inkoopMaken = async (db, vraag, opdracht) => {
     try { await pdfNaarInbox(pdf, schoon(opdracht.pdfnaam, 120), o); pdfGemaild = true; }
     catch (e) { console.error(e); pdfFout = e instanceof Melding ? e.message : "De pdf kon niet naar e-Boekhouden worden gemaild."; }
   }
-  return { geboekt, alGeboekt: !!o.alGeboekt, producten: gemaakt, regels: o.voorbeeld.regels, totaal: o.voorbeeld.totaal, pdfGemaild, pdfFout };
+  return { geboekt, alGeboekt: !!o.alGeboekt, producten: gemaakt, prijslijst: inPrijslijst, nietInPrijslijst, regels: o.voorbeeld.regels, totaal: o.voorbeeld.totaal, pdfGemaild, pdfFout };
 };
 
 // ---------- Afhandelen ----------
@@ -1009,7 +1052,7 @@ const afhandelen = async (req, db) => {
     if (soort === "cijfers") return antwoord(await cijfers(vraag));
     if (soort === "kopers") return antwoord(await kopers(db, vraag, opdracht));
     if (soort === "leveranciers") return antwoord(await leveranciersZoeken(db, vraag, opdracht));
-    if (soort === "inkoop_voorbereiden") return antwoord((await inkoopOpbouwen(vraag, opdracht)).voorbeeld);
+    if (soort === "inkoop_voorbereiden") return antwoord((await inkoopOpbouwen(db, vraag, opdracht)).voorbeeld);
     if (soort === "inkoop_maken") return antwoord(await inkoopMaken(db, vraag, opdracht));
     return antwoord(await maken(db, vraag, opdracht));
   } catch (e) {
