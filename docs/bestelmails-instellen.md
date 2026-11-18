@@ -115,3 +115,10 @@ De volgorde is belangrijk:
 6. **Backoffice → Prijslijst → Koppelen met e-Boekhouden:** kies het factuursjabloon, klik op **Voorstel op naam**, kijk alle keuzes na en klik op **Koppelingen opslaan**.
 7. **Eerste factuur:** open een bevestigde bestelling → **Factuur voorbereiden** → controleer → **Maak factuur in e-Boekhouden**. Kijk daarna in e-Boekhouden of de factuur, de klant en de voorraad kloppen, en verstuur hem vanuit e-Boekhouden.
 
+
+## Update 18 nov: inkoopfactuur inboeken
+
+1. **Supabase → SQL Editor:** plak de inhoud van `supabase/027-inkoop.sql` en klik op **Run**. Dit maakt de tabel waarin de markup per leverancier wordt onthouden.
+2. **Supabase → Edge Functions → factuur → Code:** vervang alles door de inhoud van `supabase/functions/factuur/index.ts` en klik op **Deploy**. Laat de instelling Verify JWT staan zoals hij nu staat.
+3. Zeg "zet het live".
+4. **Backoffice → Facturen → Inkoopfactuur:** boek een eerste factuur in. Controleer daarna in e-Boekhouden de boeking en de nieuwe producten, en vul via **Voorraad bewerken** de aantallen in die het scherm toont.

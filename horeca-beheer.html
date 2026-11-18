@@ -89,6 +89,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
         <a href="#nieuwsmail" data-tab="nieuwsmail">Nieuwsmail</a>
         <p class="beheer__groep">Facturen</p>
         <a href="#factuur" data-tab="factuur">Losse factuur</a>
+        <a href="#inkoop" data-tab="inkoop">Inkoopfactuur</a>
         <p class="beheer__groep">Inzicht</p>
         <a href="#overzicht" data-tab="overzicht">Overzicht</a>
         <a href="#kopers" data-tab="kopers">Wie kocht wat</a>
@@ -521,6 +522,96 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
         <ul class="beheer__problemen" data-veld="lfproblemen" hidden></ul>
         <button class="knop knop--primair" type="button" data-actie="lf-maak">Maak factuur in e-Boekhouden</button>
         <p class="formulier__status" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+
+    {%- comment -%} Inkoopfactuur inboeken in e-Boekhouden en nieuwe wijnen als product (functie factuur, supabase/027) {%- endcomment -%}
+    <div data-scherm="inkoop" hidden>
+      <p class="beheer__uitleg">Boek een inkoopfactuur in e-Boekhouden en maak de nieuwe wijnen daar aan als product, met de inkoopprijs. De verkoopprijzen rekenen we uit met de markup; ze komen niet in e-Boekhouden. Je ziet eerst een voorbeeld. Pas na "Inboeken" gebeurt er iets.</p>
+      <form class="formulier beheer__losfactuur" id="inkoop" novalidate>
+        <h2 class="beheer__tussenkop">Leverancier</h2>
+        <div class="beheer__zoekrij">
+          <div class="veld">
+            <label for="ik-zoek">Zoek in e-Boekhouden <span class="veld__optioneel">(naam)</span></label>
+            <input id="ik-zoek" type="search" autocomplete="off">
+          </div>
+          <button class="knop knop--secundair" type="button" data-actie="ik-zoek">Zoeken</button>
+        </div>
+        <fieldset class="beheer__klanten" data-veld="ikleveranciers">
+          <legend class="visueel-verborgen">Kies de leverancier</legend>
+        </fieldset>
+        <label class="akkoord"><input type="checkbox" data-veld="iknieuwvink"> Nieuwe leverancier aanmaken in e-Boekhouden</label>
+        <div class="beheer__nieuweklant" data-veld="iknieuw" hidden>
+          <div class="beheer__velden">
+            <div class="veld"><label for="ik-naam">Naam</label><input id="ik-naam" name="naam" autocomplete="off"></div>
+            <div class="veld"><label for="ik-adres">Straat en huisnummer <span class="veld__optioneel">(niet verplicht)</span></label><input id="ik-adres" name="adres" autocomplete="off"></div>
+            <div class="veld"><label for="ik-postcode">Postcode <span class="veld__optioneel">(niet verplicht)</span></label><input id="ik-postcode" name="postcode" autocomplete="off"></div>
+            <div class="veld"><label for="ik-plaats">Plaats <span class="veld__optioneel">(niet verplicht)</span></label><input id="ik-plaats" name="plaats" autocomplete="off"></div>
+            <div class="veld"><label for="ik-land">Land <span class="veld__optioneel">(niet verplicht)</span></label><input id="ik-land" name="land" autocomplete="off"></div>
+            <div class="veld"><label for="ik-email">E-mailadres <span class="veld__optioneel">(niet verplicht)</span></label><input id="ik-email" name="email" type="email" autocomplete="off"></div>
+            <div class="veld"><label for="ik-btw">Btw-nummer <span class="veld__optioneel">(niet verplicht)</span></label><input id="ik-btw" name="btw" autocomplete="off"></div>
+          </div>
+        </div>
+
+        <h2 class="beheer__tussenkop">Factuur</h2>
+        <div class="beheer__velden">
+          <div class="veld"><label for="ik-nummer">Factuurnummer</label><input id="ik-nummer" name="factuurnummer" autocomplete="off"></div>
+          <div class="veld"><label for="ik-datum">Factuurdatum</label><input id="ik-datum" name="datum" type="date"></div>
+          <div class="veld"><label for="ik-termijn">Betaaltermijn <span class="veld__optioneel">(dagen)</span></label><input id="ik-termijn" name="termijn" type="number" min="0" inputmode="numeric" value="14"></div>
+          <div class="veld"><label for="ik-btwcode">Btw</label>
+            <select id="ik-btwcode" name="btw">
+              <option value="BI_EU_INK">Binnen de EU, 0%</option>
+              <option value="HOOG_INK_21">Nederland, 21%</option>
+              <option value="BU_EU_INK">Buiten de EU, 0%</option>
+            </select>
+          </div>
+        </div>
+
+        <h2 class="beheer__tussenkop">Markup</h2>
+        <div class="beheer__velden">
+          <div class="veld"><label for="ik-mp">Markup particulier <span class="veld__optioneel">(bijv. 1,45)</span></label><input id="ik-mp" name="markup_particulier" inputmode="decimal" autocomplete="off"></div>
+          <div class="veld"><label for="ik-mh">Markup horeca <span class="veld__optioneel">(bijv. 1,45)</span></label><input id="ik-mh" name="markup_horeca" inputmode="decimal" autocomplete="off"></div>
+          <div class="veld"><label for="ik-toeslag">Accijns en transport <span class="veld__optioneel">(per fles)</span></label><input id="ik-toeslag" name="toeslag" inputmode="decimal" autocomplete="off"></div>
+        </div>
+        <p class="beheer__klein">Horeca excl. btw = inkoop × markup + accijns en transport. Particulier incl. btw = (inkoop × markup + accijns en transport) × 1,21, naar boven afgerond op 50 cent. De markup wordt per leverancier onthouden.</p>
+
+        <h2 class="beheer__tussenkop">Wijnen</h2>
+        <details class="beheer__plakken">
+          <summary>Regels plakken</summary>
+          <div class="veld">
+            <label for="ik-plak">Eén wijn per regel: omschrijving; aantal flessen; inkoopprijs per fles</label>
+            <textarea id="ik-plak" rows="5"></textarea>
+          </div>
+          <button class="knop knop--secundair" type="button" data-actie="ik-plak">Regels overnemen</button>
+        </details>
+        <ol class="beheer__losregels" data-veld="ikregels"></ol>
+        <button class="knop knop--secundair" type="button" data-actie="ik-regel">Wijn toevoegen</button>
+        <dl class="mandje__totalen beheer__totalen beheer__lostotaal">
+          <div class="mandje__totaal"><dt>Totaal excl. btw</dt><dd data-veld="iktotaal"></dd></div>
+        </dl>
+        <button class="knop knop--primair" type="submit">Voorbeeld bekijken</button>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="beheer__formulier beheer__factuur" data-veld="ikvoorbeeld" hidden>
+        <h2 class="beheer__tussenkop" data-veld="ikkop" tabindex="-1">Voorbeeld</h2>
+        <p class="beheer__klein" data-veld="ikinfo"></p>
+        <div class="beheer__tabel">
+          <table>
+            <thead><tr><th scope="col">Wijn</th><th scope="col">Product</th><th scope="col" class="beheer__getal">Flessen</th><th scope="col" class="beheer__getal">Inkoop</th><th scope="col" class="beheer__getal">Horeca excl.</th><th scope="col" class="beheer__getal">Particulier incl.</th></tr></thead>
+            <tbody data-veld="ikvoorbeeldregels"></tbody>
+          </table>
+        </div>
+        <dl class="mandje__totalen beheer__totalen">
+          <div class="mandje__totaal"><dt>Te boeken excl. btw</dt><dd data-veld="iktotaal2"></dd></div>
+        </dl>
+        <ul class="beheer__problemen" data-veld="ikproblemen" hidden></ul>
+        <button class="knop knop--primair" type="button" data-actie="ik-maak">Inboeken in e-Boekhouden</button>
+        <p class="formulier__status" role="status" aria-live="polite"></p>
+        <div data-veld="ikklaar" hidden>
+          <p class="beheer__klein">Nog één ding in e-Boekhouden: open de boeking en klik op "Voorraad bewerken". Vul daar per product het aantal flessen in:</p>
+          <ul data-veld="ikvoorraad"></ul>
+        </div>
       </div>
     </div>
 

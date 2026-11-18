@@ -15,6 +15,8 @@
 //                     maken, aangevraagd door de betaal-Worker (met de koppelsleutel) of opnieuw vanuit de backoffice.
 // 8. "cijfers":        de omzet van dit jaar en deze maand en de openstaande facturen, voor het startscherm.
 // 9. "kopers":         per cuvée van één producent welke klanten hem op een factuur hadden (alleen lezen).
+// 10. "leveranciers", "inkoop_voorbereiden" en "inkoop_maken": een inkoopfactuur inboeken en de nieuwe wijnen
+//                     als product aanmaken, met de inkoopprijs (supabase/027). Ook hier eerst een voorbeeld.
 // Factuurregels verwijzen naar het product in e-Boekhouden (productId), zodat de voorraad daar meeloopt.
 // Bedragen komen uit de bestelling zoals VMV hem heeft bevestigd (prijs per stuk na korting).
 //
@@ -786,6 +788,175 @@ const kopers = async (db, vraag, opdracht) => {
   };
 };
 
+// ---------- 10. Inkoopfactuur inboeken (supabase/027) ----------
+// Een inkoopfactuur als "Factuur ontvangen" in e-Boekhouden: één regel met het totaal van de wijnen
+// (excl. btw) op de rekening Inkopen. Nieuwe wijnen worden daar ook product, met de inkoopprijs en zonder
+// verkoopprijs; groep, omzetrekening, btw en voorraad zoals bij het product met het hoogste nummer.
+// Accijns en transport boeken we niet: die zitten alleen als toeslag per fles in de verkoopprijzen.
+// Verkoopprijzen (alleen getoond, niet opgeslagen in e-Boekhouden):
+//   horeca excl. btw      = inkoop × markup horeca + toeslag, op de cent
+//   particulier incl. btw = (inkoop × markup particulier + toeslag) × 1,21, naar boven op 50 cent
+// De voorraad (aantallen) kan niet via de koppeling: dat doe je in e-Boekhouden met "Voorraad bewerken".
+const INKOOP_BTW = { BI_EU_INK: "Binnen de EU, 0%", HOOG_INK_21: "Nederland, 21%", BU_EU_INK: "Buiten de EU, 0%" };
+const omhoog50 = (c) => Math.ceil(Math.round(c * 1000) / 1000 / 50 - 1e-9) * 50;
+export const verkoopprijzen = (inkoop, mP, mH, toeslag) => ({
+  horeca: Math.round((inkoop * mH + toeslag) * 100) / 100,
+  particulier: omhoog50((inkoop * mP + toeslag) * 121) / 100
+});
+const gewoneTekst = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+
+const leveranciersZoeken = async (db, vraag, opdracht) => {
+  const { klanten } = await klantenZoeken(vraag, opdracht);
+  const ids = klanten.map((k) => k.id);
+  const { data } = ids.length ? await db.from("inkoop_leveranciers").select("*").in("eb_relatie_id", ids) : { data: [] };
+  return {
+    leveranciers: klanten.map((k) => {
+      const m = (data || []).find((x) => Number(x.eb_relatie_id) === k.id);
+      return { ...k, markup: m ? { particulier: m.markup_particulier, horeca: m.markup_horeca, toeslag: m.toeslag } : null };
+    })
+  };
+};
+
+const inkoopOpbouwen = async (vraag, opdracht) => {
+  const problemen = [];
+  const getal = (v) => (v === "" || v == null ? NaN : Number(v));
+  const mP = getal(opdracht.markup_particulier), mH = getal(opdracht.markup_horeca), toeslag = getal(opdracht.toeslag);
+  if (!(mP >= 1 && mP <= 10)) problemen.push("Vul de markup voor particulier in, bijvoorbeeld 1,45.");
+  if (!(mH >= 1 && mH <= 10)) problemen.push("Vul de markup voor horeca in, bijvoorbeeld 1,45.");
+  if (!(toeslag >= 0 && toeslag <= 100)) problemen.push("Vul de toeslag per fles in (accijns en transport), of 0.");
+  const nummer = schoon(opdracht.factuurnummer, 50);
+  if (!nummer) problemen.push("Vul het factuurnummer van de leverancier in.");
+  const datum = /^\d{4}-\d{2}-\d{2}$/.test(String(opdracht.datum || "")) ? opdracht.datum : null;
+  if (!datum) problemen.push("Vul de factuurdatum in.");
+  const termijn = Math.floor(Number(opdracht.termijn));
+  if (!(termijn >= 0 && termijn <= 365)) problemen.push("Vul de betaaltermijn in dagen in.");
+  const btwCode = opdracht.btw in INKOOP_BTW ? opdracht.btw : null;
+  if (!btwCode) problemen.push("Kies de btw-code.");
+
+  // De leverancier: een bestaande relatie, of (met het vinkje) een nieuwe
+  let leverancier = null, nieuw = null;
+  if (Number.isInteger(opdracht.relatie)) {
+    const r = await vraag("GET", `/v1/relation/${opdracht.relatie}`);
+    if (!r) problemen.push("Deze leverancier bestaat niet (meer) in e-Boekhouden. Zoek hem opnieuw.");
+    else leverancier = relatieVan(r);
+  } else if (opdracht.relatie === "nieuw") {
+    const n = opdracht.nieuw || {};
+    nieuw = {
+      type: "B", name: schoon(n.naam, 100),
+      address: schoon(n.adres, 100), postalCode: schoon(n.postcode, 10), city: schoon(n.plaats, 50), country: schoon(n.land, 50),
+      emailAddress: schoon(n.email, 150),
+      ...(schoon(n.btw, 20) ? { vatNumber: schoon(n.btw, 20).replace(/\s/g, "").toUpperCase() } : {}),
+      ...(termijn >= 0 ? { termOfPayment: termijn } : {})
+    };
+    if (!nieuw.name) problemen.push("Vul de naam van de nieuwe leverancier in.");
+    leverancier = { id: null, naam: nieuw.name, plaats: nieuw.city, nieuw: true };
+  } else problemen.push("Kies de leverancier, of zet het vinkje voor een nieuwe leverancier aan.");
+
+  // Is deze factuur al geboekt? (zelfde factuurnummer bij dezelfde leverancier)
+  let alGeboekt = null;
+  if (nummer && leverancier && leverancier.id) {
+    const j = await vraag("GET", `/v1/mutation?limit=50&type=1&invoiceNumber=${encodeURIComponent(nummer)}`);
+    alGeboekt = ((j && j.items) || []).find((m) => !m.relationId || m.relationId === leverancier.id) || null;
+  }
+
+  // De wijnen
+  const invoer = Array.isArray(opdracht.regels) ? opdracht.regels.slice(0, 100) : [];
+  if (!invoer.length) problemen.push("Voeg minstens één wijn toe.");
+  const producten = await alles(vraag, "/v1/product");
+  const opNaam = new Map(producten.map((p) => [gewoneTekst(p.description), p]));
+  // Het volgende productnummer: het hoogste nummer plus 1, met evenveel cijfers (041 → 042)
+  const numeriek = producten.filter((p) => /^\d+$/.test(String(p.code || "").trim()));
+  const hoogste = numeriek.sort((a, b) => parseInt(b.code, 10) - parseInt(a.code, 10))[0] || null;
+  let volgende = hoogste ? parseInt(hoogste.code, 10) + 1 : 1;
+  const breedte = hoogste ? String(hoogste.code).trim().length : 3;
+  const voorbeeldProduct = hoogste ? await vraag("GET", `/v1/product/${hoogste.id}`) : null;
+  const sjabloon = {
+    groupId: voorbeeldProduct && voorbeeldProduct.groupId ? voorbeeldProduct.groupId : undefined,
+    ledgerId: voorbeeldProduct ? voorbeeldProduct.ledgerId : null,
+    vat: (voorbeeldProduct && voorbeeldProduct.vat) || "HOOG_VERK_21"
+  };
+  if (invoer.length && !sjabloon.ledgerId) problemen.push("Er staat nog geen product met een nummer in e-Boekhouden om groep en omzetrekening van over te nemen.");
+
+  const regels = [];
+  const gezien = new Set();
+  for (const r of invoer) {
+    const omschrijving = schoon(r.omschrijving, 200);
+    const aantal = Math.floor(Number(r.aantal));
+    const prijs = Math.round(Number(r.prijs) * 100) / 100;
+    if (!omschrijving) { problemen.push("Vul bij elke wijn de omschrijving in."); continue; }
+    if (!(aantal >= 1 && aantal <= 100000)) { problemen.push(`Vul bij ${omschrijving} het aantal flessen in.`); continue; }
+    if (!(prijs > 0 && prijs <= 100000)) { problemen.push(`Vul bij ${omschrijving} de inkoopprijs per fles in.`); continue; }
+    const sleutel = gewoneTekst(omschrijving);
+    if (gezien.has(sleutel)) { problemen.push(`${omschrijving} staat twee keer in de lijst. Tel de aantallen bij elkaar op.`); continue; }
+    gezien.add(sleutel);
+    const bestaand = opNaam.get(sleutel) || null;
+    const code = bestaand ? (bestaand.code || "") : String(volgende++).padStart(breedte, "0");
+    if (!bestaand && code.length > 20) { problemen.push("Het volgende productnummer is te lang voor e-Boekhouden."); continue; }
+    const v = mP >= 1 && mH >= 1 && toeslag >= 0 ? verkoopprijzen(prijs, mP, mH, toeslag) : { horeca: null, particulier: null };
+    regels.push({ omschrijving, aantal, prijs, code, bestaand: !!bestaand, bestaandId: bestaand ? bestaand.id : null, ...v });
+  }
+  const totaal = regels.reduce((s, r) => s + centen(r.prijs) * r.aantal, 0) / 100;
+
+  // Rekeningen: Inkopen (7000) voor de regel, Crediteuren voor de boeking
+  const [inkopen] = await Promise.all([vraag("GET", "/v1/ledger?code=7000")]);
+  const inkoopRekening = ((inkopen && inkopen.items) || [])[0] || null;
+  if (!inkoopRekening) problemen.push("In e-Boekhouden staat geen grootboekrekening 7000 (Inkopen).");
+  const cred = await alles(vraag, "/v1/ledger?category=CRED");
+  const crediteuren = cred.length === 1 ? cred[0] : cred.find((l) => String(l.code) === "1600") || null;
+  if (!crediteuren) problemen.push("Ik kan de rekening Crediteuren in e-Boekhouden niet vinden.");
+
+  return {
+    regels, nieuw, leverancier, sjabloon, problemen, btwCode, nummer, datum, termijn,
+    inkoopRekening, crediteuren, alGeboekt,
+    markup: { particulier: mP, horeca: mH, toeslag },
+    voorbeeld: {
+      leverancier, factuurnummer: nummer, datum, termijn, btw: btwCode ? INKOOP_BTW[btwCode] : "",
+      rekening: inkoopRekening ? `${inkoopRekening.code} ${inkoopRekening.description || ""}`.trim() : "",
+      alGeboekt: !!alGeboekt, totaal,
+      regels: regels.map(({ bestaandId, ...r }) => r),
+      problemen
+    }
+  };
+};
+
+const inkoopMaken = async (db, vraag, opdracht) => {
+  const o = await inkoopOpbouwen(vraag, opdracht);
+  if (o.problemen.length) throw new Melding(o.problemen[0]);
+  // 1. De leverancier
+  let relatie = o.leverancier.id;
+  if (o.nieuw) relatie = (await vraag("POST", "/v1/relation", o.nieuw)).id;
+  // 2. De boeking (niet als hij er al staat, bijvoorbeeld na een eerdere poging)
+  let geboekt = false;
+  if (!o.alGeboekt) {
+    await vraag("POST", "/v1/mutation", {
+      type: "1", date: o.datum, ledgerId: o.crediteuren.id, relationId: relatie,
+      invoiceNumber: o.nummer, termOfPayment: o.termijn, inExVat: "EX",
+      description: schoon(o.leverancier.naam, 200),
+      rows: [{ ledgerId: o.inkoopRekening.id, vatCode: o.btwCode, amount: o.voorbeeld.totaal, description: schoon(`Wijn, factuur ${o.nummer}`, 200) }]
+    });
+    geboekt = true;
+  }
+  // 3. De nieuwe producten (bestaande met dezelfde omschrijving slaan we over)
+  const gemaakt = [];
+  for (const r of o.regels) {
+    if (r.bestaand) continue;
+    await vraag("POST", "/v1/product", {
+      code: r.code, description: r.omschrijving, purchasePriceExcl: r.prijs,
+      vat: o.sjabloon.vat, ledgerId: o.sjabloon.ledgerId,
+      ...(o.sjabloon.groupId ? { groupId: o.sjabloon.groupId } : {}),
+      inStockManagement: true, active: true
+    });
+    gemaakt.push(r.code);
+  }
+  // 4. De markup onthouden voor de volgende keer
+  await db.from("inkoop_leveranciers").upsert({
+    eb_relatie_id: relatie, naam: o.leverancier.naam,
+    markup_particulier: o.markup.particulier, markup_horeca: o.markup.horeca, toeslag: o.markup.toeslag,
+    bijgewerkt: new Date().toISOString()
+  });
+  return { geboekt, alGeboekt: !!o.alGeboekt, producten: gemaakt, regels: o.voorbeeld.regels, totaal: o.voorbeeld.totaal };
+};
+
 // ---------- Afhandelen ----------
 const afhandelen = async (req, db) => {
   const opdracht = await req.json().catch(() => ({}));
@@ -793,7 +964,7 @@ const afhandelen = async (req, db) => {
   // De webwinkelfactuur mag ook de betaal-Worker aanvragen, met de koppelsleutel; al het andere alleen een beheerder
   const worker = soort === "webwinkel" && await isWorker(db, opdracht.sleutel);
   if (!worker && !(await beheerderUit(db, req))) return antwoord({ fout: "Geen toegang. Log opnieuw in op de backoffice." }, 401);
-  if (!["gegevens", "koppelen", "voorbereiden", "maken", "klanten", "los_voorbereiden", "los_maken", "webwinkel", "cijfers", "kopers"].includes(soort)) return antwoord({ fout: "Onbekende opdracht." }, 400);
+  if (!["gegevens", "koppelen", "voorbereiden", "maken", "klanten", "los_voorbereiden", "los_maken", "webwinkel", "cijfers", "kopers", "leveranciers", "inkoop_voorbereiden", "inkoop_maken"].includes(soort)) return antwoord({ fout: "Onbekende opdracht." }, 400);
   if (soort === "webwinkel" && !Number.isInteger(opdracht.bestelling) && !opdracht.bestelnummer) return antwoord({ fout: "Onbekende bestelling." }, 400);
   if ((soort === "voorbereiden" || soort === "maken") && !Number.isInteger(opdracht.bestelling)) return antwoord({ fout: "Onbekende bestelling." }, 400);
   let vraag = null;
@@ -808,6 +979,9 @@ const afhandelen = async (req, db) => {
     if (soort === "webwinkel") return antwoord(await webwinkel(db, vraag, opdracht));
     if (soort === "cijfers") return antwoord(await cijfers(vraag));
     if (soort === "kopers") return antwoord(await kopers(db, vraag, opdracht));
+    if (soort === "leveranciers") return antwoord(await leveranciersZoeken(db, vraag, opdracht));
+    if (soort === "inkoop_voorbereiden") return antwoord((await inkoopOpbouwen(vraag, opdracht)).voorbeeld);
+    if (soort === "inkoop_maken") return antwoord(await inkoopMaken(db, vraag, opdracht));
     return antwoord(await maken(db, vraag, opdracht));
   } catch (e) {
     if (e instanceof Melding) return antwoord({ fout: e.message }, e.status);

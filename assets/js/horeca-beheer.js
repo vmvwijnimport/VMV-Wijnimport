@@ -147,9 +147,9 @@
     var h = location.hash.slice(1) || "start";
     var m = /^(bestelling|klant|wijn|lijst)-(.+)$/.exec(h);
     // #prijslijst (en het oude #wijnen) is het overzicht van de wijnen met hun prijzen
-    var scherm = m ? m[1] : h === "prijslijst" || h === "wijnen" ? "wijnen" : (["start", "klanten", "overzicht", "kopers", "bezoekers", "factuur", "hedonist", "drops", "nieuwsmail", "koppelen"].indexOf(h) >= 0 ? h : "bestellingen");
+    var scherm = m ? m[1] : h === "prijslijst" || h === "wijnen" ? "wijnen" : (["start", "klanten", "overzicht", "kopers", "bezoekers", "factuur", "inkoop", "hedonist", "drops", "nieuwsmail", "koppelen"].indexOf(h) >= 0 ? h : "bestellingen");
     schermen.forEach(function (s) { s.hidden = s.dataset.scherm !== scherm; });
-    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : ["wijn", "wijnen", "lijst", "koppelen"].indexOf(scherm) >= 0 ? "prijslijst" : ["start", "overzicht", "kopers", "bezoekers", "factuur", "hedonist", "drops", "nieuwsmail"].indexOf(scherm) >= 0 ? scherm : "bestellingen";
+    var tab = scherm === "klant" || scherm === "klanten" ? "klanten" : ["wijn", "wijnen", "lijst", "koppelen"].indexOf(scherm) >= 0 ? "prijslijst" : ["start", "overzicht", "kopers", "bezoekers", "factuur", "inkoop", "hedonist", "drops", "nieuwsmail"].indexOf(scherm) >= 0 ? scherm : "bestellingen";
     // Bij afdrukken alleen de prijslijst (zie stijl.css, @media print)
     document.body.classList.toggle("drukt-prijslijst", scherm === "lijst");
     pagina.querySelectorAll("[data-tab]").forEach(function (a) {
@@ -173,6 +173,7 @@
     if (scherm === "kopers") toonKopers();
     if (scherm === "bezoekers") toonBezoekers();
     if (scherm === "factuur") toonLosFactuur();
+    if (scherm === "inkoop") toonInkoop();
     if (scherm === "hedonist") toonHedonist();
     if (scherm === "drops") toonDrops();
     if (scherm === "start") toonStart();
@@ -2788,6 +2789,204 @@
   });
   var toonLosFactuur = function () {
     if (!veld("lfregels").children.length) { veld("lfregels").appendChild(lfRegel()); lfTotaal(); }
+  };
+
+  // ---------- Inkoopfactuur inboeken (functie factuur: leveranciers, inkoop_voorbereiden, inkoop_maken) ----------
+  // Leverancier, factuurgegevens, markup en de wijnen. De functie rekent alles opnieuw uit; dit scherm is een hulp.
+  var ik = document.getElementById("inkoop");
+  var ikStatus = ik.querySelector(".formulier__status");
+  var ikVoorbeeld = veld("ikvoorbeeld");
+  var ikLeverancier = null;   // id van de gekozen relatie, of "nieuw" (vinkje)
+  var ikKlaar = function () { ikVoorbeeld.hidden = true; };
+  var ikVeld = function (naam) { return (ik.elements[naam] && ik.elements[naam].value.trim()) || ""; };
+
+  var ikRegel = function (w) {
+    w = w || {};
+    var li = el("li", "beheer__losregel");
+    var nr = Date.now() + Math.random().toString(36).slice(2, 6);
+    var maak = function (label, klasse, waarde, soort) {
+      var v = el("div", "veld"), l = el("label", null, label), i = el("input", klasse);
+      i.id = "ik-" + soort + "-" + nr; l.htmlFor = i.id; i.autocomplete = "off";
+      if (waarde != null) i.value = waarde;
+      v.appendChild(l); v.appendChild(i); li.appendChild(v);
+      i.addEventListener("input", function () { ikTotaal(); ikKlaar(); });
+      return i;
+    };
+    var oms = maak("Omschrijving in e-Boekhouden", null, w.omschrijving, "o");
+    var aantal = maak("Flessen", "beheer__invoer", w.aantal, "a");
+    aantal.type = "number"; aantal.min = "1"; aantal.inputMode = "numeric";
+    var prijs = maak("Inkoop per fles", null, w.prijs != null ? kaal(w.prijs) : "", "p");
+    prijs.inputMode = "decimal";
+    var bedrag = el("span", "beheer__bedrag");
+    var weg = el("button", "bestel__terug", "Weghalen"); weg.type = "button";
+    weg.addEventListener("click", function () { li.remove(); ikTotaal(); ikKlaar(); });
+    li.appendChild(bedrag); li.appendChild(weg);
+    li.bedrag = bedrag;
+    li.lees = function () { var x = getal(prijs.value); return { omschrijving: oms.value.trim(), aantal: parseInt(aantal.value, 10) || 0, prijs: isNaN(x) ? null : x }; };
+    return li;
+  };
+  var ikRegels = function () { return [].slice.call(veld("ikregels").children); };
+  var ikTotaal = function () {
+    var c = 0;
+    ikRegels().forEach(function (li) {
+      var r = li.lees();
+      var b = r.prijs != null && r.aantal > 0 ? Math.round(r.prijs * 100) * r.aantal : 0;
+      li.bedrag.textContent = b ? euro(b / 100) : "";
+      c += b;
+    });
+    veld("iktotaal").textContent = euro(c / 100);
+  };
+  ik.querySelector("[data-actie=ik-regel]").addEventListener("click", function () {
+    var li = ikRegel(); veld("ikregels").appendChild(li); li.querySelector("input").focus();
+  });
+  // Plakken: "omschrijving; aantal; prijs" per regel (ook met tabs, zoals uit een spreadsheet)
+  ik.querySelector("[data-actie=ik-plak]").addEventListener("click", function () {
+    var vak = document.getElementById("ik-plak");
+    var nieuw = vak.value.split(/\r?\n/).map(function (r) { return r.trim(); }).filter(Boolean).map(function (r) {
+      var d = r.split(/\t|;/).map(function (x) { return x.trim(); });
+      return { omschrijving: d[0] || "", aantal: parseInt(d[1], 10) || "", prijs: isNaN(getal(d[2] || "")) ? null : getal(d[2]) };
+    });
+    if (!nieuw.length) { melding(ikStatus, "Plak eerst de regels in het vak.", "fout"); return; }
+    ikRegels().forEach(function (li) { if (!li.lees().omschrijving) li.remove(); });
+    nieuw.forEach(function (w) { veld("ikregels").appendChild(ikRegel(w)); });
+    vak.value = ""; vak.closest("details").open = false;
+    melding(ikStatus, nieuw.length === 1 ? "1 wijn overgenomen." : nieuw.length + " wijnen overgenomen.", "goed");
+    ikTotaal(); ikKlaar();
+  });
+
+  // De markup van een leverancier invullen (als hij is onthouden)
+  var ikMarkup = function (m) {
+    if (!m) return;
+    if (m.particulier != null) ik.elements.markup_particulier.value = kaal(m.particulier);
+    if (m.horeca != null) ik.elements.markup_horeca.value = kaal(m.horeca);
+    if (m.toeslag != null) ik.elements.toeslag.value = kaal(m.toeslag);
+  };
+  var ikLijst = function (lijst) {
+    var vak = veld("ikleveranciers");
+    [].slice.call(vak.querySelectorAll("label")).forEach(function (l) { l.remove(); });
+    lijst.forEach(function (k) {
+      var l = el("label", "akkoord beheer__klantkeuze");
+      var i = el("input"); i.type = "radio"; i.name = "ik-leverancier"; i.value = String(k.id);
+      i.checked = ikLeverancier === k.id;
+      i.addEventListener("change", function () {
+        ikLeverancier = k.id; veld("iknieuwvink").checked = false; veld("iknieuw").hidden = true;
+        ikMarkup(k.markup); ikKlaar();
+      });
+      l.appendChild(i);
+      l.appendChild(document.createTextNode(" " + k.naam + (k.plaats ? ", " + k.plaats : "") + (k.markup ? " · markup onthouden" : "")));
+      vak.appendChild(l);
+    });
+  };
+  veld("iknieuwvink").addEventListener("change", function () {
+    var aan = this.checked;
+    veld("iknieuw").hidden = !aan;
+    if (aan) {
+      ikLeverancier = "nieuw";
+      veld("ikleveranciers").querySelectorAll("input").forEach(function (i) { i.checked = false; });
+      if (!document.getElementById("ik-naam").value) document.getElementById("ik-naam").value = document.getElementById("ik-zoek").value.trim();
+    } else ikLeverancier = null;
+    ikKlaar();
+  });
+  veld("iknieuw").addEventListener("input", ikKlaar);
+  ik.addEventListener("change", ikKlaar);
+  var ikZoek = function () {
+    var knop = ik.querySelector("[data-actie=ik-zoek]");
+    var tekst = document.getElementById("ik-zoek").value.trim();
+    if (tekst.length < 2) { melding(ikStatus, "Vul minstens twee letters in om te zoeken.", "fout"); return; }
+    melding(ikStatus);
+    bezig(knop, "Zoeken…");
+    factuurFunctie({ opdracht: "leveranciers", zoek: tekst })
+      .then(function (r) {
+        bezig(knop);
+        if (r.leveranciers.length && !veld("iknieuwvink").checked) { ikLeverancier = r.leveranciers[0].id; ikMarkup(r.leveranciers[0].markup); }
+        ikLijst(r.leveranciers);
+        if (!r.leveranciers.length) melding(ikStatus, "Geen leverancier gevonden met “" + tekst + "”. Zoek anders, of zet het vinkje voor een nieuwe leverancier aan.");
+        ikKlaar();
+      })
+      .catch(function (err) { bezig(knop); melding(ikStatus, foutTekst(err), "fout"); });
+  };
+  ik.querySelector("[data-actie=ik-zoek]").addEventListener("click", ikZoek);
+  document.getElementById("ik-zoek").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); ikZoek(); } });
+
+  var ikOpdracht = function (soort) {
+    var n = function (naam) { var i = document.getElementById("ik-" + naam); return i ? i.value.trim() : ""; };
+    var g = function (naam) { var x = getal(ikVeld(naam)); return isNaN(x) ? "" : x; };
+    return {
+      opdracht: soort, relatie: ikLeverancier,
+      nieuw: ikLeverancier === "nieuw" ? { naam: n("naam"), adres: n("adres"), postcode: n("postcode"), plaats: n("plaats"), land: n("land"), email: n("email"), btw: n("btw") } : null,
+      factuurnummer: ikVeld("factuurnummer"), datum: ikVeld("datum"), termijn: ikVeld("termijn"), btw: ikVeld("btw"),
+      markup_particulier: g("markup_particulier"), markup_horeca: g("markup_horeca"), toeslag: g("toeslag"),
+      regels: ikRegels().map(function (li) { return li.lees(); }).filter(function (r) { return r.omschrijving || r.prijs != null; })
+    };
+  };
+  var ikToon = function (v) {
+    var tbody = veld("ikvoorbeeldregels");
+    tbody.textContent = "";
+    v.regels.forEach(function (r) {
+      var tr = el("tr"), th = el("th", null, r.omschrijving);
+      th.scope = "row";
+      tr.appendChild(th);
+      tr.appendChild(el("td", null, r.bestaand ? r.code + " (bestaat al)" : r.code + " (nieuw)"));
+      tr.appendChild(el("td", "beheer__getal", String(r.aantal)));
+      tr.appendChild(el("td", "beheer__getal", euro(r.prijs)));
+      tr.appendChild(el("td", "beheer__getal", r.horeca == null ? "" : euro(r.horeca)));
+      tr.appendChild(el("td", "beheer__getal", r.particulier == null ? "" : euro(r.particulier)));
+      tbody.appendChild(tr);
+    });
+    veld("iktotaal2").textContent = euro(v.totaal);
+  };
+  ik.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var knop = ik.querySelector("button[type=submit]");
+    if (ikLeverancier == null) { melding(ikStatus, "Zoek en kies eerst de leverancier, of zet het vinkje voor een nieuwe leverancier aan.", "fout"); return; }
+    melding(ikStatus);
+    bezig(knop, "Ophalen uit e-Boekhouden…");
+    factuurFunctie(ikOpdracht("inkoop_voorbereiden"))
+      .then(function (v) {
+        bezig(knop);
+        ikToon(v);
+        veld("ikkop").textContent = "Voorbeeld" + (v.factuurnummer ? ": factuur " + v.factuurnummer : "");
+        veld("ikinfo").textContent = (v.leverancier ? "Van " + v.leverancier.naam + (v.leverancier.nieuw ? " (nieuwe leverancier)" : "") + ". " : "") +
+          (v.datum ? "Factuurdatum " + new Date(v.datum + "T12:00:00").toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" }) + ", " : "") +
+          "betaaltermijn " + v.termijn + " dagen. Btw: " + v.btw + ", op rekening " + v.rekening + ". " +
+          (v.alGeboekt ? "Deze factuur staat al in e-Boekhouden: hij wordt niet nog een keer geboekt, alleen de nieuwe producten worden aangemaakt." : "");
+        var lijst = veld("ikproblemen");
+        lijst.textContent = "";
+        v.problemen.forEach(function (t) { lijst.appendChild(el("li", null, t)); });
+        lijst.hidden = !v.problemen.length;
+        ikVoorbeeld.querySelector("[data-actie=ik-maak]").hidden = v.problemen.length > 0;
+        veld("ikklaar").hidden = true;
+        melding(ikVoorbeeld.querySelector(".formulier__status"));
+        ikVoorbeeld.hidden = false;
+        veld("ikkop").focus();
+      })
+      .catch(function (err) { bezig(knop); melding(ikStatus, foutTekst(err), "fout"); });
+  });
+  ikVoorbeeld.querySelector("[data-actie=ik-maak]").addEventListener("click", function () {
+    var knop = this, status = ikVoorbeeld.querySelector(".formulier__status");
+    bezig(knop, "Inboeken…");
+    factuurFunctie(ikOpdracht("inkoop_maken"))
+      .then(function (r) {
+        bezig(knop);
+        knop.hidden = true;
+        ikToon(r);
+        melding(status, (r.geboekt ? "De factuur is ingeboekt" : "De factuur stond al in e-Boekhouden") +
+          (r.producten.length ? (r.producten.length === 1 ? " en product " : " en de producten ") + r.producten.join(", ") + (r.producten.length === 1 ? " is" : " zijn") + " aangemaakt." : ". Er waren geen nieuwe producten."), "goed");
+        var vr = veld("ikvoorraad");
+        vr.textContent = "";
+        r.regels.forEach(function (x) { vr.appendChild(el("li", null, x.code + " " + x.omschrijving + ": " + x.aantal + " flessen")); });
+        veld("ikklaar").hidden = false;
+        var mp = ik.elements.markup_particulier.value, mh = ik.elements.markup_horeca.value, ts = ik.elements.toeslag.value;
+        ik.reset(); ik.elements.markup_particulier.value = mp; ik.elements.markup_horeca.value = mh; ik.elements.toeslag.value = ts;
+        veld("ikregels").textContent = ""; veld("ikregels").appendChild(ikRegel()); ikTotaal();
+        veld("iknieuw").hidden = true;
+        if (ikLeverancier === "nieuw") { ikLeverancier = null; ikLijst([]); }
+      })
+      .catch(function (err) { bezig(knop); melding(status, foutTekst(err), "fout"); });
+  });
+  var toonInkoop = function () {
+    if (!veld("ikregels").children.length) { veld("ikregels").appendChild(ikRegel()); ikTotaal(); }
+    if (!ik.elements.datum.value) ik.elements.datum.value = new Date().toISOString().slice(0, 10);
   };
 
   var start = function () {
