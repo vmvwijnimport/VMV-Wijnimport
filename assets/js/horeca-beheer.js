@@ -2844,33 +2844,32 @@
     var weg = el("button", "bestel__terug", "Weghalen"); weg.type = "button";
     weg.addEventListener("click", function () { li.remove(); ikTotaal(); ikKlaar(); });
     li.appendChild(bedrag); li.appendChild(weg);
-    // Voor de prijslijst: ingevuld uit de omschrijving, tot je een veld zelf aanpast
+    // Voor de prijslijst: producent, wijn en jaargang komen uit de omschrijving; je kiest alleen de kleur en of het een magnum is
     var lijst = el("div", "beheer__inkooplijst");
-    lijst.dataset.prijslijst = "";
-    var lp = maak("Producent", null, "", "lp", lijst); lp.setAttribute("list", "w-producenten");
-    var ln = maak("Wijn", null, "", "ln", lijst);
-    var lj = maak("Jaargang", null, "", "lj", lijst);
-    var lf = maak("Formaat", null, "", "lf", lijst);
     var kv = el("div", "veld"), kl = el("label", null, "Kleur"), lk = el("select");
     lk.id = "ik-lk-" + nr; kl.htmlFor = lk.id;
     [["", "Kies"], ["wit", "Wit"], ["rood", "Rood"], ["rose", "Rosé"]].forEach(function (k) { var o = el("option", null, k[1]); o.value = k[0]; lk.appendChild(o); });
     kv.appendChild(kl); kv.appendChild(lk); lijst.appendChild(kv);
+    var ml = el("label", "akkoord"), mg = el("input");
+    mg.type = "checkbox"; ml.appendChild(mg); ml.appendChild(document.createTextNode(" Magnum (150 cl)"));
+    lijst.appendChild(ml);
     li.appendChild(lijst);
-    var ontleed = {};
-    [lp, ln, lj, lf, lk].forEach(function (i) { i.addEventListener("input", function () { i.dataset.handmatig = "1"; ikKlaar(); }); i.addEventListener("change", function () { i.dataset.handmatig = "1"; ikKlaar(); }); });
+    lk.addEventListener("change", function () { lk.dataset.handmatig = "1"; ikKlaar(); });
+    mg.addEventListener("change", function () { mg.dataset.handmatig = "1"; ikKlaar(); });
     var vulLijst = function () {
-      ontleed = ikOntleed(oms.value);
-      [[lp, "producent"], [ln, "naam"], [lj, "jaargang"], [lf, "formaat"], [lk, "kleur"]].forEach(function (x) { if (!x[0].dataset.handmatig) x[0].value = ontleed[x[1]] || ""; });
+      var o = ikOntleed(oms.value);
+      if (!lk.dataset.handmatig) lk.value = o.kleur || "";
+      if (!mg.dataset.handmatig) mg.checked = /^150/.test(o.formaat);
     };
     oms.addEventListener("input", vulLijst);
     vulLijst();
     li.bedrag = bedrag;
     li.lees = function () {
-      var x = getal(prijs.value);
-      var naam = lp.value.trim(), b = ikBekend().filter(function (p) { return p.naam.toLowerCase() === naam.toLowerCase(); })[0];
+      var x = getal(prijs.value), o = ikOntleed(oms.value);
+      var formaat = mg.checked ? "150 cl" : (/^150/.test(o.formaat) ? "75 cl" : o.formaat);
       return {
         omschrijving: oms.value.trim(), aantal: parseInt(aantal.value, 10) || 0, prijs: isNaN(x) ? null : x,
-        prijslijst: { producent: naam, regio: b ? b.regio : "", producent_slug: b ? b.slug : "", naam: ln.value.trim(), jaargang: lj.value.trim(), formaat: lf.value.trim(), kleur: lk.value }
+        prijslijst: { producent: o.producent, regio: o.regio, producent_slug: o.producent_slug, naam: o.naam, jaargang: o.jaargang, formaat: formaat, kleur: lk.value }
       };
     };
     return li;

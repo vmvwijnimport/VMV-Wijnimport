@@ -1285,7 +1285,7 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   padding: var(--s-2) 0; border-bottom: 1px solid var(--lijn);
 }
 .beheer__losregel .veld { margin: 0; }
-.beheer__losregel .beheer__invoer, .beheer__losregel input { width: 100%; }
+.beheer__losregel .beheer__invoer, .beheer__losregel input:not([type=checkbox]) { width: 100%; }
 .beheer__losregel .beheer__bedrag { padding-bottom: 12px; }
 .beheer__losregel .bestel__terug { margin: 0 0 14px; }
 .beheer__lostotaal { margin: var(--s-2) 0 var(--s-4); }
@@ -1307,11 +1307,11 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .beheer__losregels--breed .beheer__losregel > .veld:first-child { grid-column: 1 / -1; }
 .beheer__losregels--breed .beheer__bedrag { justify-self: end; }
 @media (max-width: 48rem) { .beheer__losregels--breed .beheer__losregel { grid-template-columns: 1fr 1fr; } .beheer__losregels--breed .beheer__bedrag { justify-self: start; } .beheer__losregel .beheer__bedrag { grid-column: auto; grid-row: auto; } }
-.beheer__inkooplijst { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 2fr) 6rem 6rem 7rem; gap: var(--s-1) var(--s-2); padding: var(--s-2); background: var(--wit); border: 1px solid var(--lijn); }
+.beheer__inkooplijst { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: end; gap: var(--s-1) var(--s-3); }
+.beheer__inkooplijst .veld { width: 9rem; }
+.beheer__inkooplijst .akkoord { margin: 0 0 14px; white-space: nowrap; }
 .beheer__inkooplijst .veld { margin: 0; }
-.beheer__inkooplijst label { font-size: var(--fs-klein); }
 .beheer__losregels--zonderlijst .beheer__inkooplijst { display: none; }
-@media (max-width: 48rem) { .beheer__inkooplijst { grid-template-columns: 1fr 1fr; } }
 .beheer__plakken { margin: 0 0 var(--s-2); }
 .beheer__plakken summary { cursor: pointer; }
 .beheer__plakken textarea { width: 100%; }

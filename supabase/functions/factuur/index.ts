@@ -904,7 +904,7 @@ const inkoopOpbouwen = async (db, vraag, opdracht) => {
         naam: schoon(l.naam, 150), jaargang: schoon(l.jaargang, 10), formaat: schoon(l.formaat, 20) || "75 cl",
         kleur: ["wit", "rood", "rose"].includes(l.kleur) ? l.kleur : null
       };
-      if (!lijst.producent || !lijst.naam) { problemen.push(`Vul bij ${omschrijving} de producent en de naam voor de prijslijst in.`); continue; }
+      if (!lijst.producent || !lijst.naam) { problemen.push(`Voor de prijslijst mist bij ${omschrijving} de producent of de naam. Schrijf de omschrijving als "Producent - Wijn 2019 75cl", of zet het vinkje voor de prijslijst uit.`); continue; }
     }
     regels.push({ omschrijving, aantal, prijs, code, bestaand: !!bestaand, bestaandId: bestaand ? bestaand.id : null, lijst, ...v });
   }
