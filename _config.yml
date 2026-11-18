@@ -125,6 +125,7 @@ exclude:
   - prijslijst
   - foto-originelen
   - huisstijl
+  - Factuur inboeken
   - betalen
   - CLAUDE.md
   - docs

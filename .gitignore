@@ -12,6 +12,7 @@ prijslijst/
 foto-originelen/
 huisstijl/
 drukwerk/
+Factuur inboeken/
 
 # Lokale geheimen: nooit committen
 .env
