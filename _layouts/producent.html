@@ -32,7 +32,6 @@ layout: default
     <p class="producent__herkomst">
       {% if p.plaats %}{{ p.plaats }}, {% endif %}{{ regio }}, {{ land }}
     </p>
-    <p class="producent__nl">{{ t.verkrijgbaar }} {{ site.title }}</p>
   </header>
 
   {%- comment -%}
@@ -105,6 +104,7 @@ layout: default
         {%- if p.druiven %}<div><dt>{{ t.druiven }}</dt><dd>{{ p.druiven }}</dd></div>{% endif %}
         {%- if hectare %}<div><dt>{{ t.wijngaard }}</dt><dd>{{ hectare }} {{ t.hectare }}</dd></div>{% endif %}
         {%- if werkwijze %}<div><dt>{{ t.werkwijze }}</dt><dd>{{ werkwijze }}</dd></div>{% endif %}
+        <div><dt>{{ t.verkrijgbaar }}</dt><dd>{{ site.title }}</dd></div>
       </dl>
       <p class="producent__vraag"><a href="{{ t.url.contact | relative_url }}?producent={{ p.naam | url_encode }}">{{ t.beschikbaarheid }}</a></p>
       {%- if p.website or p.instagram %}

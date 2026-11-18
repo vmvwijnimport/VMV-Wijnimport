@@ -143,3 +143,4 @@ De livegang voorbereiden met de eigenaar: Resend, Confirm email aan, FormSubmit 
 - **Site van vóór het horecaportaal:** de tag `voor-horeca-portaal`.
 - **Tussenstand:** elke commit op de branch `horeca-portaal`.
 - `main` (de live site) wordt pas gewijzigd na toestemming.
+- **Producentpagina (18 nov), wens van de eigenaar:** het regeltje "In Nederland verkrijgbaar via VMV Wijnimport" onder de naam is weg; in het feitenblok staat nu "Importeur: VMV Wijnimport" (EN "Importer"). Voor zoekmachines staat "importeur in Nederland" al in de paginatitel en de omschrijving.

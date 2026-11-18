@@ -540,7 +540,6 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 .kruimel a:hover { color: var(--rood); }
 .producent__kop { margin: var(--s-6) 0 var(--s-6); }
 .producent__herkomst { margin: var(--s-2) 0 0; font-size: var(--fs-klein); color: var(--tekst-zacht); }
-.producent__nl { margin: 4px 0 0; font-size: var(--fs-klein); color: var(--tekst-zacht); }
 
 .producent__foto { margin: 0 calc(var(--rand) * -1); }
 .producent__foto img { width: 100%; height: clamp(18rem, 55vw, 40rem); object-fit: cover; }

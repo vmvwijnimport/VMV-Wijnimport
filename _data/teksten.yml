@@ -56,7 +56,7 @@ nl:
   leeftijd_nee_tekst: Je moet 18 jaar of ouder zijn om deze website te bekijken.
   # Pagina van een producent
   kruimelpad: Kruimelpad
-  verkrijgbaar: In Nederland verkrijgbaar via
+  verkrijgbaar: Importeur
   fles_alt: Een fles van %naam% op een bankje in het park
   vorige_foto: Vorige foto
   volgende_foto: Volgende foto
@@ -179,7 +179,7 @@ en:
   leeftijd_nee_kop: Please come back when you’re 18
   leeftijd_nee_tekst: You must be 18 or older to view this website.
   kruimelpad: Breadcrumb
-  verkrijgbaar: Imported into the Netherlands by
+  verkrijgbaar: Importer
   fles_alt: A bottle from %naam% on a park bench
   vorige_foto: Previous photo
   volgende_foto: Next photo
