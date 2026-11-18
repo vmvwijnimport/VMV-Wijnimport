@@ -2984,55 +2984,6 @@
       })
       .catch(function (err) { bezig(knop); melding(status, foutTekst(err), "fout"); });
   });
-  // De pdf laten lezen (functie factuur: inkoop_lezen) en het formulier ermee invullen
-  ik.querySelector("[data-actie=ik-lees]").addEventListener("click", function () {
-    var knop = this, bestand = document.getElementById("ik-pdf").files[0];
-    if (!bestand) { melding(ikStatus, "Kies eerst de pdf van de factuur.", "fout"); return; }
-    if (!/pdf$/i.test(bestand.type || bestand.name)) { melding(ikStatus, "Kies een pdf-bestand.", "fout"); return; }
-    if (bestand.size > 10 * 1024 * 1024) { melding(ikStatus, "Deze pdf is te groot (meer dan 10 MB).", "fout"); return; }
-    melding(ikStatus);
-    bezig(knop, "Factuur lezen…");
-    var lezer = new FileReader();
-    lezer.onerror = function () { bezig(knop); melding(ikStatus, "Dit bestand kon niet worden geopend.", "fout"); };
-    lezer.onload = function () {
-      factuurFunctie({ opdracht: "inkoop_lezen", pdf: String(lezer.result).split(",")[1] || "" })
-        .then(function (g) {
-          bezig(knop);
-          if (g.factuurnummer) ik.elements.factuurnummer.value = g.factuurnummer;
-          if (g.datum) ik.elements.datum.value = g.datum;
-          if (g.termijn != null) ik.elements.termijn.value = g.termijn;
-          veld("ikregels").textContent = "";
-          (g.regels.length ? g.regels : [{}]).forEach(function (w) { veld("ikregels").appendChild(ikRegel(w)); });
-          ikTotaal();
-          var lijst = veld("ikoverig");
-          lijst.textContent = "";
-          if (g.overig.length) lijst.appendChild(el("li", null, "Niet meegenomen (geen wijn): " + g.overig.join("; ")));
-          lijst.hidden = !g.overig.length;
-          // Gegevens voor een nieuwe leverancier alvast invullen, en zoeken of hij al bestaat
-          var l = g.leverancier || {};
-          ["naam", "adres", "postcode", "plaats", "land", "email", "btw"].forEach(function (n) {
-            var i = document.getElementById("ik-" + n); if (i && l[n]) i.value = l[n];
-          });
-          ikKlaar();
-          var gelezen = g.regels.length === 1 ? "1 wijn" : g.regels.length + " wijnen";
-          if (!l.naam) { melding(ikStatus, "Factuur gelezen: " + gelezen + ". Kijk alles na en kies de leverancier.", "goed"); return; }
-          document.getElementById("ik-zoek").value = l.naam;
-          return factuurFunctie({ opdracht: "leveranciers", zoek: l.naam.split(/\s+/).slice(0, 3).join(" ") }).then(function (r) {
-            veld("iknieuwvink").checked = false; veld("iknieuw").hidden = true; ikLeverancier = null;
-            ikLijst(r.leveranciers);
-            if (r.leveranciers.length) {
-              ikLeverancier = r.leveranciers[0].id; ikMarkup(r.leveranciers[0].markup); ikLijst(r.leveranciers);
-              melding(ikStatus, "Factuur gelezen: " + gelezen + ". Leverancier gevonden in e-Boekhouden. Kijk alles na.", "goed");
-            } else {
-              veld("iknieuwvink").checked = true; veld("iknieuw").hidden = false; ikLeverancier = "nieuw";
-              melding(ikStatus, "Factuur gelezen: " + gelezen + ". " + l.naam + " staat nog niet in e-Boekhouden: het vinkje voor een nieuwe leverancier staat aan. Kijk alles na.", "goed");
-            }
-          });
-        })
-        .catch(function (err) { bezig(knop); melding(ikStatus, foutTekst(err), "fout"); });
-    };
-    lezer.readAsDataURL(bestand);
-  });
   var toonInkoop = function () {
     if (!veld("ikregels").children.length) { veld("ikregels").appendChild(ikRegel()); ikTotaal(); }
     if (!ik.elements.datum.value) ik.elements.datum.value = new Date().toISOString().slice(0, 10);

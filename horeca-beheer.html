@@ -527,18 +527,8 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
 
     {%- comment -%} Inkoopfactuur inboeken in e-Boekhouden en nieuwe wijnen als product (functie factuur, supabase/027) {%- endcomment -%}
     <div data-scherm="inkoop" hidden>
-      <p class="beheer__uitleg">Boek een inkoopfactuur in e-Boekhouden en maak de nieuwe wijnen daar aan als product, met de inkoopprijs. Upload de pdf om het formulier automatisch in te vullen, of vul het zelf in. De verkoopprijzen rekenen we uit met de markup; ze komen niet in e-Boekhouden. Je ziet eerst een voorbeeld. Pas na "Inboeken" gebeurt er iets.</p>
+      <p class="beheer__uitleg">Boek een inkoopfactuur in e-Boekhouden en maak de nieuwe wijnen daar aan als product, met de inkoopprijs. De verkoopprijzen rekenen we uit met de markup; ze komen niet in e-Boekhouden. Je ziet eerst een voorbeeld. Pas na "Inboeken" gebeurt er iets.</p>
       <form class="formulier beheer__losfactuur" id="inkoop" novalidate>
-        <h2 class="beheer__tussenkop">Factuur uploaden</h2>
-        <div class="beheer__zoekrij">
-          <div class="veld">
-            <label for="ik-pdf">Pdf van de factuur <span class="veld__optioneel">(vult het formulier in; kijk alles na)</span></label>
-            <input id="ik-pdf" type="file" accept="application/pdf,.pdf">
-          </div>
-          <button class="knop knop--secundair" type="button" data-actie="ik-lees">Lees factuur</button>
-        </div>
-        <ul class="beheer__klein" data-veld="ikoverig" hidden></ul>
-
         <h2 class="beheer__tussenkop">Leverancier</h2>
         <div class="beheer__zoekrij">
           <div class="veld">
