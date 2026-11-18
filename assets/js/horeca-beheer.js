@@ -2965,13 +2965,28 @@
   ikVoorbeeld.querySelector("[data-actie=ik-maak]").addEventListener("click", function () {
     var knop = this, status = ikVoorbeeld.querySelector(".formulier__status");
     bezig(knop, "Inboeken…");
-    factuurFunctie(ikOpdracht("inkoop_maken"))
+    // De geopende pdf gaat mee, zodat de functie hem naar de inbox van e-Boekhouden mailt
+    var bestand = document.getElementById("ik-pdf").files[0];
+    new Promise(function (klaar, mis) {
+      if (!bestand) { klaar(null); return; }
+      var lezer = new FileReader();
+      lezer.onload = function () { klaar(String(lezer.result).split(",")[1] || null); };
+      lezer.onerror = function () { mis(new Error("De pdf kon niet worden gelezen. Kies hem opnieuw.")); };
+      lezer.readAsDataURL(bestand);
+    })
+      .then(function (pdf) {
+        var o = ikOpdracht("inkoop_maken");
+        if (pdf) { o.pdf = pdf; o.pdfnaam = bestand.name; }
+        return factuurFunctie(o);
+      })
       .then(function (r) {
         bezig(knop);
         knop.hidden = true;
         ikToon(r);
         melding(status, (r.geboekt ? "De factuur is ingeboekt" : "De factuur stond al in e-Boekhouden") +
           (r.producten.length ? (r.producten.length === 1 ? " en product " : " en de producten ") + r.producten.join(", ") + (r.producten.length === 1 ? " is" : " zijn") + " aangemaakt." : ". Er waren geen nieuwe producten."), "goed");
+        veld("ikbijlage").textContent = r.pdfGemaild ? "De pdf is naar de inbox van e-Boekhouden gemaild. Koppel hem daar aan de boeking."
+          : (r.pdfFout ? r.pdfFout + " " : "") + (r.geboekt ? "Voeg de pdf van de factuur zelf toe aan de boeking in e-Boekhouden." : "");
         var vr = veld("ikvoorraad");
         vr.textContent = "";
         r.regels.forEach(function (x) { vr.appendChild(el("li", null, x.code + " " + x.omschrijving + ": " + x.aantal + " flessen")); });
@@ -2981,6 +2996,7 @@
         veld("ikregels").textContent = ""; veld("ikregels").appendChild(ikRegel()); ikTotaal();
         veld("iknieuw").hidden = true;
         if (ikLeverancier === "nieuw") { ikLeverancier = null; ikLijst([]); }
+        ikPdfDicht();
       })
       .catch(function (err) { bezig(knop); melding(status, foutTekst(err), "fout"); });
   });

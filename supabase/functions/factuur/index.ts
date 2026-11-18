@@ -22,6 +22,8 @@
 //
 // Instellingen in Supabase → Edge Functions → Secrets (niets hiervan staat in de repository):
 //   EBOEKHOUDEN_TOKEN  het API-token uit e-Boekhouden (Beheer → Inrichting → Koppelingen → e-Boekhouden API)
+//   EBOEKHOUDEN_INBOX  het e-mailadres waarmee je documenten in e-Boekhouden zet (voor de pdf van inkoopfacturen);
+//                      verstuurd met RESEND_API_KEY en AFZENDER, die al voor de functie bestelmail bestaan
 
 const EB = "https://api.e-boekhouden.nl";
 const BRON = "VMVportaal";   // naam van deze koppeling bij e-Boekhouden (max. 10 tekens)
@@ -797,13 +799,13 @@ const kopers = async (db, vraag, opdracht) => {
 //   horeca excl. btw      = inkoop × markup horeca + toeslag, op de cent
 //   particulier incl. btw = (inkoop × markup particulier + toeslag) × 1,21, naar boven op 50 cent
 // De voorraad (aantallen) kan niet via de koppeling: dat doe je in e-Boekhouden met "Voorraad bewerken".
+// Bijlagen kunnen ook niet via de koppeling: de pdf gaat per mail naar de inbox van e-Boekhouden.
 const INKOOP_BTW = { BI_EU_INK: "Binnen de EU, 0%", HOOG_INK_21: "Nederland, 21%", BU_EU_INK: "Buiten de EU, 0%" };
 const omhoog50 = (c) => Math.ceil(Math.round(c * 1000) / 1000 / 50 - 1e-9) * 50;
 export const verkoopprijzen = (inkoop, mP, mH, toeslag) => ({
   horeca: Math.round((inkoop * mH + toeslag) * 100) / 100,
   particulier: omhoog50((inkoop * mP + toeslag) * 121) / 100
 });
-const gewoneTekst = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 
 const leveranciersZoeken = async (db, vraag, opdracht) => {
   const { klanten } = await klantenZoeken(vraag, opdracht);
@@ -863,7 +865,7 @@ const inkoopOpbouwen = async (vraag, opdracht) => {
   const invoer = Array.isArray(opdracht.regels) ? opdracht.regels.slice(0, 100) : [];
   if (!invoer.length) problemen.push("Voeg minstens één wijn toe.");
   const producten = await alles(vraag, "/v1/product");
-  const opNaam = new Map(producten.map((p) => [gewoneTekst(p.description), p]));
+  const opNaam = new Map(producten.map((p) => [gewoon(p.description), p]));
   // Het volgende productnummer: het hoogste nummer plus 1, met evenveel cijfers (041 → 042)
   const numeriek = producten.filter((p) => /^\d+$/.test(String(p.code || "").trim()));
   const hoogste = numeriek.sort((a, b) => parseInt(b.code, 10) - parseInt(a.code, 10))[0] || null;
@@ -886,7 +888,7 @@ const inkoopOpbouwen = async (vraag, opdracht) => {
     if (!omschrijving) { problemen.push("Vul bij elke wijn de omschrijving in."); continue; }
     if (!(aantal >= 1 && aantal <= 100000)) { problemen.push(`Vul bij ${omschrijving} het aantal flessen in.`); continue; }
     if (!(prijs > 0 && prijs <= 100000)) { problemen.push(`Vul bij ${omschrijving} de inkoopprijs per fles in.`); continue; }
-    const sleutel = gewoneTekst(omschrijving);
+    const sleutel = gewoon(omschrijving);
     if (gezien.has(sleutel)) { problemen.push(`${omschrijving} staat twee keer in de lijst. Tel de aantallen bij elkaar op.`); continue; }
     gezien.add(sleutel);
     const bestaand = opNaam.get(sleutel) || null;
@@ -917,6 +919,26 @@ const inkoopOpbouwen = async (vraag, opdracht) => {
       problemen
     }
   };
+};
+
+// Mailt de pdf via Resend (dezelfde sleutel en afzender als de functie bestelmail) naar het
+// inbox-adres van e-Boekhouden. Het adres staat alleen in Supabase: secret EBOEKHOUDEN_INBOX.
+const pdfNaarInbox = async (pdf, naam, o) => {
+  const aan = Deno.env.get("EBOEKHOUDEN_INBOX"), sleutel = Deno.env.get("RESEND_API_KEY");
+  if (!aan || !sleutel) throw new Melding("De pdf is niet gemaild: het inbox-adres van e-Boekhouden (EBOEKHOUDEN_INBOX) staat nog niet in Supabase.");
+  if (!/^[A-Za-z0-9+/]+=*$/.test(pdf) || pdf.length > 14_000_000) throw new Melding("De pdf is niet gemaild: het bestand is ongeldig of groter dan 10 MB.");
+  const bestand = (naam && /\.pdf$/i.test(naam) ? naam : `Inkoopfactuur ${o.nummer}.pdf`).replace(/[\\/:*?"<>|]/g, "-");
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${sleutel}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: Deno.env.get("AFZENDER") || "VMV Wijnimport <onboarding@resend.dev>",
+      to: [aan], subject: schoon(`Inkoopfactuur ${o.nummer} ${o.leverancier.naam}`, 200),
+      text: `Inkoopfactuur ${o.nummer} van ${o.leverancier.naam}, ingeboekt vanuit de backoffice.`,
+      attachments: [{ filename: bestand, content: pdf }]
+    })
+  });
+  if (!r.ok) { console.error(`Resend ${r.status}: ${await r.text()}`); throw new Melding("De pdf kon niet naar e-Boekhouden worden gemaild."); }
 };
 
 const inkoopMaken = async (db, vraag, opdracht) => {
@@ -954,7 +976,14 @@ const inkoopMaken = async (db, vraag, opdracht) => {
     markup_particulier: o.markup.particulier, markup_horeca: o.markup.horeca, toeslag: o.markup.toeslag,
     bijgewerkt: new Date().toISOString()
   });
-  return { geboekt, alGeboekt: !!o.alGeboekt, producten: gemaakt, regels: o.voorbeeld.regels, totaal: o.voorbeeld.totaal };
+  // 5. De pdf van de factuur naar de inbox van e-Boekhouden mailen (alleen bij een nieuwe boeking)
+  const pdf = String(opdracht.pdf || "").replace(/^data:[^,]*,/, "").replace(/\s/g, "");
+  let pdfGemaild = false, pdfFout = "";
+  if (pdf && geboekt) {
+    try { await pdfNaarInbox(pdf, schoon(opdracht.pdfnaam, 120), o); pdfGemaild = true; }
+    catch (e) { console.error(e); pdfFout = e instanceof Melding ? e.message : "De pdf kon niet naar e-Boekhouden worden gemaild."; }
+  }
+  return { geboekt, alGeboekt: !!o.alGeboekt, producten: gemaakt, regels: o.voorbeeld.regels, totaal: o.voorbeeld.totaal, pdfGemaild, pdfFout };
 };
 
 // ---------- Afhandelen ----------

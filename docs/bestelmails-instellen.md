@@ -122,3 +122,9 @@ De volgorde is belangrijk:
 2. **Supabase → Edge Functions → factuur → Code:** vervang alles door de inhoud van `supabase/functions/factuur/index.ts` en klik op **Deploy**. Laat de instelling Verify JWT staan zoals hij nu staat.
 3. Zeg "zet het live".
 4. **Backoffice → Facturen → Inkoopfactuur:** boek een eerste factuur in. Controleer daarna in e-Boekhouden de boeking en de nieuwe producten, en vul via **Voorraad bewerken** de aantallen in die het scherm toont.
+
+### Pdf van de inkoopfactuur naar e-Boekhouden
+
+1. **Supabase → Edge Functions → Secrets:** voeg toe met de naam **`EBOEKHOUDEN_INBOX`** en als waarde het e-mailadres waarmee je documenten in e-Boekhouden zet. Het mailen gebruikt de Resend-sleutel en afzender die er al zijn voor de bestelmails.
+2. **Supabase → Edge Functions → factuur → Code:** vervang alles door de inhoud van `supabase/functions/factuur/index.ts` en klik op **Deploy**.
+3. Zeg "zet het live".
