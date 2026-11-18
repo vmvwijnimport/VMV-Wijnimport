@@ -1289,6 +1289,19 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .beheer__losregel .beheer__bedrag { padding-bottom: 12px; }
 .beheer__losregel .bestel__terug { margin: 0 0 14px; }
 .beheer__lostotaal { margin: var(--s-2) 0 var(--s-4); }
+/* Inkoopfactuur: met een geopende pdf het formulier links en de factuur rechts, meescrollend */
+.beheer__pdfkeuze { max-width: 52rem; margin-bottom: var(--s-3); }
+.beheer__inkoop--pdf { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-4); align-items: start; }
+.beheer__inkoop--pdf .beheer__losfactuur { max-width: none; padding: var(--s-4) var(--s-3); }
+.beheer__pdf { position: sticky; top: var(--s-2); display: flex; flex-direction: column; height: calc(100vh - var(--s-4)); border: 1px solid var(--lijn); background: var(--wit); }
+.beheer__pdfbalk { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-1) var(--s-2); margin: 0; padding: var(--s-1) var(--s-2); border-bottom: 1px solid var(--lijn); font-size: var(--fs-klein); }
+.beheer__pdfbalk span { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--tekst-zacht); }
+.beheer__pdfbalk .bestel__terug { margin: 0; }
+.beheer__pdf iframe { flex: 1 1 auto; width: 100%; border: 0; }
+@media (max-width: 64rem) {
+  .beheer__inkoop--pdf { grid-template-columns: minmax(0, 1fr); }
+  .beheer__pdf { position: static; height: 60vh; order: -1; }
+}
 /* Inkoopfactuur: de omschrijving over de hele breedte, daaronder flessen en prijs */
 .beheer__losregels--breed .beheer__losregel { grid-template-columns: 6rem 9rem minmax(0, 1fr) auto; }
 .beheer__losregels--breed .beheer__losregel .veld:first-child { grid-column: 1 / -1; }

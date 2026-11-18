@@ -2984,6 +2984,30 @@
       })
       .catch(function (err) { bezig(knop); melding(status, foutTekst(err), "fout"); });
   });
+  // De pdf van de factuur naast het formulier tonen. Alleen in deze browser: hij gaat nergens heen.
+  var ikPdfAdres = null;
+  var ikPdfDicht = function () {
+    if (ikPdfAdres) URL.revokeObjectURL(ikPdfAdres);
+    ikPdfAdres = null;
+    veld("ikpdfkader").removeAttribute("src");
+    veld("ikpdf").hidden = true;
+    veld("ikraster").classList.remove("beheer__inkoop--pdf");
+    document.getElementById("ik-pdf").value = "";
+  };
+  document.getElementById("ik-pdf").addEventListener("change", function () {
+    var bestand = this.files[0];
+    if (!bestand) return;
+    if (!/pdf$/i.test(bestand.type || bestand.name)) { melding(ikStatus, "Kies een pdf-bestand.", "fout"); this.value = ""; return; }
+    if (ikPdfAdres) URL.revokeObjectURL(ikPdfAdres);
+    ikPdfAdres = URL.createObjectURL(bestand);
+    veld("ikpdfkader").src = ikPdfAdres;
+    veld("ikpdflink").href = ikPdfAdres;
+    veld("ikpdfnaam").textContent = bestand.name;
+    veld("ikpdf").hidden = false;
+    veld("ikraster").classList.add("beheer__inkoop--pdf");
+    melding(ikStatus);
+  });
+  ik.closest("[data-scherm]").querySelector("[data-actie=ik-pdfdicht]").addEventListener("click", ikPdfDicht);
   var toonInkoop = function () {
     if (!veld("ikregels").children.length) { veld("ikregels").appendChild(ikRegel()); ikTotaal(); }
     if (!ik.elements.datum.value) ik.elements.datum.value = new Date().toISOString().slice(0, 10);
