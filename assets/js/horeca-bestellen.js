@@ -85,12 +85,14 @@
     return groep;
   };
 
+  // Uitverkocht en binnenkort zijn (nog) niet te bestellen
+  var teBestellen = function (p) { return p.beschikbaarheid !== "uitverkocht" && p.beschikbaarheid !== "binnenkort"; };
   var voegKnoppenToe = function () {
     document.querySelectorAll("#assortiment .wijnregel").forEach(function (li) {
       var id = li.dataset.product, p = perId[id];
       if (!p || li.querySelector(".aantal")) return;
       var vak = el("span", "wijnregel__bestel");
-      if (p.beschikbaarheid === "uitverkocht") { li.appendChild(vak); return; }
+      if (!teBestellen(p)) { li.appendChild(vak); return; }
       vak.appendChild(aantalKnoppen(id, p, "wijnregel"));
       if (p.soort !== "glas") {
         var doos = el("button", "tekstknop wijnregel__doos", t("+ doos", "+ case"));
@@ -280,7 +282,7 @@
   tabblad();
 
   // ---------- Bestel opnieuw: dezelfde wijnen en aantallen in het mandje ----------
-  // Wat niet meer te bestellen is (uitverkocht of uit het assortiment), slaan we over en noemen we.
+  // Wat niet (meer) te bestellen is (uitverkocht, binnenkort of uit het assortiment), slaan we over en noemen we.
   var opnieuwKnop = function (b) {
     var vak = el("div", "bestelling__opnieuw");
     var knop = el("button", "knop knop--secundair", t("Bestel opnieuw", "Order again"));
@@ -291,7 +293,7 @@
       var gezet = 0, overgeslagen = [];
       b.bestelregels.forEach(function (x) {
         var p = perId[x.product_id];
-        if (!p || p.beschikbaarheid === "uitverkocht") { overgeslagen.push(x.omschrijving); return; }
+        if (!p || !teBestellen(p)) { overgeslagen.push(x.omschrijving); return; }
         zet(p.id, (mandje[p.id] || 0) + x.aantal);
         gezet++;
       });
@@ -443,7 +445,7 @@
     laad();
     // Producten die niet meer bestaan of uitverkocht zijn uit het mandje halen
     Object.keys(mandje).forEach(function (id) {
-      if (!perId[id] || perId[id].beschikbaarheid === "uitverkocht") delete mandje[id];
+      if (!perId[id] || !teBestellen(perId[id])) delete mandje[id];
     });
     voegKnoppenToe();
     toon();
