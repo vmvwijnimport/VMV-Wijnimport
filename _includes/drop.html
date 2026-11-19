@@ -2,6 +2,7 @@
   De droppagina: één wijn, via een eigen link uit WhatsApp (/drop/?c=<code> en /en/drop/?c=<code>).
   Een drop kan twee of drie wijnen hebben (supabase/026): de link is die van de eerste wijn, en
   drop_aanbod geeft de codes van de andere wijnen mee. /drop/?c=<code>-<code> werkt ook.
+  Een drop kan ook een pakket hebben (supabase/029): een eigen tabblad met de wijnen erin.
   Staat niet in het menu en niet in Google. De wijn, de prijs (incl. btw) en de voorraad staan alleen
   in de database (supabase/022-drops.sql) en worden in de backoffice ingesteld, onder Drops.
   Logica: assets/js/drop.js; het mandje en afrekenen: assets/js/winkel.js.
@@ -48,7 +49,9 @@
       <p class="drop__producent" data-veld="producent"></p>
       <h1 data-veld="naam"></h1>
       <p class="drop__kenmerken" data-veld="kenmerken"></p>
-      <p class="drop__prijs"><span data-veld="prijs"></span> <small>{% if en %}per bottle, incl. VAT{% else %}per fles, incl. btw{% endif %}</small></p>
+      {%- comment -%} Bij een pakket (supabase/029): de wijnen erin, met hun aantal {%- endcomment %}
+      <ul class="drop__inhoud" data-veld="inhoud" hidden></ul>
+      <p class="drop__prijs"><span data-veld="prijs"></span> <small data-veld="per">{% if en %}per bottle, incl. VAT{% else %}per fles, incl. btw{% endif %}</small></p>
       <p class="drop__voorraad" data-veld="voorraad"></p>
 
       <div class="drop__bestel" data-veld="bestel">
@@ -63,6 +66,7 @@
       <p class="drop__klein" data-veld="levering"></p>
 
       <div class="verhaal drop__verhaal" data-veld="tekst"></div>
+      <div class="verhaal drop__inhoudtekst" data-veld="inhoudtekst" hidden></div>
       <p class="drop__meer" data-veld="meer" hidden><a href=""></a></p>
     </div>
   </article>

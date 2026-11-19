@@ -1461,6 +1461,14 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .drop__kleurstip--rose { --stip: var(--rose); --stiprand: var(--rose); }
 .drop__kleurstip--rood { --stip: var(--rood); --stiprand: var(--rood); }
 .drop__kleurstip { flex: none; width: 12px; height: 12px; margin-top: 7px; border-radius: 50%; background: var(--stip); border: 1px solid var(--stiprand); }
+.drop__stippen { display: flex; flex: none; gap: 3px; }
+/* Pakket (supabase/029): de wijnen erin, en de tekst van wijnen die alleen in het pakket zitten */
+.drop__inhoud { margin: var(--s-2) 0 0; padding: 0; list-style: none; }
+.drop__inhoud li { display: flex; gap: var(--s-1); padding: 4px 0; }
+.drop__inhoud .drop__kleurstip { margin-top: 6px; }
+.drop__inhoudtekst { margin-top: var(--s-4); padding-top: var(--s-4); border-top: 1px solid var(--lijn); }
+.drop__inhoudtekst h2 { margin: var(--s-3) 0 var(--s-1); font-size: var(--fs-h3); }
+.drop__inhoudtekst h2:first-child { margin-top: 0; }
 .drop__paneel { animation: drop-in .35s ease; }
 @keyframes drop-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .drop__paneel { animation: none; } }
@@ -1496,6 +1504,9 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .beheer__dropwijn { margin-bottom: var(--s-3); padding: var(--s-3); background: var(--wit); border: 1px solid var(--lijn); }
 .beheer__dropwijn .beheer__velden { margin-bottom: 0; }
 .beheer__dropwijn .beheer__dropfoto { margin: var(--s-2) 0 0; }
+.beheer__droppakket { border-color: var(--zwart); }
+.beheer__droplos { margin-top: var(--s-2); }
+.beheer__droplos .veld { max-width: 24rem; margin: var(--s-1) 0 0; }
 .beheer__dropwijnbalk { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--s-2); }
 .beheer__dropwijnkop { margin: 0; font-weight: 500; color: var(--zwart); }
 .beheer__dropwijnweg { padding: 0; border: 0; background: none; font: inherit; font-size: var(--fs-klein); color: var(--tekst); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }

@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var n = totaalGlazen();
     var glazen = Object.keys(mandje).reduce(function (som, id) { return som + prijsModel(mandje[id] || 0); }, 0);
     var f = 0, wijn = 0;
-    codes().forEach(function (c) { var w = wijnMandje.wijnen[c]; f += w.aantal; wijn += Math.round(w.prijs * 100) * w.aantal; });
+    codes().forEach(function (c) { var w = wijnMandje.wijnen[c]; f += w.aantal * (w.flessen || 1); wijn += Math.round(w.prijs * 100) * w.aantal; });
     wijn = wijn / 100;
     var sub = glazen + wijn;
     var gratis, verzending;
@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var wijnRegels = codes().map(function (c) {
       var w = wijnMandje.wijnen[c];
-      var uitleg = "<small>" + euro(w.prijs) + (EN ? " per bottle" : " per fles") + "</small>";
+      var uitleg = "<small>" + euro(w.prijs) + (w.pakket ? (EN ? " per bundle" : " per pakket") : (EN ? " per bottle" : " per fles")) + "</small>";
       return '<li class="mandje__regel"><span>' + veilig(w.naam) + uitleg + stapper("wijn", c, w.aantal, veilig(w.naam)) + "</span><span>" + euro(w.prijs * w.aantal) + "</span></li>";
     });
     var glasRegels = Object.keys(W.modellen)
@@ -222,8 +222,9 @@ document.addEventListener("DOMContentLoaded", function () {
     melding();
     if (aantal > w.max) {
       aantal = w.max;
-      melding(EN ? "You can order up to " + w.max + fles(w.max) + " of " + w.naam + "."
-                 : "Je kunt maximaal " + w.max + fles(w.max) + " van " + w.naam + " bestellen.");
+      var stuks = w.pakket ? (EN ? (w.max === 1 ? " bundle" : " bundles") : (w.max === 1 ? " pakket" : " pakketten")) : fles(w.max);
+      melding(EN ? "You can order up to " + w.max + stuks + " of " + w.naam + "."
+                 : "Je kunt maximaal " + w.max + stuks + " van " + w.naam + " bestellen.");
     }
     if (aantal === 0) delete wijnMandje.wijnen[code];
     else w.aantal = aantal;
@@ -233,8 +234,11 @@ document.addEventListener("DOMContentLoaded", function () {
   // Gegevens uit drop_aanbod overnemen; het maximum is wat er nog is, en hooguit het maximum per klant
   var neem = function (a) {
     var w = wijnMandje.wijnen[a.code] || { aantal: 0 };
-    w.naam = a.naam;
+    w.naam = a.soort === "pakket" ? (EN ? a.pakket_en || a.naam : a.naam) : a.naam;
     w.prijs = Number(a.prijs);
+    // Pakket (supabase/029): telt als zoveel flessen als erin zitten
+    w.pakket = a.soort === "pakket";
+    w.flessen = w.pakket ? (a.inhoud || []).reduce(function (s, x) { return s + (Number(x.aantal) || 1); }, 0) || 1 : 1;
     w.levering = EN ? (a.levering_en || a.levering) : a.levering;
     w.max = a.max ? Math.min(a.beschikbaar, a.max) : a.beschikbaar;
     wijnMandje.wijnen[a.code] = w;

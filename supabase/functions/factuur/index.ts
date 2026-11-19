@@ -541,6 +541,19 @@ export const verdeel = (bedrag, aantal) => {
   return [{ aantal: rest, prijs: (per + 1) / 100 }, { aantal: aantal - rest, prijs: per / 100 }].filter((x) => x.aantal > 0);
 };
 
+// Een pakket uit een drop (supabase/029) over de wijnen erin verdelen, naar verhouding van hun particuliere
+// prijs (anders de losse dropprijs). Het totaal is precies het bedrag van het pakket.
+// inhoud: [{ eb, naam, flessen, gewicht }] → [{ eb, naam, delen }]
+export const pakketVerdelen = (bedrag, inhoud) => {
+  const totaal = centen(bedrag);
+  const som = inhoud.reduce((s, w) => s + w.gewicht * w.flessen, 0) || 1;
+  const exact = inhoud.map((w) => totaal * w.gewicht * w.flessen / som);
+  const deel = exact.map(Math.floor);
+  let over = totaal - deel.reduce((s, x) => s + x, 0);
+  exact.map((x, i) => ({ i, rest: x - deel[i] })).sort((a, b) => b.rest - a.rest).forEach(({ i }) => { if (over > 0) { deel[i]++; over--; } });
+  return inhoud.map((w, i) => ({ eb: w.eb, naam: w.naam, delen: verdeel(deel[i] / 100, w.flessen) }));
+};
+
 // De glasprijzen van de site (_data/winkel.yml): de prijs per glas en voor elke 6 van hetzelfde model
 const glasprijzen = async () => {
   try {
@@ -580,15 +593,30 @@ const webwinkelOpbouwen = async (db, vraag, h) => {
   if (!inst || !inst.eb_sjabloon_id) problemen.push("Kies eerst een factuursjabloon onder Prijslijst → Koppelen met e-Boekhouden.");
 
   // Wijn: via de drop naar de wijn in de prijslijst en het gekoppelde product
-  const dropIds = regels.filter((r) => r.soort === "wijn").map((r) => Number(r.drop_id));
+  const dropIds = regels.filter((r) => r.soort === "wijn")
+    .flatMap((r) => [Number(r.drop_id), ...(Array.isArray(r.inhoud) ? r.inhoud.map((x) => Number(x.drop_id)) : [])]);
   const { data: drops } = dropIds.length
-    ? await db.from("drops").select("id, product_id, producten(eb_product_id)").in("id", dropIds)
+    ? await db.from("drops").select("id, prijs, product_id, producten(eb_product_id, producent, naam, jaargang, prijs_particulier)").in("id", dropIds)
     : { data: [] };
   const winkel = regels.some((r) => r.soort === "glas") ? await glasprijzen() : null;
   const lijst = [];
   for (const r of regels) {
     let eb = null;
-    if (r.soort === "wijn") {
+    if (r.soort === "wijn" && r.pakket) {
+      // Pakket: elke wijn als eigen regel, zodat de voorraad per wijn klopt
+      const inhoud = [];
+      for (const x of Array.isArray(r.inhoud) ? r.inhoud : []) {
+        const d = (drops || []).find((y) => y.id === Number(x.drop_id));
+        const p = d && d.producten;
+        if (!p || !p.eb_product_id) { problemen.push(`Een wijn in ${r.naam} is nog niet gekoppeld aan een product in e-Boekhouden (Prijslijst → Koppelen).`); continue; }
+        inhoud.push({
+          eb: p.eb_product_id, flessen: r.aantal * Math.max(1, Number(x.aantal) || 1),
+          naam: `${p.producent} – ${p.naam}${p.jaargang ? ` ${p.jaargang}` : ""} (pakket)`,
+          gewicht: Number(p.prijs_particulier) > 0 ? Number(p.prijs_particulier) : Number(d.prijs) > 0 ? Number(d.prijs) : 1
+        });
+      }
+      if (inhoud.length && inhoud.length === r.inhoud.length) lijst.push(...pakketVerdelen(r.bedrag, inhoud));
+    } else if (r.soort === "wijn") {
       const d = (drops || []).find((x) => x.id === Number(r.drop_id));
       eb = d && d.producten ? d.producten.eb_product_id : null;
       if (!eb) { problemen.push(`${r.naam} is nog niet gekoppeld aan een product in e-Boekhouden (Prijslijst → Koppelen).`); continue; }

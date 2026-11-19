@@ -281,7 +281,7 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
 
     {%- comment -%} Drops: één wijn met een eigen link voor WhatsApp (supabase/022-drops.sql) {%- endcomment -%}
     <div data-scherm="drops" hidden>
-      <p class="beheer__uitleg">Een drop is één tot drie wijnen met een eigen link, om te delen via WhatsApp. De link staat niet op de website en niet in Google. Klanten betalen met iDEAL; tijdens het betalen houden we de flessen een half uur vast. Betaalde bestellingen staan onder Webwinkel.</p>
+      <p class="beheer__uitleg">Een drop is één tot drie wijnen met een eigen link, om te delen via WhatsApp, eventueel met een pakket: een eigen prijs voor flessen van die wijnen samen. Een pakket haalt de flessen van de voorraad van elke wijn; een wijn kan ook alleen in het pakket te koop zijn. De link staat niet op de website en niet in Google. Klanten betalen met iDEAL; tijdens het betalen houden we de flessen een half uur vast. Betaalde bestellingen staan onder Webwinkel.</p>
       <p class="formulier__status" data-veld="dropmelding" role="status" aria-live="polite"></p>
       <div class="beheer__knoppen beheer__dropnieuw">
         <button class="knop knop--primair" type="button" data-actie="drop-nieuw">Nieuwe drop</button>
@@ -292,12 +292,15 @@ description: Backoffice van VMV Wijnimport voor horecabestellingen en aanvragen.
         {%- comment -%} Eén tot drie wijnen; de regels maakt horeca-beheer.js (maakWijnRegel) {%- endcomment -%}
         <div class="beheer__dropwijnen" data-veld="dropwijnen"></div>
         <p class="beheer__klein" data-veld="dropwijnenmelding" hidden>Meer wijnen in één drop werkt pas als supabase/026-drop-meer-wijnen.sql is uitgevoerd in Supabase.</p>
+        {%- comment -%} Een pakket met flessen van de wijnen hierboven (supabase/029; maakPakketRegel) {%- endcomment %}
+        <div data-veld="droppakket"></div>
         <div class="beheer__knoppen beheer__dropwijnerbij">
           <button class="knop knop--secundair" type="button" data-actie="drop-wijnerbij">Nog een wijn</button>
+          <button class="knop knop--secundair" type="button" data-actie="drop-pakket">Pakket toevoegen</button>
         </div>
         <div class="beheer__velden">
           <div class="veld">
-            <label for="d-max">Maximum per klant, per wijn <span class="veld__optioneel">(leeg = geen)</span></label>
+            <label for="d-max">Maximum per klant, per wijn of pakket <span class="veld__optioneel">(leeg = geen)</span></label>
             <input id="d-max" name="max_per_klant" type="number" min="1" inputmode="numeric" autocomplete="off">
           </div>
           <div class="veld">

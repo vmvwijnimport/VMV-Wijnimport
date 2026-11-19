@@ -76,7 +76,8 @@
       db.from("drops").select("*").order("open_vanaf", { ascending: false }),
       db.from("drop_bestellingen").select("id, status, aangemaakt_op, regels").neq("status", "vervallen"),
       db.from("drop_instellingen").select("*").maybeSingle(),
-      db.from("drops").select("groep").limit(1)
+      db.from("drops").select("groep").limit(1),
+      db.from("drops").select("soort").limit(1)
     ]).then(function (r) {
       // De Hedonist-tabel bestaat pas na supabase/015; zonder die tabel werkt de rest gewoon
       r.slice(0, 4).forEach(function (x) { if (x.error) throw x.error; });
@@ -87,6 +88,7 @@
       data.dropKosten = r[8].error ? null : r[8].data;
       data.dropsKlaar = !r[6].error;
       data.dropGroep = !r[9].error;               // meer wijnen in één drop: pas na supabase/026
+      data.dropPakket = !r[10].error;             // een pakket in een drop: pas na supabase/029
       data.bestellingen = r[0].data;
       data.bestellingen.forEach(function (b) { b.bestelregels.sort(function (x, y) { return x.id - y.id; }); });
       data.klanten = r[1].data;
@@ -1267,10 +1269,13 @@
     var grens = Date.now() - 30 * 60 * 1000;
     data.dropBestellingen.forEach(function (b) {
       (b.regels || []).forEach(function (r) {
-        if (r.soort !== "wijn" || Number(r.drop_id) !== d.id) return;
+        if (r.soort !== "wijn") return;
+        // Flessen van deze wijn in een pakket (supabase/029) tellen ook mee
+        var n = Number(r.drop_id) === d.id ? r.aantal : (r.flessen || []).reduce(function (s, f) { return s + (Number(f.drop_id) === d.id ? f.aantal : 0); }, 0);
+        if (!n) return;
         t.bestellingen++;
-        if (b.status === "betaald") t.verkocht += r.aantal;
-        else if (new Date(b.aangemaakt_op).getTime() > grens) t.gereserveerd += r.aantal;
+        if (b.status === "betaald") t.verkocht += n;
+        else if (new Date(b.aangemaakt_op).getTime() > grens) t.gereserveerd += n;
       });
     });
     return t;
@@ -1284,6 +1289,7 @@
   };
   var productVan = function (id) { return data.producten.filter(function (p) { return p.id === id; })[0]; };
   var dropNaam = function (d) {
+    if (d.soort === "pakket") return d.naam || "Pakket";
     var p = productVan(d.product_id);
     return p ? p.producent + ", " + wijnNaam(p) : "Wijn niet meer in de prijslijst";
   };
@@ -1291,7 +1297,13 @@
   var dropWijnen = function (d) {
     return [d].concat(data.drops.filter(function (x) { return x.groep === d.id && !x.verwijderd; }));
   };
-  var dropTitel = function (wijnen) {
+  var dropTitel = function (alles) {
+    var wijnen = alles.filter(function (d) { return d.soort !== "pakket"; });
+    var pakket = alles.filter(function (d) { return d.soort === "pakket"; }).map(dropNaam);
+    var titel = wijnenTitel(wijnen);
+    return pakket.length ? titel + " + " + pakket.join(", ") : titel;
+  };
+  var wijnenTitel = function (wijnen) {
     if (wijnen.length === 1) return dropNaam(wijnen[0]);
     var p = wijnen.map(function (d) { return productVan(d.product_id); });
     var zelfde = p.every(function (x) { return x && p[0] && x.producent === p[0].producent; });
@@ -1323,7 +1335,7 @@
       var st = dropStatus(d, tellingen[0]);
       // Alleen uitverkocht als alle wijnen op zijn
       if (st[0] === "Uitverkocht" || st[0] === "Open") {
-        st = wijnen.every(function (w, i) { return tellingen[i].verkocht >= w.aantal; }) ? ["Uitverkocht", "geleverd"] : dropStatus(d, { verkocht: -1 });
+        st = wijnen.every(function (w, i) { return w.soort === "pakket" || tellingen[i].verkocht >= w.aantal; }) ? ["Uitverkocht", "geleverd"] : dropStatus(d, { verkocht: -1 });
       }
       var rij = el("div", "beheer__droprij");
       var c1 = el("div", "beheer__cel");
@@ -1332,8 +1344,13 @@
         (d.max_per_klant ? " · max. " + d.max_per_klant + " per klant" + (wijnen.length > 1 ? " per wijn" : "") : "")));
       wijnen.forEach(function (w, i) {
         var t = tellingen[i], p = productVan(w.product_id);
+        if (w.soort === "pakket") {
+          c1.appendChild(el("small", null, dropNaam(w) + ": " + euro(w.prijs) + " per pakket · verkocht " + t.verkocht +
+            (t.gereserveerd ? ", " + t.gereserveerd + " nu aan het betalen" : "")));
+          return;
+        }
         c1.appendChild(el("small", null, (wijnen.length > 1 ? (p ? wijnNaam(p) : "Wijn") + ": " : "") + euro(w.prijs) + " per fles · verkocht " + t.verkocht + " van " + w.aantal +
-          (t.gereserveerd ? ", " + t.gereserveerd + " nu aan het betalen" : "")));
+          (t.gereserveerd ? ", " + t.gereserveerd + " nu aan het betalen" : "") + (w.los === false ? " · alleen in het pakket" : w.max_los != null ? " · max. " + w.max_los + " los" : "")));
       });
       var c2 = el("div", "beheer__labels");
       c2.appendChild(el("span", "label label--" + st[1], st[0]));
@@ -1425,13 +1442,117 @@
       r.querySelector(".beheer__dropwijnkop").textContent = regels.length > 1 ? "Wijn " + (i + 1) : "Wijn";
       r.querySelector("[data-actie=drop-wijnweg]").hidden = regels.length < 2;
     });
-    pagina.querySelector(".beheer__dropwijnerbij").hidden = !meer || regels.length >= MAX_WIJNEN;
+    pagina.querySelector("[data-actie=drop-wijnerbij]").hidden = !meer || regels.length >= MAX_WIJNEN;
     veld("dropwijnenmelding").hidden = meer;
+    toonPakketKnop();
+  };
+
+  // ---------- Pakket (supabase/029): een eigen naam en prijs, met flessen van de wijnen hierboven ----------
+  var pakketRegel = function () { return veld("droppakket").querySelector(".beheer__dropwijn"); };
+  var toonPakketKnop = function () {
+    var heeft = !!pakketRegel();
+    pagina.querySelector("[data-actie=drop-pakket]").hidden = heeft || data.dropPakket === false;
+    // "Los te koop" en "Hooguit los" zijn alleen nodig als er een pakket is
+    dropForm.querySelectorAll("[data-pakketveld]").forEach(function (v) { v.hidden = !heeft; });
+  };
+  // De wijnen hierboven als regels "aantal flessen per pakket"; ingevulde aantallen blijven staan
+  var vulPakketInhoud = function () {
+    var regel = pakketRegel();
+    if (!regel) return;
+    var lijst = regel.querySelector(".beheer__pakketinhoud");
+    var oud = {};
+    lijst.querySelectorAll("input").forEach(function (i) { oud[i.dataset.sleutel] = i.value; });
+    lijst.textContent = "";
+    wijnRegels().forEach(function (w, n) {
+      var p = productVan(Number(w.querySelector(".beheer__dropkeuze").value));
+      var v = el("div", "veld"), i = el("input");
+      i.type = "number"; i.min = "0"; i.max = "24"; i.inputMode = "numeric"; i.autocomplete = "off";
+      i.id = "d-pakket-" + w.dataset.sleutel; i.dataset.sleutel = w.dataset.sleutel;
+      i.value = w.dataset.sleutel in oud ? oud[w.dataset.sleutel] : (regel.beginInhoud && regel.beginInhoud[w.dataset.id]) || "1";
+      var l = el("label", null, (p ? p.producent + ", " + wijnNaam(p) : "Wijn " + (n + 1)) + " ");
+      l.appendChild(el("span", "veld__optioneel", "(flessen per pakket; 0 = niet erin)"));
+      l.htmlFor = i.id;
+      v.appendChild(l); v.appendChild(i);
+      lijst.appendChild(v);
+    });
+  };
+  var maakPakketRegel = function (d) {
+    var regel = el("div", "beheer__dropwijn beheer__droppakket");
+    regel.dataset.id = d ? d.id : "";
+    regel.dataset.foto = d && d.foto ? d.foto : "";
+    regel.beginInhoud = {};
+    ((d && d.inhoud) || []).forEach(function (x) { regel.beginInhoud[x.drop_id] = String(x.aantal); });
+    var kop = el("div", "beheer__dropwijnbalk");
+    kop.appendChild(el("p", "beheer__dropwijnkop", "Pakket"));
+    var weg = el("button", "beheer__dropwijnweg", "Weghalen");
+    weg.type = "button";
+    weg.addEventListener("click", function () {
+      if (regel.dataset.id) dropWeg.push(Number(regel.dataset.id));
+      regel.remove();
+      toonPakketKnop();
+    });
+    kop.appendChild(weg);
+    regel.appendChild(kop);
+    var id = "d-pk-" + Date.now();
+    var invoer = function (plek, label, uitleg, klasse, waarde) {
+      var v = el("div", "veld"), i = el("input", klasse);
+      i.id = id + "-" + klasse; i.autocomplete = "off";
+      if (waarde != null) i.value = waarde;
+      var l = el("label", null, label + " ");
+      if (uitleg) l.appendChild(el("span", "veld__optioneel", uitleg));
+      l.htmlFor = i.id;
+      v.appendChild(l); v.appendChild(i);
+      plek.appendChild(v);
+      return i;
+    };
+    var velden = el("div", "beheer__velden");
+    invoer(velden, "Naam", "(bijv. \"Carteret-pakket\")", "beheer__pakketnaam", d ? d.naam : "").maxLength = 120;
+    invoer(velden, "Naam in het Engels", "(leeg = dezelfde)", "beheer__pakketnaam-en", d ? d.naam_en || "" : "").maxLength = 120;
+    var prijs = invoer(velden, "Prijs per pakket", "(incl. btw)", "beheer__dropprijs", d ? kaal(d.prijs) : "");
+    prijs.inputMode = "decimal";
+    var fotoVeld = el("div", "veld"), foto = el("input");
+    foto.id = id + "-foto"; foto.type = "file"; foto.accept = "image/jpeg,image/png,image/webp";
+    var fl = el("label", null, "Foto ");
+    fl.appendChild(el("span", "veld__optioneel", "(bijv. de flessen samen)"));
+    fl.htmlFor = foto.id;
+    fotoVeld.appendChild(fl); fotoVeld.appendChild(foto);
+    velden.appendChild(fotoVeld);
+    regel.appendChild(velden);
+    regel.appendChild(el("p", "beheer__klein", "Wat zit erin? De flessen gaan af van de voorraad van elke wijn hierboven. Het aantal pakketten volgt vanzelf uit die voorraad."));
+    regel.appendChild(el("div", "beheer__velden beheer__pakketinhoud"));
+    var tekstVeld = function (klasse, label, uitleg, waarde) {
+      var v = el("div", "veld"), t = el("textarea", klasse);
+      t.id = id + "-" + klasse; t.rows = 4; t.maxLength = 3000; t.value = waarde || "";
+      var l = el("label", null, label + " ");
+      l.appendChild(el("span", "veld__optioneel", uitleg));
+      l.htmlFor = t.id;
+      v.appendChild(l); v.appendChild(t);
+      regel.appendChild(v);
+    };
+    tekstVeld("beheer__droptekst", "Tekst over het pakket", "(een witregel is een nieuwe alinea)", d && d.tekst);
+    tekstVeld("beheer__droptekst-en", "In het Engels", "(leeg = de Nederlandse tekst)", d && d.tekst_en);
+    var vak = el("div", "beheer__dropfoto"), img = el("img");
+    img.alt = "Foto bij het pakket";
+    var fotoWeg = el("button", "knop knop--secundair", "Foto weghalen");
+    fotoWeg.type = "button";
+    vak.appendChild(img); vak.appendChild(fotoWeg);
+    regel.appendChild(vak);
+    var zetFoto = function (adres) { regel.dataset.foto = adres || ""; vak.hidden = !adres; if (adres) img.src = adres; };
+    zetFoto(regel.dataset.foto);
+    fotoWeg.addEventListener("click", function () { zetFoto(""); foto.value = ""; });
+    foto.addEventListener("change", function (e) {
+      if (e.target.files[0]) uploadFoto(e.target.files[0], dropForm.querySelector(".formulier__status"), zetFoto);
+    });
+    veld("droppakket").appendChild(regel);
+    vulPakketInhoud();
+    toonPakketKnop();
+    return regel;
   };
   var maakWijnRegel = function (d) {
     var n = wijnRegels().length + 1;
     var regel = el("div", "beheer__dropwijn");
     regel.dataset.id = d ? d.id : "";
+    regel.dataset.sleutel = "w" + Date.now() + Math.random().toString(36).slice(2, 6);
     regel.dataset.foto = d && d.foto ? d.foto : "";
     var kop = el("div", "beheer__dropwijnbalk");
     kop.appendChild(el("p", "beheer__dropwijnkop", "Wijn"));
@@ -1442,6 +1563,7 @@
       if (regel.dataset.id) dropWeg.push(Number(regel.dataset.id));
       regel.remove();
       nummerRegels();
+      vulPakketInhoud();
     });
     kop.appendChild(weg);
     regel.appendChild(kop);
@@ -1477,6 +1599,23 @@
     fotoVeld.appendChild(fl); fotoVeld.appendChild(foto);
     velden.appendChild(prijsVeld); velden.appendChild(aantalVeld); velden.appendChild(fotoVeld);
     regel.appendChild(velden);
+    // Alleen met een pakket (supabase/029): los te koop of alleen in het pakket, en hoeveel hooguit los
+    var losVak = el("div", "beheer__droplos");
+    losVak.dataset.pakketveld = "";
+    var losLabel = el("label", "akkoord"), los = el("input");
+    los.type = "checkbox"; los.className = "beheer__droplosvink"; los.checked = !d || d.los !== false;
+    losLabel.appendChild(los); losLabel.appendChild(document.createTextNode(" Ook los te koop (anders alleen in het pakket)"));
+    var maxVeld = el("div", "veld"), maxLos = el("input");
+    maxLos.id = keuze.id + "-maxlos"; maxLos.type = "number"; maxLos.min = "0"; maxLos.inputMode = "numeric"; maxLos.autocomplete = "off"; maxLos.className = "beheer__dropmaxlos";
+    var ml = el("label", null, "Hooguit los ");
+    ml.appendChild(el("span", "veld__optioneel", "(flessen; leeg = geen grens, de rest blijft voor het pakket)"));
+    ml.htmlFor = maxLos.id;
+    maxVeld.appendChild(ml); maxVeld.appendChild(maxLos);
+    if (d && d.max_los != null) maxLos.value = d.max_los;
+    los.addEventListener("change", function () { maxVeld.hidden = !los.checked; });
+    maxVeld.hidden = !los.checked;
+    losVak.appendChild(losLabel); losVak.appendChild(maxVeld);
+    regel.appendChild(losVak);
     // Elke wijn een eigen beschrijving, in het Nederlands en het Engels
     var tekstVeld = function (klasse, label, uitleg) {
       var v = el("div", "veld"), t = el("textarea", klasse);
@@ -1513,6 +1652,7 @@
     keuze.addEventListener("change", function () {
       var p = productVan(Number(keuze.value));
       if (p && !regel.dataset.id && !prijs.value && p.prijs_particulier != null) prijs.value = kaal(p.prijs_particulier);
+      vulPakketInhoud();
     });
     veld("dropwijnen").appendChild(regel);
     nummerRegels();
@@ -1525,10 +1665,12 @@
     dropForm.reset();
     melding(dropForm.querySelector(".formulier__status"));
     veld("dropwijnen").textContent = "";
+    veld("droppakket").textContent = "";
     if (d) {
       var wijnen = dropWijnen(d);
       veld("dropkop").textContent = "Drop wijzigen: " + dropTitel(wijnen);
-      wijnen.forEach(maakWijnRegel);
+      wijnen.filter(function (w) { return w.soort !== "pakket"; }).forEach(maakWijnRegel);
+      wijnen.filter(function (w) { return w.soort === "pakket"; }).slice(0, 1).forEach(maakPakketRegel);
       dropForm.max_per_klant.value = d.max_per_klant || "";
       dropForm.open_vanaf.value = lokaal(d.open_vanaf);
       dropForm.open_tot.value = lokaal(d.open_tot);
@@ -1553,13 +1695,20 @@
   pagina.querySelector("[data-actie=drop-annuleer]").addEventListener("click", sluitDrop);
   pagina.querySelector("[data-actie=drop-wijnerbij]").addEventListener("click", function () {
     if (wijnRegels().length < MAX_WIJNEN) maakWijnRegel(null).querySelector("select").focus();
+    vulPakketInhoud();
+  });
+  pagina.querySelector("[data-actie=drop-pakket]").addEventListener("click", function () {
+    if (!pakketRegel()) maakPakketRegel(null).querySelector("input").focus();
   });
 
   dropForm.addEventListener("submit", function (e) {
     e.preventDefault();
     var status = dropForm.querySelector(".formulier__status");
+    var pk = pakketRegel();
     var regels = wijnRegels().map(function (r) {
-      return { id: r.dataset.id ? Number(r.dataset.id) : null, foto: r.dataset.foto,
+      return { id: r.dataset.id ? Number(r.dataset.id) : null, foto: r.dataset.foto, sleutel: r.dataset.sleutel,
+               los: !pk || r.querySelector(".beheer__droplosvink").checked,
+               max_los: pk && r.querySelector(".beheer__droplosvink").checked ? r.querySelector(".beheer__dropmaxlos").value : "",
                product_id: r.querySelector(".beheer__dropkeuze").value,
                prijs: getal(r.querySelector(".beheer__dropprijs").value),
                aantal: r.querySelector(".beheer__dropaantal").value,
@@ -1574,6 +1723,22 @@
       else if (w.aantal === "") fout = "Vul het aantal flessen in" + welke + ".";
     });
     if (!fout && regels.some(function (w, i) { return regels.some(function (x, j) { return j !== i && x.product_id === w.product_id; }); })) fout = "Je hebt dezelfde wijn twee keer gekozen.";
+    var pakket = null;
+    if (!fout && pk) {
+      pakket = {
+        id: pk.dataset.id ? Number(pk.dataset.id) : null, soort: "pakket", foto: pk.dataset.foto,
+        naam: pk.querySelector(".beheer__pakketnaam").value.trim(), naam_en: pk.querySelector(".beheer__pakketnaam-en").value.trim(),
+        prijs: getal(pk.querySelector(".beheer__dropprijs").value),
+        tekst: pk.querySelector(".beheer__droptekst").value, tekst_en: pk.querySelector(".beheer__droptekst-en").value,
+        inhoud: [].slice.call(pk.querySelectorAll(".beheer__pakketinhoud input")).map(function (i) {
+          return { sleutel: i.dataset.sleutel, aantal: parseInt(i.value, 10) || 0 };
+        }).filter(function (x) { return x.aantal > 0; })
+      };
+      if (!pakket.naam) fout = "Geef het pakket een naam.";
+      else if (!(pakket.prijs > 0)) fout = "Vul de prijs per pakket in, alleen in cijfers.";
+      else if (!pakket.inhoud.length) fout = "Vul in hoeveel flessen van elke wijn in het pakket zitten.";
+    }
+    if (!fout && !pk && regels.some(function (w) { return !w.los; })) fout = "Er is geen pakket, dus elke wijn moet los te koop zijn.";
     if (!fout && !dropForm.open_vanaf.value) fout = "Vul in vanaf wanneer de drop open is.";
     if (fout) { melding(status, fout, "fout"); return; }
     var samen = {
@@ -1585,17 +1750,24 @@
     var bewaar = function (w, groep) {
       return db.rpc("beheer_drop", { gegevens: Object.assign({}, samen, {
         id: w.id, product_id: w.product_id, prijs: w.prijs, aantal: w.aantal, foto: w.foto,
-        tekst: w.tekst, tekst_en: w.tekst_en, groep: groep || ""
+        tekst: w.tekst, tekst_en: w.tekst_en, groep: groep || "",
+        soort: w.soort || "wijn", los: w.los !== false, max_los: w.max_los || "", naam: w.naam || "", naam_en: w.naam_en || "", inhoud: w.inhoud || []
       }) }).then(function (r) { if (r.error) throw r.error; return r.data; });
     };
+    var ids = {};   // sleutel van de wijnregel → id van de drop, voor de inhoud van het pakket
     var knop = dropForm.querySelector("button[type=submit]");
     bezig(knop, "Opslaan…");
     // Eerst de eerste wijn (die bepaalt de link), dan de andere wijnen, dan de weggehaalde wijnen
     bewaar(regels[0], null)
       .then(function (eerste) {
+        ids[regels[0].sleutel] = eerste;
         return regels.slice(1).reduce(function (klaar, w) {
-          return klaar.then(function () { return bewaar(w, eerste); });
-        }, Promise.resolve());
+          return klaar.then(function () { return bewaar(w, eerste).then(function (id) { ids[w.sleutel] = id; }); });
+        }, Promise.resolve()).then(function () {
+          if (!pakket) return;
+          pakket.inhoud = pakket.inhoud.map(function (x) { return { drop_id: ids[x.sleutel], aantal: x.aantal }; });
+          return bewaar(pakket, eerste);
+        });
       })
       .then(function () {
         return dropWeg.reduce(function (klaar, id) {
@@ -1658,7 +1830,7 @@
 
     var drops = veld("startdrops");
     drops.textContent = "";
-    var lopend = data.drops.filter(function (d) { return !d.verwijderd && !d.gestopt && !(d.open_tot && new Date(d.open_tot) < new Date()); });
+    var lopend = data.drops.filter(function (d) { return d.soort !== "pakket" && !d.verwijderd && !d.gestopt && !(d.open_tot && new Date(d.open_tot) < new Date()); });
     lopend.slice(0, 4).forEach(function (d) {
       var t = dropTelling(d);
       var li = startLink(dropNaam(d), "#drops", "Verkocht " + t.verkocht + " van " + d.aantal + (new Date(d.open_vanaf) > new Date() ? ", opent " + moment(d.open_vanaf) : ""));
