@@ -93,7 +93,8 @@
         if (p.max_per_bestelling) labels.appendChild(el("span", "label", "Max. " + p.max_per_bestelling));
         li.appendChild(labels);
 
-        li.appendChild(el("span", "wijnregel__prijs", euro(p.prijs_ex)));
+        // Binnenkort: nog geen prijs tonen (de wijn is ook nog niet te bestellen)
+        li.appendChild(el("span", "wijnregel__prijs", p.beschikbaarheid === "binnenkort" ? "" : euro(p.prijs_ex)));
         lijst.appendChild(li);
       });
       sectie.appendChild(lijst);
