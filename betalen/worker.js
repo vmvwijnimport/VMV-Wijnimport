@@ -16,7 +16,7 @@
 //    POST /betaling        maakt een Mollie-betaling aan, geeft de betaallink terug
 //    POST /drop/betaling   hetzelfde voor een mandje met wijn uit een drop, eventueel met glazen
 //                          (supabase/022-drops.sql)
-//    GET  /status?id=tr_…  geeft de status van een betaling terug
+//    GET  /status?id=tr_…  geeft de status van een betaling terug (en of het een drop is)
 //    POST /webhook         Mollie meldt een statuswijziging; is de betaling binnen,
 //                          dan krijgen de klant en VMV een mail in de huisstijl, komt
 //                          de bestelling in de backoffice en wordt de factuur in e-Boekhouden
@@ -64,7 +64,7 @@ export default {
         const id = new URL(request.url).searchParams.get("id") || "";
         if (!/^tr_[A-Za-z0-9]+$/.test(id)) return antwoord({ fout: "Onbekende betaling" }, 400);
         const betaling = await mollie(`/payments/${id}`, env);
-        return antwoord({ status: betaling.status, bestelnummer: betaling.metadata?.bestelnummer || "" });
+        return antwoord({ status: betaling.status, bestelnummer: betaling.metadata?.bestelnummer || "", soort: betaling.metadata?.soort || "hedonist" });
       }
       return antwoord({ fout: "Niet gevonden" }, 404);
     } catch (e) {
@@ -77,9 +77,9 @@ class Fout extends Error {
   constructor(bericht, status = 400) { super(bericht); this.status = status; }
 }
 
-async function mollie(pad, env, body) {
+async function mollie(pad, env, body, methode) {
   const r = await fetch(MOLLIE + pad, {
-    method: body ? "POST" : "GET",
+    method: methode || (body ? "POST" : "GET"),
     headers: { Authorization: `Bearer ${env.MOLLIE_API_KEY}`, "Content-Type": "application/json" },
     body: body ? JSON.stringify(body) : undefined,
   });
@@ -119,6 +119,14 @@ export function bereken(winkel, aantallen, bezorging) {
 export function isAmsterdam(postcode) {
   const cijfers = parseInt(String(postcode || "").replace(/\D/g, "").slice(0, 4), 10);
   return cijfers >= 1011 && cijfers <= 1109;
+}
+
+// Het id van de betaling in de terugkeerlink, zodat /bestelling/ hem ook vindt als de klant in een andere
+// browser terugkomt (bijv. na de bank-app, of na afrekenen in de browser van WhatsApp). Lukt het niet, dan
+// zoekt /bestelling/ zoals eerst in het tabblad waar betaald werd.
+async function terugkeerMetId(betaling, env, site, en) {
+  await mollie(`/payments/${betaling.id}`, env, { redirectUrl: `${site}/bestelling/?id=${betaling.id}${en ? "&taal=en" : ""}` }, "PATCH")
+    .catch(() => {});
 }
 
 async function maakBetaling(invoer, env, site, webhook) {
@@ -164,6 +172,8 @@ async function maakBetaling(invoer, env, site, webhook) {
       glasregels: JSON.stringify(b.lijst.map((r) => ({ soort: "glas", ...r }))),
     },
   });
+
+  await terugkeerMetId(betaling, env, site, false);
 
   return {
     id: betaling.id,
@@ -446,6 +456,7 @@ async function maakDropBetaling(invoer, env, site, webhook) {
   }
   // Lukt dit niet, dan vindt de webhook de bestelling alsnog via het bestelnummer
   await rpc("drop_koppelen", { bestelnummer, mollie: betaling.id, sleutel }).catch(() => {});
+  await terugkeerMetId(betaling, env, site, en);
 
   return { id: betaling.id, betaallink: betaling._links.checkout.href, bestelnummer, totaal: Number(b.totaal) };
 }

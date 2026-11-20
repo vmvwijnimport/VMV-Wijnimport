@@ -17,7 +17,7 @@ sitemap: false
   </header>
   <div class="tekst">
     <p id="bestelling-nummer"></p>
-    <p><a id="bestelling-terug" href="{{ '/en/hedonist/' | relative_url }}">Back to Hedonist</a></p>
+    <p><a id="bestelling-terug" href="{{ '/en/' | relative_url }}">Go to the website</a></p>
     <p class="contactregel">Questions about your order? <a href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">Send us a WhatsApp</a> or email <a href="mailto:{{ site.email }}">{{ site.email }}</a>.</p>
   </div>
 </section>
@@ -31,19 +31,17 @@ document.addEventListener("DOMContentLoaded", function () {
   var nummer = document.getElementById("bestelling-nummer");
   var betaling = null;
   try { betaling = JSON.parse(sessionStorage.getItem("vmv-betaling")); } catch (e) {}
+  // Back in a different browser (e.g. after the banking app): the payment id is in the link from Mollie
+  var uitLink = new URLSearchParams(location.search).get("id");
+  if (uitLink && (!betaling || betaling.id !== uitLink)) betaling = { id: uitLink, taal: "en" };
 
   if (!betaling || !koppeling) {
     tekst.textContent = "We can’t find an order in this browser. If you’ve just paid, you’ll receive a confirmation by email.";
     return;
   }
-  nummer.textContent = "Order number: " + betaling.bestelnummer;
+  if (betaling.bestelnummer) nummer.textContent = "Order number: " + betaling.bestelnummer;
   // An order with wine from a drop (possibly with glasses): different texts, and both baskets emptied
   var drop = betaling.soort === "drop";
-  if (drop) {
-    var terug = document.getElementById("bestelling-terug");
-    terug.href = {{ '/en/' | relative_url | jsonify }};
-    terug.textContent = "Go to the website";
-  }
   var leegMandje = function () {
     try { localStorage.removeItem("vmv-hedonist-mandje"); if (drop) localStorage.removeItem("vmv-wijn-mandje"); } catch (e) {}
   };
@@ -51,6 +49,13 @@ document.addEventListener("DOMContentLoaded", function () {
   fetch(koppeling.replace(/\/$/, "") + "/status?id=" + encodeURIComponent(betaling.id))
     .then(function (r) { return r.json(); })
     .then(function (s) {
+      if (s.bestelnummer) nummer.textContent = "Order number: " + s.bestelnummer;
+      if (s.soort) drop = s.soort === "drop";
+      if (!drop) {
+        var terug = document.getElementById("bestelling-terug");
+        terug.href = {{ '/en/hedonist/' | relative_url | jsonify }};
+        terug.textContent = "Back to Hedonist";
+      }
       if (s.status === "paid") {
         kop.textContent = "Thank you for your order";
         tekst.textContent = drop
@@ -66,11 +71,12 @@ document.addEventListener("DOMContentLoaded", function () {
         leegMandje();
       } else {
         kop.textContent = "Your payment didn’t go through";
-        tekst.textContent = "You haven’t been charged. Your basket is still there, so you can try again.";
+        tekst.textContent = betaling.terug
+          ? "You haven’t been charged. Your basket is still there, so you can try again."
+          : "You haven’t been charged. You can try again.";
         // Back to the page where you checked out (the drop or Hedonist), with the basket
         var terugNaar = document.getElementById("bestelling-terug");
-        if (/^\/[^\/]/.test(betaling.terug || "")) terugNaar.href = betaling.terug;
-        terugNaar.textContent = "Back to your basket";
+        if (/^\/[^\/]/.test(betaling.terug || "")) { terugNaar.href = betaling.terug; terugNaar.textContent = "Back to your basket"; }
       }
     })
     .catch(function () {
