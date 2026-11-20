@@ -1475,10 +1475,12 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 @keyframes drop-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .drop__paneel { animation: none; } }
 @media (max-width: 36rem) {
-  /* Smal: de wijnen naast elkaar om doorheen te schuiven */
-  .drop__kiezer { margin: 0 calc(var(--rand) * -1) var(--s-4); padding: 0 var(--rand); overflow-x: auto; scrollbar-width: none; }
-  .drop__kiezer::-webkit-scrollbar { display: none; }
-  .drop__keuze { flex: none; }
+  /* Smal: de wijnen onder elkaar, zodat je ziet hoeveel er zijn; de gekozen wijn met een streep links */
+  .drop__kiezer { flex-direction: column; gap: 0; margin-bottom: var(--s-4); border-top: 1px solid var(--lijn); }
+  .drop__keuze { width: 100%; margin: 0; padding: 12px 0 12px 12px; border-bottom: 1px solid var(--lijn); border-left: 2px solid transparent; }
+  .drop__keuze:last-child { border-bottom: 0; }
+  .drop__keuze[aria-selected="true"] { border-bottom-color: var(--lijn); border-left-color: var(--zwart); }
+  .drop__keuze:last-child[aria-selected="true"] { border-bottom-color: transparent; }
 }
 @media (max-width: 56rem) {
   .drop__wijn { grid-template-columns: 1fr; gap: var(--s-4); }
