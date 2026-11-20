@@ -230,8 +230,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var kiezer = veld("kiezer"), panelen = veld("panelen");
     kiezer.textContent = ""; panelen.textContent = "";
-    var tabs = [], vakken = [];
+    var tabs = [], vakken = [], gekozen = 0;
+    // Op de telefoon: één wijn tegelijk, met pijltjes en "1 / 3" ernaast (de rij met wijnen is daar verborgen)
+    var oud = veld("blader");
+    if (oud) oud.remove();
+    var blader = el("div", "drop__blader");
+    blader.dataset.veld = "blader";
+    var pijl = function (stap, label, pad) {
+      var k = el("button", "fotoreeks__knop");
+      k.type = "button";
+      k.setAttribute("aria-label", label);
+      k.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="' + pad + '" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
+      k.addEventListener("click", function () { kies((gekozen + stap + wijnen.length) % wijnen.length); });
+      return k;
+    };
+    var teller = el("span", "fotoreeks__teller");
+    teller.setAttribute("aria-live", "polite");
+    blader.appendChild(pijl(-1, EN ? "Previous wine" : "Vorige wijn", "M15 5l-7 7 7 7"));
+    blader.appendChild(teller);
+    blader.appendChild(pijl(1, EN ? "Next wine" : "Volgende wijn", "M9 5l7 7-7 7"));
+    kiezer.parentNode.insertBefore(blader, panelen);
     var kies = function (i, focus) {
+      gekozen = i;
+      teller.textContent = (i + 1) + " / " + wijnen.length;
       tabs.forEach(function (t, j) {
         t.setAttribute("aria-selected", j === i ? "true" : "false");
         t.tabIndex = j === i ? 0 : -1;
