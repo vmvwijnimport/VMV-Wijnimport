@@ -1528,12 +1528,6 @@
     regel.appendChild(velden);
     regel.appendChild(el("p", "beheer__klein", "Wat zit erin? Kies de wijnen hierboven, of voeg een wijn toe die je alleen in het pakket verkoopt. De flessen gaan af van de voorraad van elke wijn. Het aantal pakketten volgt vanzelf uit die voorraad."));
     regel.appendChild(el("div", "beheer__velden beheer__pakketinhoud"));
-    regel.appendChild(el("div", "beheer__pakketwijnen"));
-    var erbij = el("button", "knop knop--secundair beheer__pakketerbij", "Wijn alleen in het pakket");
-    erbij.type = "button";
-    erbij.dataset.actie = "pakket-wijnerbij";
-    erbij.addEventListener("click", function () { maakWijnRegel(null, true).querySelector("select").focus(); });
-    regel.appendChild(erbij);
     var tekstVeld = function (klasse, label, uitleg, waarde) {
       var v = el("div", "veld"), t = el("textarea", klasse);
       t.id = id + "-" + klasse; t.rows = 4; t.maxLength = 3000; t.value = waarde || "";
@@ -1557,6 +1551,13 @@
     foto.addEventListener("change", function (e) {
       if (e.target.files[0]) uploadFoto(e.target.files[0], dropForm.querySelector(".formulier__status"), zetFoto);
     });
+    // Daaronder de wijnen die alleen in het pakket zitten (elk met een eigen tekst)
+    regel.appendChild(el("div", "beheer__pakketwijnen"));
+    var erbij = el("button", "knop knop--secundair beheer__pakketerbij", "Wijn alleen in het pakket");
+    erbij.type = "button";
+    erbij.dataset.actie = "pakket-wijnerbij";
+    erbij.addEventListener("click", function () { maakWijnRegel(null, true).querySelector("select").focus(); });
+    regel.appendChild(erbij);
     veld("droppakket").appendChild(regel);
     vulPakketInhoud();
     nummerRegels();
@@ -1744,8 +1745,8 @@
       pakket = {
         id: pk.dataset.id ? Number(pk.dataset.id) : null, soort: "pakket", foto: pk.dataset.foto,
         naam: pk.querySelector(".beheer__pakketnaam").value.trim(), naam_en: pk.querySelector(".beheer__pakketnaam-en").value.trim(),
-        prijs: getal(pk.querySelector(".beheer__dropprijs").value),
-        tekst: pk.querySelector(".beheer__droptekst").value, tekst_en: pk.querySelector(".beheer__droptekst-en").value,
+        prijs: getal(pk.querySelector(":scope > .beheer__velden .beheer__dropprijs").value),
+        tekst: pk.querySelector(":scope > .veld > .beheer__droptekst").value, tekst_en: pk.querySelector(":scope > .veld > .beheer__droptekst-en").value,
         inhoud: [].slice.call(pk.querySelectorAll(".beheer__pakketinhoud input")).map(function (i) {
           return { sleutel: i.dataset.sleutel, aantal: parseInt(i.value, 10) || 0 };
         }).filter(function (x) { return x.aantal > 0; })
