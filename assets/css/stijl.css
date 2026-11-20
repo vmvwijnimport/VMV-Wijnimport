@@ -1424,6 +1424,8 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 .drop__wijn { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: var(--s-8); align-items: start; }
 .drop__foto { margin: 0; position: sticky; top: calc(var(--kopgrootte) + var(--s-3)); }
 .drop__foto img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; background: var(--champagne-licht); }
+/* Staande foto (bijv. een etiket): helemaal tonen, zo hoog als het scherm toelaat */
+.drop__foto--staand img { aspect-ratio: auto; height: auto; max-height: calc(100vh - var(--kopgrootte) - var(--s-6)); object-fit: contain; object-position: left top; background: none; }
 .drop__info { max-width: var(--kolom); }
 .drop__producent { margin: 0 0 var(--s-2); font-size: var(--fs-ui); color: var(--tekst-zacht); }
 .drop__producent a { color: inherit; }
@@ -1482,6 +1484,7 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
   .drop__wijn { grid-template-columns: 1fr; gap: var(--s-4); }
   .drop__foto { position: static; margin: 0 calc(var(--rand) * -1); }
   .drop__foto img { aspect-ratio: 1 / 1; }
+  .drop__foto--staand img { aspect-ratio: auto; max-height: 80vh; object-position: center top; }
 }
 .mandje__melding { margin: 0 0 var(--s-2); padding: 12px 14px; background: var(--champagne-licht); font-size: var(--fs-klein); color: var(--tekst); }
 .mandje__melding[hidden] { display: none; }

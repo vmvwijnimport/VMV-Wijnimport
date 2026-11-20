@@ -85,7 +85,13 @@ document.addEventListener("DOMContentLoaded", function () {
       aanbod = a;
       var foto = a.foto || fotos[a.slug];
       veld("fotovak", kaart).hidden = !foto;
-      if (foto) { veld("foto", kaart).src = foto; veld("foto", kaart).alt = a.naam || ""; }
+      if (foto) {
+        // Een staande foto (bijv. een etiket) tonen we helemaal, niet bijgesneden
+        var img = veld("foto", kaart), vak = veld("fotovak", kaart);
+        img.onload = function () { vak.classList.toggle("drop__foto--staand", img.naturalHeight > img.naturalWidth * 1.05); };
+        img.src = foto;
+        img.alt = a.naam || "";
+      }
 
       var producent = veld("producent", kaart);
       producent.textContent = "";
