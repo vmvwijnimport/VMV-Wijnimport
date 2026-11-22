@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
         kop.textContent = "Bedankt voor je bestelling";
         tekst.textContent = drop
           ? "Je betaling is gelukt. Je krijgt een bevestiging per mail, met wanneer je bestelling komt. De factuur sturen we apart."
-          : "Je betaling is gelukt. Je ontvangt een factuur per mail. De verwachte levering is in " + levering + ".";
+          : "Je betaling is gelukt. Je ontvangt een factuur per mail. We leveren " + levering + ".";
         leegMandje();
         try { sessionStorage.removeItem("vmv-betaling"); } catch (e) {}
       } else if (s.status === "open" || s.status === "pending") {

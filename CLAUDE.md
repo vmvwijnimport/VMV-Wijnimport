@@ -13,7 +13,7 @@ Lees dit bestand en `docs/voortgang.md` aan het begin van elke sessie. Daar staa
   - Bourgogne: Jérémy Carteret, Les Monts, Maison Ex Nihilo, Vins Saisons.
   - Franken: Krawalter.
   - Piëmont: Rosanna Sandri.
-- **Hedonist:** VMV is officieel distributeur van Hedonist-glazen (handgeblazen, loodvrij) in Nederland. Er zijn twee modellen: HEDONIST Glas (breed) en HEDONIST Glas "White" (smaller). Op /hedonist/ staat een pre-order met winkelmandje.
+- **Hedonist:** VMV is officieel distributeur van Hedonist-glazen (handgeblazen, loodvrij) in Nederland. Er zijn twee modellen: HEDONIST Glas (breed) en HEDONIST Glas "White" (smaller). Op /hedonist/ staat een winkelmandje (tot 22 nov 2026 een pre-order; de glazen zijn nu op voorraad).
 - **Contact:** info@vmvwijnimport.com, WhatsApp 06 15 74 23 32 (https://wa.me/message/7A7JGLEONUS3E1). Nieuwe jaargangen worden via WhatsApp aangekondigd.
 - **Bedrijfsgegevens:** KvK 99082918, btw NL868786901B01.
 - **Adres:** het vestigingsadres is het **thuisadres van de eigenaar**. Het staat **alleen** in de algemene voorwaarden (wettelijk verplicht) en nergens anders op de site.
@@ -201,3 +201,4 @@ Horecaklanten vragen een inlog aan; de eigenaar keurt die handmatig goed. Alleen
 | 29 okt 2026 | Factuurkoppeling met e-Boekhouden vanuit de backoffice: eerst een voorbeeld, pas na een klik de factuur, met producten uit e-Boekhouden (voorraad); niet automatisch mailen; korting in de prijs per stuk. Voorraad uit e-Boekhouden niet in het portaal (de API geeft geen aantallen) | wens van de eigenaar; de factuur eerst zelf controleren |
 | 30 okt 2026 | Geheime voorbeeldlink (`voorbeeld_code` in `_config.yml`): wie `/?voorbeeld=<code>` opent, ziet 30 dagen de hele site achter de wachtpagina; de inhoud staat daarvoor verborgen in de broncode | de eigenaar wil de site laten zien aan mensen buiten zijn wifi |
 | 30 okt 2026 | Lancering: wachtpagina uit, zoekmachines aan | opdracht van de eigenaar |
+| 22 nov 2026 | Hedonist-pre-order voorbij: glazen op voorraad, normale prijs (per glas en per 6), levering binnen 2 tot 5 werkdagen | de glazen zijn binnen; keuze van de eigenaar |

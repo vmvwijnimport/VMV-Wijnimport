@@ -87,11 +87,11 @@ nl:
   producent_tekst: Stuur ons een bericht via WhatsApp of mail. Dan laten we weten wat er beschikbaar is en wanneer de nieuwe jaargang binnenkomt.
   seo_importeur: importeur in Nederland
   seo_verkrijgbaar: "De wijnen van %naam% uit %regio% zijn in Nederland verkrijgbaar via importeur VMV Wijnimport."
-  # Hedonist-pre-order (_includes/hedonist-winkel.html)
+  # Hedonist-winkel (_includes/hedonist-winkel.html)
   winkel:
     per_glas: per glas
     voor_zes: voor 6 glazen van hetzelfde model
-    levering: Verwachte levering
+    levering: Levering
     veilig: Je betaalt veilig met iDEAL of via een bankoverschrijving.
     aantal: Aantal
     aantal_glazen: Aantal glazen
@@ -125,10 +125,10 @@ nl:
     bestellen: Bestellen en betalen
     btw: Prijzen zijn inclusief btw. Je hebt 14 dagen bedenktijd na ontvangst.
     terug: Terug naar winkelmandje
-    bedankt: Bedankt voor je pre-order
+    bedankt: Bedankt voor je bestelling
     ontvangen: We hebben je bestelling ontvangen.
     betaallink: Je krijgt van ons per mail een iDEAL-betaallink.
-    levering_in: De verwachte levering is
+    levering_in: We leveren
     achttien: Ik ben 18 jaar of ouder
 
 en:
@@ -213,7 +213,7 @@ en:
   winkel:
     per_glas: per glass
     voor_zes: for a set of 6 of the same model
-    levering: Expected delivery
+    levering: Delivery
     veilig: Pay securely by iDEAL or bank transfer.
     aantal: Quantity
     aantal_glazen: Number of glasses
@@ -247,10 +247,10 @@ en:
     bestellen: Order and pay
     btw: Prices include VAT. You can cancel within 14 days of receiving your order.
     terug: Back to basket
-    bedankt: Thank you for your pre-order
+    bedankt: Thank you for your order
     ontvangen: We’ve received your order.
     betaallink: We’ll email you an iDEAL payment link.
-    levering_in: "Expected delivery:"
+    levering_in: We deliver
     achttien: I am 18 or over
   # Namen van landen, regio's en druiven in het Engels
   namen:

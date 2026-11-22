@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
         kop.textContent = "Thank you for your order";
         tekst.textContent = drop
           ? "Your payment was successful. You’ll receive a confirmation by email, including when your order will arrive. We’ll send the invoice separately."
-          : "Your payment was successful. You’ll receive an invoice by email. Expected delivery is in " + levering + ".";
+          : "Your payment was successful. You’ll receive an invoice by email. We deliver " + levering + ".";
         leegMandje();
         try { sessionStorage.removeItem("vmv-betaling"); } catch (e) {}
       } else if (s.status === "open" || s.status === "pending") {

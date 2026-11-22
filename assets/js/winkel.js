@@ -1,4 +1,4 @@
-// Winkelmandje voor de Hedonist-glazen (pre-order) en wijn uit een drop (/drop/), prijsberekening en bestellen.
+// Winkelmandje voor de Hedonist-glazen en wijn uit een drop (/drop/), prijsberekening en bestellen.
 // Glazen: prijzen en regels uit _data/winkel.yml (via #winkel-gegevens).
 // Wijn: naam, prijs, voorraad en bezorgkosten uit de database (supabase/022-drops.sql, drop_aanbod);
 // de droppagina (assets/js/drop.js) legt wijn in het mandje met het event "vmv:wijn".
@@ -352,13 +352,13 @@ document.addEventListener("DOMContentLoaded", function () {
       .filter(function (id) { return mandje[id] > 0; })
       .map(function (id) { return mandje[id] + " × " + W.modellen[id]; });
     var data = Object.fromEntries(new FormData(form).entries());
-    data._subject = "Pre-order Hedonist: " + b.n + " glazen, " + data.naam + (EN ? " (Engelse site)" : "");
+    data._subject = "Bestelling Hedonist: " + b.n + " glazen, " + data.naam + (EN ? " (Engelse site)" : "");
     data._template = "table";
     data._captcha = "false";
     data._replyto = data.email;
     data._autoresponse = EN
-      ? "Thank you for pre-ordering Hedonist glasses from VMV Wijnimport. We’ve received your order and will send you an iDEAL payment link. Expected delivery: " + W.levering + "."
-      : "Bedankt voor je pre-order van Hedonist glazen bij VMV Wijnimport. We hebben je bestelling ontvangen en sturen je een iDEAL-betaallink. Verwachte levering: " + W.levering + ".";
+      ? "Thank you for ordering Hedonist glasses from VMV Wijnimport. We’ve received your order and will send you an iDEAL payment link. We deliver " + W.levering + "."
+      : "Bedankt voor je bestelling van Hedonist glazen bij VMV Wijnimport. We hebben je bestelling ontvangen en sturen je een iDEAL-betaallink. We leveren " + W.levering + ".";
     data.betalen = W.idealActief ? "iDEAL (online)" : "iDEAL-betaallink sturen";
     data.bestelling = regels.join(", ");
     data.bezorging = { amsterdam: "Bezorgen in Amsterdam", ophalen: "Ophalen bij " + W.ophalenBij }[bezorging()] || "Verzenden";
@@ -436,8 +436,8 @@ document.addEventListener("DOMContentLoaded", function () {
       .catch(function () {
         status.classList.add("fout");
         status.innerHTML = EN
-          ? 'Your pre-order was not sent. Please try again, or email us at <a href="mailto:info@vmvwijnimport.com">info@vmvwijnimport.com</a>.'
-          : 'Je pre-order is niet verstuurd. Probeer het opnieuw, of mail ons op <a href="mailto:info@vmvwijnimport.com">info@vmvwijnimport.com</a>.';
+          ? 'Your order was not sent. Please try again, or email us at <a href="mailto:info@vmvwijnimport.com">info@vmvwijnimport.com</a>.'
+          : 'Je bestelling is niet verstuurd. Probeer het opnieuw, of mail ons op <a href="mailto:info@vmvwijnimport.com">info@vmvwijnimport.com</a>.';
       })
       .finally(function () { knop.disabled = false; });
   });

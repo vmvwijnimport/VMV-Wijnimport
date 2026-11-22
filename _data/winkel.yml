@@ -1,21 +1,20 @@
 # ------------------------------------------------------------
-#  Pre-order Hedonist glazen
+#  Hedonist glazen bestellen (tot 22 nov 2026 een pre-order)
 #  Prijzen in euro's, met een punt als decimaalteken (32.75).
-#  Zet open op false om de pre-order van de site te halen.
+#  Zet open op false om de winkel van de site te halen.
 # ------------------------------------------------------------
 
 open: true
-kop: Hedonist pre-order nu open
-levering: november
+kop: Bestel Hedonist glazen
+levering: binnen 2 tot 5 werkdagen
 # Op de Engelse pagina (/en/hedonist/)
-kop_en: Hedonist pre-order now open
-levering_en: November
+kop_en: Order Hedonist glasses
+levering_en: within 2 to 5 working days
 
-# Prijs per glas, en de prijs voor elke 6 glazen van hetzelfde model (niet mixen)
-prijs_glas: 32.75
-prijs_glas_normaal: 34.50
-prijs_zes: 185.00
-prijs_zes_normaal: 195.00
+# Prijs per glas, en de prijs voor elke 6 glazen van hetzelfde model (niet mixen).
+# Met prijs_glas_normaal en prijs_zes_normaal erbij staat de normale prijs doorgestreept (zoals bij de pre-order).
+prijs_glas: 34.50
+prijs_zes: 195.00
 
 # Verzending
 verzendkosten: 12.50            # inclusief verzekering

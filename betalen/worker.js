@@ -133,7 +133,7 @@ async function maakBetaling(invoer, env, site, webhook) {
   const r = await fetch(`${site}/winkel.json`, { cf: { cacheTtl: 60 } });
   if (!r.ok) throw new Fout("Kon de prijzen niet ophalen", 502);
   const winkel = await r.json();
-  if (!winkel.open) throw new Fout("De pre-order is gesloten");
+  if (!winkel.open) throw new Fout("De winkel is gesloten");
 
   const k = invoer.klant || {};
   const bezorging = ["amsterdam", "ophalen"].includes(invoer.bezorging) ? invoer.bezorging : "verzenden";
@@ -153,7 +153,7 @@ async function maakBetaling(invoer, env, site, webhook) {
 
   const betaling = await mollie("/payments", env, {
     amount: { currency: "EUR", value: b.totaal.toFixed(2) },
-    description: `Pre-order Hedonist ${bestelnummer}`,
+    description: `Hedonist ${bestelnummer}`,
     redirectUrl: `${site}/bestelling/`,
     webhookUrl: webhook,
     locale: "nl_NL",
@@ -253,11 +253,11 @@ export const mailKlant = (betaling, levering, site) => {
   const m = betaling.metadata || {};
   const inhoud =
     alinea(`Beste ${html(m.naam)},`) +
-    alinea(`Bedankt voor je pre-order van Hedonist glazen. Je betaling is binnen. Hieronder staat je bestelling.`) +
+    alinea(`Bedankt voor je bestelling van Hedonist glazen. Je betaling is binnen. Hieronder staat je bestelling.`) +
     regelTabel(m, betaling.amount.value) +
     gegevens([
       ["Bestelnummer", html(m.bestelnummer)],
-      ["Levering", levering ? `Verwacht in ${html(levering)}` : ""],
+      ["Levering", levering ? html(levering.charAt(0).toUpperCase() + levering.slice(1)) : ""],
       [isOphalen(m) ? "Ophalen" : "Bezorging", bezorgregel(m)],
       ["Opmerking", m.opmerking ? html(m.opmerking) : ""]
     ]) +
@@ -290,7 +290,7 @@ export const mailVmv = (betaling, levering) => {
     alinea("De klant heeft een bevestiging gekregen. Antwoorden op deze mail gaan naar de klant.");
   return {
     onderwerp: `Betaald: Hedonist ${m.bestelnummer}, ${m.naam}`,
-    html: omhulsel("Nieuwe pre-order Hedonist", `Betaald, ${m.bestelling || ""}`, inhoud)
+    html: omhulsel("Nieuwe bestelling Hedonist", `Betaald, ${m.bestelling || ""}`, inhoud)
   };
 };
 
@@ -311,7 +311,7 @@ async function verstuur(env, sleutel, aan, antwoordAan, mail) {
   if (!r.ok) throw new Fout(`Mail versturen mislukt (${r.status})`, 502);
 }
 
-// Alleen bij een betaalde pre-order; andere statussen (open, mislukt, verlopen) krijgen geen mail.
+// Alleen bij een betaalde bestelling; andere statussen (open, mislukt, verlopen) krijgen geen mail.
 // Lukt een mail niet, dan geven we een fout terug; Mollie probeert het later opnieuw.
 async function naBetaling(betaling, env, site, ctx) {
   if (betaling.status !== "paid" || !betaling.metadata?.bestelnummer) return;
@@ -416,7 +416,7 @@ async function maakDropBetaling(invoer, env, site, webhook) {
     const r = await fetch(`${site}/winkel.json`, { cf: { cacheTtl: 60 } });
     if (!r.ok) throw new Fout("Kon de prijzen niet ophalen", 502);
     const winkel = await r.json();
-    if (!winkel.open) throw new Fout(en ? "The Hedonist pre-order is closed" : "De pre-order van de glazen is gesloten");
+    if (!winkel.open) throw new Fout(en ? "Hedonist glasses can’t be ordered right now" : "De glazen zijn nu niet te bestellen");
     glazen = glasRegels(winkel, invoer.glazen).lijst;
     glasLevering = winkel.levering || "";
   }
@@ -482,7 +482,7 @@ const dropLevering = (b, en) => (b.regels || [])
   .map((r) => {
     const tekst = en && r.soort === "wijn" ? (r.levering_en || r.levering) : r.levering;
     if (!tekst) return "";
-    if (r.soort === "glas") return en ? `Hedonist glasses: expected in ${tekst}` : `Hedonist-glazen: verwacht in ${tekst}`;
+    if (r.soort === "glas") return en ? `Hedonist glasses: ${tekst}` : `Hedonist-glazen: ${tekst}`;
     return `${r.naam}: ${tekst}`;
   })
   .filter((t, i, lijst) => t && lijst.indexOf(t) === i)

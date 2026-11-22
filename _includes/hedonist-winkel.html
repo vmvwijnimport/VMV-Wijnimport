@@ -1,5 +1,5 @@
 {%- comment -%}
-  Pre-order Hedonist glazen. Prijzen en regels staan in _data/winkel.yml.
+  Hedonist glazen bestellen. Prijzen en regels staan in _data/winkel.yml.
   Bestellingen gaan via FormSubmit naar het e-mailadres in _config.yml;
   betalen gebeurt daarna via een betaalverzoek.
 {%- endcomment -%}
@@ -13,8 +13,8 @@
     <header class="winkel__kop">
       <h2 id="winkel-kop">{% if en %}{{ w.kop_en | default: w.kop }}{% else %}{{ w.kop }}{% endif %}</h2>
       <p class="winkel__prijzen">
-        <span><strong>{% include euro.html bedrag=w.prijs_glas %}</strong> {{ wt.per_glas }} <s>{% include euro.html bedrag=w.prijs_glas_normaal %}</s></span>
-        <span><strong>{% include euro.html bedrag=w.prijs_zes %}</strong> {{ wt.voor_zes }} <s>{% include euro.html bedrag=w.prijs_zes_normaal %}</s></span>
+        <span><strong>{% include euro.html bedrag=w.prijs_glas %}</strong> {{ wt.per_glas }}{% if w.prijs_glas_normaal %} <s>{% include euro.html bedrag=w.prijs_glas_normaal %}</s>{% endif %}</span>
+        <span><strong>{% include euro.html bedrag=w.prijs_zes %}</strong> {{ wt.voor_zes }}{% if w.prijs_zes_normaal %} <s>{% include euro.html bedrag=w.prijs_zes_normaal %}</s>{% endif %}</span>
       </p>
       <p class="winkel__levering">{{ wt.levering }}: {{ levering }}. {{ wt.veilig }}</p>
     </header>

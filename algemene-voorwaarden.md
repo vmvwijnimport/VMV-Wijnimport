@@ -90,7 +90,7 @@ KvK-nummer: {{ b.kvk }}<br>
 
 ## Artikel 6. Levertijd en pre-orders {#artikel-6}
 
-1. De ondernemer vermeldt op de bestelpagina een verwachte leveringsperiode. Voor de huidige pre-order van Hedonist-glazen is dat {{ w.levering }}. Voor wijn staat de levering op de bestelpagina en in de bevestigingsmail.
+1. De ondernemer vermeldt op de bestelpagina een verwachte leveringsperiode. Voor Hedonist-glazen is dat {{ w.levering }}. Voor wijn staat de levering op de bestelpagina en in de bevestigingsmail.
 2. De vermelde leveringsperiode is een verwachting en geen fatale termijn. De ondernemer is afhankelijk van de levering door de producent en spant zich in om binnen de vermelde periode te leveren.
 3. Als de verwachte leveringsperiode met meer dan 30 dagen wordt overschreden, stelt de ondernemer de klant hiervan op de hoogte. De klant heeft in dat geval het recht de overeenkomst kosteloos te ontbinden. De ondernemer betaalt het betaalde bedrag dan binnen 14 dagen na ontbinding terug.
 4. Een pre-order is een gewone bestelling. Voor consumenten geldt het herroepingsrecht uit artikel 11. Een zakelijke klant kan een pre-order na het sluiten van de overeenkomst niet annuleren, behoudens het bepaalde in lid 3.
