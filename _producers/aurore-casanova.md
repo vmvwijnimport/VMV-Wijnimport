@@ -1,4 +1,5 @@
 ---
+foto_alt: Aurore Casanova and Jean-Baptiste Robinet in their cellar
 samenvatting: Aurore Casanova and Jean-Baptiste Robinet make biodynamic Champagne in Mardeuil, with grand cru plots in Puisieulx, Le Mesnil-sur-Oger and Oger.
 werkwijze: Biodynamic, certified organic
 ---

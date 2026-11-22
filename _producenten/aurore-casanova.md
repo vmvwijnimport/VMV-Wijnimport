@@ -3,9 +3,9 @@ naam: Aurore Casanova
 land: Frankrijk
 regio: Champagne
 plaats: Mardeuil
-foto: 
-foto_positie: center
-foto_alt: 
+foto: /assets/img/producenten/aurore-casanova.jpg
+foto_positie: center 45%
+foto_alt: Aurore Casanova en Jean-Baptiste Robinet in hun kelder
 lijst_foto: /assets/img/producenten/lijst/aurore-casanova.jpg
 samenvatting: Aurore Casanova en Jean-Baptiste Robinet maken biodynamische champagne in Mardeuil, met grand cru-plots in Puisieulx, Le Mesnil-sur-Oger en Oger.
 druiven:
