@@ -2181,7 +2181,8 @@
           if (meer) t.appendChild(el("small", null, meer));
           li.appendChild(t);
           var lab = [];
-          if (p.allocatie) lab.push("allocatie");
+          // Op de particuliere lijst ook bij "allocatie voor particulieren" (supabase/030)
+          if (p.allocatie || (!horeca && p.allocatie_particulier)) lab.push("allocatie");
           if (p.beschikbaarheid === "binnenkort") lab.push("binnenkort");
           if (p.beschikbaarheid === "uitverkocht") lab.push("uitverkocht");
           // Glazen: de lagere prijs bij meer glazen groot achter de prijs
@@ -2203,7 +2204,7 @@
     if (!wijnen.length) doel.appendChild(el("p", "beheer__leeg", horeca ? "Er staan geen wijnen op deze lijst." : "Nog geen wijnen met een particuliere prijs."));
 
     var voet = el("footer", "prijslijst__voet");
-    if (!horeca && wijnen.some(function (p) { return p.allocatie; })) {
+    if (!horeca && wijnen.some(function (p) { return p.allocatie || p.allocatie_particulier; })) {
       voet.appendChild(el("p", "prijslijst__klein", "Allocatie: kleine productie, te bestellen in overleg."));
     }
     if (horeca) {
@@ -2332,6 +2333,7 @@
       id: p.id || null, soort: p.soort, producent: p.producent, producent_slug: p.producent_slug || "",
       regio: p.regio || "", naam: p.naam, druif: p.druif || "", jaargang: p.jaargang || "", formaat: p.formaat || "",
       kleur: p.kleur || "", prijs_ex: String(p.prijs_ex), beschikbaarheid: p.beschikbaarheid, allocatie: !!p.allocatie,
+      allocatie_particulier: !!p.allocatie_particulier,
       max_per_bestelling: p.max_per_bestelling == null ? "" : String(p.max_per_bestelling), actief: p.actief !== false,
       prijs_particulier: p.prijs_particulier == null ? "" : String(p.prijs_particulier)
     };
@@ -2369,6 +2371,7 @@
     if (meer) a.appendChild(el("small", null, meer));
     var labels = el("span", "beheer__cel beheer__labels");
     if (p.allocatie) labels.appendChild(el("span", "label", "Allocatie"));
+    else if (p.allocatie_particulier) labels.appendChild(el("span", "label", "Allocatie particulier"));
     if (p.max_per_bestelling) labels.appendChild(el("span", "label", "max. " + p.max_per_bestelling));
     if (p.actief === false) labels.appendChild(el("span", "label label--geannuleerd", "Niet zichtbaar"));
     var prijs = el("span", "beheer__cel beheer__bedrag", euro(p.prijs_ex));
@@ -2494,6 +2497,7 @@
     wijnForm.beschikbaarheid.value = p.beschikbaarheid || "op_voorraad";
     wijnForm.max_per_bestelling.value = p.max_per_bestelling || "";
     wijnForm.allocatie.checked = !!p.allocatie;
+    wijnForm.allocatie_particulier.checked = !!p.allocatie_particulier;
     wijnForm.actief.checked = p.actief !== false;
     veld("wijnknop").textContent = wijn ? "Wijzigingen opslaan" : "Wijn toevoegen";
     wijnForm.querySelector("[data-actie=jaargang]").hidden = !wijn;
@@ -2545,6 +2549,7 @@
       prijs_ex: prijs,
       beschikbaarheid: wijnForm.beschikbaarheid.value,
       allocatie: wijnForm.allocatie.checked,
+      allocatie_particulier: wijnForm.allocatie_particulier.checked,
       max_per_bestelling: max ? Number(max) : null,
       actief: wijnForm.actief.checked,
       prijs_particulier: part
