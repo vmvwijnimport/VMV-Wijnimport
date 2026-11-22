@@ -2181,7 +2181,7 @@
           if (meer) t.appendChild(el("small", null, meer));
           li.appendChild(t);
           var lab = [];
-          if (p.allocatie) lab.push(horeca ? "allocatie" : "zeer beperkt");
+          if (p.allocatie) lab.push("allocatie");
           if (p.beschikbaarheid === "binnenkort") lab.push("binnenkort");
           if (p.beschikbaarheid === "uitverkocht") lab.push("uitverkocht");
           // Glazen: de lagere prijs bij meer glazen groot achter de prijs
@@ -2204,7 +2204,7 @@
 
     var voet = el("footer", "prijslijst__voet");
     if (!horeca && wijnen.some(function (p) { return p.allocatie; })) {
-      voet.appendChild(el("p", "prijslijst__klein", "Zeer beperkt: kleine productie, op allocatie of in overleg."));
+      voet.appendChild(el("p", "prijslijst__klein", "Allocatie: kleine productie, te bestellen in overleg."));
     }
     if (horeca) {
       var regels = [];
