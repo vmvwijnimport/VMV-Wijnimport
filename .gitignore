@@ -13,6 +13,7 @@ foto-originelen/
 huisstijl/
 drukwerk/
 Factuur inboeken/
+Drop voor Claude, niet uploaden./
 
 # Lokale geheimen: nooit committen
 .env

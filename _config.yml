@@ -126,6 +126,7 @@ exclude:
   - foto-originelen
   - huisstijl
   - Factuur inboeken
+  - "Drop voor Claude, niet uploaden."
   - betalen
   - CLAUDE.md
   - docs
