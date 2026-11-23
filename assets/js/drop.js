@@ -241,7 +241,11 @@ document.addEventListener("DOMContentLoaded", function () {
       k.type = "button";
       k.setAttribute("aria-label", label);
       k.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="' + pad + '" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
-      k.addEventListener("click", function () { kies((gekozen + stap + wijnen.length) % wijnen.length); });
+      k.addEventListener("click", function () {
+        kies((gekozen + stap + wijnen.length) % wijnen.length);
+        // Verderop gescrold: terug naar het begin van de nieuwe wijn
+        if (panelen.getBoundingClientRect().top < 0) kiezer.parentNode.scrollIntoView({ block: "start" });
+      });
       return k;
     };
     var teller = el("span", "fotoreeks__teller");

@@ -1476,13 +1476,18 @@ a.kanaal:hover .kanaal__actie { color: var(--rood); }
 @keyframes drop-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .drop__paneel { animation: none; } }
 @media (max-width: 36rem) {
-  /* Smal: alleen de gekozen wijn, met pijltjes en "1 / 3" ernaast om naar de volgende te gaan */
-  .drop__meerdere { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
-  .drop__meerdere [data-veld="panelen"] { grid-column: 1 / -1; }
-  .drop__kiezer { margin-bottom: var(--s-4); }
+  /* Smal: alleen de gekozen wijn, met pijltjes en "1 / 3" ernaast om naar de volgende te gaan.
+     Die balk loopt mee onder de header, zodat je ook verderop ziet dat er meer wijnen zijn. */
+  .drop__meerdere { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+  .drop__meerdere [data-veld="panelen"] { grid-column: 1 / -1; margin-top: var(--s-4); }
+  .drop__kiezer, .drop__blader {
+    position: sticky; top: var(--kopgrootte); z-index: 2; margin-bottom: 0; padding-top: var(--s-1);
+    background: var(--wit); border-bottom: 1px solid var(--lijn);
+  }
+  .drop__kiezer { align-items: flex-end; }
   .drop__keuze { display: none; }
   .drop__keuze[aria-selected="true"] { display: flex; border-bottom-color: transparent; }
-  .drop__blader { display: flex; align-items: center; margin-bottom: var(--s-4); padding-bottom: 4px; border-bottom: 1px solid var(--lijn); }
+  .drop__blader { display: flex; align-items: center; padding-bottom: 4px; }
 }
 @media (max-width: 56rem) {
   .drop__wijn { grid-template-columns: 1fr; gap: var(--s-4); }
