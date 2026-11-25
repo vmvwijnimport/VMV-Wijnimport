@@ -75,14 +75,17 @@ layout: default
       {%- if p.cuvees and p.cuvees.size > 0 %}
       <section class="cuvees" aria-labelledby="cuvees-kop">
         <h2 id="cuvees-kop">Cuvées</h2>
+        {%- comment %} Staat er een cuvée op binnenkort, dan krijgt elke rij een vak voor dat label (leeg bij de andere cuvées): zo staan de druiven en de labels recht onder elkaar {% endcomment %}
+        {%- assign later = p.cuvees | where: "binnenkort", true | size %}
         <ul class="cuvees__lijst">
           {%- for c in p.cuvees %}
           <li>
             <span class="stip stip--{{ c.type | default: 'wit' }}" aria-hidden="true"></span>
-            <span class="cuvees__naam">{{ c.naam }}{% if c.binnenkort %} <span class="label label--binnenkort cuvees__binnenkort">{{ t.binnenkort }}</span>{% endif %}</span>
-            {%- if c.druif or c.herkomst %}
+            <span class="cuvees__naam">{{ c.naam }}</span>
+            {%- if c.druif or c.herkomst or later > 0 %}
             <span class="cuvees__extra">
               {% if c.druif %}<span class="cuvees__druif">{{ t.namen[c.druif] | default: c.druif }}</span>{% endif %}
+              {% if c.binnenkort %}<span class="label label--binnenkort cuvees__binnenkort">{{ t.binnenkort }}</span>{% elsif later > 0 %}<span class="cuvees__binnenkort" aria-hidden="true"></span>{% endif %}
               {%- comment %} Eigen wijngaard (domaine) of gekochte druiven (négoce), achteraan met een vaste breedte zodat ze onder elkaar staan {% endcomment %}
               {% if c.herkomst %}<span class="label cuvees__herkomst">{% if c.herkomst == "negoce" %}Négoce{% else %}Domaine{% endif %}</span>{% endif %}
             </span>
