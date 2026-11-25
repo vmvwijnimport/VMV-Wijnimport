@@ -16,7 +16,7 @@ layout: default
 {%- assign werkwijze = page.werkwijze | default: p.werkwijze -%}
 {%- assign foto_alt = page.foto_alt | default: p.foto_alt | default: p.naam -%}
 {%- assign hectare = page.hectare | default: p.hectare -%}
-{%- if page.taal == "en" and page.hectare == nil %}{% assign hectare = hectare | replace: ",", "." %}{% endif -%}
+{%- if page.taal == "en" and page.hectare == nil and hectare %}{% assign hectare = hectare | replace: ",", "." %}{% endif -%}
 {%- assign regio = t.namen[p.regio] | default: p.regio -%}
 {%- assign land = t.namen[p.land] | default: p.land -%}
 {%- assign buren = site.producenten | where: "regio", p.regio | sort: "naam" -%}
