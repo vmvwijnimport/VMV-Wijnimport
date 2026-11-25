@@ -608,13 +608,28 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 .cuvees__druif { color: var(--tekst-zacht); font-size: var(--fs-klein); }
 .cuvees__extra { display: flex; align-items: baseline; gap: var(--s-1) var(--s-2); margin-left: auto; }
 .cuvees__herkomst { min-width: 5.5em; text-align: center; }
-/* Binnenkort achter de druif in een vak met vaste breedte (leeg bij de andere cuvées): druiven en labels staan recht onder elkaar */
-.cuvees__binnenkort { min-width: 7.5em; text-align: center; }
 @media (max-width: 36rem) {
   /* Smal: een lange naam blijft naast de stip, druif en label eronder rechts */
   .cuvees__lijst li { display: grid; grid-template-columns: auto minmax(0, 1fr); }
   .cuvees__lijst .stip { align-self: baseline; }
   .cuvees__extra { grid-column: 2; justify-self: end; }
+}
+/* Lijst met een cuvée op binnenkort: één raster voor alle rijen (subgrid), zodat de druiven helemaal rechts
+   en de labels in een eigen kolom ervoor recht onder elkaar staan */
+.cuvees .cuvees__lijst--later { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 0 var(--s-2); }
+.cuvees__lijst--later li { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: baseline; }
+.cuvees__lijst--later .cuvees__extra { display: contents; }
+.cuvees__lijst--later .cuvees__binnenkort { grid-column: 3; grid-row: 1; justify-self: start; }
+.cuvees__lijst--later .cuvees__druif { grid-column: 4; grid-row: 1; justify-self: end; }
+/* Zonder druif staat het label zelf helemaal rechts */
+.cuvees__lijst--later .cuvees__binnenkort--rechts { grid-column: 4; justify-self: end; }
+.cuvees__lijst--later .cuvees__herkomst { grid-column: 4; justify-self: end; }
+@media (max-width: 36rem) {
+  /* Smal: de naam over de hele breedte, label en druif eronder */
+  .cuvees__lijst--later li { grid-template-columns: subgrid; row-gap: 4px; }
+  .cuvees__lijst--later .cuvees__naam { grid-column: 2 / -1; }
+  .cuvees__lijst--later .cuvees__binnenkort, .cuvees__lijst--later .cuvees__druif { grid-row: 2; }
+  .cuvees__lijst--later .cuvees__binnenkort--rechts { grid-column: 4; }
 }
 
 /* Waar je de wijnen drinkt: een bordeaux vlak (de kleur van het visitekaartje) over de breedte van de pagina, per stad een kolom,
