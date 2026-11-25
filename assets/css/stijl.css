@@ -608,8 +608,8 @@ html.voorbeeld .voorbeeld__wacht { display: none; }
 .cuvees__druif { color: var(--tekst-zacht); font-size: var(--fs-klein); }
 .cuvees__extra { display: flex; align-items: baseline; gap: var(--s-1) var(--s-2); margin-left: auto; }
 .cuvees__herkomst { min-width: 5.5em; text-align: center; }
-/* Binnenkort achter de druif, met een vaste breedte: zo staan de labels onder elkaar */
-.cuvees__binnenkort { min-width: 7.5em; text-align: center; }
+/* Binnenkort naast de naam, zodat de druif rechts blijft staan */
+.cuvees__binnenkort { margin-left: var(--s-1); vertical-align: 1px; }
 @media (max-width: 36rem) {
   /* Smal: een lange naam blijft naast de stip, druif en label eronder rechts */
   .cuvees__lijst li { display: grid; grid-template-columns: auto minmax(0, 1fr); }
