@@ -10,6 +10,6 @@ He presses his grapes at the winery of Aurélien Lurquin, his friend and mentor 
 
 The wines ferment spontaneously and age for eleven months in barrel. They are neither filtered nor fined. After that they spend three years in bottle. He uses no dosage.
 
-The label tells you everything you want to know about the wine: the soil of the plot, how the wine was made, when it was disgorged, how much sulphur it contains and how many bottles there are. Diarra means lion in Bambara, a language from West Africa.
+The name INSU comes from the French *à l’insu*: without knowing. For Pierre-Gabriel, curiosity starts with not knowing. His surname Diarra means lion in Bambara, a language from West Africa; Pierre-Gabriel was born in Senegal.
 
 Production is small and he is only at the beginning, but in our view Pierre-Gabriel is already one of the talents of Champagne’s new generation.

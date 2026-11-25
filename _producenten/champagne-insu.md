@@ -37,6 +37,6 @@ Zijn druiven perst hij bij Aurélien Lurquin, zijn vriend en mentor en een van d
 
 De wijnen vergisten spontaan en rijpen elf maanden op vat. Ze worden niet gefilterd of geklaard. Daarna liggen ze drie jaar op fles. Hij gebruikt geen dosage.
 
-Op het etiket staat alles wat je over de wijn wilt weten: de grond van het plot, hoe de wijn is gemaakt, wanneer hij is gedegorgeerd, hoeveel zwavel erin zit en hoeveel flessen er zijn. Diarra betekent leeuw in het Bambara, een taal uit West-Afrika.
+De naam INSU komt van het Franse *à l’insu*: zonder het te weten. Voor Pierre-Gabriel begint nieuwsgierigheid juist bij niet weten. Zijn achternaam Diarra betekent leeuw in het Bambara, een taal uit West-Afrika; Pierre-Gabriel is in Senegal geboren.
 
 De productie is klein en hij staat pas aan het begin, maar wat ons betreft hoort Pierre-Gabriel nu al bij de talenten van de nieuwe generatie in de Champagne.
