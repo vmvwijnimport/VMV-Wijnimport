@@ -10,6 +10,4 @@ He presses his grapes at the winery of Aurélien Lurquin, his friend and mentor 
 
 The wines ferment spontaneously and age for eleven months in barrel or amphora. They are neither filtered nor fined. After that they spend three years in bottle. He uses no dosage. He is now also working on cuvées with a longer élevage.
 
-The name INSU comes from the French *à l’insu*: without knowing. For Pierre-Gabriel, curiosity starts with not knowing. His surname Diarra means lion in Bambara, a language from West Africa; Pierre-Gabriel was born in Senegal.
-
 Production is small and he is only at the beginning, but in our view Pierre-Gabriel is already one of the talents of Champagne’s new generation.
