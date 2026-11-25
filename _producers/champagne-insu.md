@@ -6,6 +6,10 @@ werkwijze: Organic, unfiltered
 
 Pierre-Gabriel Diarra grew up in Hautvillers, where his family owned vineyards. At first he went in a completely different direction, working in tech in England and France for years, but in the end he returned to the vineyard. He earned his degree in viticulture and oenology in Bordeaux and made his first vintage under the name Champagne INSU in 2021.
 
-He presses his grapes at the winery of Aurélien Lurquin, his friend and mentor and one of the most sought-after names in Champagne. Like Lurquin, he makes wine first and Champagne second. Pierre-Gabriel farms six plots in Hautvillers, all organically, and looks at his vineyard more like a Burgundian winemaker than a Champagne maker. Every cuvée comes from one plot, one grape variety and one year. The wines ferment spontaneously, age in barrel and are neither filtered nor fined.
+He presses his grapes at the winery of Aurélien Lurquin, his friend and mentor and one of the most sought-after names in Champagne. Like Lurquin, he makes wine first and Champagne second. Pierre-Gabriel farms six plots in Hautvillers, about three hectares in total, all organically, with vines planted between 1971 and 1988. He looks at his vineyard more like a Burgundian winemaker than a Champagne maker. Every cuvée comes from one plot, one grape variety and one year.
 
-He gives his wines five years: several years in barrel, followed by long ageing in bottle. Production is small and he is only at the beginning, but in our view Pierre-Gabriel is already one of the talents of Champagne’s new generation.
+The wines ferment spontaneously and age for eleven months in barrel. They are neither filtered nor fined. After that they spend three years in bottle. He uses no dosage.
+
+The label tells you everything you want to know about the wine: the soil of the plot, how the wine was made, when it was disgorged, how much sulphur it contains and how many bottles there are. Diarra means lion in Bambara, a language from West Africa.
+
+Production is small and he is only at the beginning, but in our view Pierre-Gabriel is already one of the talents of Champagne’s new generation.
