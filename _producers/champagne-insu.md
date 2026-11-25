@@ -8,7 +8,7 @@ Pierre-Gabriel Diarra grew up in Hautvillers, where his family owned vineyards. 
 
 He presses his grapes at the winery of Aurélien Lurquin, his friend and mentor and one of the most sought-after names in Champagne. Like Lurquin, he makes wine first and Champagne second. Pierre-Gabriel farms six plots in Hautvillers, about three hectares in total, all organically, with vines planted between 1971 and 1988. He looks at his vineyard more like a Burgundian winemaker than a Champagne maker. Every cuvée comes from one plot, one grape variety and one year.
 
-The wines ferment spontaneously and age for eleven months in barrel. They are neither filtered nor fined. After that they spend three years in bottle. He uses no dosage.
+The wines ferment spontaneously and age for eleven months in barrel or amphora. They are neither filtered nor fined. After that they spend three years in bottle. He uses no dosage. He is now also working on cuvées with a longer élevage.
 
 The name INSU comes from the French *à l’insu*: without knowing. For Pierre-Gabriel, curiosity starts with not knowing. His surname Diarra means lion in Bambara, a language from West Africa; Pierre-Gabriel was born in Senegal.
 
