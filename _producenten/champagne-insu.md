@@ -29,6 +29,12 @@ cuvees:
   - naam: Les Coutures
     druif: Chardonnay
     type: wit
+  - naam: Les Basses Maladries
+    type: wit
+    binnenkort: true
+  - naam: AMAME
+    type: wit
+    binnenkort: true
 ---
 
 Pierre-Gabriel Diarra groeide op in Hautvillers, waar zijn familie wijngaarden had. Hij koos eerst voor iets heel anders en werkte jarenlang in de techsector in Engeland en Frankrijk, maar uiteindelijk ging hij terug naar de wijngaard. Hij haalde zijn diploma wijnbouw en oenologie in Bordeaux en maakte in 2021 zijn eerste jaargang onder de naam Champagne INSU.
