@@ -30,9 +30,11 @@ cuvees:
     druif: Chardonnay
     type: wit
   - naam: Les Basses Maladries
+    druif: Meunier
     type: wit
     binnenkort: true
   - naam: AMAME
+    druif: Assemblage
     type: wit
     binnenkort: true
 ---
